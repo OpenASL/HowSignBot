@@ -24,7 +24,7 @@ import catchphrase
 
 # -----------------------------------------------------------------------------
 
-__version__ = "20.25.0"
+__version__ = "20.26.0"
 
 env = Env(eager=False)
 env.read_env()
