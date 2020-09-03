@@ -245,9 +245,6 @@ def get_gsheet_client():
     return gspread.authorize(credentials)
 
 
-# -----------------------------------------------------------------------------
-
-
 def post_feedback(username: str, feedback: str, guild: Optional[str]):
     # Assumes rows are in the format (date, feedback, guild, version)
     client = get_gsheet_client()
@@ -257,9 +254,6 @@ def post_feedback(username: str, feedback: str, guild: Optional[str]):
     row = (now.isoformat(), feedback, guild or "", __version__)
     logger.info(f"submitting feedback: {row}")
     return worksheet.append_row(row)
-
-
-# -----------------------------------------------------------------------------
 
 
 @bot.command(name="feedback", help="Anonymously share an idea or report a bug")
