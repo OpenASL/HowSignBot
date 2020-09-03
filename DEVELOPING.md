@@ -20,6 +20,12 @@ Re-run the bootstrap script
 . script/bootstrap
 ```
 
+## Running tests
+
+```
+. script/test
+```
+
 ## Releasing
 
 As a pre-requisite, set the `GH_TOKEN` environment variable to a personal access token with repo access.

@@ -14,6 +14,4 @@ jobs:
     - name: Install dependencies
       run: . script/bootstrap
     - name: Run pre-commit
-      run: pre-commit run --all-files
-    - name: Run tests
-      run: pytest
+      run: . script/test
