@@ -506,7 +506,9 @@ WATCH2GETHER_CLOSE_MESSAGE = "✨ _watch2gether room closed_"
 
 
 @bot.command(
-    name="w2g", aliases=("wtg", "watch2gether"), help=WATCH2GETHER_HELP,
+    name="w2g",
+    aliases=("wtg", "watch2gether"),
+    help=WATCH2GETHER_HELP,
 )
 async def watch2gether_command(ctx: Context, video_url: str = None):
     # Send initial message then edit it so that we don't get an embed
