@@ -1,5 +1,4 @@
 {
-  "name": "Discord ASL Tools",
-  "repository": "https://github.com/sloria/howsign",
+  "name": "HowSignBot",
   "buildpacks": [{ "url": "heroku/python" }]
 }
