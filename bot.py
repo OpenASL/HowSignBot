@@ -506,9 +506,7 @@ WATCH2GETHER_CLOSE_MESSAGE = "✨ _watch2gether room closed_"
 
 
 @bot.command(
-    name="w2g",
-    aliases=("wtg", "watch2gether"),
-    help=WATCH2GETHER_HELP,
+    name="w2g", aliases=("wtg", "watch2gether"), help=WATCH2GETHER_HELP,
 )
 async def watch2gether_command(ctx: Context, video_url: str = None):
     # Send initial message then edit it so that we don't get an embed
@@ -645,7 +643,7 @@ async def catchphrase_command(ctx: Context, category: str = None):
 # -----------------------------------------------------------------------------
 
 # Allow cleaning up Zoom, watch2gether, etc. rooms after bot restarts
-# NOTE: Only the bot owner can perform this cleanup
+# Need to use on_raw_reaction_add to handle messages that aren't in the cache
 
 CLOSE_MESSAGE_MAP = {
     r"Could not create Zoom": ZOOM_CLOSED_MESSAGE,
@@ -656,13 +654,9 @@ CLOSE_MESSAGE_MAP = {
     r"Codenames": CODENAMES_CLOSE_MESSAGE,
 }
 
-# Need to use on_raw_reaction_add to handle messages that aren't in the cache
-
 
 @bot.event
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
-    if payload.user_id != bot.owner_id:
-        return
     if str(payload.emoji) == "🛑" and payload.channel_id:
         with suppress(discord.NotFound):
             channel = bot.get_channel(payload.channel_id)
