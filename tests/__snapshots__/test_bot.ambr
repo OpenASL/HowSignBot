@@ -1,0 +1,154 @@
+# name: test_catchphrase
+  <class 'dict'> {
+    'content': '
+      ||skirt||
+      ||green||
+      ||bay||
+      ||snowman||
+      ||Steve Martin||
+      ||river rafting||
+      ||Spain||
+      ||dredge||
+      Enter `!cp` or `!cp [category]` for more.
+    ',
+  }
+---
+# name: test_catchphrase_categories[Hard]
+  <class 'dict'> {
+    'content': '
+      ||wreath||
+      ||through||
+      ||highway||
+      ||cardboard||
+      ||full moon||
+      ||mast||
+      ||wool||
+      ||blimp||
+      Enter `!cp` or `!cp [category]` for more.
+    ',
+  }
+---
+# name: test_catchphrase_categories[categories]
+  <class 'dict'> {
+    'content': '
+      easy, medium, hard, animals, food, travel, people, household
+      Enter `!cp` or `!cp [category]` to generate a list of words/phrases.
+    ',
+  }
+---
+# name: test_catchphrase_categories[food]
+  <class 'dict'> {
+    'content': '
+      ||scone||
+      ||chicken pot pie||
+      ||blanch||
+      ||clams||
+      ||Kool-aid||
+      ||corn on the cob||
+      ||pineapple||
+      ||yam||
+      Enter `!cp` or `!cp [category]` for more.
+    ',
+  }
+---
+# name: test_handshape[open8]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=Embed.Empty,
+      colour=Embed.Empty,
+      description=Embed.Empty,
+      fields=<class 'list'> [
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(url='attachment://Open8.png'),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title='Open8',
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+    'file': <class 'File'> {
+      filename='Open8.png',
+    },
+  }
+---
+# name: test_handshape[open9]
+  <class 'dict'> {
+    'content': '"open9" not found. Did you mean "OpenX"? Enter `!handshapes` to see a list of handshapes.',
+  }
+---
+# name: test_handshape[random]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=Embed.Empty,
+      colour=Embed.Empty,
+      description=Embed.Empty,
+      fields=<class 'list'> [
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(url='attachment://8.png'),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title='8',
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+    'file': <class 'File'> {
+      filename='8.png',
+    },
+  }
+---
+# name: test_handshapes
+  <class 'dict'> {
+    'content': '
+      1, 3, Bent3, 4, 5, Claw5, 6, 7, 8, Open8, 9, Flat9, A, OpenA, B, BentB, FlatB, OpenB, C, FlatC, SmallC, D, E, G, H, I, K, L, M, OpenM, N, OpenN, O, FlatO, SmallO, R, S, T, V, BentV, X, OpenX, Y, ILY, Corna
+      
+      Enter `!handshape` to display a random handshape or `!handshape [name]` to display a specific handshape.
+  
+    ',
+  }
+---
+# name: test_howsign[tiger]
+  <class 'dict'> {
+    'content': '
+      TIGER
+      _Lifeprint_ : https://www.google.com/search?&q=site%3Alifeprint.com+tiger
+      _YouGlish_: https://youglish.com/pronounce/tiger/signlanguage/asl
+      _Spread The Sign_: <https://www.spreadthesign.com/en.us/search/?q=tiger>
+      _SigningSavvy_: https://www.signingsavvy.com/search/tiger
+  
+    ',
+  }
+---
+# name: test_howsign[what's up]
+  <class 'dict'> {
+    'content': '
+      WHAT'S UP
+      _Lifeprint_ : https://www.google.com/search?&q=site%3Alifeprint.com+what%27s+up
+      _YouGlish_: https://youglish.com/pronounce/what%27s+up/signlanguage/asl
+      _Spread The Sign_: <https://www.spreadthesign.com/en.us/search/?q=what%27s+up>
+      _SigningSavvy_: https://www.signingsavvy.com/search/what%27s+up
+  
+    ',
+  }
+---
+# name: test_howsign[||tiger||]
+  <class 'dict'> {
+    'content': '
+      ||TIGER||
+      _Lifeprint_ : || https://www.google.com/search?&q=site%3Alifeprint.com+tiger ||
+      _YouGlish_: || https://youglish.com/pronounce/tiger/signlanguage/asl ||
+      _Spread The Sign_: || <https://www.spreadthesign.com/en.us/search/?q=tiger> ||
+      _SigningSavvy_: || <https://www.signingsavvy.com/search/tiger> ||
+  
+    ',
+  }
+---

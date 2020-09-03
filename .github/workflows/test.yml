@@ -1,0 +1,19 @@
+name: Run tests
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8.5
+    - name: Install dependencies
+      run: . script/bootstrap
+    - name: Run pre-commit
+      run: pre-commit run --all-files
+    - name: Run tests
+      run: pytest

@@ -1,0 +1,16 @@
+echo "==> Checking out master..."
+git checkout master
+echo "==> Merging dev into master..."
+git merge dev
+
+echo "==> Publishing with semantic-release..."
+semantic-release publish
+
+echo "==> Checking out dev..."
+git checkout dev
+echo "==> Merging master into dev..."
+git merge master
+echo "==> Pushing dev..."
+git push origin dev
+
+echo "==> Finished."

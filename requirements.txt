@@ -1,0 +1,6 @@
+discord.py==1.4.1
+environs==8.0.0
+gspread==3.6.0
+aiohttp==3.6.2
+pyyaml==5.3.1
+.
