@@ -484,7 +484,6 @@ async def watch2gether_command(ctx: Context, video_url: str = None):
         await message.edit(
             content="🚨 _Could not create watch2gether room. That's embarrassing._"
         )
-        return
     else:
         template = WATCH2GETHER_WITH_URL_TEMPLATE if video_url else WATCH2GETHER_TEMPLATE
         content = template.format(url=url, video_url=video_url)
