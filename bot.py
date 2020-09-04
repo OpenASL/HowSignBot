@@ -1,24 +1,25 @@
 import asyncio
+import base64
 import datetime as dt
-import logging
 import difflib
+import logging
 import random
-from contextlib import suppress
 import re
 import uuid
-import base64
+from contextlib import suppress
 from typing import Optional
+from urllib.parse import quote_plus
 
 import aiohttp
 import discord
+import gspread
 from discord.ext import commands
 from discord.ext.commands import Context
 from environs import Env
 from google.auth.crypt._python_rsa import RSASigner
 from google.oauth2.service_account import Credentials
-import gspread
 
-import howsign
+import handshapes
 import cuteid
 import catchphrase
 
@@ -137,13 +138,14 @@ def howsign_impl(word: str):
         else f"sending links for: '{word}'"
     )
     logger.info(log)
+    quoted_word = quote_plus(word)
     return {
         "content": template.format(
             word_uppercased=word.upper(),
-            lifeprint=howsign.get_lifeprint_url(word),
-            signingsavvy=howsign.get_signingsavvy_url(word),
-            spread_the_sign=howsign.get_spread_the_sign_url(word),
-            youglish=howsign.get_youglish_url(word),
+            lifeprint=f"https://www.google.com/search?&q=site%3Alifeprint.com+{quoted_word}",
+            signingsavvy=f"https://www.signingsavvy.com/search/{quoted_word}",
+            spread_the_sign=f"https://www.spreadthesign.com/en.us/search/?q={quoted_word}",
+            youglish=f"https://youglish.com/pronounce/{quoted_word}/signlanguage/asl",
         )
     }
 
@@ -157,7 +159,9 @@ async def howsign_command(ctx: Context, *, word: str):
 async def howsign_error(ctx, error):
     if isinstance(error, commands.errors.MissingRequiredArgument):
         logger.info(f"missing argument to '{ctx.invoked_with}'")
-        await ctx.send(f"Enter a word or phrase after `{COMMAND_PREFIX}howsign`")
+        await ctx.send(
+            f"Enter a word or phrase after `{COMMAND_PREFIX}{ctx.invoked_with}`"
+        )
     else:
         logger.error(
             f"unexpected error when handling '{ctx.invoked_with}'", exc_info=error
@@ -182,14 +186,14 @@ Enter {COMMAND_PREFIX}handshapes to show a list of handshapes.
 def handshape_impl(name: str):
     logger.info(f"handshape: '{name}'")
     if name == "random":
-        name = random.choice(tuple(howsign.HANDSHAPES.keys()))
+        name = random.choice(tuple(handshapes.HANDSHAPES.keys()))
         logger.info(f"chose '{name}'")
 
     try:
-        handshape = howsign.get_handshape(name)
-    except howsign.HandshapeNotFoundError:
+        handshape = handshapes.get_handshape(name)
+    except handshapes.HandshapeNotFoundError:
         logger.info(f"handshape '{name}' not found")
-        suggestion = did_you_mean(name, tuple(howsign.HANDSHAPES.keys()))
+        suggestion = did_you_mean(name, tuple(handshapes.HANDSHAPES.keys()))
         if suggestion:
             return {
                 "content": f'"{name}" not found. Did you mean "{suggestion}"? Enter `{COMMAND_PREFIX}handshapes` to see a list of handshapes.'
@@ -230,7 +234,8 @@ Enter {COMMAND_PREFIX}handshape to display a random handshape or {COMMAND_PREFIX
 def handshapes_impl():
     return {
         "content": HANDSHAPES_TEMPLATE.format(
-            handshapes=", ".join(howsign.HANDSHAPES.keys()), COMMAND_PREFIX=COMMAND_PREFIX
+            handshapes=", ".join(handshapes.HANDSHAPES.keys()),
+            COMMAND_PREFIX=COMMAND_PREFIX,
         )
     }
 

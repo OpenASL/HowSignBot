@@ -20,7 +20,7 @@ setup(
     packages=find_packages("lib"),
     package_dir={"": "lib"},
     package_data={
-        "howsign": ["handshapes/*.png"],
+        "handshapes": ["assets/*.png"],
         "catchphrase": ["*.yaml"],
         "cuteid": ["*.json"],
     },
