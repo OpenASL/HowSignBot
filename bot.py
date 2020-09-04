@@ -369,7 +369,7 @@ async def idiom_command(ctx, spoiler: Optional[str]):
 # -----------------------------------------------------------------------------
 
 
-ZOOM_TEMPLATE = """**Join URL**: {join_url}
+ZOOM_TEMPLATE = """**Join URL**: <{join_url}>
 **Passcode**: {passcode}
 🚀 This meeting is happening now. Go practice!
 *After the meeting ends, react with 🛑 to remove this message.*
@@ -381,8 +381,6 @@ ZOOM_CLOSED_MESSAGE = "✨ _Zoom meeting ended_"
 @bot.command(name="zoom", help="BOT OWNER ONLY: Create a Zoom meeting")
 @commands.is_owner()
 async def zoom_command(ctx: Context):
-    # Send initial message then edit it so that we don't get an annoying Zoom embed
-    message = await ctx.send("Creating meeting...")
     logger.info("creating zoom meeting")
     try:
         meeting = await meetings.create_zoom(
@@ -398,14 +396,14 @@ async def zoom_command(ctx: Context):
         )
     except Exception:
         logger.exception("could not create Zoom meeting")
-        await message.edit(
+        message = await ctx.send(
             content="🚨 _Could not create Zoom meeting. That's embarrassing._"
         )
     else:
         content = ZOOM_TEMPLATE.format(
             join_url=meeting.join_url, passcode=meeting.passcode
         )
-        await message.edit(content=content, suppress=True)
+        message = await ctx.send(content=content)
 
     await wait_for_stop_sign(message, replace_with=ZOOM_CLOSED_MESSAGE)
 
@@ -454,14 +452,14 @@ Examples:
     COMMAND_PREFIX=COMMAND_PREFIX
 )
 
-WATCH2GETHER_TEMPLATE = """{url}
+WATCH2GETHER_TEMPLATE = """<{url}>
 🚀 Watch videos together!
 *React to this message with 🛑 to close the room.*
 """
 
-WATCH2GETHER_WITH_URL_TEMPLATE = """{url}
+WATCH2GETHER_WITH_URL_TEMPLATE = """<{url}>
 🚀 Watch videos together!
-Queued video: {video_url}
+Queued video: <{video_url}>
 *React to this message with 🛑 to close the room.*
 """
 
@@ -474,24 +472,18 @@ WATCH2GETHER_CLOSED_MESSAGE = "✨ _watch2gether room closed_"
     help=WATCH2GETHER_HELP,
 )
 async def watch2gether_command(ctx: Context, video_url: str = None):
-    # Send initial message then edit it so that we don't get an embed
-    message = await ctx.send("Creating watch2gether room...")
     logger.info("creating watch2gether meeting")
     try:
         url = await meetings.create_watch2gether(WATCH2GETHER_API_KEY, video_url)
     except Exception:
         logger.exception("could not create watch2gether room")
-        await message.edit(
+        message = await ctx.send(
             content="🚨 _Could not create watch2gether room. That's embarrassing._"
         )
     else:
         template = WATCH2GETHER_WITH_URL_TEMPLATE if video_url else WATCH2GETHER_TEMPLATE
         content = template.format(url=url, video_url=video_url)
-        await message.edit(
-            content=content,
-            suppress=True,
-            allowed_mentions=discord.AllowedMentions(users=True),
-        )
+        message = await ctx.send(content=content)
 
     await wait_for_stop_sign(message, replace_with=WATCH2GETHER_CLOSED_MESSAGE)
 
