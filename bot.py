@@ -372,7 +372,7 @@ async def idiom_command(ctx, spoiler: Optional[str]):
 ZOOM_TEMPLATE = """**Join URL**: {join_url}
 **Passcode**: {passcode}
 🚀 This meeting is happening now. Go practice!
-*Details will be removed when the meeting ends.*
+*After the meeting ends, react with 🛑 to remove this message.*
 """
 
 ZOOM_CLOSED_MESSAGE = "✨ _Zoom meeting ended_"
@@ -424,7 +424,7 @@ async def zoom_error(ctx, error):
 
 MEET_TEMPLATE = """**Join URL**: <{join_url}>
 🚀 This meeting is happening now. Go practice!
-After the meeting ends, react with 🛑 to remove this message.
+*After the meeting ends, react with 🛑 to remove this message.*
 """
 
 MEET_CLOSED_MESSAGE = "✨ _Jitsi Meet ended_"
