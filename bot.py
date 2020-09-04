@@ -1,11 +1,9 @@
 import asyncio
-import base64
 import datetime as dt
 import difflib
 import logging
 import random
 import re
-import uuid
 from contextlib import suppress
 from typing import Optional
 from urllib.parse import quote_plus
@@ -22,6 +20,7 @@ from google.oauth2.service_account import Credentials
 import handshapes
 import cuteid
 import catchphrase
+import meetings
 
 # -----------------------------------------------------------------------------
 
@@ -370,26 +369,6 @@ async def idiom_command(ctx, spoiler: Optional[str]):
 # -----------------------------------------------------------------------------
 
 
-async def create_meeting():
-    async with aiohttp.ClientSession() as client:
-        resp = await client.post(
-            f"https://api.zoom.us/v2/users/{ZOOM_USER_ID}/meetings",
-            json={
-                "type": 1,
-                "topic": "PRACTICE",
-                "settings": {
-                    "host_video": False,
-                    "participant_video": False,
-                    "mute_upon_entry": True,
-                    "waiting_room": False,
-                },
-            },
-            headers={"Authorization": f"Bearer {ZOOM_JWT}"},
-        )
-    resp.raise_for_status()
-    return await resp.json()
-
-
 ZOOM_TEMPLATE = """**Join URL**: {join_url}
 **Passcode**: {passcode}
 🚀 This meeting is happening now. Go practice!
@@ -406,7 +385,17 @@ async def zoom_command(ctx: Context):
     message = await ctx.send("Creating meeting...")
     logger.info("creating zoom meeting")
     try:
-        data = await create_meeting()
+        meeting = await meetings.create_zoom(
+            token=ZOOM_JWT,
+            user_id=ZOOM_USER_ID,
+            topic="PRACTICE",
+            settings={
+                "host_video": False,
+                "participant_video": False,
+                "mute_upon_entry": True,
+                "waiting_room": False,
+            },
+        )
     except Exception:
         logger.exception("could not create Zoom meeting")
         await message.edit(
@@ -414,7 +403,7 @@ async def zoom_command(ctx: Context):
         )
     else:
         content = ZOOM_TEMPLATE.format(
-            join_url=data["join_url"], passcode=data["password"]
+            join_url=meeting.join_url, passcode=meeting.passcode
         )
         await message.edit(content=content, suppress=True)
 
@@ -441,13 +430,9 @@ After the meeting ends, react with 🛑 to remove this message.
 MEET_CLOSED_MESSAGE = "✨ _Jitsi Meet ended_"
 
 
-def pretty_uuid() -> str:
-    return base64.urlsafe_b64encode(uuid.uuid4().bytes).decode().replace("=", "")
-
-
 @bot.command(name="meet", aliases=("jitsi",), help="Start a Jitsi Meet meeting")
 async def meet_command(ctx: Context):
-    join_url = f"https://meet.jit.si/{pretty_uuid()}"
+    join_url = meetings.create_jitsi_meet()
     content = MEET_TEMPLATE.format(join_url=join_url)
     logger.info("sending jitsi meet info")
     message = await ctx.send(content=content)
@@ -456,19 +441,6 @@ async def meet_command(ctx: Context):
 
 
 # -----------------------------------------------------------------------------
-
-
-async def create_watch2gether(video_url: Optional[str]) -> str:
-    async with aiohttp.ClientSession() as client:
-        payload = {"api_key": WATCH2GETHER_API_KEY}
-        if payload:
-            payload["share"] = video_url
-        resp = await client.post("https://w2g.tv/rooms/create.json", json=payload)
-    resp.raise_for_status()
-    data = await resp.json()
-    stream_key = data["streamkey"]
-    url = f"https://w2g.tv/rooms/{stream_key}"
-    return url
 
 
 WATCH2GETHER_HELP = """Create a new watch2gether room
@@ -506,7 +478,7 @@ async def watch2gether_command(ctx: Context, video_url: str = None):
     message = await ctx.send("Creating watch2gether room...")
     logger.info("creating watch2gether meeting")
     try:
-        url = await create_watch2gether(video_url)
+        url = await meetings.create_watch2gether(WATCH2GETHER_API_KEY, video_url)
     except Exception:
         logger.exception("could not create watch2gether room")
         await message.edit(
