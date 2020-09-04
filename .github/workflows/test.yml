@@ -11,5 +11,5 @@ jobs:
         python-version: 3.8.5
     - name: Install dependencies
       run: . script/bootstrap
-    - name: Run pre-commit
+    - name: Run tests
       run: . script/test
