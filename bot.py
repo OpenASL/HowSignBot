@@ -75,6 +75,17 @@ def did_you_mean(word, possibilities):
         return None
 
 
+async def wait_for_stop_sign(message: discord.Message, *, replace_with: str):
+    def check(reaction, user):
+        return reaction.message.id == message.id and str(reaction.emoji) == "🛑"
+
+    try:
+        await bot.wait_for("reaction_add", check=check)
+    finally:
+        logger.info(f"replacing message with: {replace_with}")
+        await message.edit(content=replace_with)
+
+
 # -----------------------------------------------------------------------------
 
 
@@ -370,12 +381,8 @@ async def create_meeting():
             },
             headers={"Authorization": f"Bearer {ZOOM_JWT}"},
         )
-    if resp.status >= 400:
-        logger.error("could not create meeting")
-        return None
-    else:
-        data = await resp.json()
-        return data
+    resp.raise_for_status()
+    return await resp.json()
 
 
 ZOOM_TEMPLATE = """**Join URL**: {join_url}
@@ -393,23 +400,20 @@ async def zoom_command(ctx: Context):
     # Send initial message then edit it so that we don't get an annoying Zoom embed
     message = await ctx.send("Creating meeting...")
     logger.info("creating zoom meeting")
-    data = await create_meeting()
-    if not data:
+    try:
+        data = await create_meeting()
+    except Exception:
+        logger.exception("could not create Zoom meeting")
         await message.edit(
             content="🚨 _Could not create Zoom meeting. That's embarrassing._"
         )
-        return
-    content = ZOOM_TEMPLATE.format(join_url=data["join_url"], passcode=data["password"])
-    await message.edit(content=content, suppress=True)
+    else:
+        content = ZOOM_TEMPLATE.format(
+            join_url=data["join_url"], passcode=data["password"]
+        )
+        await message.edit(content=content, suppress=True)
 
-    def check(reaction, user):
-        return reaction.message.id == message.id and str(reaction.emoji) == "🛑"
-
-    try:
-        await bot.wait_for("reaction_add", check=check)
-    finally:
-        logger.info("scrubbing zoom info")
-        await message.edit(content=ZOOM_CLOSED_MESSAGE)
+    await wait_for_stop_sign(message, replace_with=ZOOM_CLOSED_MESSAGE)
 
 
 @zoom_command.error
@@ -433,26 +437,17 @@ MEET_CLOSED_MESSAGE = "✨ _Jitsi Meet ended_"
 
 
 def pretty_uuid() -> str:
-    uid = str(uuid.uuid4())
-    return base64.urlsafe_b64encode(uuid.UUID(uid).bytes).decode().replace("=", "")
+    return base64.urlsafe_b64encode(uuid.uuid4().bytes).decode().replace("=", "")
 
 
 @bot.command(name="meet", aliases=("jitsi",), help="Start a Jitsi Meet meeting")
 async def meet_command(ctx: Context):
-    # Send initial message then edit it so that we don't get an annoying Zoom embed
     join_url = f"https://meet.jit.si/{pretty_uuid()}"
     content = MEET_TEMPLATE.format(join_url=join_url)
     logger.info("sending jitsi meet info")
     message = await ctx.send(content=content)
 
-    def check(reaction, user):
-        return reaction.message.id == message.id and str(reaction.emoji) == "🛑"
-
-    try:
-        await bot.wait_for("reaction_add", check=check)
-    finally:
-        logger.info("scrubbing jitsi meet info")
-        await message.edit(content=MEET_CLOSED_MESSAGE)
+    await wait_for_stop_sign(message, replace_with=MEET_CLOSED_MESSAGE)
 
 
 # -----------------------------------------------------------------------------
@@ -464,14 +459,11 @@ async def create_watch2gether(video_url: Optional[str]) -> str:
         if payload:
             payload["share"] = video_url
         resp = await client.post("https://w2g.tv/rooms/create.json", json=payload)
-    if resp.status >= 400:
-        logger.error("could not create watch2gether room")
-        return None
-    else:
-        data = await resp.json()
-        stream_key = data["streamkey"]
-        url = f"https://w2g.tv/rooms/{stream_key}"
-        return url
+    resp.raise_for_status()
+    data = await resp.json()
+    stream_key = data["streamkey"]
+    url = f"https://w2g.tv/rooms/{stream_key}"
+    return url
 
 
 WATCH2GETHER_HELP = """Create a new watch2gether room
@@ -487,16 +479,16 @@ Examples:
 
 WATCH2GETHER_TEMPLATE = """{url}
 🚀 Watch videos together!
-*As the room creator, you may react to this message with 🛑 to close the room.*
+*React to this message with 🛑 to close the room.*
 """
 
 WATCH2GETHER_WITH_URL_TEMPLATE = """{url}
 🚀 Watch videos together!
 Queued video: {video_url}
-*As the room creator, you may react to this message with 🛑 to close the room.*
+*React to this message with 🛑 to close the room.*
 """
 
-WATCH2GETHER_CLOSE_MESSAGE = "✨ _watch2gether room closed_"
+WATCH2GETHER_CLOSED_MESSAGE = "✨ _watch2gether room closed_"
 
 
 @bot.command(
@@ -508,37 +500,29 @@ async def watch2gether_command(ctx: Context, video_url: str = None):
     # Send initial message then edit it so that we don't get an embed
     message = await ctx.send("Creating watch2gether room...")
     logger.info("creating watch2gether meeting")
-    url = await create_watch2gether(video_url)
-    if not url:
+    try:
+        url = await create_watch2gether(video_url)
+    except Exception:
+        logger.exception("could not create watch2gether room")
         await message.edit(
             content="🚨 _Could not create watch2gether room. That's embarrassing._"
         )
         return
-    template = WATCH2GETHER_WITH_URL_TEMPLATE if video_url else WATCH2GETHER_TEMPLATE
-    content = template.format(url=url, video_url=video_url)
-    await message.edit(
-        content=content,
-        suppress=True,
-        allowed_mentions=discord.AllowedMentions(users=True),
-    )
-
-    def check(reaction, user):
-        return (
-            reaction.message.id == message.id
-            and str(reaction.emoji) == "🛑"
-            and user.id in (ctx.author.id, bot.owner_id)
+    else:
+        template = WATCH2GETHER_WITH_URL_TEMPLATE if video_url else WATCH2GETHER_TEMPLATE
+        content = template.format(url=url, video_url=video_url)
+        await message.edit(
+            content=content,
+            suppress=True,
+            allowed_mentions=discord.AllowedMentions(users=True),
         )
 
-    try:
-        await bot.wait_for("reaction_add", check=check)
-    finally:
-        logger.info("scrubbing watch2gether info")
-        await message.edit(content=WATCH2GETHER_CLOSE_MESSAGE)
+    await wait_for_stop_sign(message, replace_with=WATCH2GETHER_CLOSED_MESSAGE)
 
 
 # -----------------------------------------------------------------------------
 
-CODENAMES_CLOSE_MESSAGE = "✨ _Codenames game ended_"
+CODENAMES_CLOSED_MESSAGE = "✨ _Codenames game ended_"
 
 
 def make_teams(players):
@@ -579,7 +563,7 @@ async def codenames_command(ctx: Context, name: str = None):
             future.cancel()
         if str(reaction.emoji) == "🛑":
             logger.info("scrubbing codenames info")
-            await message.edit(content=CODENAMES_CLOSE_MESSAGE)
+            await message.edit(content=CODENAMES_CLOSED_MESSAGE)
             break
         elif str(reaction.emoji) in ("👍", "🔄"):
             if str(reaction.emoji) == "🔄":
@@ -641,13 +625,13 @@ async def catchphrase_command(ctx: Context, category: str = None):
 # Allow cleaning up Zoom, watch2gether, etc. rooms after bot restarts
 # Need to use on_raw_reaction_add to handle messages that aren't in the cache
 
-CLOSE_MESSAGE_MAP = {
+CLOSED_MESSAGE_MAP = {
     r"Could not create Zoom": ZOOM_CLOSED_MESSAGE,
     r"zoom\.us": ZOOM_CLOSED_MESSAGE,
     r"meet\.jit\.si": MEET_CLOSED_MESSAGE,
-    r"Could not create watch2gether": WATCH2GETHER_CLOSE_MESSAGE,
-    r"Watch videos together": WATCH2GETHER_CLOSE_MESSAGE,
-    r"Codenames": CODENAMES_CLOSE_MESSAGE,
+    r"Could not create watch2gether": WATCH2GETHER_CLOSED_MESSAGE,
+    r"Watch videos together": WATCH2GETHER_CLOSED_MESSAGE,
+    r"Codenames": CODENAMES_CLOSED_MESSAGE,
 }
 
 
@@ -666,7 +650,7 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
                 if message.id == cached_message.id:
                     return
 
-            for pattern, close_message in CLOSE_MESSAGE_MAP.items():
+            for pattern, close_message in CLOSED_MESSAGE_MAP.items():
                 if re.search(pattern, message.content):
                     logger.info(f"cleaning up room with message: {close_message}")
                     await message.edit(content=close_message)
