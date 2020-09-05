@@ -432,6 +432,24 @@ async def meet_command(ctx: Context, *, name: Optional[str]):
 
 # -----------------------------------------------------------------------------
 
+SPEAKEASY_CLOSED_MESSAGE = "✨ _Speakeasy event ended_"
+
+
+@bot.command(name="speakeasy", help="Start a Speakeasy (https://speakeasy.co/) event")
+async def speakeasy_command(ctx: Context, *, name: Optional[str]):
+    join_url = meetings.create_speakeasy(name, secret=SECRET_KEY)
+    content = f"️🍻 **Speakeasy**\nJoin URL: <{join_url}>"
+    if name:
+        content = f"{content}\n**Name**: {name}"
+    content = f"{content}\n🚀 This event is happening now. Make a friend!\n*After the event ends, react with 🛑 to remove this message.*"
+    logger.info("sending speakeasy info")
+    message = await ctx.send(content=content)
+
+    await wait_for_stop_sign(message, replace_with=MEET_CLOSED_MESSAGE)
+
+
+# -----------------------------------------------------------------------------
+
 
 WATCH2GETHER_HELP = """Create a new watch2gether room
 
