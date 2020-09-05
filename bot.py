@@ -32,6 +32,7 @@ env.read_env()
 LOG_LEVEL = env.log_level("LOG_LEVEL", logging.INFO)
 DISCORD_TOKEN = env.str("DISCORD_TOKEN", required=True)
 OWNER_ID = env.int("OWNER_ID", required=True)
+SECRET_KEY = env.str("SECRET_KEY", required=True)
 COMMAND_PREFIX = env.str("COMMAND_PREFIX", "?")
 
 
@@ -415,18 +416,16 @@ async def zoom_error(ctx, error):
 
 # -----------------------------------------------------------------------------
 
-MEET_TEMPLATE = """**Join URL**: <{join_url}>
-🚀 This meeting is happening now. Go practice!
-*After the meeting ends, react with 🛑 to remove this message.*
-"""
-
 MEET_CLOSED_MESSAGE = "✨ _Jitsi Meet ended_"
 
 
 @bot.command(name="meet", aliases=("jitsi",), help="Start a Jitsi Meet meeting")
-async def meet_command(ctx: Context):
-    join_url = meetings.create_jitsi_meet()
-    content = MEET_TEMPLATE.format(join_url=join_url)
+async def meet_command(ctx: Context, *, name: Optional[str]):
+    join_url = meetings.create_jitsi_meet(name, secret=SECRET_KEY)
+    content = f"**Join URL**: <{join_url}>"
+    if name:
+        content = f"{content}\n**Name**: {name}"
+    content = f"{content}\n🚀 This meeting is happening now. Go practice!\n*After the meeting ends, react with 🛑 to remove this message.*"
     logger.info("sending jitsi meet info")
     message = await ctx.send(content=content)
 
