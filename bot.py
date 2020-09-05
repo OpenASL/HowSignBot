@@ -369,24 +369,18 @@ async def idiom_command(ctx, spoiler: Optional[str]):
 # -----------------------------------------------------------------------------
 
 
-ZOOM_TEMPLATE = """**Join URL**: <{join_url}>
-**Passcode**: {passcode}
-🚀 This meeting is happening now. Go practice!
-*After the meeting ends, react with 🛑 to remove this message.*
-"""
-
 ZOOM_CLOSED_MESSAGE = "✨ _Zoom meeting ended_"
 
 
 @bot.command(name="zoom", help="BOT OWNER ONLY: Create a Zoom meeting")
 @commands.is_owner()
-async def zoom_command(ctx: Context):
+async def zoom_command(ctx: Context, *, topic: Optional[str]):
     logger.info("creating zoom meeting")
     try:
         meeting = await meetings.create_zoom(
             token=ZOOM_JWT,
             user_id=ZOOM_USER_ID,
-            topic="PRACTICE",
+            topic=topic or "PRACTICE",
             settings={
                 "host_video": False,
                 "participant_video": False,
@@ -400,9 +394,10 @@ async def zoom_command(ctx: Context):
             content="🚨 _Could not create Zoom meeting. That's embarrassing._"
         )
     else:
-        content = ZOOM_TEMPLATE.format(
-            join_url=meeting.join_url, passcode=meeting.passcode
-        )
+        content = f"**Join URL**: <{meeting.join_url}>\n**Passcode**: {meeting.passcode}"
+        if topic:
+            content = f"{content}\n**Topic**: {topic}"
+        content = f"{content}\n🚀 This meeting is happening now. Go practice!\n*After the meeting ends, react with 🛑 to remove this message.*"
         message = await ctx.send(content=content)
 
     await wait_for_stop_sign(message, replace_with=ZOOM_CLOSED_MESSAGE)
