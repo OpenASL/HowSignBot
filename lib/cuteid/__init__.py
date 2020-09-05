@@ -1,6 +1,6 @@
-import random
 import json
 from pathlib import Path
+from secrets import choice
 
 HERE = Path(__file__).parent
 
@@ -11,4 +11,4 @@ with (HERE / "animals.json").open("r") as fp:
 
 
 def cuteid():
-    return f"{random.choice(_adjectives)}-{random.choice(_adjectives)}-{random.choice(_animals)}".lower()
+    return f"{choice(_adjectives)}-{choice(_adjectives)}-{choice(_animals)}".lower()
