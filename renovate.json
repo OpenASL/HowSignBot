@@ -1,0 +1,11 @@
+{
+  "extends": ["config:base", ":semanticCommitTypeAll(chore)", "schedule:daily"],
+  "pip_requirements": {
+    "fileMatch": ["(^|/)requirements(-dev)?\\.txt"]
+  },
+  "pip_setup": {
+    "enabled": false
+  },
+  "rangeStrategy": "bump",
+  "semanticCommits": true
+}
