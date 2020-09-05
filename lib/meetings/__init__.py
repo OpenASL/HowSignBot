@@ -1,8 +1,11 @@
 import base64
+import hmac
+import hashlib
 import uuid
 from typing import NamedTuple
 
 import aiohttp
+from slugify import slugify
 
 
 class ZoomMeeting(NamedTuple):
@@ -29,13 +32,33 @@ async def create_zoom(
     return ZoomMeeting(join_url=data["join_url"], passcode=data["password"])
 
 
+def _signature(s: str, *, secret: str) -> str:
+    dig = hmac.new(
+        secret.encode("utf-8"), msg=s.encode("utf-8"), digestmod=hashlib.sha256
+    ).digest()
+    return base64.urlsafe_b64encode(dig).decode()
+
+
 def _pretty_uuid() -> str:
     return base64.urlsafe_b64encode(uuid.uuid4().bytes).decode().replace("=", "")
 
 
-def create_jitsi_meet() -> str:
+def _slug_with_signature(s: str, *, secret: str):
+    slug = slugify(s)
+    return "-".join((slug, _signature(slug, secret=secret)[:16]))
+
+
+def create_jitsi_meet(name: str = None, *, secret: str = None) -> str:
     """Return a Jitsi Meet URL with a unique ID."""
-    return f"https://meet.jit.si/{_pretty_uuid()}"
+    # Return deterministic URLs when name is passed in
+    #  so that the same meeting can be shared in multiple servers.
+    #  The URL will be the slugified name with a 16-character signature appended
+    if name:
+        slug = _slug_with_signature(name, secret=secret)
+    else:
+        slug = _pretty_uuid()
+    name = name or _pretty_uuid()
+    return f"https://meet.jit.si/{slug}"
 
 
 async def create_watch2gether(api_key: str, video_url: str = None) -> str:
