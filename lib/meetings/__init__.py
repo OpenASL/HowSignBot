@@ -40,8 +40,7 @@ def _signature(s: str, *, secret: str) -> str:
 
 
 def _slug_with_signature(s: str, *, secret: str, slug_length=16):
-    slug = slugify(s)
-    return "-".join((slug, _signature(slug, secret=secret)[:slug_length]))
+    return "-".join((slugify(s), _signature(s, secret=secret)[:slug_length]))
 
 
 def _pretty_uuid() -> str:
