@@ -1,11 +1,11 @@
 import base64
 import hmac
 import hashlib
-import uuid
 from typing import NamedTuple, Optional
 
 import aiohttp
 from slugify import slugify
+import cuteid
 
 
 class ZoomMeeting(NamedTuple):
@@ -55,17 +55,13 @@ def _slug_with_signature(s: str, *, secret: str, slug_length=16):
     return "-".join((slugify(s), _signature(s, secret=secret)[:slug_length]))
 
 
-def _pretty_uuid() -> str:
-    return base64.urlsafe_b64encode(uuid.uuid4().bytes).decode().rstrip("=")
-
-
 def _get_secret_slug(name: Optional[str], secret: Optional[str]) -> str:
     """Return a hard-to-guess slug to use for meeting URLs.
 
     If name is passed, return the slugified name with a 16-character signature
     appended so that the same meeting can be shared in multiple servers.
     """
-    return _slug_with_signature(name, secret=secret) if name else _pretty_uuid()
+    return _slug_with_signature(name, secret=secret) if name else cuteid.emojid()
 
 
 def create_jitsi_meet(name: Optional[str], *, secret: Optional[str]) -> str:
@@ -77,4 +73,4 @@ def create_jitsi_meet(name: Optional[str], *, secret: Optional[str]) -> str:
 def create_speakeasy(name: Optional[str], *, secret: Optional[str]) -> str:
     """Return a Speakeasy URL."""
     slug = _get_secret_slug(name, secret)
-    return f"https://speakeasy.co/{slug.lower()}"
+    return f"https://speakeasy.co/{slug}"

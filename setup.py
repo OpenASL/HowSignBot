@@ -14,7 +14,7 @@ def read(fname):
 setup(
     name="howsignbot-lib",
     version="1.0.0",
-    install_requires=["pyyaml~=5.0", "python-slugify~=4.0"],
+    install_requires=["pyyaml>=5.0", "python-slugify>=4.0", "emoji>=0.6.0"],
     extras_require=EXTRAS_REQUIRE,
     python_requires=">=3.8",
     packages=find_packages("lib"),
