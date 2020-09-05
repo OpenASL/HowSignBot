@@ -80,11 +80,9 @@ async def wait_for_stop_sign(message: discord.Message, *, replace_with: str):
     def check(reaction, user):
         return reaction.message.id == message.id and str(reaction.emoji) == "🛑"
 
-    try:
-        await bot.wait_for("reaction_add", check=check)
-    finally:
-        logger.info(f"replacing message with: {replace_with}")
-        await message.edit(content=replace_with)
+    await bot.wait_for("reaction_add", check=check)
+    logger.info(f"replacing message with: {replace_with}")
+    await message.edit(content=replace_with)
 
 
 # -----------------------------------------------------------------------------

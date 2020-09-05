@@ -39,13 +39,13 @@ def _signature(s: str, *, secret: str) -> str:
     return base64.urlsafe_b64encode(dig).decode()
 
 
-def _slug_with_signature(s: str, *, secret: str):
+def _slug_with_signature(s: str, *, secret: str, slug_length=16):
     slug = slugify(s)
-    return "-".join((slug, _signature(slug, secret=secret)[:16]))
+    return "-".join((slug, _signature(slug, secret=secret)[:slug_length]))
 
 
 def _pretty_uuid() -> str:
-    return base64.urlsafe_b64encode(uuid.uuid4().bytes).decode().replace("=", "")
+    return base64.urlsafe_b64encode(uuid.uuid4().bytes).decode().rstrip("=")
 
 
 def create_jitsi_meet(name: str = None, *, secret: str = None) -> str:
