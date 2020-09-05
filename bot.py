@@ -621,5 +621,5 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
 
 
 if __name__ == "__main__":
-    logger.info("starting bot")
+    logger.info(f"starting bot version {__version__}")
     bot.run(DISCORD_TOKEN)
