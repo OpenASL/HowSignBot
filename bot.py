@@ -445,7 +445,7 @@ async def speakeasy_command(ctx: Context, *, name: Optional[str]):
     logger.info("sending speakeasy info")
     message = await ctx.send(content=content)
 
-    await wait_for_stop_sign(message, replace_with=MEET_CLOSED_MESSAGE)
+    await wait_for_stop_sign(message, replace_with=SPEAKEASY_CLOSED_MESSAGE)
 
 
 # -----------------------------------------------------------------------------
@@ -610,6 +610,7 @@ CLOSED_MESSAGE_MAP = {
     r"Could not create watch2gether": WATCH2GETHER_CLOSED_MESSAGE,
     r"Watch videos together": WATCH2GETHER_CLOSED_MESSAGE,
     r"Codenames": CODENAMES_CLOSED_MESSAGE,
+    r"Speakeasy": SPEAKEASY_CLOSED_MESSAGE,
 }
 
 
