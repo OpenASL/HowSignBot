@@ -605,18 +605,18 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
             if not channel:
                 return
             message = await channel.fetch_message(payload.message_id)
-            if message.author.id != bot.user.id:
+        if message.author.id != bot.user.id:
+            return
+        # Cached messages will already be handled
+        for cached_message in bot.cached_messages:
+            if message.id == cached_message.id:
                 return
-            # Cached messages will already be handled
-            for cached_message in bot.cached_messages:
-                if message.id == cached_message.id:
-                    return
 
-            for pattern, close_message in CLOSED_MESSAGE_MAP.items():
-                if re.search(pattern, message.content):
-                    logger.info(f"cleaning up room with message: {close_message}")
-                    await message.edit(content=close_message)
-                    return
+        for pattern, close_message in CLOSED_MESSAGE_MAP.items():
+            if re.search(pattern, message.content):
+                logger.info(f"cleaning up room with message: {close_message}")
+                await message.edit(content=close_message)
+                return
 
 
 if __name__ == "__main__":
