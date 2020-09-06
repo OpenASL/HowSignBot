@@ -6,6 +6,12 @@
   "pip_setup": {
     "enabled": false
   },
+  "packageRules": [
+    {
+      "updateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true
+    }
+  ],
   "rangeStrategy": "bump",
   "semanticCommits": true
 }
