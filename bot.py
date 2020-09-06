@@ -420,10 +420,12 @@ MEET_CLOSED_MESSAGE = "✨ _Jitsi Meet ended_"
 @bot.command(name="meet", aliases=("jitsi",), help="Start a Jitsi Meet meeting")
 async def meet_command(ctx: Context, *, name: Optional[str]):
     meeting = meetings.create_jitsi_meet(name, secret=SECRET_KEY)
-    content = f"**Join URL**: <{meeting.join_url}>\n**Desktop App Link**: <{meeting.deeplink}>\n*Note: Desktop App Link requires <https://github.com/jitsi/jitsi-meet-electron>"
+    content = (
+        f"**Join URL**: <{meeting.join_url}>\n**Desktop App Link***: <{meeting.deeplink}>"
+    )
     if name:
         content = f"{content}\n**Name**: {name}"
-    content = f"{content}\n🚀 This meeting is happening now. Go practice!\n*After the meeting ends, react with 🛑 to remove this message.*"
+    content = f"{content}\n🚀 This meeting is happening now. Go practice!\n*Desktop App Link requires <https://github.com/jitsi/jitsi-meet-electron>\n*After the meeting ends, react with 🛑 to remove this message.*"
     logger.info("sending jitsi meet info")
     message = await ctx.send(content=content)
 
