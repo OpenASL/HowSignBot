@@ -520,7 +520,7 @@ def format_team(players):
 async def codenames_command(ctx: Context, name: str = None):
     name = name or cuteid.cuteid()
     url = f"https://horsepaste.com/{name}"
-    base_message = f"🕵️ **Codenames** 🕵️\n{url}\nReact with 👍 to join a team. React with 🔄 to shuffle the teams."
+    base_message = f"🕵️ **Codenames** 🕵️\n{url}\nReact with 👍 to join a team. React with 🔀 to shuffle the teams."
     logger.info(f"starting codenames game at {url}")
     message = await ctx.send(base_message)
 
@@ -539,8 +539,8 @@ async def codenames_command(ctx: Context, name: str = None):
         reaction, _ = done.pop().result()
         for future in pending:
             future.cancel()
-        if str(reaction.emoji) in ("👍", "🔄"):
-            if str(reaction.emoji) == "🔄":
+        if str(reaction.emoji) in ("👍", "🔀"):
+            if str(reaction.emoji) == "🔀":
                 logger.info("shuffling players")
                 random.shuffle(players)
             else:
