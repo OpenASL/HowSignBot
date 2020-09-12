@@ -77,8 +77,15 @@ def did_you_mean(word, possibilities):
 
 
 async def wait_for_stop_sign(message: discord.Message, *, replace_with: str):
+    with suppress(Exception):
+        await message.add_reaction("🛑")
+
     def check(reaction, user):
-        return reaction.message.id == message.id and str(reaction.emoji) == "🛑"
+        return (
+            user.id != bot.user.id
+            and reaction.message.id == message.id
+            and str(reaction.emoji) == "🛑"
+        )
 
     await bot.wait_for("reaction_add", check=check)
     logger.info(f"replacing message with: {replace_with}")
@@ -396,7 +403,7 @@ async def zoom_command(ctx: Context, *, topic: Optional[str]):
         content = f"**Join URL**: <{meeting.join_url}>\n**Passcode**: {meeting.passcode}"
         if topic:
             content = f"{content}\n**Topic**: {topic}"
-        content = f"{content}\n🚀 This meeting is happening now. Go practice!\n*After the meeting ends, react with 🛑 to remove this message.*"
+        content = f"{content}\n🚀 This meeting is happening now. Go practice!\n*After the meeting ends, click 🛑 to remove this message.*"
         message = await ctx.send(content=content)
 
     await wait_for_stop_sign(message, replace_with=ZOOM_CLOSED_MESSAGE)
@@ -425,7 +432,7 @@ async def meet_command(ctx: Context, *, name: Optional[str]):
     )
     if name:
         content = f"{content}\n**Name**: {name}"
-    content = f"{content}\n🚀 This meeting is happening now. Go practice!\n*Desktop App Link requires <https://github.com/jitsi/jitsi-meet-electron>\n*After the meeting ends, react with 🛑 to remove this message.*"
+    content = f"{content}\n🚀 This meeting is happening now. Go practice!\n*Desktop App Link requires <https://github.com/jitsi/jitsi-meet-electron>\n*After the meeting ends, click 🛑 to remove this message.*"
     logger.info("sending jitsi meet info")
     message = await ctx.send(content=content)
 
@@ -443,7 +450,7 @@ async def speakeasy_command(ctx: Context, *, name: Optional[str]):
     content = f"️🍻 **Speakeasy**\nJoin URL: <{join_url}>"
     if name:
         content = f"{content}\n**Name**: {name}"
-    content = f"{content}\n🚀 This event is happening now. Make a friend!\n*After the event ends, react with 🛑 to remove this message.*"
+    content = f"{content}\n🚀 This event is happening now. Make a friend!\n*After the event ends, click 🛑 to remove this message.*"
     logger.info("sending speakeasy info")
     message = await ctx.send(content=content)
 
@@ -466,13 +473,13 @@ Examples:
 
 WATCH2GETHER_TEMPLATE = """<{url}>
 🚀 Watch videos together!
-*React to this message with 🛑 to close the room.*
+*When finished, click 🛑 to remove this message.*
 """
 
 WATCH2GETHER_WITH_URL_TEMPLATE = """<{url}>
 🚀 Watch videos together!
 Queued video: <{video_url}>
-*React to this message with 🛑 to close the room.*
+*When finished, click 🛑 to remove this message.*
 """
 
 WATCH2GETHER_CLOSED_MESSAGE = "✨ _watch2gether room closed_"
@@ -506,7 +513,10 @@ async def watch2gether_command(ctx: Context, video_url: str = None):
 def make_teams(players):
     red, blue = [], []
     for player in reversed(players):
-        team = min(red, blue, key=len)
+        if len(red) == len(blue):
+            team = random.choice([red, blue])
+        else:
+            team = min(red, blue, key=len)
         team.append(player)
     return red, blue
 
@@ -520,9 +530,13 @@ def format_team(players):
 async def codenames_command(ctx: Context, name: str = None):
     name = name or cuteid.cuteid()
     url = f"https://horsepaste.com/{name}"
-    base_message = f"🕵️ **Codenames** 🕵️\n{url}\nReact with 👍 to join a team. React with 🔀 to shuffle the teams."
+    base_message = f"🕵️ **Codenames** 🕵️\n{url}\nClick 👍 to join a team. Click 🔀 to shuffle the teams."
     logger.info(f"starting codenames game at {url}")
     message = await ctx.send(base_message)
+
+    with suppress(Exception):
+        await message.add_reaction("👍")
+        await message.add_reaction("🔀")
 
     def check(reaction, user):
         return reaction.message.id == message.id
@@ -544,7 +558,11 @@ async def codenames_command(ctx: Context, name: str = None):
                 logger.info("shuffling players")
                 random.shuffle(players)
             else:
-                players = await reaction.users().flatten()
+                players = [
+                    player
+                    for player in await reaction.users().flatten()
+                    if player.id != bot.user.id
+                ]
             red, blue = make_teams(players)
             logger.info(f"total players: {len(players)}")
             await message.edit(
@@ -600,8 +618,8 @@ async def catchphrase_command(ctx: Context, category: str = None):
 # Need to use on_raw_reaction_add to handle messages that aren't in the cache
 
 CLOSED_MESSAGE_MAP = {
-    r"Could not create Zoom": ZOOM_CLOSED_MESSAGE,
     r"zoom\.us": ZOOM_CLOSED_MESSAGE,
+    r"Could not create Zoom": ZOOM_CLOSED_MESSAGE,
     r"meet\.jit\.si": MEET_CLOSED_MESSAGE,
     r"Could not create watch2gether": WATCH2GETHER_CLOSED_MESSAGE,
     r"Watch videos together": WATCH2GETHER_CLOSED_MESSAGE,
