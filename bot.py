@@ -58,7 +58,7 @@ bot = commands.Bot(command_prefix=COMMAND_PREFIX, owner_id=OWNER_ID)
 
 # -----------------------------------------------------------------------------
 
-_spoiler_pattern = re.compile(r"\s*\|\|\s*(\S*)\s*\|\|\s*")
+_spoiler_pattern = re.compile(r"\s*\|\|\s*(.*)\s*\|\|\s*")
 
 
 def get_spoiler_text(val: str) -> Optional[str]:
@@ -126,36 +126,51 @@ HOWSIGN_SPOILER_TEMPLATE = """[👋 **Handspeak** - Search results]({handspeak})
 HOWSIGN_HELP = """Look up a word or phrase
 
 If the word or phrase is sent in spoiler text, i.e. enclosed in `||`, the word will also be blacked out in the reply.
+To search multiple words/phrases, separate the values with a comma.
 
 Examples:
 {COMMAND_PREFIX}howsign tiger
 {COMMAND_PREFIX}howsign ||tiger||
 {COMMAND_PREFIX}howsign what's up
+{COMMAND_PREFIX}howsign church, chocolate, computer
 """.format(
     COMMAND_PREFIX=COMMAND_PREFIX
 )
 
 
+def word_display(word: str, *, has_spoiler: bool):
+    quoted_word = quote_plus(word)
+    template = HOWSIGN_SPOILER_TEMPLATE if has_spoiler else HOWSIGN_TEMPLATE
+    return template.format(
+        word_uppercased=word.upper(),
+        lifeprint=f"https://www.google.com/search?&q=site%3Alifeprint.com+{quoted_word}",
+        handspeak=f"https://www.google.com/search?&q=site%3Ahandspeak.com+{quoted_word}",
+        signingsavvy=f"https://www.signingsavvy.com/search/{quoted_word}",
+        spread_the_sign=f"https://www.spreadthesign.com/en.us/search/?q={quoted_word}",
+        youglish=f"https://youglish.com/pronounce/{quoted_word}/signlanguage/asl",
+    )
+
+
 def howsign_impl(word: str):
     spoiler = get_spoiler_text(word)
     word = spoiler if spoiler else word
-    title = f"||{word.upper()}||" if spoiler else word.upper()
-    template = HOWSIGN_SPOILER_TEMPLATE if spoiler else HOWSIGN_TEMPLATE
     logger.info(f"sending links for: '{word}'")
-    quoted_word = quote_plus(word)
-    return {
-        "embed": discord.Embed(
+    has_multiple = "," in word
+    if has_multiple:
+        words = word.split(",")
+        embed = discord.Embed()
+        for word in words:
+            word = word.strip()
+            title = f"||{word.upper()}||" if spoiler else word.upper()
+            embed.add_field(name=title, value=word_display(word, has_spoiler=spoiler))
+    else:
+        title = f"||{word.upper()}||" if spoiler else word.upper()
+        embed = discord.Embed(
             title=title,
-            description=template.format(
-                word_uppercased=word.upper(),
-                lifeprint=f"https://www.google.com/search?&q=site%3Alifeprint.com+{quoted_word}",
-                handspeak=f"https://www.google.com/search?&q=site%3Ahandspeak.com+{quoted_word}",
-                signingsavvy=f"https://www.signingsavvy.com/search/{quoted_word}",
-                spread_the_sign=f"https://www.spreadthesign.com/en.us/search/?q={quoted_word}",
-                youglish=f"https://youglish.com/pronounce/{quoted_word}/signlanguage/asl",
-            ),
+            description=word_display(word, has_spoiler=spoiler),
         )
-    }
+
+    return {"embed": embed}
 
 
 @bot.command(name="howsign", aliases=("sign",), help=HOWSIGN_HELP)

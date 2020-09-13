@@ -116,6 +116,30 @@
     ',
   }
 ---
+# name: test_howsign[need, ask]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=Embed.Empty,
+      colour=Embed.Empty,
+      description=Embed.Empty,
+      fields=<class 'list'> [
+        EmbedProxy(inline=True, name='NEED', value='[👋 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+need)\n[🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+need)\n[🤝 **SigningSavvy** - Sign for NEED](https://www.signingsavvy.com/search/need)\n[🌐 **Spread The Sign** - NEED](https://www.spreadthesign.com/en.us/search/?q=need)\n[📹 **YouGlish** - ASL videos containing NEED](https://youglish.com/pronounce/need/signlanguage/asl)\n'),
+        EmbedProxy(inline=True, name='ASK', value='[👋 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+ask)\n[🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+ask)\n[🤝 **SigningSavvy** - Sign for ASK](https://www.signingsavvy.com/search/ask)\n[🌐 **Spread The Sign** - ASK](https://www.spreadthesign.com/en.us/search/?q=ask)\n[📹 **YouGlish** - ASL videos containing ASK](https://youglish.com/pronounce/ask/signlanguage/asl)\n'),
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title=Embed.Empty,
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
 # name: test_howsign[tiger]
   <class 'dict'> {
     'embed': <class 'Embed'> {
@@ -128,7 +152,7 @@
         [🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+tiger)
         [🤝 **SigningSavvy** - Sign for TIGER](https://www.signingsavvy.com/search/tiger)
         [🌐 **Spread The Sign** - TIGER](https://www.spreadthesign.com/en.us/search/?q=tiger)
-        [📹 **YouGlish** - Videos containing TIGER](https://youglish.com/pronounce/tiger/signlanguage/asl)
+        [📹 **YouGlish** - ASL videos containing TIGER](https://youglish.com/pronounce/tiger/signlanguage/asl)
   
       ',
       fields=<class 'list'> [
@@ -157,7 +181,7 @@
         [🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+what%27s+up)
         [🤝 **SigningSavvy** - Sign for WHAT'S UP](https://www.signingsavvy.com/search/what%27s+up)
         [🌐 **Spread The Sign** - WHAT'S UP](https://www.spreadthesign.com/en.us/search/?q=what%27s+up)
-        [📹 **YouGlish** - Videos containing WHAT'S UP](https://youglish.com/pronounce/what%27s+up/signlanguage/asl)
+        [📹 **YouGlish** - ASL videos containing WHAT'S UP](https://youglish.com/pronounce/what%27s+up/signlanguage/asl)
   
       ',
       fields=<class 'list'> [
@@ -168,6 +192,30 @@
       thumbnail=EmbedProxy(),
       timestamp=Embed.Empty,
       title="WHAT'S UP",
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
+# name: test_howsign[||need, ask||]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=Embed.Empty,
+      colour=Embed.Empty,
+      description=Embed.Empty,
+      fields=<class 'list'> [
+        EmbedProxy(inline=True, name='||NEED||', value='[👋 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+need)\n[🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+need)\n[🤝 **SigningSavvy** - Sign for ||NEED||](https://www.signingsavvy.com/search/need)\n[🌐 **Spread The Sign** - ||NEED||](https://www.spreadthesign.com/en.us/search/?q=need)\n[📹 **YouGlish** - Videos containing ||NEED||](https://youglish.com/pronounce/need/signlanguage/asl)\n'),
+        EmbedProxy(inline=True, name='||ASK||', value='[👋 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+ask)\n[🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+ask)\n[🤝 **SigningSavvy** - Sign for ||ASK||](https://www.signingsavvy.com/search/ask)\n[🌐 **Spread The Sign** - ||ASK||](https://www.spreadthesign.com/en.us/search/?q=ask)\n[📹 **YouGlish** - Videos containing ||ASK||](https://youglish.com/pronounce/ask/signlanguage/asl)\n'),
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title=Embed.Empty,
       type='rich',
       url=Embed.Empty,
       video=EmbedProxy(),
@@ -197,6 +245,35 @@
       thumbnail=EmbedProxy(),
       timestamp=Embed.Empty,
       title='||TIGER||',
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
+# name: test_howsign[||what's up||]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=Embed.Empty,
+      colour=Embed.Empty,
+      description='
+        [👋 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+what%27s+up)
+        [🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+what%27s+up)
+        [🤝 **SigningSavvy** - Sign for ||WHAT'S UP||](https://www.signingsavvy.com/search/what%27s+up)
+        [🌐 **Spread The Sign** - ||WHAT'S UP||](https://www.spreadthesign.com/en.us/search/?q=what%27s+up)
+        [📹 **YouGlish** - Videos containing ||WHAT'S UP||](https://youglish.com/pronounce/what%27s+up/signlanguage/asl)
+  
+      ',
+      fields=<class 'list'> [
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title="||WHAT'S UP||",
       type='rich',
       url=Embed.Empty,
       video=EmbedProxy(),

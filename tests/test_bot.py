@@ -8,7 +8,17 @@ import bot
 random.seed(1)
 
 
-@pytest.mark.parametrize("word", ("tiger", "||tiger||", "what's up"))
+@pytest.mark.parametrize(
+    "word",
+    (
+        "tiger",
+        "||tiger||",
+        "what's up",
+        "||what's up||",
+        "need, ask",
+        "||need, ask||",
+    ),
+)
 def test_howsign(snapshot, word):
     result = bot.howsign_impl(word)
     assert result == snapshot
