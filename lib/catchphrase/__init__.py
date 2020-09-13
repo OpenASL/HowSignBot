@@ -1,6 +1,7 @@
 import itertools
 import random
 from pathlib import Path
+import json
 
 import yaml
 
@@ -8,9 +9,12 @@ import yaml
 HERE = Path(__file__).parent
 
 with (HERE / "game_words.yaml").open("r") as fp:
-    _game_words = yaml.load(fp, Loader=yaml.SafeLoader)
+    CATCHPHRASE = yaml.load(fp, Loader=yaml.SafeLoader)["catchphrase"]
+with (HERE / "sentences.json").open("r") as fp:
+    SENTENCES = json.load(fp)["data"]
+with (HERE / "phrases.json").open("r") as fp:
+    IDIOMS = json.load(fp)["data"]
 
-CATCHPHRASE = _game_words["catchphrase"]
 CATEGORIES = list(CATCHPHRASE.keys())
 ALL_WORDS = list(itertools.chain(*CATCHPHRASE.values()))
 
@@ -18,3 +22,11 @@ ALL_WORDS = list(itertools.chain(*CATCHPHRASE.values()))
 def catchphrase(category: str = None):
     word_list = CATCHPHRASE[category] if category else ALL_WORDS
     return random.choice(word_list)
+
+
+def sentence():
+    return random.choice(SENTENCES)["sentence"]
+
+
+def idiom():
+    return random.choice(IDIOMS)

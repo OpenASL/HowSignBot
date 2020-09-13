@@ -48,3 +48,15 @@ def test_catchphrase(snapshot):
 def test_catchphrase_categories(snapshot, category):
     result = bot.catchphrase_impl(category)
     assert result == snapshot
+
+
+@pytest.mark.parametrize("spoiler", (None, "||"))
+def test_sentence(snapshot, spoiler):
+    result = bot.sentence_impl(spoiler)
+    assert result == snapshot
+
+
+@pytest.mark.parametrize("spoiler", (None, "||"))
+def test_idiom(snapshot, spoiler):
+    result = bot.idiom_impl(spoiler)
+    assert result == snapshot
