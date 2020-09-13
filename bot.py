@@ -321,7 +321,7 @@ async def feedback_error(ctx, error):
 
 
 async def get_random_sentence() -> str:
-    async with aiohttp.ClientSession() as client:
+    async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10)) as client:
         resp = await client.get("https://randomwordgenerator.com/json/sentences.json")
     data = await resp.json()
     return random.choice(data["data"])["sentence"]
@@ -354,8 +354,10 @@ async def sentence_command(ctx, spoiler: Optional[str]):
 
 
 async def get_random_idiom() -> dict:
-    async with aiohttp.ClientSession() as client:
-        resp = await client.get("https://randomwordgenerator.com/json/phrases.json")
+    async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10)) as client:
+        resp = await client.get(
+            "https://randomwordgenerator.com/json/phrases.json",
+        )
     data = await resp.json()
     return random.choice(data["data"])
 
