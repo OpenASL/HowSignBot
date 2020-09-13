@@ -118,40 +118,88 @@
 ---
 # name: test_howsign[tiger]
   <class 'dict'> {
-    'content': '
-      TIGER
-      _Handspeak_ : https://www.google.com/search?&q=site%3Ahandspeak.com+tiger
-      _Lifeprint_ : https://www.google.com/search?&q=site%3Alifeprint.com+tiger
-      _SigningSavvy_: <https://www.signingsavvy.com/search/tiger>
-      _Spread The Sign_: <https://www.spreadthesign.com/en.us/search/?q=tiger>
-      _YouGlish_: https://youglish.com/pronounce/tiger/signlanguage/asl
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=Embed.Empty,
+      colour=Embed.Empty,
+      description='
+        [👋 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+tiger)
+        [🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+tiger)
+        [🤝 **SigningSavvy** - Sign for TIGER](https://www.signingsavvy.com/search/tiger)
+        [🌐 **Spread The Sign** - TIGER](https://www.spreadthesign.com/en.us/search/?q=tiger)
+        [📹 **YouGlish** - Videos containing TIGER](https://youglish.com/pronounce/tiger/signlanguage/asl)
   
-    ',
+      ',
+      fields=<class 'list'> [
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title='TIGER',
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
   }
 ---
 # name: test_howsign[what's up]
   <class 'dict'> {
-    'content': '
-      WHAT'S UP
-      _Handspeak_ : https://www.google.com/search?&q=site%3Ahandspeak.com+what%27s+up
-      _Lifeprint_ : https://www.google.com/search?&q=site%3Alifeprint.com+what%27s+up
-      _SigningSavvy_: <https://www.signingsavvy.com/search/what%27s+up>
-      _Spread The Sign_: <https://www.spreadthesign.com/en.us/search/?q=what%27s+up>
-      _YouGlish_: https://youglish.com/pronounce/what%27s+up/signlanguage/asl
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=Embed.Empty,
+      colour=Embed.Empty,
+      description='
+        [👋 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+what%27s+up)
+        [🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+what%27s+up)
+        [🤝 **SigningSavvy** - Sign for WHAT'S UP](https://www.signingsavvy.com/search/what%27s+up)
+        [🌐 **Spread The Sign** - WHAT'S UP](https://www.spreadthesign.com/en.us/search/?q=what%27s+up)
+        [📹 **YouGlish** - Videos containing WHAT'S UP](https://youglish.com/pronounce/what%27s+up/signlanguage/asl)
   
-    ',
+      ',
+      fields=<class 'list'> [
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title="WHAT'S UP",
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
   }
 ---
 # name: test_howsign[||tiger||]
   <class 'dict'> {
-    'content': '
-      ||TIGER||
-      _Handspeak_ : || https://www.google.com/search?&q=site%3Ahandspeak.com+tiger ||
-      _Lifeprint_ : || https://www.google.com/search?&q=site%3Alifeprint.com+tiger ||
-      _SigningSavvy_: || <https://www.signingsavvy.com/search/tiger> ||
-      _Spread The Sign_: || <https://www.spreadthesign.com/en.us/search/?q=tiger> ||
-      _YouGlish_: || https://youglish.com/pronounce/tiger/signlanguage/asl ||
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=Embed.Empty,
+      colour=Embed.Empty,
+      description='
+        [👋 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+tiger)
+        [🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+tiger)
+        [🤝 **SigningSavvy** - Sign for ||TIGER||](https://www.signingsavvy.com/search/tiger)
+        [🌐 **Spread The Sign** - ||TIGER||](https://www.spreadthesign.com/en.us/search/?q=tiger)
+        [📹 **YouGlish** - Videos containing ||TIGER||](https://youglish.com/pronounce/tiger/signlanguage/asl)
   
-    ',
+      ',
+      fields=<class 'list'> [
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title='||TIGER||',
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
   }
 ---
