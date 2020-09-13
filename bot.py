@@ -111,6 +111,7 @@ async def on_ready():
 
 HOWSIGN_TEMPLATE = """{word_uppercased}
 _Lifeprint_ : {lifeprint}
+_Handspeak_ : {handspeak}
 _YouGlish_: {youglish}
 _Spread The Sign_: <{spread_the_sign}>
 _SigningSavvy_: {signingsavvy}
@@ -118,6 +119,7 @@ _SigningSavvy_: {signingsavvy}
 
 HOWSIGN_SPOILER_TEMPLATE = """||{word_uppercased}||
 _Lifeprint_ : || {lifeprint} ||
+_Handspeak_ : || {handspeak} ||
 _YouGlish_: || {youglish} ||
 _Spread The Sign_: || <{spread_the_sign}> ||
 _SigningSavvy_: || <{signingsavvy}> ||
@@ -151,6 +153,7 @@ def howsign_impl(word: str):
         "content": template.format(
             word_uppercased=word.upper(),
             lifeprint=f"https://www.google.com/search?&q=site%3Alifeprint.com+{quoted_word}",
+            handspeak=f"https://www.google.com/search?&q=site%3Ahandspeak.com+{quoted_word}",
             signingsavvy=f"https://www.signingsavvy.com/search/{quoted_word}",
             spread_the_sign=f"https://www.spreadthesign.com/en.us/search/?q={quoted_word}",
             youglish=f"https://youglish.com/pronounce/{quoted_word}/signlanguage/asl",
