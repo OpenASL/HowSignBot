@@ -152,9 +152,9 @@ def word_display(word: str, *, has_spoiler: bool):
 
 
 def howsign_impl(word: str):
+    logger.info(f"sending links for: '{word}'")
     spoiler = get_spoiler_text(word)
     word = spoiler if spoiler else word
-    logger.info(f"sending links for: '{word}'")
     has_multiple = "," in word
     if has_multiple:
         words = word.split(",")
