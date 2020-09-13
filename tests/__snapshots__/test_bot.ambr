@@ -116,6 +116,34 @@
     ',
   }
 ---
+# name: test_idiom[None]
+  <class 'dict'> {
+    'content': '
+      **Put a Sock In It**
+      Meaning: Asking someone to be quiet or to shut up.
+  
+    ',
+  }
+---
+# name: test_idiom[||]
+  <class 'dict'> {
+    'content': '
+      ||**Hit Below The Belt**||
+      Meaning: ||A boxing term. Also often used to refer to inappropriate words, or comments that are too personal.||
+  
+    ',
+  }
+---
+# name: test_sentence[None]
+  <class 'dict'> {
+    'content': "Hang on, my kittens are scratching at the bathtub and they'll upset by the lack of biscuits.",
+  }
+---
+# name: test_sentence[||]
+  <class 'dict'> {
+    'content': '||I love eating toasted cheese and tuna sandwiches.||',
+  }
+---
 # name: test_sign[need, ask]
   <class 'dict'> {
     'embed': <class 'Embed'> {

@@ -21,7 +21,7 @@ setup(
     package_dir={"": "lib"},
     package_data={
         "handshapes": ["assets/*.png"],
-        "catchphrase": ["*.yaml"],
+        "catchphrase": ["*.yaml", "*.json"],
         "cuteid": ["*.json"],
     },
     include_package_data=True,

@@ -8,7 +8,6 @@ from contextlib import suppress
 from typing import Optional
 from urllib.parse import quote_plus
 
-import aiohttp
 import discord
 import gspread
 from discord.ext import commands
@@ -320,13 +319,6 @@ async def feedback_error(ctx, error):
 # -----------------------------------------------------------------------------
 
 
-async def get_random_sentence() -> str:
-    async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10)) as client:
-        resp = await client.get("https://randomwordgenerator.com/json/sentences.json")
-    data = await resp.json()
-    return random.choice(data["data"])["sentence"]
-
-
 SENTENCE_HELP = """Display a random sentence
 
 Enter {COMMAND_PREFIX}sentence || to display the sentence in spoiler text.
@@ -335,9 +327,8 @@ Enter {COMMAND_PREFIX}sentence || to display the sentence in spoiler text.
 )
 
 
-@bot.command(name="sentence", help=SENTENCE_HELP)
-async def sentence_command(ctx, spoiler: Optional[str]):
-    sentence = await get_random_sentence()
+def sentence_impl(spoiler: Optional[str]):
+    sentence = catchphrase.sentence()
     should_spoil = spoiler and spoiler.startswith("||")
     if should_spoil:
         sentence = f"||{sentence}||"
@@ -347,19 +338,15 @@ async def sentence_command(ctx, spoiler: Optional[str]):
         else f"sending random sentence: '{sentence}'"
     )
     logger.info(log)
-    await ctx.send(sentence)
+    return {"content": sentence}
+
+
+@bot.command(name="sentence", help=SENTENCE_HELP)
+async def sentence_command(ctx, spoiler: Optional[str]):
+    await ctx.send(**sentence_impl(spoiler=spoiler))
 
 
 # -----------------------------------------------------------------------------
-
-
-async def get_random_idiom() -> dict:
-    async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10)) as client:
-        resp = await client.get(
-            "https://randomwordgenerator.com/json/phrases.json",
-        )
-    data = await resp.json()
-    return random.choice(data["data"])
 
 
 IDIOM_HELP = """Display a random English idiom
@@ -378,9 +365,8 @@ Meaning: ||{meaning}||
 """
 
 
-@bot.command(name="idiom", help=IDIOM_HELP)
-async def idiom_command(ctx, spoiler: Optional[str]):
-    data = await get_random_idiom()
+def idiom_impl(spoiler: Optional[str]):
+    data = catchphrase.idiom()
     should_spoil = spoiler and spoiler.startswith("||")
     log = (
         f"sending random idiom in spoiler text: {data}"
@@ -389,7 +375,15 @@ async def idiom_command(ctx, spoiler: Optional[str]):
     )
     logger.info(log)
     template = IDIOM_SPOILER_TEMPLATE if should_spoil else IDIOM_TEMPLATE
-    await ctx.send(template.format(idiom=data["phrase"], meaning=data["meaning"]))
+    content = template.format(idiom=data["phrase"], meaning=data["meaning"])
+    return {
+        "content": content,
+    }
+
+
+@bot.command(name="idiom", help=IDIOM_HELP)
+async def idiom_command(ctx, spoiler: Optional[str]):
+    await ctx.send(**idiom_impl(spoiler))
 
 
 # -----------------------------------------------------------------------------
