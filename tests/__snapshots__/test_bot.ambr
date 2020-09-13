@@ -120,11 +120,11 @@
   <class 'dict'> {
     'content': '
       TIGER
-      _Lifeprint_ : https://www.google.com/search?&q=site%3Alifeprint.com+tiger
       _Handspeak_ : https://www.google.com/search?&q=site%3Ahandspeak.com+tiger
-      _YouGlish_: https://youglish.com/pronounce/tiger/signlanguage/asl
+      _Lifeprint_ : https://www.google.com/search?&q=site%3Alifeprint.com+tiger
+      _SigningSavvy_: <https://www.signingsavvy.com/search/tiger>
       _Spread The Sign_: <https://www.spreadthesign.com/en.us/search/?q=tiger>
-      _SigningSavvy_: https://www.signingsavvy.com/search/tiger
+      _YouGlish_: https://youglish.com/pronounce/tiger/signlanguage/asl
   
     ',
   }
@@ -133,11 +133,11 @@
   <class 'dict'> {
     'content': '
       WHAT'S UP
-      _Lifeprint_ : https://www.google.com/search?&q=site%3Alifeprint.com+what%27s+up
       _Handspeak_ : https://www.google.com/search?&q=site%3Ahandspeak.com+what%27s+up
-      _YouGlish_: https://youglish.com/pronounce/what%27s+up/signlanguage/asl
+      _Lifeprint_ : https://www.google.com/search?&q=site%3Alifeprint.com+what%27s+up
+      _SigningSavvy_: <https://www.signingsavvy.com/search/what%27s+up>
       _Spread The Sign_: <https://www.spreadthesign.com/en.us/search/?q=what%27s+up>
-      _SigningSavvy_: https://www.signingsavvy.com/search/what%27s+up
+      _YouGlish_: https://youglish.com/pronounce/what%27s+up/signlanguage/asl
   
     ',
   }
@@ -146,11 +146,11 @@
   <class 'dict'> {
     'content': '
       ||TIGER||
-      _Lifeprint_ : || https://www.google.com/search?&q=site%3Alifeprint.com+tiger ||
       _Handspeak_ : || https://www.google.com/search?&q=site%3Ahandspeak.com+tiger ||
-      _YouGlish_: || https://youglish.com/pronounce/tiger/signlanguage/asl ||
-      _Spread The Sign_: || <https://www.spreadthesign.com/en.us/search/?q=tiger> ||
+      _Lifeprint_ : || https://www.google.com/search?&q=site%3Alifeprint.com+tiger ||
       _SigningSavvy_: || <https://www.signingsavvy.com/search/tiger> ||
+      _Spread The Sign_: || <https://www.spreadthesign.com/en.us/search/?q=tiger> ||
+      _YouGlish_: || https://youglish.com/pronounce/tiger/signlanguage/asl ||
   
     ',
   }

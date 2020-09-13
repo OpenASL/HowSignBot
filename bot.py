@@ -110,19 +110,19 @@ async def on_ready():
 # -----------------------------------------------------------------------------
 
 HOWSIGN_TEMPLATE = """{word_uppercased}
-_Lifeprint_ : {lifeprint}
 _Handspeak_ : {handspeak}
-_YouGlish_: {youglish}
+_Lifeprint_ : {lifeprint}
+_SigningSavvy_: <{signingsavvy}>
 _Spread The Sign_: <{spread_the_sign}>
-_SigningSavvy_: {signingsavvy}
+_YouGlish_: {youglish}
 """
 
 HOWSIGN_SPOILER_TEMPLATE = """||{word_uppercased}||
-_Lifeprint_ : || {lifeprint} ||
 _Handspeak_ : || {handspeak} ||
-_YouGlish_: || {youglish} ||
-_Spread The Sign_: || <{spread_the_sign}> ||
+_Lifeprint_ : || {lifeprint} ||
 _SigningSavvy_: || <{signingsavvy}> ||
+_Spread The Sign_: || <{spread_the_sign}> ||
+_YouGlish_: || {youglish} ||
 """
 
 HOWSIGN_HELP = """Look up a word or phrase
