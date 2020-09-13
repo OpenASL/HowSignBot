@@ -109,25 +109,23 @@ async def on_ready():
 
 # -----------------------------------------------------------------------------
 
-HOWSIGN_TEMPLATE = """{word_uppercased}
-_Handspeak_ : {handspeak}
-_Lifeprint_ : {lifeprint}
-_SigningSavvy_: <{signingsavvy}>
-_Spread The Sign_: <{spread_the_sign}>
-_YouGlish_: {youglish}
+HOWSIGN_TEMPLATE = """[👋 **Handspeak** - Search results]({handspeak})
+[🧬 **Lifeprint** - Search results]({lifeprint})
+[🤝 **SigningSavvy** - Sign for {word_uppercased}]({signingsavvy})
+[🌐 **Spread The Sign** - {word_uppercased}]({spread_the_sign})
+[📹 **YouGlish** - Videos containing {word_uppercased}]({youglish})
 """
 
-HOWSIGN_SPOILER_TEMPLATE = """||{word_uppercased}||
-_Handspeak_ : || {handspeak} ||
-_Lifeprint_ : || {lifeprint} ||
-_SigningSavvy_: || <{signingsavvy}> ||
-_Spread The Sign_: || <{spread_the_sign}> ||
-_YouGlish_: || {youglish} ||
+HOWSIGN_SPOILER_TEMPLATE = """[👋 **Handspeak** - Search results]({handspeak})
+[🧬 **Lifeprint** - Search results]({lifeprint})
+[🤝 **SigningSavvy** - Sign for ||{word_uppercased}||]({signingsavvy})
+[🌐 **Spread The Sign** - ||{word_uppercased}||]({spread_the_sign})
+[📹 **YouGlish** - Videos containing ||{word_uppercased}||]({youglish})
 """
 
 HOWSIGN_HELP = """Look up a word or phrase
 
-If the word or phrase is sent in spoiler text, i.e. enclosed in `||`, the corresponding links will be blacked out.
+If the word or phrase is sent in spoiler text, i.e. enclosed in `||`, the word will also be blacked out in the reply.
 
 Examples:
 {COMMAND_PREFIX}howsign tiger
@@ -141,22 +139,21 @@ Examples:
 def howsign_impl(word: str):
     spoiler = get_spoiler_text(word)
     word = spoiler if spoiler else word
+    title = f"||{word.upper()}||" if spoiler else word.upper()
     template = HOWSIGN_SPOILER_TEMPLATE if spoiler else HOWSIGN_TEMPLATE
-    log = (
-        f"sending spoiler links for: '{word}'"
-        if spoiler
-        else f"sending links for: '{word}'"
-    )
-    logger.info(log)
+    logger.info(f"sending links for: '{word}'")
     quoted_word = quote_plus(word)
     return {
-        "content": template.format(
-            word_uppercased=word.upper(),
-            lifeprint=f"https://www.google.com/search?&q=site%3Alifeprint.com+{quoted_word}",
-            handspeak=f"https://www.google.com/search?&q=site%3Ahandspeak.com+{quoted_word}",
-            signingsavvy=f"https://www.signingsavvy.com/search/{quoted_word}",
-            spread_the_sign=f"https://www.spreadthesign.com/en.us/search/?q={quoted_word}",
-            youglish=f"https://youglish.com/pronounce/{quoted_word}/signlanguage/asl",
+        "embed": discord.Embed(
+            title=title,
+            description=template.format(
+                word_uppercased=word.upper(),
+                lifeprint=f"https://www.google.com/search?&q=site%3Alifeprint.com+{quoted_word}",
+                handspeak=f"https://www.google.com/search?&q=site%3Ahandspeak.com+{quoted_word}",
+                signingsavvy=f"https://www.signingsavvy.com/search/{quoted_word}",
+                spread_the_sign=f"https://www.spreadthesign.com/en.us/search/?q={quoted_word}",
+                youglish=f"https://youglish.com/pronounce/{quoted_word}/signlanguage/asl",
+            ),
         )
     }
 
