@@ -100,7 +100,7 @@ async def wait_for_stop_sign(message: discord.Message, *, replace_with: str):
 @bot.event
 async def on_ready():
     activity = discord.Activity(
-        name=f"{COMMAND_PREFIX}howsign | {COMMAND_PREFIX}handshapes",
+        name=f"{COMMAND_PREFIX}sign | {COMMAND_PREFIX}handshapes",
         type=discord.ActivityType.playing,
     )
     await bot.change_presence(activity=activity)
@@ -108,30 +108,30 @@ async def on_ready():
 
 # -----------------------------------------------------------------------------
 
-HOWSIGN_TEMPLATE = """[👋 **Handspeak** - Search results]({handspeak})
+SIGN_TEMPLATE = """[👋 **Handspeak** - Search results]({handspeak})
 [🧬 **Lifeprint** - Search results]({lifeprint})
 [🤝 **SigningSavvy** - Sign for {word_uppercased}]({signingsavvy})
 [🌐 **Spread The Sign** - {word_uppercased}]({spread_the_sign})
 [📹 **YouGlish** - Videos containing {word_uppercased}]({youglish})
 """
 
-HOWSIGN_SPOILER_TEMPLATE = """[👋 **Handspeak** - Search results]({handspeak})
+SIGN_SPOILER_TEMPLATE = """[👋 **Handspeak** - Search results]({handspeak})
 [🧬 **Lifeprint** - Search results]({lifeprint})
 [🤝 **SigningSavvy** - Sign for ||{word_uppercased}||]({signingsavvy})
 [🌐 **Spread The Sign** - ||{word_uppercased}||]({spread_the_sign})
 [📹 **YouGlish** - Videos containing ||{word_uppercased}||]({youglish})
 """
 
-HOWSIGN_HELP = """Look up a word or phrase
+SIGN_HELP = """Look up a word or phrase
 
 If the word or phrase is sent in spoiler text, i.e. enclosed in `||`, the word will also be blacked out in the reply.
 To search multiple words/phrases, separate the values with a comma.
 
 Examples:
-{COMMAND_PREFIX}howsign tiger
-{COMMAND_PREFIX}howsign ||tiger||
-{COMMAND_PREFIX}howsign what's up
-{COMMAND_PREFIX}howsign church, chocolate, computer
+{COMMAND_PREFIX}sign tiger
+{COMMAND_PREFIX}sign ||tiger||
+{COMMAND_PREFIX}sign what's up
+{COMMAND_PREFIX}sign church, chocolate, computer
 """.format(
     COMMAND_PREFIX=COMMAND_PREFIX
 )
@@ -139,7 +139,7 @@ Examples:
 
 def word_display(word: str, *, has_spoiler: bool):
     quoted_word = quote_plus(word)
-    template = HOWSIGN_SPOILER_TEMPLATE if has_spoiler else HOWSIGN_TEMPLATE
+    template = SIGN_SPOILER_TEMPLATE if has_spoiler else SIGN_TEMPLATE
     return template.format(
         word_uppercased=word.upper(),
         lifeprint=f"https://www.google.com/search?&q=site%3Alifeprint.com+{quoted_word}",
@@ -172,7 +172,7 @@ def sign_impl(word: str):
     return {"embed": embed}
 
 
-@bot.command(name="sign", aliases=("howsign",), help=HOWSIGN_HELP)
+@bot.command(name="sign", aliases=("howsign",), help=SIGN_HELP)
 async def sign_command(ctx: Context, *, word: str):
     await ctx.send(**sign_impl(word))
 
