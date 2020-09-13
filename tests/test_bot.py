@@ -19,8 +19,8 @@ random.seed(1)
         "||need, ask||",
     ),
 )
-def test_howsign(snapshot, word):
-    result = bot.howsign_impl(word)
+def test_sign(snapshot, word):
+    result = bot.sign_impl(word)
     assert result == snapshot
 
 

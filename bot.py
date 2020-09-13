@@ -113,7 +113,7 @@ HOWSIGN_TEMPLATE = """[👋 **Handspeak** - Search results]({handspeak})
 [🧬 **Lifeprint** - Search results]({lifeprint})
 [🤝 **SigningSavvy** - Sign for {word_uppercased}]({signingsavvy})
 [🌐 **Spread The Sign** - {word_uppercased}]({spread_the_sign})
-[📹 **YouGlish** - ASL videos containing {word_uppercased}]({youglish})
+[📹 **YouGlish** - Videos containing {word_uppercased}]({youglish})
 """
 
 HOWSIGN_SPOILER_TEMPLATE = """[👋 **Handspeak** - Search results]({handspeak})
@@ -151,7 +151,7 @@ def word_display(word: str, *, has_spoiler: bool):
     )
 
 
-def howsign_impl(word: str):
+def sign_impl(word: str):
     logger.info(f"sending links for: '{word}'")
     spoiler = get_spoiler_text(word)
     word = spoiler if spoiler else word
@@ -173,13 +173,13 @@ def howsign_impl(word: str):
     return {"embed": embed}
 
 
-@bot.command(name="howsign", aliases=("sign",), help=HOWSIGN_HELP)
-async def howsign_command(ctx: Context, *, word: str):
-    await ctx.send(**howsign_impl(word))
+@bot.command(name="sign", aliases=("howsign",), help=HOWSIGN_HELP)
+async def sign_command(ctx: Context, *, word: str):
+    await ctx.send(**sign_impl(word))
 
 
-@howsign_command.error
-async def howsign_error(ctx, error):
+@sign_command.error
+async def sign_error(ctx, error):
     if isinstance(error, commands.errors.MissingRequiredArgument):
         logger.info(f"missing argument to '{ctx.invoked_with}'")
         await ctx.send(
