@@ -113,7 +113,7 @@ HOWSIGN_TEMPLATE = """[👋 **Handspeak** - Search results]({handspeak})
 [🧬 **Lifeprint** - Search results]({lifeprint})
 [🤝 **SigningSavvy** - Sign for {word_uppercased}]({signingsavvy})
 [🌐 **Spread The Sign** - {word_uppercased}]({spread_the_sign})
-[📹 **YouGlish** - Videos containing {word_uppercased}]({youglish})
+[📹 **YouGlish** - ASL videos containing {word_uppercased}]({youglish})
 """
 
 HOWSIGN_SPOILER_TEMPLATE = """[👋 **Handspeak** - Search results]({handspeak})
