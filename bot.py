@@ -350,7 +350,7 @@ def make_practice_sessions_today_embed(guild_id: int):
     sessions = get_practice_sessions_today(guild_id)
     now = dt.datetime.utcnow()
     embed = discord.Embed(
-        description=f"{now:%A, %B %-d}",
+        description=f"Today - {now:%A, %B %-d}",
         color=discord.Color.orange(),
     )
     if not sessions:
