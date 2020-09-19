@@ -53,7 +53,9 @@ logging.basicConfig(level=LOG_LEVEL)
 
 logger = logging.getLogger("bot")
 
-bot = commands.Bot(command_prefix=COMMAND_PREFIX, owner_id=OWNER_ID)
+bot = commands.Bot(
+    command_prefix=COMMAND_PREFIX, case_insensitive=True, owner_id=OWNER_ID
+)
 
 # -----------------------------------------------------------------------------
 
