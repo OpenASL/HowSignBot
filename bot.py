@@ -5,16 +5,18 @@ import logging
 import random
 import re
 from contextlib import suppress
-from typing import Optional
+from typing import Optional, NamedTuple
 from urllib.parse import quote_plus
 
 import discord
+import dateparser
 import gspread
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord.ext.commands import Context
 from environs import Env
 from google.auth.crypt._python_rsa import RSASigner
 from google.oauth2.service_account import Credentials
+import pytz
 
 import handshapes
 import cuteid
@@ -34,18 +36,26 @@ OWNER_ID = env.int("OWNER_ID", required=True)
 SECRET_KEY = env.str("SECRET_KEY", required=True)
 COMMAND_PREFIX = env.str("COMMAND_PREFIX", "?")
 
-
 GOOGLE_PROJECT_ID = env.str("GOOGLE_PROJECT_ID", required=True)
 GOOGLE_PRIVATE_KEY = env.str("GOOGLE_PRIVATE_KEY", required=True)
 GOOGLE_PRIVATE_KEY_ID = env.str("GOOGLE_PRIVATE_KEY_ID", required=True)
 GOOGLE_CLIENT_EMAIL = env.str("GOOGLE_CLIENT_EMAIL", required=True)
 GOOGLE_TOKEN_URI = env.str("GOOGLE_TOKEN_URI", "https://oauth2.googleapis.com/token")
 FEEDBACK_SHEET_KEY = env.str("FEEDBACK_SHEET_KEY", required=True)
+SCHEDULE_SHEET_KEYS = env.dict("SCHEDULE_SHEET_KEYS", required=True, subcast_key=int)
+SCHEDULE_CHANNELS = env.dict(
+    "SCHEDULE_CHANNELS", required=True, subcast_key=int, subcast=int
+)
+
 
 ZOOM_USER_ID = env.str("ZOOM_USER_ID", required=True)
 ZOOM_JWT = env.str("ZOOM_JWT", required=True)
 
 WATCH2GETHER_API_KEY = env.str("WATCH2GETHER_API_KEY", required=True)
+# Default to 10 AM EDT
+_daily_practice_send_time_raw = env.str("DAILY_PRACTICE_SEND_TIME", "14:00")
+_hour, _min = _daily_practice_send_time_raw.split(":")
+DAILY_PRACTICE_SEND_TIME = dt.time(hour=int(_hour), minute=int(_min))
 
 env.seal()
 
@@ -105,6 +115,7 @@ async def on_ready():
         name=f"{COMMAND_PREFIX}sign | {COMMAND_PREFIX}handshapes",
         type=discord.ActivityType.playing,
     )
+    daily_practice_message.start()
     await bot.change_presence(activity=activity)
 
 
@@ -176,6 +187,11 @@ def sign_impl(word: str):
 
 @bot.command(name="sign", aliases=("howsign",), help=SIGN_HELP)
 async def sign_command(ctx: Context, *, word: str):
+    # TODO: Remove. This is just for identifying guild and channel IDs for the daily schedule
+    if ctx.guild:
+        logger.info(
+            f"sign command invoked in guild {ctx.guild.id} ({ctx.guild.name}), channel {ctx.channel.id} (#{ctx.channel.name})"
+        )
     await ctx.send(**sign_impl(word))
 
 
@@ -285,9 +301,136 @@ def get_gsheet_client():
     return gspread.authorize(credentials)
 
 
-def post_feedback(username: str, feedback: str, guild: Optional[str]):
-    # Assumes rows are in the format (date, feedback, guild, version)
+# -----------------------------------------------------------------------------
+
+EASTERN = pytz.timezone("US/Eastern")
+PACIFIC = pytz.timezone("US/Pacific")
+TIME_FORMAT = "%-I:%M %p %Z"
+
+
+class PracticeSession(NamedTuple):
+    dtime: Optional[dt.datetime]
+    host: str
+    notes: str
+
+
+def get_practice_sessions_today(guild_id: int):
+    logger.info(f"fetching today's practice sessions for guild {guild_id}")
     client = get_gsheet_client()
+    sheet = client.open_by_key(SCHEDULE_SHEET_KEYS[guild_id])
+    worksheet = sheet.get_worksheet(0)
+    all_values = worksheet.get_all_values()
+    now = dt.datetime.utcnow()
+    today = now.date()
+    sessions = [
+        PracticeSession(
+            dtime=dateparser.parse(
+                row[0],
+                # Use eastern time if timezone can't be parsed; return a UTC datetime
+                settings={"TIMEZONE": "US/Eastern", "TO_TIMEZONE": "UTC"},
+            ),
+            host=row[1],
+            notes=row[2],
+        )
+        for row in all_values[2:]
+        if row
+    ]
+    return sorted(
+        [
+            session
+            for session in sessions
+            # Assume pacific time when filtering to include all of US
+            if session.dtime and session.dtime.astimezone(PACIFIC).date() == today
+        ],
+        key=lambda s: s.dtime,
+    )
+
+
+def make_practice_sessions_today_embed(guild_id: int):
+    sessions = get_practice_sessions_today(guild_id)
+    now = dt.datetime.utcnow()
+    embed = discord.Embed(
+        description=f"{now:%A, %B %-d}",
+        color=discord.Color.orange(),
+    )
+    if not sessions:
+        embed.description += "\n\n*There are no scheduled practices yet!*"
+    else:
+        for session in sessions:
+            pacific_dstr = session.dtime.astimezone(PACIFIC).strftime(TIME_FORMAT)
+            eastern_dstr = session.dtime.astimezone(EASTERN).strftime(TIME_FORMAT)
+            title = f"{pacific_dstr} / {eastern_dstr}"
+            value = ""
+            if session.host:
+                value += f"Host: {session.host}"
+            if session.notes:
+                value += f"\nNotes: {session.notes}"
+            embed.add_field(name=title, value=value or "Practice", inline=False)
+    sheet_key = SCHEDULE_SHEET_KEYS[guild_id]
+    embed.add_field(
+        name="Schedule a practice here:",
+        value=f"[Practice Schedule](https://docs.google.com/spreadsheets/d/{sheet_key}/edit)",
+    )
+    return embed
+
+
+async def is_in_guild(ctx: Context):
+    return bool(ctx.guild)
+
+
+@bot.command(
+    name="practices", help="List today's practice schedule for the current server"
+)
+@commands.check(is_in_guild)
+async def practices_command(ctx: Context):
+    guild = ctx.guild
+    embed = make_practice_sessions_today_embed(guild.id)
+    await ctx.send(embed=embed)
+
+
+@practices_command.error
+async def practices_error(ctx, error):
+    if isinstance(error, commands.errors.CheckFailure):
+        await ctx.send(
+            f"`{COMMAND_PREFIX}{ctx.invoked_with}` must be run within a server."
+        )
+    else:
+        logger.error(
+            f"unexpected error when handling '{ctx.invoked_with}'", exc_info=error
+        )
+
+
+@tasks.loop(seconds=10.0)
+async def daily_practice_message():
+    now = dt.datetime.utcnow()
+    date = now.date()
+    if now.time() > DAILY_PRACTICE_SEND_TIME:
+        date = now.date() + dt.timedelta(days=1)
+    then = dt.datetime.combine(date, DAILY_PRACTICE_SEND_TIME)
+    logger.info(f"practice schedules will be sent at {then.isoformat()}")
+    await discord.utils.sleep_until(then)
+    logger.info("sending daily practice schedules")
+    for guild_id, channel_id in SCHEDULE_CHANNELS.items():
+        try:
+            logger.info(
+                f"sending daily practice schedule for guild {guild_id}, channel {channel_id}"
+            )
+            guild = bot.get_guild(guild_id)
+            channel = guild.get_channel(channel_id)
+            embed = make_practice_sessions_today_embed(guild.id)
+            await channel.send(embed=embed)
+        except Exception:
+            logger.exception(
+                f"could not send message to guild {guild_id}, channel {channel_id}"
+            )
+
+
+# -----------------------------------------------------------------------------
+
+
+def post_feedback(username: str, feedback: str, guild: Optional[str]):
+    client = get_gsheet_client()
+    # Assumes rows are in the format (date, feedback, guild, version)
     sheet = client.open_by_key(FEEDBACK_SHEET_KEY)
     now = dt.datetime.now(dt.timezone.utc)
     worksheet = sheet.get_worksheet(0)
