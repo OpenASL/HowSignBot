@@ -429,11 +429,10 @@ async def send_refreshable_message(ctx: Context, make_kwargs: Callable[[], dict]
 
     while True:
         try:
-            timeout = 60 * 60 * 6  # 6 hours
             done, pending = await asyncio.wait(
                 (
-                    bot.wait_for("reaction_add", check=check, timeout=timeout),
-                    bot.wait_for("reaction_remove", check=check, timeout=timeout),
+                    bot.wait_for("reaction_add", check=check),
+                    bot.wait_for("reaction_remove", check=check),
                 ),
                 return_when=asyncio.FIRST_COMPLETED,
             )
