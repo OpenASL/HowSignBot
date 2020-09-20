@@ -473,7 +473,9 @@ async def daily_practice_message():
     if now.time() > DAILY_PRACTICE_SEND_TIME:
         date = now.date() + dt.timedelta(days=1)
     then = dt.datetime.combine(date, DAILY_PRACTICE_SEND_TIME)
-    logger.info(f"practice schedules will be sent at {then.isoformat()}")
+    logger.info(
+        f"practice schedules for {len(SCHEDULE_CHANNELS)} channels will be sent at {then.isoformat()}"
+    )
     await discord.utils.sleep_until(then)
     logger.info("sending daily practice schedules")
     for guild_id, channel_id in SCHEDULE_CHANNELS.items():
