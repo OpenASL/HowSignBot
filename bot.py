@@ -380,7 +380,7 @@ async def is_in_guild(ctx: Context):
 
 @bot.command(
     name="practices",
-    aliases=("practice",),
+    aliases=("schedule",),
     help="List today's practice schedule for the current server",
 )
 @commands.check(is_in_guild)
