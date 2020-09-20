@@ -376,6 +376,8 @@ def make_practice_session_embed(
     description = dtime_pacific.strftime("%A, %B %-d")
     if dtime_pacific.date() == now_pacific.date():
         description = f"Today - {description}"
+    elif (dtime_pacific.date() - now_pacific.date()).days == 1:
+        description = f"Tomorrow - {description}"
     embed = discord.Embed(
         description=description,
         color=discord.Color.orange(),
