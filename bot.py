@@ -379,7 +379,9 @@ async def is_in_guild(ctx: Context):
 
 
 @bot.command(
-    name="practices", help="List today's practice schedule for the current server"
+    name="practices",
+    aliases=("practice",),
+    help="List today's practice schedule for the current server",
 )
 @commands.check(is_in_guild)
 async def practices_command(ctx: Context):
@@ -733,31 +735,31 @@ async def codenames_command(ctx: Context, name: str = None):
 
 NUM_CATCHPHRASE_WORDS = 8
 
+CATEGORIES_FORMATTED = ", ".join(catchphrase.CATEGORIES)
+
 
 def catchphrase_impl(category: str = None):
     category = category.lower() if category else None
     if category == "categories":
-        categories = ", ".join(catchphrase.CATEGORIES)
         return {
-            "content": f"{categories}\nEnter `{COMMAND_PREFIX}cp` or `{COMMAND_PREFIX}cp [category]` to generate a list of words/phrases."
+            "content": f"{CATEGORIES_FORMATTED}\nEnter `{COMMAND_PREFIX}cp` or `{COMMAND_PREFIX}cp [category]` to generate a list of words/phrases."
         }
 
     if category and category not in catchphrase.CATEGORIES:
         logger.info(f"invalid category: {category}")
-        categories = ", ".join(catchphrase.CATEGORIES)
         suggestion = did_you_mean(category, catchphrase.CATEGORIES)
         if suggestion:
             return {
-                "content": f'"{category}" is not a valid category. Did you mean "{suggestion}"?\nCategories: {categories}'
+                "content": f'"{category}" is not a valid category. Did you mean "{suggestion}"?\nCategories: {CATEGORIES_FORMATTED}'
             }
         else:
             return {
-                "content": f'"{category}" is not a valid category.\nCategories: {categories}'
+                "content": f'"{category}" is not a valid category.\nCategories: {CATEGORIES_FORMATTED}'
             }
     words = "\n".join(
         f"||{catchphrase.catchphrase(category)}||" for _ in range(NUM_CATCHPHRASE_WORDS)
     )
-    message = f"{words}\nEnter `{COMMAND_PREFIX}cp` or `{COMMAND_PREFIX}cp [category]` for more."
+    message = f"{words}\nEnter `{COMMAND_PREFIX}cp` or `{COMMAND_PREFIX}cp [category]` for more.\nCategories: {CATEGORIES_FORMATTED}"
     logger.info("sending catchphrase words/phrases")
     return {"content": message}
 

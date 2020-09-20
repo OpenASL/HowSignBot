@@ -10,6 +10,7 @@
       ||Spain||
       ||dredge||
       Enter `!cp` or `!cp [category]` for more.
+      Categories: easy, medium, hard, animals, food, travel, people, household
     ',
   }
 ---
@@ -25,6 +26,7 @@
       ||wool||
       ||blimp||
       Enter `!cp` or `!cp [category]` for more.
+      Categories: easy, medium, hard, animals, food, travel, people, household
     ',
   }
 ---
@@ -48,6 +50,7 @@
       ||pineapple||
       ||yam||
       Enter `!cp` or `!cp [category]` for more.
+      Categories: easy, medium, hard, animals, food, travel, people, household
     ',
   }
 ---
