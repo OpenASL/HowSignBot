@@ -310,6 +310,7 @@ def get_gsheet_client():
 EASTERN = pytz.timezone("US/Eastern")
 PACIFIC = pytz.timezone("US/Pacific")
 TIME_FORMAT = "%-I:%M %p %Z"
+TIME_FORMAT_NO_MINUTES = "%-I %p %Z"
 
 
 def parse_human_readable_datetime(dstr: str) -> Optional[dt.datetime]:
@@ -363,8 +364,9 @@ def get_practice_sessions(
 
 
 def format_multi_time(dtime: dt.datetime) -> str:
-    pacific_dstr = dtime.astimezone(PACIFIC).strftime(TIME_FORMAT)
-    eastern_dstr = dtime.astimezone(EASTERN).strftime(TIME_FORMAT)
+    time_format = TIME_FORMAT if dtime.minute != 0 else TIME_FORMAT_NO_MINUTES
+    pacific_dstr = dtime.astimezone(PACIFIC).strftime(time_format)
+    eastern_dstr = dtime.astimezone(EASTERN).strftime(time_format)
     return f"{pacific_dstr} / {eastern_dstr}"
 
 
