@@ -5,7 +5,7 @@ import logging
 import random
 import re
 from contextlib import suppress
-from typing import Optional, NamedTuple, List
+from typing import Optional, NamedTuple, List, Callable
 from urllib.parse import quote_plus
 
 import discord
@@ -329,7 +329,7 @@ class PracticeSession(NamedTuple):
 
 
 def get_practice_worksheet_for_guild(guild_id: int):
-    logger.info(f"fetching today's practice sessions for guild {guild_id}")
+    logger.info(f"fetching practice worksheet {guild_id}")
     client = get_gsheet_client()
     sheet = client.open_by_key(SCHEDULE_SHEET_KEYS[guild_id])
     return sheet.get_worksheet(0)
@@ -411,6 +411,46 @@ async def is_in_guild(ctx: Context):
     return bool(ctx.guild)
 
 
+async def send_refreshable_message(ctx: Context, make_kwargs: Callable[[], dict]):
+    kwargs = await make_kwargs()
+    message = await ctx.send(**kwargs)
+
+    with suppress(Exception):
+        await message.add_reaction("🔄")
+
+    def check(reaction, user):
+        return (
+            user.id != bot.user.id
+            and reaction.message.id == message.id
+            and reaction.emoji == "🔄"
+        )
+
+    while True:
+        try:
+            timeout = 60 * 60 * 6  # 6 hours
+            done, pending = await asyncio.wait(
+                (
+                    bot.wait_for("reaction_add", check=check, timeout=timeout),
+                    bot.wait_for("reaction_remove", check=check, timeout=timeout),
+                ),
+                return_when=asyncio.FIRST_COMPLETED,
+            )
+            reaction, user = done.pop().result()
+            for future in pending:
+                future.cancel()
+        except asyncio.TimeoutError:
+            # Try to remove the reactions. Fail silently if the bot doesn't have permission.
+            with suppress(Exception):
+                await message.clear_reactions()
+            return
+        logger.info("refreshing message")
+        kwargs = await make_kwargs()
+        await message.edit(**kwargs)
+        # Try to remove the reaction. Fail silently if the bot doesn't have permission.
+        with suppress(Exception):
+            await message.remove_reaction(reaction, user)
+
+
 @bot.command(
     name="practices",
     help="List today's practice schedule for the current server",
@@ -418,8 +458,11 @@ async def is_in_guild(ctx: Context):
 @commands.check(is_in_guild)
 async def practices_command(ctx: Context):
     guild = ctx.guild
-    embed = make_practice_sessions_today_embed(guild.id)
-    await ctx.send(embed=embed)
+
+    async def make_kwargs():
+        return {"embed": make_practice_sessions_today_embed(guild.id)}
+
+    await send_refreshable_message(ctx, make_kwargs)
 
 
 @bot.command(
@@ -441,13 +484,21 @@ async def practice_command(ctx: Context, *, start_time: str):
     logger.info(f"adding new practice session to sheet: {row}")
     worksheet = get_practice_worksheet_for_guild(guild.id)
     worksheet.append_row(row)
-    sessions = get_practice_sessions(guild_id=guild.id, dtime=dtime, worksheet=worksheet)
-    embed = make_practice_session_embed(guild_id=guild.id, sessions=sessions, dtime=dtime)
     dtime_pacific = dtime.astimezone(PACIFIC)
     short_display_date = f"{dtime_pacific:%a, %b %d} {format_multi_time(dtime)}"
-    await ctx.send(
-        content=f"🙌 New practice scheduled for *{short_display_date}*", embed=embed
-    )
+
+    async def make_message_kwargs():
+        sessions = get_practice_sessions(
+            guild_id=guild.id, dtime=dtime, worksheet=worksheet
+        )
+        embed = make_practice_session_embed(
+            guild_id=guild.id, sessions=sessions, dtime=dtime
+        )
+        return dict(
+            content=f"🙌 New practice scheduled for *{short_display_date}*", embed=embed
+        )
+
+    await send_refreshable_message(ctx, make_message_kwargs)
 
 
 @practice_command.error
