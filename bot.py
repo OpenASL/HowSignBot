@@ -314,6 +314,8 @@ TIME_FORMAT = "%-I:%M %p %Z"
 
 def parse_human_readable_datetime(dstr: str) -> Optional[dt.datetime]:
     parsed = dateparser.parse(dstr)
+    if not parsed:
+        return None
     # Use Pacific time if timezone can't be parsed; return a UTC datetime
     if not parsed.tzinfo:
         parsed = PACIFIC.localize(parsed)
@@ -442,7 +444,7 @@ async def practice_command(ctx: Context, *, start_time: str):
     dtime_pacific = dtime.astimezone(PACIFIC)
     short_display_date = f"{dtime_pacific:%a, %b %d} {format_multi_time(dtime)}"
     await ctx.send(
-        content=f"🙌 *New practice scheduled for {short_display_date}*", embed=embed
+        content=f"🙌 New practice scheduled for *{short_display_date}*", embed=embed
     )
 
 
