@@ -326,8 +326,8 @@ def get_practice_sessions_today(guild_id: int):
         PracticeSession(
             dtime=dateparser.parse(
                 row[0],
-                # Use eastern time if timezone can't be parsed; return a UTC datetime
-                settings={"TIMEZONE": "US/Eastern", "TO_TIMEZONE": "UTC"},
+                # Use Pacific time if timezone can't be parsed; return a UTC datetime
+                settings={"TIMEZONE": "US/Pacific", "TO_TIMEZONE": "UTC"},
             ),
             host=row[1],
             notes=row[2],
@@ -348,7 +348,7 @@ def get_practice_sessions_today(guild_id: int):
 
 def make_practice_sessions_today_embed(guild_id: int):
     sessions = get_practice_sessions_today(guild_id)
-    now = dt.datetime.utcnow()
+    now = PACIFIC.localize(dt.datetime.utcnow())
     embed = discord.Embed(
         description=f"Today - {now:%A, %B %-d}",
         color=discord.Color.orange(),
