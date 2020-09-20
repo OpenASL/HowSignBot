@@ -574,6 +574,9 @@ async def zoom_command(ctx: Context, *, topic: Optional[str]):
 async def zoom_error(ctx, error):
     if isinstance(error, commands.errors.CheckFailure):
         logger.info(f"unauthorized zoom access attempt by {ctx.author}")
+        await ctx.send(
+            f"⚠️ `{COMMAND_PREFIX}{ctx.invoked_with}` can only be used by the bot owner because it is using their Zoom account."
+        )
     else:
         logger.error(
             f"unexpected error when handling '{ctx.invoked_with}'", exc_info=error
