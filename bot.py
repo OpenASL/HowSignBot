@@ -5,7 +5,7 @@ import logging
 import random
 import re
 from contextlib import suppress
-from typing import Optional, NamedTuple
+from typing import Optional, NamedTuple, List
 from urllib.parse import quote_plus
 
 import discord
@@ -85,6 +85,10 @@ def did_you_mean(word, possibilities):
         return difflib.get_close_matches(word, possibilities, n=1, cutoff=0.5)[0]
     except IndexError:
         return None
+
+
+def utcnow():
+    return dt.datetime.now(dt.timezone.utc)
 
 
 STOP_SIGN = "🛑"
@@ -308,27 +312,35 @@ PACIFIC = pytz.timezone("US/Pacific")
 TIME_FORMAT = "%-I:%M %p %Z"
 
 
+def parse_human_readable_datetime(dstr: str) -> Optional[dt.datetime]:
+    parsed = dateparser.parse(dstr)
+    # Use Pacific time if timezone can't be parsed; return a UTC datetime
+    if not parsed.tzinfo:
+        parsed = PACIFIC.localize(parsed)
+    return parsed.astimezone(dt.timezone.utc)
+
+
 class PracticeSession(NamedTuple):
     dtime: Optional[dt.datetime]
     host: str
     notes: str
 
 
-def get_practice_sessions_today(guild_id: int):
+def get_practice_worksheet_for_guild(guild_id: int):
     logger.info(f"fetching today's practice sessions for guild {guild_id}")
     client = get_gsheet_client()
     sheet = client.open_by_key(SCHEDULE_SHEET_KEYS[guild_id])
-    worksheet = sheet.get_worksheet(0)
+    return sheet.get_worksheet(0)
+
+
+def get_practice_sessions(
+    guild_id: int, dtime: dt.datetime, *, worksheet=None
+) -> List[PracticeSession]:
+    worksheet = worksheet or get_practice_worksheet_for_guild(guild_id)
     all_values = worksheet.get_all_values()
-    now = dt.datetime.utcnow()
-    today = now.date()
     sessions = [
         PracticeSession(
-            dtime=dateparser.parse(
-                row[0],
-                # Use Pacific time if timezone can't be parsed; return a UTC datetime
-                settings={"TIMEZONE": "US/Pacific", "TO_TIMEZONE": "UTC"},
-            ),
+            dtime=parse_human_readable_datetime(row[0]),
             host=row[1],
             notes=row[2],
         )
@@ -340,26 +352,37 @@ def get_practice_sessions_today(guild_id: int):
             session
             for session in sessions
             # Assume pacific time when filtering to include all of US
-            if session.dtime and session.dtime.astimezone(PACIFIC).date() == today
+            if session.dtime
+            and session.dtime.astimezone(PACIFIC).date()
+            == dtime.astimezone(PACIFIC).date()
         ],
         key=lambda s: s.dtime,
     )
 
 
-def make_practice_sessions_today_embed(guild_id: int):
-    sessions = get_practice_sessions_today(guild_id)
-    now = PACIFIC.localize(dt.datetime.utcnow())
+def format_multi_time(dtime: dt.datetime) -> str:
+    pacific_dstr = dtime.astimezone(PACIFIC).strftime(TIME_FORMAT)
+    eastern_dstr = dtime.astimezone(EASTERN).strftime(TIME_FORMAT)
+    return f"{pacific_dstr} / {eastern_dstr}"
+
+
+def make_practice_session_embed(
+    guild_id: int, sessions: List[PracticeSession], *, dtime: dt.datetime
+):
+    now_pacific = utcnow().astimezone(PACIFIC)
+    dtime_pacific = dtime.astimezone(PACIFIC)
+    description = dtime_pacific.strftime("%A, %B %-d")
+    if dtime_pacific.date() == now_pacific.date():
+        description = f"Today - {description}"
     embed = discord.Embed(
-        description=f"Today - {now:%A, %B %-d}",
+        description=description,
         color=discord.Color.orange(),
     )
     if not sessions:
         embed.description += "\n\n*There are no scheduled practices yet!*"
     else:
         for session in sessions:
-            pacific_dstr = session.dtime.astimezone(PACIFIC).strftime(TIME_FORMAT)
-            eastern_dstr = session.dtime.astimezone(EASTERN).strftime(TIME_FORMAT)
-            title = f"{pacific_dstr} / {eastern_dstr}"
+            title = format_multi_time(session.dtime)
             value = ""
             if session.host:
                 value += f"Host: {session.host}"
@@ -368,10 +391,16 @@ def make_practice_sessions_today_embed(guild_id: int):
             embed.add_field(name=title, value=value or "Practice", inline=False)
     sheet_key = SCHEDULE_SHEET_KEYS[guild_id]
     embed.add_field(
-        name="Schedule a practice here:",
-        value=f"[Practice Schedule](https://docs.google.com/spreadsheets/d/{sheet_key}/edit)",
+        name="🗓",
+        value=f"[Schedule or edit a practice](https://docs.google.com/spreadsheets/d/{sheet_key}/edit)",
     )
     return embed
+
+
+def make_practice_sessions_today_embed(guild_id: int):
+    now = utcnow()
+    sessions = get_practice_sessions(guild_id, dtime=now)
+    return make_practice_session_embed(guild_id, sessions, dtime=now)
 
 
 async def is_in_guild(ctx: Context):
@@ -380,7 +409,6 @@ async def is_in_guild(ctx: Context):
 
 @bot.command(
     name="practices",
-    aliases=("schedule",),
     help="List today's practice schedule for the current server",
 )
 @commands.check(is_in_guild)
@@ -390,11 +418,45 @@ async def practices_command(ctx: Context):
     await ctx.send(embed=embed)
 
 
+@bot.command(
+    name="practice",
+    help="Schedule a practice session",
+)
+@commands.check(is_in_guild)
+async def practice_command(ctx: Context, *, start_time: str):
+    logger.info(f"scheduling new practice session: {start_time}")
+    guild = ctx.guild
+    dtime = parse_human_readable_datetime(start_time)
+    if not dtime:
+        await ctx.send(f'⚠️Could not parse "{start_time}" into a datetime.')
+        return
+    host = getattr(ctx.author, "nick", ctx.author.name)
+    notes = ""
+    display_dtime = dtime.astimezone(PACIFIC).strftime("%A, %B %d %I:%M %p %Z %Y")
+    row = (display_dtime, host, notes)
+    logger.info(f"adding new practice session to sheet: {row}")
+    worksheet = get_practice_worksheet_for_guild(guild.id)
+    worksheet.append_row(row)
+    sessions = get_practice_sessions(guild_id=guild.id, dtime=dtime, worksheet=worksheet)
+    embed = make_practice_session_embed(guild_id=guild.id, sessions=sessions, dtime=dtime)
+    dtime_pacific = dtime.astimezone(PACIFIC)
+    short_display_date = f"{dtime_pacific:%a, %b %d} {format_multi_time(dtime)}"
+    await ctx.send(
+        content=f"🙌 *New practice scheduled for {short_display_date}*", embed=embed
+    )
+
+
+@practice_command.error
 @practices_command.error
 async def practices_error(ctx, error):
     if isinstance(error, commands.errors.CheckFailure):
         await ctx.send(
             f"`{COMMAND_PREFIX}{ctx.invoked_with}` must be run within a server."
+        )
+    elif isinstance(error, commands.errors.MissingRequiredArgument):
+        logger.info(f"missing argument to '{ctx.invoked_with}'")
+        await ctx.send(
+            f"⚠️To schedule a practice, enter a time practice after `{COMMAND_PREFIX}{ctx.invoked_with}`.\nExample: `{COMMAND_PREFIX}{ctx.invoked_with} today at 2pm EDT`"
         )
     else:
         logger.error(
@@ -404,7 +466,7 @@ async def practices_error(ctx, error):
 
 @tasks.loop(seconds=10.0)
 async def daily_practice_message():
-    now = dt.datetime.utcnow()
+    now = utcnow()
     date = now.date()
     if now.time() > DAILY_PRACTICE_SEND_TIME:
         date = now.date() + dt.timedelta(days=1)
@@ -434,7 +496,7 @@ def post_feedback(username: str, feedback: str, guild: Optional[str]):
     client = get_gsheet_client()
     # Assumes rows are in the format (date, feedback, guild, version)
     sheet = client.open_by_key(FEEDBACK_SHEET_KEY)
-    now = dt.datetime.now(dt.timezone.utc)
+    now = utcnow()
     worksheet = sheet.get_worksheet(0)
     row = (now.isoformat(), feedback, guild or "", __version__)
     logger.info(f"submitting feedback: {row}")
