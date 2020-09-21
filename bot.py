@@ -464,12 +464,12 @@ async def send_refreshable_message(ctx: Context, make_kwargs: Callable[[], dict]
 
 
 @bot.command(
-    name="practices",
-    aliases=("schedule",),
+    name="schedule",
+    aliases=("practices",),
     help="List today's practice schedule for the current server",
 )
 @commands.check(is_in_guild)
-async def practices_command(ctx: Context):
+async def schedule_command(ctx: Context):
     guild = ctx.guild
 
     async def make_kwargs():
@@ -515,7 +515,7 @@ async def practice_command(ctx: Context, *, start_time: str):
 
 
 @practice_command.error
-@practices_command.error
+@schedule_command.error
 async def practices_error(ctx, error):
     if isinstance(error, commands.errors.CheckFailure):
         await ctx.send(
@@ -524,7 +524,9 @@ async def practices_error(ctx, error):
     elif isinstance(error, commands.errors.MissingRequiredArgument):
         logger.info(f"missing argument to '{ctx.invoked_with}'")
         await ctx.send(
-            f"⚠️To schedule a practice, enter a time after `{COMMAND_PREFIX}{ctx.invoked_with}`.\nExample: `{COMMAND_PREFIX}{ctx.invoked_with} today at 2pm EDT`"
+            f"⚠️To schedule a practice, enter a time after `{COMMAND_PREFIX}{ctx.invoked_with}`.\n"
+            f"Example: `{COMMAND_PREFIX}{ctx.invoked_with} today at 2pm EDT`\n"
+            f"Enter `{COMMAND_PREFIX}schedule` to see today's schedule."
         )
     else:
         logger.error(
