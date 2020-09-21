@@ -454,6 +454,7 @@ async def send_refreshable_message(ctx: Context, make_kwargs: Callable[[], dict]
 
 @bot.command(
     name="practices",
+    aliases=("schedule",),
     help="List today's practice schedule for the current server",
 )
 @commands.check(is_in_guild)
