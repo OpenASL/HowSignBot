@@ -524,7 +524,7 @@ async def practices_error(ctx, error):
     elif isinstance(error, commands.errors.MissingRequiredArgument):
         logger.info(f"missing argument to '{ctx.invoked_with}'")
         await ctx.send(
-            f"⚠️To schedule a practice, enter a time practice after `{COMMAND_PREFIX}{ctx.invoked_with}`.\nExample: `{COMMAND_PREFIX}{ctx.invoked_with} today at 2pm EDT`"
+            f"⚠️To schedule a practice, enter a time after `{COMMAND_PREFIX}{ctx.invoked_with}`.\nExample: `{COMMAND_PREFIX}{ctx.invoked_with} today at 2pm EDT`"
         )
     else:
         logger.error(
