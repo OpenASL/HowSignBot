@@ -370,6 +370,17 @@ def format_multi_time(dtime: dt.datetime) -> str:
     return f"{pacific_dstr} / {eastern_dstr}"
 
 
+NO_PRACTICES = """
+
+*There are no scheduled practices yet!*
+
+Edit the schedule below or use the `{COMMAND_PREFIX}practice` command.
+Example: `{COMMAND_PREFIX}practice today at 2pm PDT`
+""".format(
+    COMMAND_PREFIX=COMMAND_PREFIX
+)
+
+
 def make_practice_session_embed(
     guild_id: int, sessions: List[PracticeSession], *, dtime: dt.datetime
 ):
@@ -385,7 +396,7 @@ def make_practice_session_embed(
         color=discord.Color.orange(),
     )
     if not sessions:
-        embed.description += "\n\n*There are no scheduled practices yet!*"
+        embed.description += NO_PRACTICES
     else:
         for session in sessions:
             title = format_multi_time(session.dtime)
