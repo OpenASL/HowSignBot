@@ -1006,6 +1006,7 @@ async def zoom(request):
     bot = request.app["bot"]  # type: discord.Bot
     data = await request.json()
     event = data["event"]
+    logging.info(f"handling zoom event: {event}")
 
     if event in SUPPORTED_EVENTS:
         meeting_id = int(data["payload"]["object"]["id"])
