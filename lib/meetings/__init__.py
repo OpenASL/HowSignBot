@@ -9,8 +9,10 @@ import cuteid
 
 
 class ZoomMeeting(NamedTuple):
+    id: int
     join_url: str
     passcode: str
+    topic: str
 
 
 async def create_zoom(
@@ -29,7 +31,12 @@ async def create_zoom(
         )
     resp.raise_for_status()
     data = await resp.json()
-    return ZoomMeeting(join_url=data["join_url"], passcode=data["password"])
+    return ZoomMeeting(
+        id=data["id"],
+        join_url=data["join_url"],
+        passcode=data["password"],
+        topic=data["topic"],
+    )
 
 
 async def create_watch2gether(api_key: str, video_url: str = None) -> str:

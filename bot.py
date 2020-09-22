@@ -28,6 +28,11 @@ import meetings
 
 __version__ = "20.50.3"
 
+app = web.Application()
+app["bot"] = None
+# Mapping of Zoom meeting IDs to a tuple of the form (channel_id, message_id, participant_count)
+app["zoom_meeting_messages"] = {}
+
 env = Env(eager=False)
 env.read_env()
 
@@ -680,6 +685,19 @@ async def idiom_command(ctx, spoiler: Optional[str]):
 ZOOM_CLOSED_MESSAGE = "✨ _Zoom meeting ended_"
 
 
+class ZoomMeetingState(NamedTuple):
+    channel_id: int
+    message_id: int
+    num_participants: int
+
+
+def format_zoom_meeting(meeting: meetings.ZoomMeeting) -> str:
+    content = f"**Join URL**: <{meeting.join_url}>\n**Passcode**: {meeting.passcode}"
+    if meeting.topic:
+        content = f"{content}\n**Topic**: {meeting.topic}"
+    return f"{content}\n\n🚀 This meeting is happening now. Go practice!\n*After the meeting ends, click {STOP_SIGN} to remove this message.*"
+
+
 @bot.command(name="zoom", help="BOT OWNER ONLY: Create a Zoom meeting")
 @commands.is_owner()
 async def zoom_command(ctx: Context, *, topic: Optional[str]):
@@ -701,14 +719,18 @@ async def zoom_command(ctx: Context, *, topic: Optional[str]):
         message = await ctx.send(
             content="🚨 _Could not create Zoom meeting. That's embarrassing._"
         )
+        return
     else:
-        content = f"**Join URL**: <{meeting.join_url}>\n**Passcode**: {meeting.passcode}"
-        if topic:
-            content = f"{content}\n**Topic**: {topic}"
-        content = f"{content}\n🚀 This meeting is happening now. Go practice!\n*After the meeting ends, click {STOP_SIGN} to remove this message.*"
-        message = await ctx.send(content=content)
+        message = await ctx.send(content=format_zoom_meeting(meeting))
+        meeting_state = ZoomMeetingState(
+            channel_id=ctx.channel.id, message_id=message.id, num_participants=0
+        )
+        app["zoom_meeting_messages"][meeting.id] = meeting_state
+        logger.info(f"setting info for meeting {meeting.id}")
 
     await wait_for_stop_sign(message, replace_with=ZOOM_CLOSED_MESSAGE)
+
+    del app["zoom_meeting_messages"][meeting.id]
 
 
 @zoom_command.error
@@ -956,14 +978,76 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
 
 # -----------------------------------------------------------------------------
 
-app = web.Application()
+EMPTY_RESPONSE = web.Response(body="", status=20)
 
 
 async def ping(request):
-    return web.Response(body="", status=200)
+    return EMPTY_RESPONSE
 
 
-app.add_routes([web.get("/ping", ping)])
+SUPPORTED_EVENTS = {
+    "meeting.participant_joined",
+    "meeting.participant_left",
+    "meeting.ended",
+}
+
+
+def format_zoom_meeting_with_participants(old_content: str, num_participants: int) -> str:
+    content = old_content.replace("👤", "")
+    insert_at = content.find("🚀") - 1
+    return content[:insert_at] + "👤" * num_participants + content[insert_at:]
+
+
+async def zoom(request):
+    # TODO: verify token
+    bot = request.app["bot"]  # type: discord.Bot
+    data = await request.json()
+    event = data["event"]
+
+    if event in SUPPORTED_EVENTS:
+        meeting_id = int(data["payload"]["object"]["id"])
+        logger.info(f"fetching info for meeting {meeting_id}")
+        try:
+            state = request.app["zoom_meeting_messages"][meeting_id]
+        except KeyError:
+            logger.warning(f"meeting_id {meeting_id} not found")
+            return EMPTY_RESPONSE
+        channel = bot.get_channel(state.channel_id)
+        message = await channel.fetch_message(state.message_id)
+        old_content = message.content
+
+        if event == "meeting.ended":
+            new_content = "✨ _Zoom meeting automatically ended_"
+            del request.app["zoom_meeting_messages"][meeting_id]
+        elif event == "meeting.participant_joined":
+            next_state = ZoomMeetingState(
+                channel_id=state.channel_id,
+                message_id=state.message_id,
+                num_participants=state.num_participants + 1,
+            )
+            logger.info(f"incrementing num_participants for meeting id {meeting_id}")
+            request.app["zoom_meeting_messages"][meeting_id] = next_state
+            new_content = format_zoom_meeting_with_participants(
+                old_content, next_state.num_participants
+            )
+        elif event == "meeting.participant_left":
+            next_state = ZoomMeetingState(
+                channel_id=state.channel_id,
+                message_id=state.message_id,
+                num_participants=state.num_participants - 1,
+            )
+            logger.info(f"decrementing num_participants for meeting id {meeting_id}")
+            request.app["zoom_meeting_messages"][meeting_id] = next_state
+            new_content = format_zoom_meeting_with_participants(
+                old_content, next_state.num_participants
+            )
+
+        await message.edit(content=new_content)
+        # TODO: handle meeting end
+    return EMPTY_RESPONSE
+
+
+app.add_routes([web.get("/ping", ping), web.post("/zoom", zoom)])
 
 
 async def start_bot():
@@ -975,6 +1059,7 @@ async def start_bot():
 
 async def on_startup(app):
     app["bot_task"] = asyncio.create_task(start_bot())
+    app["bot"] = bot
 
 
 async def on_shutdown(app):
