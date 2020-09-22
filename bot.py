@@ -57,6 +57,7 @@ SCHEDULE_CHANNELS = env.dict(
 
 ZOOM_USER_ID = env.str("ZOOM_USER_ID", required=True)
 ZOOM_JWT = env.str("ZOOM_JWT", required=True)
+ZOOM_HOOK_TOKEN = env.str("ZOOM_HOOK_TOKEN", required=True)
 
 WATCH2GETHER_API_KEY = env.str("WATCH2GETHER_API_KEY", required=True)
 # Default to 10 AM EDT
@@ -730,7 +731,8 @@ async def zoom_command(ctx: Context, *, topic: Optional[str]):
 
     await wait_for_stop_sign(message, replace_with=ZOOM_CLOSED_MESSAGE)
 
-    del app["zoom_meeting_messages"][meeting.id]
+    with suppress(KeyError):
+        del app["zoom_meeting_messages"][meeting.id]
 
 
 @zoom_command.error
@@ -999,7 +1001,8 @@ def format_zoom_meeting_with_participants(old_content: str, num_participants: in
 
 
 async def zoom(request):
-    # TODO: verify token
+    if request.headers["authorization"] != ZOOM_HOOK_TOKEN:
+        return web.Response(body="", status=403)
     bot = request.app["bot"]  # type: discord.Bot
     data = await request.json()
     event = data["event"]
