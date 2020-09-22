@@ -36,6 +36,7 @@ DISCORD_TOKEN = env.str("DISCORD_TOKEN", required=True)
 OWNER_ID = env.int("OWNER_ID", required=True)
 SECRET_KEY = env.str("SECRET_KEY", required=True)
 COMMAND_PREFIX = env.str("COMMAND_PREFIX", "?")
+PORT = env.int("PORT", 5000)
 
 GOOGLE_PROJECT_ID = env.str("GOOGLE_PROJECT_ID", required=True)
 GOOGLE_PRIVATE_KEY = env.str("GOOGLE_PRIVATE_KEY", required=True)
@@ -964,8 +965,6 @@ async def ping(request):
 
 app.add_routes([web.get("/ping", ping)])
 
-# -----------------------------------------------------------------------------
-
 
 async def start_bot():
     try:
@@ -974,20 +973,21 @@ async def start_bot():
         await bot.close()
 
 
-async def start_webserver():
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, "", 5000)
-    await site.start()
+async def on_startup(app):
+    app["bot_task"] = asyncio.create_task(start_bot())
 
 
-async def start():
-    """Start the bot and the webserver."""
-    asyncio.ensure_future(start_webserver())
-    asyncio.ensure_future(start_bot())
+async def on_shutdown(app):
+    app["bot_task"].cancel()
+    await app["bot_task"]
+
+
+app.on_startup.append(on_startup)
+app.on_shutdown.append(on_shutdown)
+
+# -----------------------------------------------------------------------------
 
 
 if __name__ == "__main__":
     logger.info(f"starting bot version {__version__}")
-    asyncio.ensure_future(start(), loop=bot.loop)
-    bot.loop.run_forever()
+    web.run_app(app, port=PORT)
