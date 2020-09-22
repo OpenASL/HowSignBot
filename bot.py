@@ -28,10 +28,7 @@ import meetings
 
 __version__ = "20.50.3"
 
-app = web.Application()
-app["bot"] = None
-# Mapping of Zoom meeting IDs to a tuple of the form (channel_id, message_id, participant_count)
-app["zoom_meeting_messages"] = {}
+app = web.Application()  # web app for listening to webhooks
 
 env = Env(eager=False)
 env.read_env()
@@ -1063,6 +1060,8 @@ async def start_bot():
 async def on_startup(app):
     app["bot_task"] = asyncio.create_task(start_bot())
     app["bot"] = bot
+    # Mapping of Zoom meeting IDs to a tuple of the form (channel_id, message_id, participant_count)
+    app["zoom_meeting_messages"] = {}
 
 
 async def on_shutdown(app):
