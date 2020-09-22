@@ -5,7 +5,7 @@ import logging
 import random
 import re
 from contextlib import suppress
-from typing import Optional, NamedTuple, List, Callable
+from typing import Optional, NamedTuple, List, Callable, Union
 from urllib.parse import quote_plus
 
 import discord
@@ -424,7 +424,9 @@ async def is_in_guild(ctx: Context):
     return bool(ctx.guild)
 
 
-async def send_refreshable_message(ctx: Context, make_kwargs: Callable[[], dict]):
+async def send_refreshable_message(
+    ctx: Union[Context, discord.TextChannel], make_kwargs: Callable[[], dict]
+):
     kwargs = await make_kwargs()
     message = await ctx.send(**kwargs)
 
@@ -553,8 +555,11 @@ async def daily_practice_message():
             )
             guild = bot.get_guild(guild_id)
             channel = guild.get_channel(channel_id)
-            embed = make_practice_sessions_today_embed(guild.id)
-            await channel.send(embed=embed)
+
+            async def make_kwargs():
+                return {"embed": make_practice_sessions_today_embed(guild.id)}
+
+            asyncio.ensure_future(send_refreshable_message(channel, make_kwargs))
         except Exception:
             logger.exception(
                 f"could not send message to guild {guild_id}, channel {channel_id}"
