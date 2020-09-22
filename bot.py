@@ -977,7 +977,7 @@ async def start_bot():
 async def start_webserver():
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, "", 5000)
+    site = web.TCPSite(runner, "localhost", 8080)
     await site.start()
 
 
