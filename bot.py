@@ -980,7 +980,7 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
 
 # -----------------------------------------------------------------------------
 
-EMPTY_RESPONSE = web.Response(body="", status=20)
+EMPTY_RESPONSE = web.Response(body="", status=200)
 
 
 async def ping(request):
