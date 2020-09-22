@@ -11,6 +11,7 @@ from urllib.parse import quote_plus
 import discord
 import dateparser
 import gspread
+from aiohttp import web
 from discord.ext import commands, tasks
 from discord.ext.commands import Context
 from environs import Env
@@ -952,6 +953,41 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
                 return
 
 
+# -----------------------------------------------------------------------------
+
+app = web.Application()
+
+
+async def ping(request):
+    return web.Response(body="", status=200)
+
+
+app.add_routes([web.get("/ping", ping)])
+
+# -----------------------------------------------------------------------------
+
+
+async def start_bot():
+    try:
+        await bot.start(DISCORD_TOKEN)
+    finally:
+        await bot.close()
+
+
+async def start_webserver():
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "localhost", 8080)
+    await site.start()
+
+
+async def start():
+    """Start the bot and the webserver."""
+    asyncio.ensure_future(start_webserver())
+    asyncio.ensure_future(start_bot())
+
+
 if __name__ == "__main__":
     logger.info(f"starting bot version {__version__}")
-    bot.run(DISCORD_TOKEN)
+    asyncio.ensure_future(start(), loop=bot.loop)
+    bot.loop.run_forever()
