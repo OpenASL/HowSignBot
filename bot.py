@@ -1018,6 +1018,7 @@ async def zoom(request):
         old_content = message.content
 
         if event == "meeting.ended":
+            logger.info(f"automatically ending meeting {meeting_id}")
             new_content = "✨ _Zoom meeting automatically ended_"
             del request.app["zoom_meeting_messages"][meeting_id]
         elif event == "meeting.participant_joined":
