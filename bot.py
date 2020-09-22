@@ -1047,7 +1047,6 @@ async def zoom(request):
             )
 
         await message.edit(content=new_content)
-        # TODO: handle meeting end
     return EMPTY_RESPONSE
 
 
