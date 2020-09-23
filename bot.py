@@ -124,8 +124,8 @@ async def on_ready():
         name=f"{COMMAND_PREFIX}sign | {COMMAND_PREFIX}handshapes",
         type=discord.ActivityType.playing,
     )
-    daily_practice_message.start()
     await bot.change_presence(activity=activity)
+    daily_practice_message.start()
 
 
 # -----------------------------------------------------------------------------
@@ -329,7 +329,7 @@ def parse_human_readable_datetime(dstr: str) -> Optional[dt.datetime]:
 
 
 class PracticeSession(NamedTuple):
-    dtime: Optional[dt.datetime]
+    dtime: dt.datetime
     host: str
     notes: str
 
@@ -346,23 +346,20 @@ def get_practice_sessions(
 ) -> List[PracticeSession]:
     worksheet = worksheet or get_practice_worksheet_for_guild(guild_id)
     all_values = worksheet.get_all_values()
-    sessions = [
-        PracticeSession(
-            dtime=parse_human_readable_datetime(row[0]),
-            host=row[1],
-            notes=row[2],
-        )
-        for row in all_values[2:]
-        if row
-    ]
     return sorted(
         [
-            session
-            for session in sessions
-            # Assume pacific time when filtering to include all of US
-            if session.dtime
-            and session.dtime.astimezone(PACIFIC).date()
-            == dtime.astimezone(PACIFIC).date()
+            PracticeSession(
+                dtime=session_dtime,
+                host=row[1],
+                notes=row[2],
+            )
+            for row in all_values[2:]  # First two rows are documentation and headers
+            if row and (session_dtime := parse_human_readable_datetime(row[0]))
+            # Compare within Pacific timezone to include all of US
+            and (
+                session_dtime.astimezone(PACIFIC).date()
+                == dtime.astimezone(PACIFIC).date()
+            )
         ],
         key=lambda s: s.dtime,
     )
