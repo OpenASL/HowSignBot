@@ -506,7 +506,7 @@ async def practice_command(ctx: Context, *, start_time: str):
     if not dtime:
         await ctx.send(f'⚠️Could not parse "{start_time}" into a datetime.')
         return
-    host = getattr(ctx.author, "nick", ctx.author.name)
+    host = getattr(ctx.author, "nick", None) or ctx.author.name
     notes = quoted or ""
     display_dtime = dtime.astimezone(PACIFIC).strftime("%A, %B %d %I:%M %p %Z %Y")
     row = (display_dtime, host, notes)
