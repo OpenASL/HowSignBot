@@ -60,3 +60,17 @@ def test_sentence(snapshot, spoiler):
 def test_idiom(snapshot, spoiler):
     result = bot.idiom_impl(spoiler)
     assert result == snapshot
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    (
+        ('today 2pm "chat"', ("today 2pm", "chat")),
+        ('"chat" today 2pm', ("today 2pm", "chat")),
+        ("today 2pm", ("today 2pm", None)),
+        ('today 2pm ""', ("today 2pm", "")),
+        ('today 2pm "steve\'s practice"', ("today 2pm", "steve's practice")),
+    ),
+)
+def test_get_and_strip_quoted_text(value, expected):
+    assert bot.get_and_strip_quoted_text(value) == expected

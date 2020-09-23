@@ -5,7 +5,7 @@ import logging
 import random
 import re
 from contextlib import suppress
-from typing import Optional, NamedTuple, List, Callable, Union
+from typing import Optional, NamedTuple, List, Callable, Union, Tuple
 from urllib.parse import quote_plus
 
 import discord
@@ -75,6 +75,7 @@ bot = commands.Bot(
 # -----------------------------------------------------------------------------
 
 _spoiler_pattern = re.compile(r"\s*\|\|\s*(.*)\s*\|\|\s*")
+_quotes_pattern = re.compile(r"\s*\"(.*?)\"\s*")
 
 
 def get_spoiler_text(val: str) -> Optional[str]:
@@ -83,6 +84,16 @@ def get_spoiler_text(val: str) -> Optional[str]:
     if match:
         return match.groups()[0]
     return None
+
+
+def get_and_strip_quoted_text(val: str) -> Tuple[str, Optional[str]]:
+    """Return `val` with quoted text removed as well as as the quoted text."""
+    match = _quotes_pattern.search(val)
+    if match:
+        stripped = _quotes_pattern.sub("", val)
+        quoted = match.groups()[0]
+        return stripped, quoted
+    return val, None
 
 
 def did_you_mean(word, possibilities):
@@ -490,12 +501,13 @@ async def schedule_command(ctx: Context):
 async def practice_command(ctx: Context, *, start_time: str):
     logger.info(f"scheduling new practice session: {start_time}")
     guild = ctx.guild
-    dtime = parse_human_readable_datetime(start_time)
+    human_readable_datetime, quoted = get_and_strip_quoted_text(start_time)
+    dtime = parse_human_readable_datetime(human_readable_datetime)
     if not dtime:
         await ctx.send(f'⚠️Could not parse "{start_time}" into a datetime.')
         return
     host = getattr(ctx.author, "nick", ctx.author.name)
-    notes = ""
+    notes = quoted or ""
     display_dtime = dtime.astimezone(PACIFIC).strftime("%A, %B %d %I:%M %p %Z %Y")
     row = (display_dtime, host, notes)
     logger.info(f"adding new practice session to sheet: {row}")
