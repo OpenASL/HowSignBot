@@ -41,5 +41,20 @@ This will tag, push, and deploy to production.
 ## Viewing logs
 
 ```
+# Prod
 heroku logs -a howsign -t
+# Staging
+heroku logs -a howsign-staging -t
 ```
+
+## Setting up Zoom webhooks (for participant indicator and auto-closing)
+
+- Go to your app in the [Zoom app dashboard](https://marketplace.zoom.us/user/build)
+- Click "Feature"
+- Turn on "Event Subscriptions"
+- Add a new event subscription. Set the name to "Participant counter" and the destination URL to `https://<app URL>/zoom`
+- Enable the following events:
+  - End Meeting
+  - Participant/Host joined meeting
+  - Participant/Host left meeting
+- Copy the verification token and set the `ZOOM_HOOK_TOKEN` environment variable in the app's configuration.
