@@ -35,7 +35,8 @@ async def create_zoom(
         id=data["id"],
         join_url=data["join_url"],
         passcode=data["password"],
-        topic=data["topic"],
+        # Pass topic directly so we don't get the default 'Zoom Meeting' topic
+        topic=topic,
     )
 
 

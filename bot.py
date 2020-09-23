@@ -698,13 +698,13 @@ def format_zoom_meeting(meeting: meetings.ZoomMeeting) -> str:
 
 @bot.command(name="zoom", help="BOT OWNER ONLY: Create a Zoom meeting")
 @commands.is_owner()
-async def zoom_command(ctx: Context, *, topic: Optional[str]):
+async def zoom_command(ctx: Context, *, topic: str = ""):
     logger.info("creating zoom meeting")
     try:
         meeting = await meetings.create_zoom(
             token=ZOOM_JWT,
             user_id=ZOOM_USER_ID,
-            topic=topic or "PRACTICE",
+            topic=topic,
             settings={
                 "host_video": False,
                 "participant_video": False,
@@ -1000,7 +1000,7 @@ def format_zoom_meeting_with_participants(old_content: str, num_participants: in
 async def zoom(request):
     if request.headers["authorization"] != ZOOM_HOOK_TOKEN:
         return web.Response(body="", status=403)
-    bot = request.app["bot"]  # type: discord.Bot
+    bot: commands.Bot = request.app["bot"]
     data = await request.json()
     event = data["event"]
     logging.info(f"handling zoom event: {event}")
@@ -1009,7 +1009,7 @@ async def zoom(request):
         meeting_id = int(data["payload"]["object"]["id"])
         logger.info(f"fetching info for meeting {meeting_id}")
         try:
-            state = request.app["zoom_meeting_messages"][meeting_id]
+            state: ZoomMeetingState = request.app["zoom_meeting_messages"][meeting_id]
         except KeyError:
             logger.warning(f"meeting_id {meeting_id} not found")
             return EMPTY_RESPONSE
