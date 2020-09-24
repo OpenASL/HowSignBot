@@ -396,7 +396,23 @@ async def schedule_command(ctx: Context):
     await ctx.send(embed=make_practice_sessions_today_embed(guild.id))
 
 
-@bot.command(name="practice", help="Schedule a practice session")
+PRACTICE_HELP = """Schedule a practice session
+
+This will add an entry to the practice spreadsheet (use ?schedule to get the link).
+You may optionally add notes within double quotes.
+IMPORTANT: Don't forget to include "am" or "pm" as well as a timezone, e.g. "pdt".
+
+Examples:
+{COMMAND_PREFIX}practice 2pm pdt
+{COMMAND_PREFIX}practice tomorrow 5pm edt "chat for ~1 hour"
+{COMMAND_PREFIX}practice saturday 6pm cst "Game night 🎉"
+{COMMAND_PREFIX}practice Sept 24 6pm cst "watch2gether session"
+""".format(
+    COMMAND_PREFIX=COMMAND_PREFIX
+)
+
+
+@bot.command(name="practice", help=PRACTICE_HELP)
 @commands.check(is_in_guild)
 async def practice_command(ctx: Context, *, start_time: str):
     logger.info(f"scheduling new practice session: {start_time}")
@@ -404,7 +420,9 @@ async def practice_command(ctx: Context, *, start_time: str):
     human_readable_datetime, quoted = get_and_strip_quoted_text(start_time)
     dtime = parse_human_readable_datetime(human_readable_datetime)
     if not dtime:
-        await ctx.send(f'⚠️Could not parse "{start_time}" into a datetime.')
+        await ctx.send(
+            f'⚠️Could not parse "{start_time}" into a date or time. Make sure to include "am" or "pm" as well as a timezone, e.g. "PDT".'
+        )
         return
     host = getattr(ctx.author, "nick", None) or ctx.author.name
     notes = quoted or ""
