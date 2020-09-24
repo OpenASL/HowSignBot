@@ -5,7 +5,7 @@ import logging
 import random
 import re
 from contextlib import suppress
-from typing import Optional, NamedTuple, List, Callable, Union, Tuple
+from typing import Optional, NamedTuple, List, Callable, Union, Tuple, Set
 from urllib.parse import quote_plus
 
 import discord
@@ -640,7 +640,7 @@ ZOOM_CLOSED_MESSAGE = "✨ _Zoom meeting ended_"
 class ZoomMeetingState(NamedTuple):
     channel_id: int
     message_id: int
-    num_participants: int
+    participant_ids: Set[str]
 
 
 def format_zoom_meeting(meeting: meetings.ZoomMeeting) -> str:
@@ -675,7 +675,7 @@ async def zoom_command(ctx: Context, *, topic: str = ""):
     else:
         message = await ctx.send(content=format_zoom_meeting(meeting))
         meeting_state = ZoomMeetingState(
-            channel_id=ctx.channel.id, message_id=message.id, num_participants=0
+            channel_id=ctx.channel.id, message_id=message.id, participant_ids=set()
         )
         app["zoom_meeting_messages"][meeting.id] = meeting_state
         logger.info(f"setting info for meeting {meeting.id}")
@@ -945,16 +945,21 @@ SUPPORTED_EVENTS = {
 }
 
 
-def format_zoom_meeting_with_participants(old_content: str, num_participants: int) -> str:
+def format_zoom_meeting_with_participants(
+    old_content: str, state: ZoomMeetingState
+) -> str:
     content = old_content.replace("👤", "")
     insert_at = content.find("🚀") - 1
+    num_participants = len(state.participant_ids)
     return content[:insert_at] + "👤" * num_participants + content[insert_at:]
 
 
-async def handle_zoom_event(event, meeting_id):
-    logging.info(f"handling zoom event {event} for meeting {meeting_id}")
+async def handle_zoom_event(data: dict):
+    event = data["event"]
     if event not in SUPPORTED_EVENTS:
         return
+    meeting_id = int(data["payload"]["object"]["id"])
+    logging.info(f"handling zoom event {event} for meeting {meeting_id}")
     try:
         state: ZoomMeetingState = app["zoom_meeting_messages"][meeting_id]
     except KeyError:
@@ -970,27 +975,25 @@ async def handle_zoom_event(event, meeting_id):
         new_content = "✨ _Zoom meeting automatically ended_"
         del app["zoom_meeting_messages"][meeting_id]
     elif event == "meeting.participant_joined":
+        participant_id = data["payload"]["object"]["participant"]["user_id"]
         next_state = ZoomMeetingState(
             channel_id=state.channel_id,
             message_id=state.message_id,
-            num_participants=state.num_participants + 1,
+            participant_ids=state.participant_ids | {participant_id},
         )
-        logger.info(f"incrementing num_participants for meeting id {meeting_id}")
+        logger.info(f"adding new participant for meeting id {meeting_id}")
         app["zoom_meeting_messages"][meeting_id] = next_state
-        new_content = format_zoom_meeting_with_participants(
-            old_content, next_state.num_participants
-        )
+        new_content = format_zoom_meeting_with_participants(old_content, next_state)
     elif event == "meeting.participant_left":
+        participant_id = data["payload"]["object"]["participant"]["user_id"]
         next_state = ZoomMeetingState(
             channel_id=state.channel_id,
             message_id=state.message_id,
-            num_participants=state.num_participants - 1,
+            participant_ids=state.participant_ids - {participant_id},
         )
-        logger.info(f"decrementing num_participants for meeting id {meeting_id}")
+        logger.info(f"removing participant for meeting id {meeting_id}")
         app["zoom_meeting_messages"][meeting_id] = next_state
-        new_content = format_zoom_meeting_with_participants(
-            old_content, next_state.num_participants
-        )
+        new_content = format_zoom_meeting_with_participants(old_content, next_state)
 
     await message.edit(content=new_content)
 
@@ -999,11 +1002,9 @@ async def zoom(request):
     if request.headers["authorization"] != ZOOM_HOOK_TOKEN:
         return web.Response(body="", status=403)
     data = await request.json()
-    event = data["event"]
-    meeting_id = int(data["payload"]["object"]["id"])
     # Zoom expects responses within 3 seconds, so run the handler logic asynchronously
     #   https://marketplace.zoom.us/docs/api-reference/webhook-reference#notification-delivery
-    asyncio.ensure_future(handle_zoom_event(event, meeting_id))
+    asyncio.ensure_future(handle_zoom_event(data))
     return EMPTY_RESPONSE
 
 
