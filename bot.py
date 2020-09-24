@@ -5,7 +5,7 @@ import logging
 import random
 import re
 from contextlib import suppress
-from typing import Optional, NamedTuple, List, Callable, Union, Tuple
+from typing import Optional, NamedTuple, List, Callable, Union, Tuple, Set
 from urllib.parse import quote_plus
 
 import discord
@@ -64,6 +64,8 @@ DAILY_PRACTICE_SEND_TIME = dt.time(hour=int(_hour), minute=int(_min))
 
 env.seal()
 
+STOP_SIGN = "🛑"
+
 logging.basicConfig(level=LOG_LEVEL)
 
 logger = logging.getLogger("bot")
@@ -71,60 +73,6 @@ logger = logging.getLogger("bot")
 bot = commands.Bot(
     command_prefix=COMMAND_PREFIX, case_insensitive=True, owner_id=OWNER_ID
 )
-
-# -----------------------------------------------------------------------------
-
-_spoiler_pattern = re.compile(r"\s*\|\|\s*(.*)\s*\|\|\s*")
-_quotes_pattern = re.compile(r"\s*\"(.*?)\"\s*")
-
-
-def get_spoiler_text(val: str) -> Optional[str]:
-    """Return value within spoiler text if it exists, else return `None`."""
-    match = _spoiler_pattern.match(val)
-    if match:
-        return match.groups()[0]
-    return None
-
-
-def get_and_strip_quoted_text(val: str) -> Tuple[str, Optional[str]]:
-    """Return `val` with quoted text removed as well as as the quoted text."""
-    match = _quotes_pattern.search(val)
-    if match:
-        stripped = _quotes_pattern.sub("", val)
-        quoted = match.groups()[0]
-        return stripped, quoted
-    return val, None
-
-
-def did_you_mean(word, possibilities):
-    try:
-        return difflib.get_close_matches(word, possibilities, n=1, cutoff=0.5)[0]
-    except IndexError:
-        return None
-
-
-def utcnow():
-    return dt.datetime.now(dt.timezone.utc)
-
-
-STOP_SIGN = "🛑"
-
-
-async def wait_for_stop_sign(message: discord.Message, *, replace_with: str):
-    with suppress(Exception):
-        await message.add_reaction(STOP_SIGN)
-
-    def check(reaction, user):
-        return (
-            user.id != bot.user.id
-            and reaction.message.id == message.id
-            and str(reaction.emoji) == STOP_SIGN
-        )
-
-    await bot.wait_for("reaction_add", check=check)
-    logger.info(f"replacing message with: {replace_with}")
-    await message.edit(content=replace_with)
-
 
 # -----------------------------------------------------------------------------
 
@@ -493,10 +441,7 @@ async def schedule_command(ctx: Context):
     await send_refreshable_message(ctx, make_kwargs)
 
 
-@bot.command(
-    name="practice",
-    help="Schedule a practice session",
-)
+@bot.command(name="practice", help="Schedule a practice session")
 @commands.check(is_in_guild)
 async def practice_command(ctx: Context, *, start_time: str):
     logger.info(f"scheduling new practice session: {start_time}")
@@ -695,7 +640,7 @@ ZOOM_CLOSED_MESSAGE = "✨ _Zoom meeting ended_"
 class ZoomMeetingState(NamedTuple):
     channel_id: int
     message_id: int
-    num_participants: int
+    participant_ids: Set[str]
 
 
 def format_zoom_meeting(meeting: meetings.ZoomMeeting) -> str:
@@ -730,7 +675,7 @@ async def zoom_command(ctx: Context, *, topic: str = ""):
     else:
         message = await ctx.send(content=format_zoom_meeting(meeting))
         meeting_state = ZoomMeetingState(
-            channel_id=ctx.channel.id, message_id=message.id, num_participants=0
+            channel_id=ctx.channel.id, message_id=message.id, participant_ids=set()
         )
         app["zoom_meeting_messages"][meeting.id] = meeting_state
         logger.info(f"setting info for meeting {meeting.id}")
@@ -1000,60 +945,66 @@ SUPPORTED_EVENTS = {
 }
 
 
-def format_zoom_meeting_with_participants(old_content: str, num_participants: int) -> str:
+def format_zoom_meeting_with_participants(
+    old_content: str, state: ZoomMeetingState
+) -> str:
     content = old_content.replace("👤", "")
     insert_at = content.find("🚀") - 1
+    num_participants = len(state.participant_ids)
     return content[:insert_at] + "👤" * num_participants + content[insert_at:]
+
+
+async def handle_zoom_event(data: dict):
+    event = data["event"]
+    if event not in SUPPORTED_EVENTS:
+        return
+    meeting_id = int(data["payload"]["object"]["id"])
+    logging.info(f"handling zoom event {event} for meeting {meeting_id}")
+    try:
+        state: ZoomMeetingState = app["zoom_meeting_messages"][meeting_id]
+    except KeyError:
+        logger.info(f"meeting_id {meeting_id} not found. ignoring...")
+        return EMPTY_RESPONSE
+    logger.info(f"fetching message for meeting {meeting_id}")
+    channel = bot.get_channel(state.channel_id)
+    message = await channel.fetch_message(state.message_id)
+    old_content = message.content
+
+    if event == "meeting.ended":
+        logger.info(f"automatically ending meeting {meeting_id}")
+        new_content = "✨ _Zoom meeting automatically ended_"
+        del app["zoom_meeting_messages"][meeting_id]
+    elif event == "meeting.participant_joined":
+        participant_id = data["payload"]["object"]["participant"]["user_id"]
+        next_state = ZoomMeetingState(
+            channel_id=state.channel_id,
+            message_id=state.message_id,
+            participant_ids=state.participant_ids | {participant_id},
+        )
+        logger.info(f"adding new participant for meeting id {meeting_id}")
+        app["zoom_meeting_messages"][meeting_id] = next_state
+        new_content = format_zoom_meeting_with_participants(old_content, next_state)
+    elif event == "meeting.participant_left":
+        participant_id = data["payload"]["object"]["participant"]["user_id"]
+        next_state = ZoomMeetingState(
+            channel_id=state.channel_id,
+            message_id=state.message_id,
+            participant_ids=state.participant_ids - {participant_id},
+        )
+        logger.info(f"removing participant for meeting id {meeting_id}")
+        app["zoom_meeting_messages"][meeting_id] = next_state
+        new_content = format_zoom_meeting_with_participants(old_content, next_state)
+
+    await message.edit(content=new_content)
 
 
 async def zoom(request):
     if request.headers["authorization"] != ZOOM_HOOK_TOKEN:
         return web.Response(body="", status=403)
-    bot: commands.Bot = request.app["bot"]
     data = await request.json()
-    event = data["event"]
-    logging.info(f"handling zoom event: {event}")
-
-    if event in SUPPORTED_EVENTS:
-        meeting_id = int(data["payload"]["object"]["id"])
-        logger.info(f"fetching info for meeting {meeting_id}")
-        try:
-            state: ZoomMeetingState = request.app["zoom_meeting_messages"][meeting_id]
-        except KeyError:
-            logger.warning(f"meeting_id {meeting_id} not found")
-            return EMPTY_RESPONSE
-        channel = bot.get_channel(state.channel_id)
-        message = await channel.fetch_message(state.message_id)
-        old_content = message.content
-
-        if event == "meeting.ended":
-            logger.info(f"automatically ending meeting {meeting_id}")
-            new_content = "✨ _Zoom meeting automatically ended_"
-            del request.app["zoom_meeting_messages"][meeting_id]
-        elif event == "meeting.participant_joined":
-            next_state = ZoomMeetingState(
-                channel_id=state.channel_id,
-                message_id=state.message_id,
-                num_participants=state.num_participants + 1,
-            )
-            logger.info(f"incrementing num_participants for meeting id {meeting_id}")
-            request.app["zoom_meeting_messages"][meeting_id] = next_state
-            new_content = format_zoom_meeting_with_participants(
-                old_content, next_state.num_participants
-            )
-        elif event == "meeting.participant_left":
-            next_state = ZoomMeetingState(
-                channel_id=state.channel_id,
-                message_id=state.message_id,
-                num_participants=state.num_participants - 1,
-            )
-            logger.info(f"decrementing num_participants for meeting id {meeting_id}")
-            request.app["zoom_meeting_messages"][meeting_id] = next_state
-            new_content = format_zoom_meeting_with_participants(
-                old_content, next_state.num_participants
-            )
-
-        await message.edit(content=new_content)
+    # Zoom expects responses within 3 seconds, so run the handler logic asynchronously
+    #   https://marketplace.zoom.us/docs/api-reference/webhook-reference#notification-delivery
+    asyncio.ensure_future(handle_zoom_event(data))
     return EMPTY_RESPONSE
 
 
@@ -1081,6 +1032,57 @@ async def on_shutdown(app):
 
 app.on_startup.append(on_startup)
 app.on_shutdown.append(on_shutdown)
+
+# -----------------------------------------------------------------------------
+
+_spoiler_pattern = re.compile(r"\s*\|\|\s*(.*)\s*\|\|\s*")
+_quotes_pattern = re.compile(r"\s*\"(.*?)\"\s*")
+
+
+def get_spoiler_text(val: str) -> Optional[str]:
+    """Return value within spoiler text if it exists, else return `None`."""
+    match = _spoiler_pattern.match(val)
+    if match:
+        return match.groups()[0]
+    return None
+
+
+def get_and_strip_quoted_text(val: str) -> Tuple[str, Optional[str]]:
+    """Return `val` with quoted text removed as well as as the quoted text."""
+    match = _quotes_pattern.search(val)
+    if match:
+        stripped = _quotes_pattern.sub("", val)
+        quoted = match.groups()[0]
+        return stripped, quoted
+    return val, None
+
+
+def did_you_mean(word, possibilities):
+    try:
+        return difflib.get_close_matches(word, possibilities, n=1, cutoff=0.5)[0]
+    except IndexError:
+        return None
+
+
+def utcnow():
+    return dt.datetime.now(dt.timezone.utc)
+
+
+async def wait_for_stop_sign(message: discord.Message, *, replace_with: str):
+    with suppress(Exception):
+        await message.add_reaction(STOP_SIGN)
+
+    def check(reaction, user):
+        return (
+            user.id != bot.user.id
+            and reaction.message.id == message.id
+            and str(reaction.emoji) == STOP_SIGN
+        )
+
+    await bot.wait_for("reaction_add", check=check)
+    logger.info(f"replacing message with: {replace_with}")
+    await message.edit(content=replace_with)
+
 
 # -----------------------------------------------------------------------------
 
