@@ -396,10 +396,23 @@ async def is_in_guild(ctx: Context):
     return bool(ctx.guild)
 
 
+SCHEDULE_HELP = """List the practice schedule for this server
+Must be used within a server (not a DM).
+
+Examples:
+{COMMAND_PREFIX}schedule
+{COMMAND_PREFIX}schedule tomorrow
+{COMMAND_PREFIX}schedule friday
+{COMMAND_PREFIX}schedule Sept 29
+""".format(
+    COMMAND_PREFIX=COMMAND_PREFIX
+)
+
+
 @bot.command(
     name="schedule",
     aliases=("practices",),
-    help="List today's practice schedule for the current server",
+    help=SCHEDULE_HELP,
 )
 @commands.check(is_in_guild)
 async def schedule_command(ctx: Context, *, when: Optional[str]):
@@ -465,7 +478,7 @@ async def practice_command(ctx: Context, *, start_time: str):
 async def practices_error(ctx, error):
     if isinstance(error, commands.errors.CheckFailure):
         await ctx.send(
-            f"`{COMMAND_PREFIX}{ctx.invoked_with}` must be run within a server."
+            f"`{COMMAND_PREFIX}{ctx.invoked_with}` must be run within a server (not a DM)."
         )
     elif isinstance(error, commands.errors.MissingRequiredArgument):
         logger.info(f"missing argument to '{ctx.invoked_with}'")
