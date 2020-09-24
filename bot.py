@@ -983,7 +983,7 @@ app.on_shutdown.append(on_shutdown)
 # -----------------------------------------------------------------------------
 
 _spoiler_pattern = re.compile(r"\s*\|\|\s*(.*)\s*\|\|\s*")
-_quotes_pattern = re.compile(r"\s*\"(.*?)\"\s*")
+_quotes_pattern = re.compile(r"\s*[\"“](.*?)[\"”]\s*")
 
 
 def get_spoiler_text(val: str) -> Optional[str]:

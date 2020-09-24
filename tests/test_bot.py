@@ -70,6 +70,7 @@ def test_idiom(snapshot, spoiler):
         ("today 2pm", ("today 2pm", None)),
         ('today 2pm ""', ("today 2pm", "")),
         ('today 2pm "steve\'s practice"', ("today 2pm", "steve's practice")),
+        ("today 2pm “smart quotes 😞”", ("today 2pm", "smart quotes 😞")),
     ),
 )
 def test_get_and_strip_quoted_text(value, expected):
