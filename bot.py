@@ -5,7 +5,7 @@ import logging
 import random
 import re
 from contextlib import suppress
-from typing import Optional, NamedTuple, List, Callable, Union, Tuple, Set
+from typing import Optional, NamedTuple, List, Tuple, Set
 from urllib.parse import quote_plus
 
 import discord
@@ -385,47 +385,6 @@ async def is_in_guild(ctx: Context):
     return bool(ctx.guild)
 
 
-async def send_refreshable_message(
-    ctx: Union[Context, discord.TextChannel], make_kwargs: Callable[[], dict]
-):
-    kwargs = await make_kwargs()
-    message = await ctx.send(**kwargs)
-
-    with suppress(Exception):
-        await message.add_reaction("🔄")
-
-    def check(reaction, user):
-        return (
-            user.id != bot.user.id
-            and reaction.message.id == message.id
-            and reaction.emoji == "🔄"
-        )
-
-    while True:
-        try:
-            done, pending = await asyncio.wait(
-                (
-                    bot.wait_for("reaction_add", check=check),
-                    bot.wait_for("reaction_remove", check=check),
-                ),
-                return_when=asyncio.FIRST_COMPLETED,
-            )
-            reaction, user = done.pop().result()
-            for future in pending:
-                future.cancel()
-        except asyncio.TimeoutError:
-            # Try to remove the reactions. Fail silently if the bot doesn't have permission.
-            with suppress(Exception):
-                await message.clear_reactions()
-            return
-        logger.info("refreshing message")
-        kwargs = await make_kwargs()
-        await message.edit(**kwargs)
-        # Try to remove the reaction. Fail silently if the bot doesn't have permission.
-        with suppress(Exception):
-            await message.remove_reaction(reaction, user)
-
-
 @bot.command(
     name="schedule",
     aliases=("practices",),
@@ -434,11 +393,7 @@ async def send_refreshable_message(
 @commands.check(is_in_guild)
 async def schedule_command(ctx: Context):
     guild = ctx.guild
-
-    async def make_kwargs():
-        return {"embed": make_practice_sessions_today_embed(guild.id)}
-
-    await send_refreshable_message(ctx, make_kwargs)
+    await ctx.send(embed=make_practice_sessions_today_embed(guild.id))
 
 
 @bot.command(name="practice", help="Schedule a practice session")
@@ -461,18 +416,11 @@ async def practice_command(ctx: Context, *, start_time: str):
     dtime_pacific = dtime.astimezone(PACIFIC)
     short_display_date = f"{dtime_pacific:%a, %b %d} {format_multi_time(dtime)}"
 
-    async def make_message_kwargs():
-        sessions = get_practice_sessions(
-            guild_id=guild.id, dtime=dtime, worksheet=worksheet
-        )
-        embed = make_practice_session_embed(
-            guild_id=guild.id, sessions=sessions, dtime=dtime
-        )
-        return dict(
-            content=f"🙌 New practice scheduled for *{short_display_date}*", embed=embed
-        )
-
-    await send_refreshable_message(ctx, make_message_kwargs)
+    sessions = get_practice_sessions(guild_id=guild.id, dtime=dtime, worksheet=worksheet)
+    embed = make_practice_session_embed(guild_id=guild.id, sessions=sessions, dtime=dtime)
+    await ctx.send(
+        content=f"🙌 New practice scheduled for *{short_display_date}*", embed=embed
+    )
 
 
 @practice_command.error
@@ -515,10 +463,9 @@ async def daily_practice_message():
             guild = bot.get_guild(guild_id)
             channel = guild.get_channel(channel_id)
 
-            async def make_kwargs():
-                return {"embed": make_practice_sessions_today_embed(guild.id)}
-
-            asyncio.ensure_future(send_refreshable_message(channel, make_kwargs))
+            asyncio.ensure_future(
+                channel.send(embed=make_practice_sessions_today_embed(guild.id))
+            )
         except Exception:
             logger.exception(
                 f"could not send message to guild {guild_id}, channel {channel_id}"
