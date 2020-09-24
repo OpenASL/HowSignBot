@@ -277,8 +277,10 @@ TIME_FORMAT = "%-I:%M %p %Z"
 TIME_FORMAT_NO_MINUTES = "%-I %p %Z"
 
 
-def parse_human_readable_datetime(dstr: str) -> Optional[dt.datetime]:
-    parsed = dateparser.parse(dstr)
+def parse_human_readable_datetime(
+    dstr: str, settings: Optional[dict] = None
+) -> Optional[dt.datetime]:
+    parsed = dateparser.parse(dstr, settings=settings)
     if not parsed:
         return None
     # Use Pacific time if timezone can't be parsed; return a UTC datetime
@@ -301,7 +303,11 @@ def get_practice_worksheet_for_guild(guild_id: int):
 
 
 def get_practice_sessions(
-    guild_id: int, dtime: dt.datetime, *, worksheet=None
+    guild_id: int,
+    dtime: dt.datetime,
+    *,
+    worksheet=None,
+    parse_settings: Optional[dict] = None,
 ) -> List[PracticeSession]:
     worksheet = worksheet or get_practice_worksheet_for_guild(guild_id)
     all_values = worksheet.get_all_values()
@@ -313,7 +319,12 @@ def get_practice_sessions(
                 notes=row[2],
             )
             for row in all_values[2:]  # First two rows are documentation and headers
-            if row and (session_dtime := parse_human_readable_datetime(row[0]))
+            if row
+            and (
+                session_dtime := parse_human_readable_datetime(
+                    row[0], settings=parse_settings
+                )
+            )
             # Compare within Pacific timezone to include all of US
             and (
                 session_dtime.astimezone(PACIFIC).date()
@@ -391,9 +402,17 @@ async def is_in_guild(ctx: Context):
     help="List today's practice schedule for the current server",
 )
 @commands.check(is_in_guild)
-async def schedule_command(ctx: Context):
-    guild = ctx.guild
-    await ctx.send(embed=make_practice_sessions_today_embed(guild.id))
+async def schedule_command(ctx: Context, *, when: Optional[str]):
+    guild_id = ctx.guild.id
+    if when:
+        settings = dict(PREFER_DATES_FROM="future")
+        dtime = parse_human_readable_datetime(when, settings=settings) or utcnow()
+    else:
+        dtime = utcnow()
+        settings = None
+    sessions = get_practice_sessions(guild_id, dtime=dtime, parse_settings=settings)
+    embed = make_practice_session_embed(guild_id, sessions, dtime=dtime)
+    await ctx.send(embed=embed)
 
 
 PRACTICE_HELP = """Schedule a practice session
