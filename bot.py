@@ -680,7 +680,7 @@ def format_zoom_meeting(meeting: meetings.ZoomMeeting) -> str:
     content = f"**Join URL**: <{meeting.join_url}>\n**Passcode**: {meeting.passcode}"
     if meeting.topic:
         content = f"{content}\n**Topic**: {meeting.topic}"
-    return f"{content}\n\n🚀 This meeting is happening now. Go practice!\n*After the meeting ends, click {STOP_SIGN} to remove this message.*"
+    return f"{content}\n\n🚀 This meeting is happening now. Go practice!\n*This message will be cleared when the meeting ends.*"
 
 
 @bot.command(name="zoom", help="BOT OWNER ONLY: Create a Zoom meeting")
@@ -713,7 +713,9 @@ async def zoom_command(ctx: Context, *, topic: str = ""):
         app["zoom_meeting_messages"][meeting.id] = meeting_state
         logger.info(f"setting info for meeting {meeting.id}")
 
-    await wait_for_stop_sign(message, replace_with=ZOOM_CLOSED_MESSAGE)
+    await wait_for_stop_sign(
+        message, add_reaction=False, replace_with=ZOOM_CLOSED_MESSAGE
+    )
 
     with suppress(KeyError):
         del app["zoom_meeting_messages"][meeting.id]
@@ -1097,9 +1099,12 @@ def did_you_mean(word, possibilities):
         return None
 
 
-async def wait_for_stop_sign(message: discord.Message, *, replace_with: str):
-    with suppress(Exception):
-        await message.add_reaction(STOP_SIGN)
+async def wait_for_stop_sign(
+    message: discord.Message, *, add_reaction: bool = True, replace_with: str
+):
+    if add_reaction:
+        with suppress(Exception):
+            await message.add_reaction(STOP_SIGN)
 
     def check(reaction, user):
         return (
