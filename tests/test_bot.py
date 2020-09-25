@@ -1,3 +1,4 @@
+import datetime as dt
 import random
 
 import pytest
@@ -75,3 +76,18 @@ def test_idiom(snapshot, spoiler):
 )
 def test_get_and_strip_quoted_text(value, expected):
     assert bot.get_and_strip_quoted_text(value) == expected
+
+
+@pytest.mark.parametrize(
+    "value",
+    (
+        "today 8:25pm edt",
+        "today 2pm edt",
+        "tomorrow 2pm pdt",
+        "friday 2pm cst",
+        "9/25 2:30 pm cdt",
+    ),
+)
+def test_parse_human_readable_datetime(value):
+    dtime = bot.parse_human_readable_datetime(value)
+    assert dtime.tzinfo == dt.timezone.utc

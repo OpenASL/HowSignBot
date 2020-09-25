@@ -271,8 +271,20 @@ def get_gsheet_client():
 
 # -----------------------------------------------------------------------------
 
+
+def utcnow():
+    return dt.datetime.now(dt.timezone.utc)
+
+
 EASTERN = pytz.timezone("US/Eastern")
+
 PACIFIC = pytz.timezone("US/Pacific")
+
+# EDT and PDT change to EST and PST during the winter
+# Show the current name in docs
+EASTERN_CURRENT_NAME = utcnow().astimezone(EASTERN).strftime("%Z")
+PACIFIC_CURRENT_NAME = utcnow().astimezone(PACIFIC).strftime("%Z")
+
 TIME_FORMAT = "%-I:%M %p %Z"
 TIME_FORMAT_NO_MINUTES = "%-I %p %Z"
 
@@ -347,9 +359,10 @@ NO_PRACTICES = """
 *There are no scheduled practices yet!*
 
 To schedule a practice, edit the schedule below or use the `{COMMAND_PREFIX}practice` command.
-Example: `{COMMAND_PREFIX}practice today at 2pm PDT`
+Example: `{COMMAND_PREFIX}practice today at 2pm {pacific}`
 """.format(
-    COMMAND_PREFIX=COMMAND_PREFIX
+    COMMAND_PREFIX=COMMAND_PREFIX,
+    pacific=PACIFIC_CURRENT_NAME.lower(),
 )
 
 
@@ -397,6 +410,8 @@ async def is_in_guild(ctx: Context):
 
 
 SCHEDULE_HELP = """List the practice schedule for this server
+
+Defaults to sending today's schedule.
 Must be used within a server (not a DM).
 
 Examples:
@@ -404,6 +419,7 @@ Examples:
 {COMMAND_PREFIX}schedule tomorrow
 {COMMAND_PREFIX}schedule friday
 {COMMAND_PREFIX}schedule Sept 29
+{COMMAND_PREFIX}schedule 10/3
 """.format(
     COMMAND_PREFIX=COMMAND_PREFIX
 )
@@ -432,30 +448,41 @@ PRACTICE_HELP = """Schedule a practice session
 
 This will add an entry to the practice spreadsheet (use ?schedule to get the link).
 You may optionally add notes within double quotes.
-IMPORTANT: Don't forget to include "am" or "pm" as well as a timezone, e.g. "pdt".
+Must be used within a server (not a DM).
+
+IMPORTANT: Don't forget to include "am" or "pm" as well as a timezone, e.g. "{pacific}".
 
 Examples:
-{COMMAND_PREFIX}practice 2pm pdt
-{COMMAND_PREFIX}practice tomorrow 5pm edt "chat for ~1 hour"
-{COMMAND_PREFIX}practice saturday 6pm cst "Game night 🎉"
-{COMMAND_PREFIX}practice Sept 24 6pm cst "watch2gether session"
+{COMMAND_PREFIX}practice 2pm {pacific}
+{COMMAND_PREFIX}practice tomorrow 5pm {eastern} "chat for ~1 hour"
+{COMMAND_PREFIX}practice saturday 6pm {pacific} "Game night 🎉"
+{COMMAND_PREFIX}practice 9/24 6pm {eastern} "watch2gether session"
 """.format(
-    COMMAND_PREFIX=COMMAND_PREFIX
+    COMMAND_PREFIX=COMMAND_PREFIX,
+    pacific=PACIFIC_CURRENT_NAME.lower(),
+    eastern=EASTERN_CURRENT_NAME.lower(),
 )
 
 
 @bot.command(name="practice", help=PRACTICE_HELP)
 @commands.check(is_in_guild)
 async def practice_command(ctx: Context, *, start_time: str):
-    logger.info(f"scheduling new practice session: {start_time}")
     guild = ctx.guild
+    logger.info(f"attempting to schedule new practice session: {start_time}")
     human_readable_datetime, quoted = get_and_strip_quoted_text(start_time)
-    dtime = parse_human_readable_datetime(human_readable_datetime)
+    settings = dict(PREFER_DATES_FROM="future")
+    dtime = parse_human_readable_datetime(human_readable_datetime, settings=settings)
     if not dtime:
         await ctx.send(
-            f'⚠️Could not parse "{start_time}" into a date or time. Make sure to include "am" or "pm" as well as a timezone, e.g. "PDT".'
+            f'⚠️Could not parse "{start_time}" into a date or time. Make sure to include "am" or "pm" as well as a timezone, e.g. "{PACIFIC_CURRENT_NAME.lower()}".'
         )
         return
+    if dtime < utcnow():
+        await ctx.send(
+            "⚠Parsed date or time is in the past. Try again with a future date or time."
+        )
+        return
+
     host = getattr(ctx.author, "nick", None) or ctx.author.name
     notes = quoted or ""
     display_dtime = dtime.astimezone(PACIFIC).strftime("%A, %B %d %I:%M %p %Z %Y")
@@ -484,7 +511,7 @@ async def practices_error(ctx, error):
         logger.info(f"missing argument to '{ctx.invoked_with}'")
         await ctx.send(
             f"⚠️To schedule a practice, enter a time after `{COMMAND_PREFIX}{ctx.invoked_with}`.\n"
-            f"Example: `{COMMAND_PREFIX}{ctx.invoked_with} today at 2pm EDT`\n"
+            f"Example: `{COMMAND_PREFIX}{ctx.invoked_with} today at 2pm {EASTERN_CURRENT_NAME.lower()}`\n"
             f"Enter `{COMMAND_PREFIX}schedule` to see today's schedule."
         )
     else:
@@ -1059,10 +1086,6 @@ def did_you_mean(word, possibilities):
         return difflib.get_close_matches(word, possibilities, n=1, cutoff=0.5)[0]
     except IndexError:
         return None
-
-
-def utcnow():
-    return dt.datetime.now(dt.timezone.utc)
 
 
 async def wait_for_stop_sign(message: discord.Message, *, replace_with: str):
