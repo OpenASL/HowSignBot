@@ -463,11 +463,24 @@ Examples:
     eastern=EASTERN_CURRENT_NAME.lower(),
 )
 
+PRACTICE_ERROR = """⚠️To schedule a practice, enter a time after `{COMMAND_PREFIX}practice`.
+Example: `{COMMAND_PREFIX}practice today at 2pm {eastern}`
+Enter `{COMMAND_PREFIX}schedule` to see today's schedule.
+""".format(
+    COMMAND_PREFIX=COMMAND_PREFIX, eastern=EASTERN_CURRENT_NAME.lower()
+)
+
 
 @bot.command(name="practice", help=PRACTICE_HELP)
 @commands.check(is_in_guild)
 async def practice_command(ctx: Context, *, start_time: str):
     guild = ctx.guild
+    if start_time in {"today", "tomorrow"}:  # Common mistakes
+        logger.info(
+            f"{ctx.invoked_with} invoked with {start_time}. sending error message"
+        )
+        await ctx.send(PRACTICE_ERROR)
+        return
     logger.info(f"attempting to schedule new practice session: {start_time}")
     human_readable_datetime, quoted = get_and_strip_quoted_text(start_time)
     settings = dict(PREFER_DATES_FROM="future")
@@ -509,11 +522,7 @@ async def practices_error(ctx, error):
         )
     elif isinstance(error, commands.errors.MissingRequiredArgument):
         logger.info(f"missing argument to '{ctx.invoked_with}'")
-        await ctx.send(
-            f"⚠️To schedule a practice, enter a time after `{COMMAND_PREFIX}{ctx.invoked_with}`.\n"
-            f"Example: `{COMMAND_PREFIX}{ctx.invoked_with} today at 2pm {EASTERN_CURRENT_NAME.lower()}`\n"
-            f"Enter `{COMMAND_PREFIX}schedule` to see today's schedule."
-        )
+        await ctx.send(PRACTICE_ERROR)
     else:
         logger.error(
             f"unexpected error when handling '{ctx.invoked_with}'", exc_info=error
