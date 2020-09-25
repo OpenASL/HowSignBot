@@ -155,11 +155,6 @@ def sign_impl(word: str):
 
 @bot.command(name="sign", aliases=("howsign",), help=SIGN_HELP)
 async def sign_command(ctx: Context, *, word: str):
-    # TODO: Remove. This is just for identifying guild and channel IDs for the daily schedule
-    if ctx.guild:
-        logger.info(
-            f"sign command invoked in guild {ctx.guild.id} ({ctx.guild.name}), channel {ctx.channel.id} (#{ctx.channel.name})"
-        )
     await ctx.send(**sign_impl(word))
 
 
@@ -724,7 +719,6 @@ async def zoom_command(ctx: Context, *, topic: str = ""):
 @zoom_command.error
 async def zoom_error(ctx, error):
     if isinstance(error, commands.errors.CheckFailure):
-        logger.info(f"unauthorized zoom access attempt by {ctx.author}")
         await ctx.send(
             f"⚠️ `{COMMAND_PREFIX}{ctx.invoked_with}` can only be used by the bot owner because it is using their Zoom account."
         )
@@ -998,7 +992,6 @@ async def handle_zoom_event(data: dict):
     try:
         state: ZoomMeetingState = app["zoom_meeting_messages"][meeting_id]
     except KeyError:
-        logger.info(f"meeting_id {meeting_id} not found. ignoring...")
         return EMPTY_RESPONSE
     logger.info(f"fetching message for meeting {meeting_id}")
     channel = bot.get_channel(state.channel_id)
