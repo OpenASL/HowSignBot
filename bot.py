@@ -988,12 +988,11 @@ async def handle_zoom_event(data: dict):
     if event not in SUPPORTED_EVENTS:
         return
     meeting_id = int(data["payload"]["object"]["id"])
-    logging.info(f"handling zoom event {event} for meeting {meeting_id}")
     try:
         state: ZoomMeetingState = app["zoom_meeting_messages"][meeting_id]
     except KeyError:
         return EMPTY_RESPONSE
-    logger.info(f"fetching message for meeting {meeting_id}")
+    logging.info(f"handling zoom event {event} for meeting {meeting_id}")
     channel = bot.get_channel(state.channel_id)
     message = await channel.fetch_message(state.message_id)
     old_content = message.content
