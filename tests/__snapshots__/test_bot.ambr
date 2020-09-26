@@ -137,6 +137,193 @@
     ',
   }
 ---
+# name: test_practice[2pm edt "chat and games! \U0001f389"]
+  <class 'tuple'> (
+    'Friday, September 25 11:00 AM PDT 2020',
+    'Steve',
+    'chat and games! 🎉',
+  )
+---
+# name: test_practice[2pm edt]
+  <class 'tuple'> (
+    'Friday, September 25 11:00 AM PDT 2020',
+    'Steve',
+    '',
+  )
+---
+# name: test_practice[9/24 1:45pm edt \u201caround 45 min.-1 hour\u201d]
+  <class 'tuple'> (
+    'Friday, September 24 10:45 AM PDT 2021',
+    'Steve',
+    'around 45 min.-1 hour',
+  )
+---
+# name: test_practice[9/27 9am cdt]
+  <class 'tuple'> (
+    'Sunday, September 27 07:00 AM PDT 2020',
+    'Steve',
+    '',
+  )
+---
+# name: test_practice[sunday 10:30pm pdt]
+  <class 'tuple'> (
+    'Sunday, September 27 10:30 PM PDT 2020',
+    'Steve',
+    '',
+  )
+---
+# name: test_practice[tomorrow 2pm pdt]
+  <class 'tuple'> (
+    'Saturday, September 26 02:00 PM PDT 2020',
+    'Steve',
+    '',
+  )
+---
+# name: test_practice_invalid[invalid]
+  <class 'dict'> {
+    'content': '⚠️Could not parse "invalid" into a date or time. Make sure to include "am" or "pm" as well as a timezone, e.g. "pdt".',
+  }
+---
+# name: test_practice_invalid[today]
+  <class 'dict'> {
+    'content': '
+      ⚠️To schedule a practice, enter a time after `!practice`.
+      Example: `!practice today at 2pm edt`
+      Enter `!schedule` to see today's schedule.
+  
+    ',
+  }
+---
+# name: test_practice_invalid[tomorrow]
+  <class 'dict'> {
+    'content': '
+      ⚠️To schedule a practice, enter a time after `!practice`.
+      Example: `!practice today at 2pm edt`
+      Enter `!schedule` to see today's schedule.
+  
+    ',
+  }
+---
+# name: test_schedule[9/27]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=<Colour value=15105570>,
+      colour=<Colour value=15105570>,
+      description='Sunday, September 27',
+      fields=<class 'list'> [
+        EmbedProxy(inline=False, name='11 AM PDT / 2 PM EDT', value='\nNotes: another 1️⃣'),
+        EmbedProxy(inline=True, name='🗓', value='[Schedule or edit a practice](https://docs.google.com/spreadsheets/d/abc/edit)'),
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title=Embed.Empty,
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
+# name: test_schedule[None]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=<Colour value=15105570>,
+      colour=<Colour value=15105570>,
+      description='Today - Friday, September 25',
+      fields=<class 'list'> [
+        EmbedProxy(inline=False, name='2 PM PDT / 5 PM EDT', value='Host: Steve\nNotes: recurring'),
+        EmbedProxy(inline=True, name='🗓', value='[Schedule or edit a practice](https://docs.google.com/spreadsheets/d/abc/edit)'),
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title=Embed.Empty,
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
+# name: test_schedule[saturday]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=<Colour value=15105570>,
+      colour=<Colour value=15105570>,
+      description='Tomorrow - Saturday, September 26',
+      fields=<class 'list'> [
+        EmbedProxy(inline=False, name='2 PM PDT / 5 PM EDT', value='Host: Steve\nNotes: one time'),
+        EmbedProxy(inline=True, name='🗓', value='[Schedule or edit a practice](https://docs.google.com/spreadsheets/d/abc/edit)'),
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title=Embed.Empty,
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
+# name: test_schedule[today]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=<Colour value=15105570>,
+      colour=<Colour value=15105570>,
+      description='Today - Friday, September 25',
+      fields=<class 'list'> [
+        EmbedProxy(inline=False, name='2 PM PDT / 5 PM EDT', value='Host: Steve\nNotes: recurring'),
+        EmbedProxy(inline=True, name='🗓', value='[Schedule or edit a practice](https://docs.google.com/spreadsheets/d/abc/edit)'),
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title=Embed.Empty,
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
+# name: test_schedule[tomorrow]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=<Colour value=15105570>,
+      colour=<Colour value=15105570>,
+      description='Tomorrow - Saturday, September 26',
+      fields=<class 'list'> [
+        EmbedProxy(inline=False, name='2 PM PDT / 5 PM EDT', value='Host: Steve\nNotes: one time'),
+        EmbedProxy(inline=True, name='🗓', value='[Schedule or edit a practice](https://docs.google.com/spreadsheets/d/abc/edit)'),
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title=Embed.Empty,
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
 # name: test_sentence[None]
   <class 'dict'> {
     'content': "Hang on, my kittens are scratching at the bathtub and they'll upset by the lack of biscuits.",
