@@ -26,7 +26,7 @@ import meetings
 
 # -----------------------------------------------------------------------------
 
-__version__ = "20.60.0"
+__version__ = "20.61.0"
 
 app = web.Application()  # web app for listening to webhooks
 
