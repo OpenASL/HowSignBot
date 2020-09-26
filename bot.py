@@ -964,11 +964,13 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
 
 # -----------------------------------------------------------------------------
 
-EMPTY_RESPONSE = web.Response(body="", status=200)
+
+def empty_response():
+    return web.Response(body="", status=200)
 
 
 async def ping(request):
-    return EMPTY_RESPONSE
+    return empty_response()
 
 
 SUPPORTED_EVENTS = {
@@ -1036,7 +1038,7 @@ async def zoom(request):
     # Zoom expects responses within 3 seconds, so run the handler logic asynchronously
     #   https://marketplace.zoom.us/docs/api-reference/webhook-reference#notification-delivery
     asyncio.ensure_future(handle_zoom_event(data))
-    return EMPTY_RESPONSE
+    return empty_response()
 
 
 app.add_routes([web.get("/ping", ping), web.post("/zoom", zoom)])
