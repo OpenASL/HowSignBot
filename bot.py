@@ -819,11 +819,7 @@ Queued video: <{video_url}>
 WATCH2GETHER_CLOSED_MESSAGE = "✨ _watch2gether room closed_"
 
 
-@bot.command(
-    name="w2g",
-    aliases=("wtg", "watch2gether"),
-    help=WATCH2GETHER_HELP,
-)
+@bot.command(name="w2g", aliases=("wtg", "watch2gether"), help=WATCH2GETHER_HELP)
 async def watch2gether_command(ctx: Context, video_url: str = None):
     logger.info("creating watch2gether meeting")
     try:
@@ -944,6 +940,32 @@ def catchphrase_impl(category: str = None):
 )
 async def catchphrase_command(ctx: Context, category: str = None):
     await ctx.send(**catchphrase_impl(category))
+
+
+# -----------------------------------------------------------------------------
+
+
+def ActivityTypeConverter(argument):
+    if argument not in discord.ActivityType._enum_member_names_:
+        raise commands.CommandError(f'⚠️"{argument}" is not a valid activity type.')
+    return getattr(discord.ActivityType, argument)
+
+
+@bot.command(name="presence", help="BOT OWNER ONLY: Change bot precense")
+@commands.is_owner()
+async def presence_command(ctx: Context, activity_type: ActivityTypeConverter, name: str):
+    activity = discord.Activity(
+        name=name.format(p=COMMAND_PREFIX),
+        type=activity_type,
+    )
+    logger.info(f"changing presence to {activity}")
+    await bot.change_presence(activity=activity)
+
+
+@presence_command.error
+async def presence_command_error(ctx, error):
+    message = error.args[0]
+    await ctx.send(content=message)
 
 
 # -----------------------------------------------------------------------------
