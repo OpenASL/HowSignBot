@@ -548,7 +548,7 @@ async def daily_practice_message():
             guild = bot.get_guild(guild_id)
             channel = guild.get_channel(channel_id)
 
-            asyncio.ensure_future(
+            asyncio.create_task(
                 channel.send(embed=make_practice_sessions_today_embed(guild.id))
             )
         except Exception:
@@ -1037,7 +1037,7 @@ async def zoom(request):
     data = await request.json()
     # Zoom expects responses within 3 seconds, so run the handler logic asynchronously
     #   https://marketplace.zoom.us/docs/api-reference/webhook-reference#notification-delivery
-    asyncio.ensure_future(handle_zoom_event(data))
+    asyncio.create_task(handle_zoom_event(data))
     return empty_response()
 
 
