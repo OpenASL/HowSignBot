@@ -137,6 +137,34 @@
     ',
   }
 ---
+# name: test_practice["games" 10am edt Sunday]
+  <class 'tuple'> (
+    'Sunday, September 27 07:00 AM PDT 2020',
+    'Steve',
+    'games',
+  )
+---
+# name: test_practice["games" at 10am edt on 9/27]
+  <class 'tuple'> (
+    'Sunday, September 27 07:00 AM PDT 2020',
+    'Steve',
+    'games',
+  )
+---
+# name: test_practice["games" at 10am edt on Sunday]
+  <class 'tuple'> (
+    'Sunday, September 27 07:00 AM PDT 2020',
+    'Steve',
+    'games',
+  )
+---
+# name: test_practice[10am edt "games" on 9/27]
+  <class 'tuple'> (
+    'Sunday, September 27 07:00 AM PDT 2020',
+    'Steve',
+    'games',
+  )
+---
 # name: test_practice[2pm edt "chat and games! \U0001f389"]
   <class 'tuple'> (
     'Friday, September 25 11:00 AM PDT 2020',

@@ -109,6 +109,10 @@ def test_schedule(snapshot, monkeypatch, mock_worksheet, when):
         "tomorrow 2pm pdt",
         "sunday 10:30pm pdt",
         "9/27 9am cdt",
+        '"games" 10am edt Sunday',
+        '"games" at 10am edt on Sunday',
+        '"games" at 10am edt on 9/27',
+        '10am edt "games" on 9/27',
     ),
 )
 @freeze_time("2020-09-25 14:00:00")

@@ -451,6 +451,7 @@ Tips:
 
 * Don't forget to include "am" or "pm".
 * Don't forget to include a timezone, e.g. "{pacific}".
+* If you don't include a date, today is assumed.
 * You may optionally add notes within double quotes.
 
 Examples:
@@ -1072,7 +1073,7 @@ app.on_shutdown.append(on_shutdown)
 # -----------------------------------------------------------------------------
 
 _spoiler_pattern = re.compile(r"\s*\|\|\s*(.*)\s*\|\|\s*")
-_quotes_pattern = re.compile(r"\s*[\"“](.*?)[\"”]\s*")
+_quotes_pattern = re.compile(r"[\"“](.*?)[\"”]")
 
 
 def get_spoiler_text(val: str) -> Optional[str]:
@@ -1087,7 +1088,7 @@ def get_and_strip_quoted_text(val: str) -> Tuple[str, Optional[str]]:
     """Return `val` with quoted text removed as well as as the quoted text."""
     match = _quotes_pattern.search(val)
     if match:
-        stripped = _quotes_pattern.sub("", val)
+        stripped = _quotes_pattern.sub("", val).strip()
         quoted = match.groups()[0]
         return stripped, quoted
     return val, None
