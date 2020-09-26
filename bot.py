@@ -445,10 +445,13 @@ async def schedule_command(ctx: Context, *, when: Optional[str]):
 PRACTICE_HELP = """Schedule a practice session
 
 This will add an entry to the practice spreadsheet (use ?schedule to get the link).
-You may optionally add notes within double quotes.
 Must be used within a server (not a DM).
 
-IMPORTANT: Don't forget to include "am" or "pm" as well as a timezone, e.g. "{pacific}".
+Tips:
+
+* Don't forget to include "am" or "pm".
+* Don't forget to include a timezone, e.g. "{pacific}".
+* You may optionally add notes within double quotes.
 
 Examples:
 {COMMAND_PREFIX}practice 2pm {pacific}
