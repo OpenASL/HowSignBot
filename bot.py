@@ -153,7 +153,7 @@ def sign_impl(word: str):
     return {"embed": embed}
 
 
-@bot.command(name="sign", aliases=("howsign",), help=SIGN_HELP)
+@bot.command(name="sign", aliases=("howsign", COMMAND_PREFIX), help=SIGN_HELP)
 async def sign_command(ctx: Context, *, word: str):
     await ctx.send(**sign_impl(word))
 
