@@ -1003,7 +1003,7 @@ async def handle_zoom_event(data: dict):
 
     if event == "meeting.ended":
         logger.info(f"automatically ending meeting {meeting_id}")
-        new_content = "✨ _Zoom meeting automatically ended_"
+        new_content = "✨ _Zoom meeting ended by host_"
         del app["zoom_meeting_messages"][meeting_id]
     elif event == "meeting.participant_joined":
         participant_id = data["payload"]["object"]["participant"]["user_id"]
