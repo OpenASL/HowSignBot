@@ -137,6 +137,13 @@
     ',
   }
 ---
+# name: test_practice["classifiers" at 6pm pdt]
+  <class 'tuple'> (
+    'Friday, September 25 06:00 PM PDT 2020',
+    'Steve',
+    'classifiers',
+  )
+---
 # name: test_practice["games" 10am edt Sunday]
   <class 'tuple'> (
     'Sunday, September 27 07:00 AM PDT 2020',
@@ -193,6 +200,13 @@
     '',
   )
 ---
+# name: test_practice[at 2pm edt]
+  <class 'tuple'> (
+    'Friday, September 25 11:00 AM PDT 2020',
+    'Steve',
+    '',
+  )
+---
 # name: test_practice[sunday 10:30pm pdt]
   <class 'tuple'> (
     'Sunday, September 27 10:30 PM PDT 2020',
@@ -210,6 +224,26 @@
 # name: test_practice_invalid[invalid]
   <class 'dict'> {
     'content': '⚠️Could not parse "invalid" into a date or time. Make sure to include "am" or "pm" as well as a timezone, e.g. "pdt".',
+  }
+---
+# name: test_practice_invalid[today edt]
+  <class 'dict'> {
+    'content': '
+      ⚠️To schedule a practice, enter a time after `!practice`.
+      Example: `!practice today at 2pm edt`
+      Enter `!schedule` to see today's schedule.
+  
+    ',
+  }
+---
+# name: test_practice_invalid[today pdt]
+  <class 'dict'> {
+    'content': '
+      ⚠️To schedule a practice, enter a time after `!practice`.
+      Example: `!practice today at 2pm edt`
+      Enter `!schedule` to see today's schedule.
+  
+    ',
   }
 ---
 # name: test_practice_invalid[today]

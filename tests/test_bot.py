@@ -104,6 +104,7 @@ def test_schedule(snapshot, monkeypatch, mock_worksheet, when):
     "start_time",
     (
         "2pm edt",
+        "at 2pm edt",
         '2pm edt "chat and games! 🎉"',
         "9/24 1:45pm edt “around 45 min.-1 hour”",
         "tomorrow 2pm pdt",
@@ -113,6 +114,7 @@ def test_schedule(snapshot, monkeypatch, mock_worksheet, when):
         '"games" at 10am edt on Sunday',
         '"games" at 10am edt on 9/27',
         '10am edt "games" on 9/27',
+        '"classifiers" at 6pm pdt',
     ),
 )
 @freeze_time("2020-09-25 14:00:00")
@@ -128,6 +130,8 @@ def test_practice(snapshot, monkeypatch, mock_worksheet, start_time):
         "invalid",
         "today",
         "tomorrow",
+        "today edt",
+        "today pdt",
     ),
 )
 @freeze_time("2020-09-25 14:00:00")

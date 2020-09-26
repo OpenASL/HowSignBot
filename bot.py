@@ -459,6 +459,7 @@ Examples:
 {COMMAND_PREFIX}practice tomorrow 5pm {eastern} "chat for ~1 hour"
 {COMMAND_PREFIX}practice saturday 6pm {pacific} "Game night 🎉"
 {COMMAND_PREFIX}practice 9/24 6pm {eastern} "watch2gether session"
+{COMMAND_PREFIX}practice "classifiers" at 6pm {pacific}
 """.format(
     COMMAND_PREFIX=COMMAND_PREFIX,
     pacific=PACIFIC_CURRENT_NAME.lower(),
@@ -474,7 +475,21 @@ Enter `{COMMAND_PREFIX}schedule` to see today's schedule.
 
 
 def practice_impl(*, guild_id: int, host: str, start_time: str):
-    if start_time in {"today", "tomorrow"}:  # Common mistakes
+    if start_time.lower() in {
+        # Common mistakes: don't try to parse these into a datetime
+        "today",
+        "tomorrow",
+        "today edt",
+        "today est",
+        "today cdt",
+        "today cst",
+        "today mdt",
+        "today mst",
+        "today mdt",
+        "today mst",
+        "today pdt",
+        "today pst",
+    }:
         logger.info(f"practice invoked with {start_time}. sending error message")
         return {"content": PRACTICE_ERROR}
     logger.info(f"attempting to schedule new practice session: {start_time}")
