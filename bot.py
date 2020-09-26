@@ -782,11 +782,13 @@ async def speakeasy_command(ctx: Context, *, name: Optional[str]):
     content = f"️🍻 **Speakeasy**\nJoin URL: <{join_url}>"
     if name:
         content = f"{content}\n**Name**: {name}"
-    content = f"{content}\n🚀 This event is happening now. Make a friend!\n*After the event ends, click {STOP_SIGN} to remove this message.*"
+    content = f"{content}\n🚀 This event is happening now. Make a friend!"
     logger.info("sending speakeasy info")
     message = await ctx.send(content=content)
 
-    await wait_for_stop_sign(message, replace_with=SPEAKEASY_CLOSED_MESSAGE)
+    await wait_for_stop_sign(
+        message, add_reaction=False, replace_with=SPEAKEASY_CLOSED_MESSAGE
+    )
 
 
 # -----------------------------------------------------------------------------
