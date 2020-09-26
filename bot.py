@@ -420,6 +420,18 @@ Examples:
 )
 
 
+def schedule_impl(guild_id: int, when: Optional[str]):
+    if when and when.strip().lower() != "today":
+        settings = dict(PREFER_DATES_FROM="future")
+        dtime = parse_human_readable_datetime(when, settings=settings) or utcnow()
+    else:
+        settings = None
+        dtime = utcnow()
+    sessions = get_practice_sessions(guild_id, dtime=dtime, parse_settings=settings)
+    embed = make_practice_session_embed(guild_id, sessions, dtime=dtime)
+    return {"embed": embed}
+
+
 @bot.command(
     name="schedule",
     aliases=("practices",),
@@ -427,16 +439,7 @@ Examples:
 )
 @commands.check(is_in_guild)
 async def schedule_command(ctx: Context, *, when: Optional[str]):
-    guild_id = ctx.guild.id
-    if when:
-        settings = dict(PREFER_DATES_FROM="future")
-        dtime = parse_human_readable_datetime(when, settings=settings) or utcnow()
-    else:
-        dtime = utcnow()
-        settings = None
-    sessions = get_practice_sessions(guild_id, dtime=dtime, parse_settings=settings)
-    embed = make_practice_session_embed(guild_id, sessions, dtime=dtime)
-    await ctx.send(embed=embed)
+    await ctx.send(**schedule_impl(guild_id=ctx.guild.id, when=when))
 
 
 PRACTICE_HELP = """Schedule a practice session
@@ -466,45 +469,46 @@ Enter `{COMMAND_PREFIX}schedule` to see today's schedule.
 )
 
 
-@bot.command(name="practice", help=PRACTICE_HELP)
-@commands.check(is_in_guild)
-async def practice_command(ctx: Context, *, start_time: str):
-    guild = ctx.guild
+def practice_impl(*, guild_id: int, host: str, start_time: str):
     if start_time in {"today", "tomorrow"}:  # Common mistakes
-        logger.info(
-            f"{ctx.invoked_with} invoked with {start_time}. sending error message"
-        )
-        await ctx.send(PRACTICE_ERROR)
-        return
+        logger.info(f"practice invoked with {start_time}. sending error message")
+        return {"content": PRACTICE_ERROR}
     logger.info(f"attempting to schedule new practice session: {start_time}")
     human_readable_datetime, quoted = get_and_strip_quoted_text(start_time)
     settings = dict(PREFER_DATES_FROM="future")
     dtime = parse_human_readable_datetime(human_readable_datetime, settings=settings)
     if not dtime:
-        await ctx.send(
-            f'⚠️Could not parse "{start_time}" into a date or time. Make sure to include "am" or "pm" as well as a timezone, e.g. "{PACIFIC_CURRENT_NAME.lower()}".'
-        )
-        return
+        return {
+            "content": f'⚠️Could not parse "{start_time}" into a date or time. Make sure to include "am" or "pm" as well as a timezone, e.g. "{PACIFIC_CURRENT_NAME.lower()}".'
+        }
     if dtime < utcnow():
-        await ctx.send(
-            "⚠Parsed date or time is in the past. Try again with a future date or time."
-        )
-        return
+        return {
+            "content": "⚠Parsed date or time is in the past. Try again with a future date or time."
+        }
 
-    host = getattr(ctx.author, "nick", None) or ctx.author.name
     notes = quoted or ""
     display_dtime = dtime.astimezone(PACIFIC).strftime("%A, %B %d %I:%M %p %Z %Y")
     row = (display_dtime, host, notes)
     logger.info(f"adding new practice session to sheet: {row}")
-    worksheet = get_practice_worksheet_for_guild(guild.id)
+    worksheet = get_practice_worksheet_for_guild(guild_id)
     worksheet.append_row(row)
     dtime_pacific = dtime.astimezone(PACIFIC)
     short_display_date = f"{dtime_pacific:%a, %b %d} {format_multi_time(dtime)}"
 
-    sessions = get_practice_sessions(guild_id=guild.id, dtime=dtime, worksheet=worksheet)
-    embed = make_practice_session_embed(guild_id=guild.id, sessions=sessions, dtime=dtime)
+    sessions = get_practice_sessions(guild_id=guild_id, dtime=dtime, worksheet=worksheet)
+    embed = make_practice_session_embed(guild_id=guild_id, sessions=sessions, dtime=dtime)
+    return {
+        "content": f"🙌 New practice scheduled for *{short_display_date}*",
+        "embed": embed,
+    }
+
+
+@bot.command(name="practice", help=PRACTICE_HELP)
+@commands.check(is_in_guild)
+async def practice_command(ctx: Context, *, start_time: str):
+    host = getattr(ctx.author, "nick", None) or ctx.author.name
     await ctx.send(
-        content=f"🙌 New practice scheduled for *{short_display_date}*", embed=embed
+        **practice_impl(guild_id=ctx.guild.id, host=host, start_time=start_time)
     )
 
 
