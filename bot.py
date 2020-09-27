@@ -354,7 +354,7 @@ NO_PRACTICES = """
 *There are no scheduled practices yet!*
 
 To schedule a practice, edit the schedule below or use the `{COMMAND_PREFIX}practice` command.
-Example: `{COMMAND_PREFIX}practice today at 2pm {pacific}`
+Example: `{COMMAND_PREFIX}practice 2pm {pacific}`
 """.format(
     COMMAND_PREFIX=COMMAND_PREFIX,
     pacific=PACIFIC_CURRENT_NAME.lower(),
