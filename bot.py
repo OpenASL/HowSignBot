@@ -80,8 +80,8 @@ bot = commands.Bot(
 @bot.event
 async def on_ready():
     activity = discord.Activity(
-        name=f"{COMMAND_PREFIX}sign | {COMMAND_PREFIX}handshapes",
-        type=discord.ActivityType.playing,
+        name=f"{COMMAND_PREFIX}sign | {COMMAND_PREFIX}{COMMAND_PREFIX}",
+        type=discord.ActivityType.watching,
     )
     await bot.change_presence(activity=activity)
     daily_practice_message.start()
@@ -945,7 +945,7 @@ async def catchphrase_command(ctx: Context, category: str = None):
 # -----------------------------------------------------------------------------
 
 
-def ActivityTypeConverter(argument):
+def ActivityTypeConverter(argument) -> discord.ActivityType:
     if argument not in discord.ActivityType._enum_member_names_:
         raise commands.CommandError(f'⚠️"{argument}" is not a valid activity type.')
     return getattr(discord.ActivityType, argument)
@@ -960,6 +960,7 @@ async def presence_command(ctx: Context, activity_type: ActivityTypeConverter, n
     )
     logger.info(f"changing presence to {activity}")
     await bot.change_presence(activity=activity)
+    await ctx.send(f"Changed presence to: `{activity}`")
 
 
 @presence_command.error
