@@ -275,7 +275,38 @@
       colour=<Colour value=15105570>,
       description='Sunday, September 27',
       fields=<class 'list'> [
-        EmbedProxy(inline=False, name='11 AM PDT / 2 PM EDT', value='\nNotes: another 1️⃣'),
+        EmbedProxy(inline=False, name='11 AM PDT / 12 PM MDT / 1 PM CDT / 2 PM EDT', value='\nNotes: another 1️⃣'),
+        EmbedProxy(inline=True, name='🗓', value='[Schedule or edit a practice](https://docs.google.com/spreadsheets/d/abc/edit)'),
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title=Embed.Empty,
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
+# name: test_schedule[9/28/2020]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=<Colour value=15105570>,
+      colour=<Colour value=15105570>,
+      description='
+        Monday, September 28
+        
+        *There are no scheduled practices yet!*
+        
+        To schedule a practice, edit the schedule below or use the `!practice` command.
+        Example: `!practice today 2pm pdt`
+  
+      ',
+      fields=<class 'list'> [
         EmbedProxy(inline=True, name='🗓', value='[Schedule or edit a practice](https://docs.google.com/spreadsheets/d/abc/edit)'),
       ],
       footer=EmbedProxy(),
@@ -299,7 +330,7 @@
       colour=<Colour value=15105570>,
       description='Today - Friday, September 25',
       fields=<class 'list'> [
-        EmbedProxy(inline=False, name='2 PM PDT / 5 PM EDT', value='Host: Steve\nNotes: recurring'),
+        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='Host: Steve\nNotes: recurring'),
         EmbedProxy(inline=True, name='🗓', value='[Schedule or edit a practice](https://docs.google.com/spreadsheets/d/abc/edit)'),
       ],
       footer=EmbedProxy(),
@@ -323,7 +354,7 @@
       colour=<Colour value=15105570>,
       description='Tomorrow - Saturday, September 26',
       fields=<class 'list'> [
-        EmbedProxy(inline=False, name='2 PM PDT / 5 PM EDT', value='Host: Steve\nNotes: one time'),
+        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='Host: Steve\nNotes: one time'),
         EmbedProxy(inline=True, name='🗓', value='[Schedule or edit a practice](https://docs.google.com/spreadsheets/d/abc/edit)'),
       ],
       footer=EmbedProxy(),
@@ -347,7 +378,7 @@
       colour=<Colour value=15105570>,
       description='Today - Friday, September 25',
       fields=<class 'list'> [
-        EmbedProxy(inline=False, name='2 PM PDT / 5 PM EDT', value='Host: Steve\nNotes: recurring'),
+        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='Host: Steve\nNotes: recurring'),
         EmbedProxy(inline=True, name='🗓', value='[Schedule or edit a practice](https://docs.google.com/spreadsheets/d/abc/edit)'),
       ],
       footer=EmbedProxy(),
@@ -371,7 +402,7 @@
       colour=<Colour value=15105570>,
       description='Tomorrow - Saturday, September 26',
       fields=<class 'list'> [
-        EmbedProxy(inline=False, name='2 PM PDT / 5 PM EDT', value='Host: Steve\nNotes: one time'),
+        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='Host: Steve\nNotes: one time'),
         EmbedProxy(inline=True, name='🗓', value='[Schedule or edit a practice](https://docs.google.com/spreadsheets/d/abc/edit)'),
       ],
       footer=EmbedProxy(),
