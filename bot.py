@@ -282,9 +282,10 @@ def utcnow():
     return dt.datetime.now(dt.timezone.utc)
 
 
-EASTERN = pytz.timezone("US/Eastern")
-
 PACIFIC = pytz.timezone("US/Pacific")
+MOUNTAIN = pytz.timezone("US/Mountain")
+CENTRAL = pytz.timezone("US/Central")
+EASTERN = pytz.timezone("US/Eastern")
 
 # EDT and PDT change to EST and PST during the winter
 # Show the current name in docs
@@ -356,8 +357,10 @@ def get_practice_sessions(
 def format_multi_time(dtime: dt.datetime) -> str:
     time_format = TIME_FORMAT if dtime.minute != 0 else TIME_FORMAT_NO_MINUTES
     pacific_dstr = dtime.astimezone(PACIFIC).strftime(time_format)
+    mountain_dstr = dtime.astimezone(MOUNTAIN).strftime(time_format)
+    central_dstr = dtime.astimezone(CENTRAL).strftime(time_format)
     eastern_dstr = dtime.astimezone(EASTERN).strftime(time_format)
-    return f"{pacific_dstr} / {eastern_dstr}"
+    return " / ".join((pacific_dstr, mountain_dstr, central_dstr, eastern_dstr))
 
 
 NO_PRACTICES = """
