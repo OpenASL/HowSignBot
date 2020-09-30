@@ -365,7 +365,7 @@ NO_PRACTICES = """
 *There are no scheduled practices yet!*
 
 To schedule a practice, edit the schedule below or use the `{COMMAND_PREFIX}practice` command.
-Example: `{COMMAND_PREFIX}practice 2pm {pacific}`
+Example: `{COMMAND_PREFIX}practice today 2pm {pacific}`
 """.format(
     COMMAND_PREFIX=COMMAND_PREFIX,
     pacific=PACIFIC_CURRENT_NAME.lower(),
@@ -466,7 +466,7 @@ Tips:
 * You may optionally add notes within double quotes.
 
 Examples:
-{COMMAND_PREFIX}practice 2pm {pacific}
+{COMMAND_PREFIX}practice today 2pm {pacific}
 {COMMAND_PREFIX}practice tomorrow 5pm {eastern} "chat for ~1 hour"
 {COMMAND_PREFIX}practice saturday 6pm {pacific} "Game night 🎉"
 {COMMAND_PREFIX}practice 9/24 6pm {eastern} "watch2gether session"

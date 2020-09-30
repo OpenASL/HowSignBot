@@ -92,6 +92,7 @@ def mock_worksheet(monkeypatch):
         "tomorrow",
         "saturday",
         "9/27",
+        "9/28/2020",
     ),
 )
 @freeze_time("2020-09-25 14:00:00")
