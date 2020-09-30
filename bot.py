@@ -70,8 +70,19 @@ logging.basicConfig(level=LOG_LEVEL)
 
 logger = logging.getLogger("bot")
 
+intents = discord.Intents.default()
+intents.typing = False
+intents.presences = False
+intents.bans = False
+intents.integrations = False
+intents.webhooks = False
+intents.invites = False
+
 bot = commands.Bot(
-    command_prefix=COMMAND_PREFIX, case_insensitive=True, owner_id=OWNER_ID
+    command_prefix=COMMAND_PREFIX,
+    case_insensitive=True,
+    owner_id=OWNER_ID,
+    intents=intents,
 )
 
 # -----------------------------------------------------------------------------
