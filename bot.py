@@ -709,7 +709,7 @@ class ZoomMeetingState(NamedTuple):
 
 
 def format_zoom_meeting(meeting: meetings.ZoomMeeting) -> str:
-    content = f"**Join URL**: <{meeting.join_url}>\n**Passcode**: {meeting.passcode}"
+    content = f"**Join URL**: <{meeting.join_url}>\n**Meeting ID:**: {meeting.id}\n**Passcode**: {meeting.passcode}"
     if meeting.topic:
         content = f"{content}\n**Topic**: {meeting.topic}"
     return f"{content}\n\n🚀 This meeting is happening now. Go practice!\n*This message will be cleared when the meeting ends.*"
