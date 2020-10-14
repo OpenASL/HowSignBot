@@ -703,8 +703,8 @@ ZOOM_CLOSED_MESSAGE = "✨ _Zoom meeting ended_"
 
 
 class ZoomMeetingState(NamedTuple):
-    channel_id: int
-    message_id: int
+    channel_ids: Tuple[int]
+    message_ids: Tuple[int]
     participant_ids: Set[str]
     meeting: meetings.ZoomMeeting
 
@@ -732,36 +732,52 @@ def make_zoom_embed(
 
 @bot.command(name="zoom", help="BOT OWNER ONLY: Create a Zoom meeting")
 @commands.is_owner()
-async def zoom_command(ctx: Context, *, topic: str = ""):
+async def zoom_command(ctx: Context, meeting_id: Optional[int] = None):
     logger.info("creating zoom meeting")
-    try:
-        meeting = await meetings.create_zoom(
-            token=ZOOM_JWT,
-            user_id=ZOOM_USER_ID,
-            topic=topic,
-            settings={
-                "host_video": False,
-                "participant_video": False,
-                "mute_upon_entry": True,
-                "waiting_room": False,
-            },
-        )
-    except Exception:
-        logger.exception("could not create Zoom meeting")
+    if meeting_id in app["zoom_meeting_messages"]:
+        state = app["zoom_meeting_messages"][meeting_id]
         message = await ctx.send(
-            content="🚨 _Could not create Zoom meeting. That's embarrassing._"
+            embed=make_zoom_embed(
+                state.meeting, num_participants=len(state.participant_ids)
+            )
         )
-        return
+        logger.info(f"updating meeting state for meeting id {meeting_id}")
+        next_state = ZoomMeetingState(
+            channel_ids=state.channel_ids + (ctx.channel.id,),
+            message_ids=state.message_ids + (message.id,),
+            participant_ids=state.participant_ids,
+            meeting=state.meeting,
+        )
+        app["zoom_meeting_messages"][meeting_id] = next_state
     else:
-        message = await ctx.send(embed=make_zoom_embed(meeting, num_participants=0))
-        meeting_state = ZoomMeetingState(
-            channel_id=ctx.channel.id,
-            message_id=message.id,
-            participant_ids=set(),
-            meeting=meeting,
-        )
-        app["zoom_meeting_messages"][meeting.id] = meeting_state
-        logger.info(f"setting info for meeting {meeting.id}")
+        try:
+            meeting = await meetings.create_zoom(
+                token=ZOOM_JWT,
+                user_id=ZOOM_USER_ID,
+                topic="",
+                settings={
+                    "host_video": False,
+                    "participant_video": False,
+                    "mute_upon_entry": True,
+                    "waiting_room": False,
+                },
+            )
+        except Exception:
+            logger.exception("could not create Zoom meeting")
+            message = await ctx.send(
+                content="🚨 _Could not create Zoom meeting. That's embarrassing._"
+            )
+            return
+        else:
+            message = await ctx.send(embed=make_zoom_embed(meeting, num_participants=0))
+            meeting_state = ZoomMeetingState(
+                channel_ids=(ctx.channel.id,),
+                message_ids=(message.id,),
+                participant_ids=set(),
+                meeting=meeting,
+            )
+            app["zoom_meeting_messages"][meeting.id] = meeting_state
+            logger.info(f"setting info for meeting {meeting.id}")
 
     await wait_for_stop_sign(
         message, add_reaction=False, replace_with=ZOOM_CLOSED_MESSAGE
@@ -1072,42 +1088,50 @@ async def handle_zoom_event(data: dict):
     except KeyError:
         return
     logging.info(f"handling zoom event {event} for meeting {meeting_id}")
-    channel = bot.get_channel(state.channel_id)
-    message = await channel.fetch_message(state.message_id)
-    if event == "meeting.ended":
-        logger.info(f"automatically ending meeting {meeting_id}")
-        del app["zoom_meeting_messages"][meeting_id]
-        edit_kwargs = {"content": "✨ _Zoom meeting ended by host_", "embed": None}
-    elif event == "meeting.participant_joined":
-        participant_id = data["payload"]["object"]["participant"]["user_id"]
-        next_state = ZoomMeetingState(
-            channel_id=state.channel_id,
-            message_id=state.message_id,
-            participant_ids=state.participant_ids | {participant_id},
-            meeting=state.meeting,
-        )
-        logger.info(f"adding new participant for meeting id {meeting_id}")
-        app["zoom_meeting_messages"][meeting_id] = next_state
-        embed = make_zoom_embed(
-            next_state.meeting, num_participants=len(next_state.participant_ids)
-        )
-        edit_kwargs = {"embed": embed}
-    elif event == "meeting.participant_left":
-        participant_id = data["payload"]["object"]["participant"]["user_id"]
-        next_state = ZoomMeetingState(
-            channel_id=state.channel_id,
-            message_id=state.message_id,
-            participant_ids=state.participant_ids - {participant_id},
-            meeting=state.meeting,
-        )
-        logger.info(f"removing participant for meeting id {meeting_id}")
-        app["zoom_meeting_messages"][meeting_id] = next_state
-        embed = make_zoom_embed(
-            next_state.meeting, num_participants=len(next_state.participant_ids)
-        )
-        edit_kwargs = {"embed": embed}
+    for channel_id, message_id in zip(state.channel_ids, state.message_ids):
+        channel = bot.get_channel(channel_id)
+        message = await channel.fetch_message(message_id)
+        if event == "meeting.ended":
+            logger.info(
+                f"automatically ending meeting {meeting_id}, message {message_id}"
+            )
+            edit_kwargs = {"content": "✨ _Zoom meeting ended by host_", "embed": None}
+        elif event == "meeting.participant_joined":
+            participant_id = data["payload"]["object"]["participant"]["user_id"]
+            next_state = ZoomMeetingState(
+                channel_ids=state.channel_ids,
+                message_ids=state.message_ids,
+                participant_ids=state.participant_ids | {participant_id},
+                meeting=state.meeting,
+            )
+            logger.info(
+                f"adding new participant for meeting id {meeting_id}, message {message_id}"
+            )
+            app["zoom_meeting_messages"][meeting_id] = next_state
+            embed = make_zoom_embed(
+                next_state.meeting, num_participants=len(next_state.participant_ids)
+            )
+            edit_kwargs = {"embed": embed}
+        elif event == "meeting.participant_left":
+            participant_id = data["payload"]["object"]["participant"]["user_id"]
+            next_state = ZoomMeetingState(
+                channel_ids=state.channel_ids,
+                message_ids=state.message_ids,
+                participant_ids=state.participant_ids - {participant_id},
+                meeting=state.meeting,
+            )
+            logger.info(
+                f"removing participant for meeting id {meeting_id}, message {message_id}"
+            )
+            app["zoom_meeting_messages"][meeting_id] = next_state
+            embed = make_zoom_embed(
+                next_state.meeting, num_participants=len(next_state.participant_ids)
+            )
+            edit_kwargs = {"embed": embed}
+        await message.edit(**edit_kwargs)
 
-    await message.edit(**edit_kwargs)
+    if event == "meeting.ended":
+        del app["zoom_meeting_messages"][meeting_id]
 
 
 async def zoom(request):
