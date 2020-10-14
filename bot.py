@@ -706,13 +706,28 @@ class ZoomMeetingState(NamedTuple):
     channel_id: int
     message_id: int
     participant_ids: Set[str]
+    meeting: meetings.ZoomMeeting
 
 
-def format_zoom_meeting(meeting: meetings.ZoomMeeting) -> str:
-    content = f"**Join URL**: <{meeting.join_url}>\n**Meeting ID:**: {meeting.id}\n**Passcode**: {meeting.passcode}"
+def make_zoom_embed(
+    meeting: meetings.ZoomMeeting, num_participants: int
+) -> discord.Embed:
+    title = f"<{meeting.join_url}>"
+    description = f"**Meeting ID:**: {meeting.id}\n**Passcode**: {meeting.passcode}"
     if meeting.topic:
-        content = f"{content}\n**Topic**: {meeting.topic}"
-    return f"{content}\n\n🚀 This meeting is happening now. Go practice!\n*This message will be cleared when the meeting ends.*"
+        description = f"{description}\n**Topic**: {meeting.topic}"
+
+    if num_participants:
+        description += "\n" + "👤" * num_participants
+    else:
+        description += "\n"
+
+    description += "\n🚀 This meeting is happening now. Go practice!\n*This message will be cleared when the meeting ends.*"
+    return discord.Embed(
+        title=title,
+        description=description,
+        color=discord.Color.blue(),
+    )
 
 
 @bot.command(name="zoom", help="BOT OWNER ONLY: Create a Zoom meeting")
@@ -738,9 +753,12 @@ async def zoom_command(ctx: Context, *, topic: str = ""):
         )
         return
     else:
-        message = await ctx.send(content=format_zoom_meeting(meeting))
+        message = await ctx.send(embed=make_zoom_embed(meeting, num_participants=0))
         meeting_state = ZoomMeetingState(
-            channel_id=ctx.channel.id, message_id=message.id, participant_ids=set()
+            channel_id=ctx.channel.id,
+            message_id=message.id,
+            participant_ids=set(),
+            meeting=meeting,
         )
         app["zoom_meeting_messages"][meeting.id] = meeting_state
         logger.info(f"setting info for meeting {meeting.id}")
@@ -1014,9 +1032,15 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
                 return
 
         for pattern, close_message in CLOSED_MESSAGE_MAP.items():
+            if message.embeds:
+                for embed in message.embeds:
+                    if re.search(pattern, embed.title):
+                        logger.info(f"cleaning up room with message: {close_message}")
+                        await message.edit(content=close_message, embed=None)
+                        return
             if re.search(pattern, message.content):
                 logger.info(f"cleaning up room with message: {close_message}")
-                await message.edit(content=close_message)
+                await message.edit(content=close_message, embed=None)
                 return
 
 
@@ -1038,15 +1062,6 @@ SUPPORTED_EVENTS = {
 }
 
 
-def format_zoom_meeting_with_participants(
-    old_content: str, state: ZoomMeetingState
-) -> str:
-    content = old_content.replace("👤", "")
-    insert_at = content.find("🚀") - 1
-    num_participants = len(state.participant_ids)
-    return content[:insert_at] + "👤" * num_participants + content[insert_at:]
-
-
 async def handle_zoom_event(data: dict):
     event = data["event"]
     if event not in SUPPORTED_EVENTS:
@@ -1059,34 +1074,40 @@ async def handle_zoom_event(data: dict):
     logging.info(f"handling zoom event {event} for meeting {meeting_id}")
     channel = bot.get_channel(state.channel_id)
     message = await channel.fetch_message(state.message_id)
-    old_content = message.content
-
     if event == "meeting.ended":
         logger.info(f"automatically ending meeting {meeting_id}")
-        new_content = "✨ _Zoom meeting ended by host_"
         del app["zoom_meeting_messages"][meeting_id]
+        edit_kwargs = {"content": "✨ _Zoom meeting ended by host_", "embed": None}
     elif event == "meeting.participant_joined":
         participant_id = data["payload"]["object"]["participant"]["user_id"]
         next_state = ZoomMeetingState(
             channel_id=state.channel_id,
             message_id=state.message_id,
             participant_ids=state.participant_ids | {participant_id},
+            meeting=state.meeting,
         )
         logger.info(f"adding new participant for meeting id {meeting_id}")
         app["zoom_meeting_messages"][meeting_id] = next_state
-        new_content = format_zoom_meeting_with_participants(old_content, next_state)
+        embed = make_zoom_embed(
+            next_state.meeting, num_participants=len(next_state.participant_ids)
+        )
+        edit_kwargs = {"embed": embed}
     elif event == "meeting.participant_left":
         participant_id = data["payload"]["object"]["participant"]["user_id"]
         next_state = ZoomMeetingState(
             channel_id=state.channel_id,
             message_id=state.message_id,
             participant_ids=state.participant_ids - {participant_id},
+            meeting=state.meeting,
         )
         logger.info(f"removing participant for meeting id {meeting_id}")
         app["zoom_meeting_messages"][meeting_id] = next_state
-        new_content = format_zoom_meeting_with_participants(old_content, next_state)
+        embed = make_zoom_embed(
+            next_state.meeting, num_participants=len(next_state.participant_ids)
+        )
+        edit_kwargs = {"embed": embed}
 
-    await message.edit(content=new_content)
+    await message.edit(**edit_kwargs)
 
 
 async def zoom(request):
@@ -1171,7 +1192,7 @@ async def wait_for_stop_sign(
 
     await bot.wait_for("reaction_add", check=check)
     logger.info(f"replacing message with: {replace_with}")
-    await message.edit(content=replace_with)
+    await message.edit(content=replace_with, embed=None)
 
 
 # -----------------------------------------------------------------------------
