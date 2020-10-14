@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v20.68.0 (2020-10-14)
+### Feature
+* Allow reusing zoom meetings ([`d797676`](https://github.com/OpenASL/HowSignBot/commit/d79767619c68ecc0e4e8abc7124d842750f9e212))
+* Use embed for Zoom ([`b9c93a3`](https://github.com/OpenASL/HowSignBot/commit/b9c93a3c9ce1fb3215ec97478f69160f32e5ad56))
+
 ## v20.67.0 (2020-10-11)
 ### Feature
 * Show meeting ID ([`202cc0c`](https://github.com/OpenASL/HowSignBot/commit/202cc0c962d2f01fea655d790e999735560a1708))
