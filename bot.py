@@ -6,7 +6,7 @@ import random
 import re
 from contextlib import suppress
 from typing import Optional, NamedTuple, List, Tuple, Set
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlencode
 
 import discord
 import dateparser
@@ -385,6 +385,8 @@ def make_practice_session_embed(
         description = f"Today - {description}"
     elif (dtime_pacific.date() - now_pacific.date()).days == 1:
         description = f"Tomorrow - {description}"
+    sheet_key = SCHEDULE_SHEET_KEYS[guild_id]
+    schedule_url = f"https://docs.google.com/spreadsheets/d/{sheet_key}/edit"
     embed = discord.Embed(
         description=description,
         color=discord.Color.orange(),
@@ -394,16 +396,23 @@ def make_practice_session_embed(
     else:
         for session in sessions:
             title = format_multi_time(session.dtime)
-            value = ""
+            gcal_event_title = (
+                f"ASL Practice: {session.notes}" if session.notes else "ASL Practice"
+            )
+            gcal_url = create_gcal_url(
+                gcal_event_title,
+                start=session.dtime,
+                description=f"See the full schedule here: {schedule_url}",
+            )
+            value = f"[Add to Google Calendar]({gcal_url})"
             if session.host:
-                value += f"Host: {session.host}"
+                value += f"\nHost: {session.host}"
             if session.notes:
                 value += f"\nNotes: {session.notes}"
             embed.add_field(name=title, value=value or "Practice", inline=False)
-    sheet_key = SCHEDULE_SHEET_KEYS[guild_id]
     embed.add_field(
         name="🗓",
-        value=f"[Schedule or edit a practice](https://docs.google.com/spreadsheets/d/{sheet_key}/edit)",
+        value=f"[Schedule or edit a practice]({schedule_url})",
     )
     return embed
 
@@ -1200,6 +1209,25 @@ def did_you_mean(word, possibilities):
         return difflib.get_close_matches(word, possibilities, n=1, cutoff=0.5)[0]
     except IndexError:
         return None
+
+
+def create_gcal_url(
+    text,
+    start: dt.datetime,
+    end: Optional[dt.datetime] = None,
+    description: Optional[str] = None,
+):
+    dt_format = "%Y%m%dT%H%M%SZ"
+    base_url = "http://www.google.com/calendar/event"
+    end = end or start + dt.timedelta(hours=1)
+    params = {
+        "action": "TEMPLATE",
+        "text": text,
+        "dates": "{}/{}".format(start.strftime(dt_format), end.strftime(dt_format)),
+    }
+    if description:
+        params["details"] = description
+    return "?".join((base_url, urlencode(params)))
 
 
 async def wait_for_stop_sign(
