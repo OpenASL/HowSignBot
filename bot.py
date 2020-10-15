@@ -540,9 +540,11 @@ def practice_impl(*, guild_id: int, host: str, start_time: str):
 @commands.check(is_in_guild)
 async def practice_command(ctx: Context, *, start_time: str):
     host = getattr(ctx.author, "nick", None) or ctx.author.name
-    await ctx.send(
+    message = await ctx.send(
         **practice_impl(guild_id=ctx.guild.id, host=host, start_time=start_time)
     )
+    with suppress(Exception):
+        await message.add_reaction("✅")
 
 
 @practice_command.error
