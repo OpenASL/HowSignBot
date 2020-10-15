@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.69.0 (2020-10-15)
+### Feature
+* Add ✅ ([`762647a`](https://github.com/OpenASL/HowSignBot/commit/762647a03d60b97072228cd8f6dc129ad24fcac8))
+
 ## v20.68.0 (2020-10-14)
 ### Feature
 * Allow reusing zoom meetings ([`d797676`](https://github.com/OpenASL/HowSignBot/commit/d79767619c68ecc0e4e8abc7124d842750f9e212))
