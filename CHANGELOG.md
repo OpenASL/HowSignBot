@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.70.0 (2020-10-15)
+### Feature
+* Add Google Calendar links (#31) ([`9fb3dcd`](https://github.com/OpenASL/HowSignBot/commit/9fb3dcd956474bf9bcd37010857b7f0564e4164b))
+
 ## v20.69.0 (2020-10-15)
 ### Feature
 * Add ✅ ([`762647a`](https://github.com/OpenASL/HowSignBot/commit/762647a03d60b97072228cd8f6dc129ad24fcac8))
