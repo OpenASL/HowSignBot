@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.70.1 (2020-10-25)
+### Fix
+* Don't add reaction when invalid input is passed (#34) ([`2c51a73`](https://github.com/OpenASL/HowSignBot/commit/2c51a73743fa83df74348c3d41d17ee96ea800a8))
+
 ## v20.70.0 (2020-10-15)
 ### Feature
 * Add Google Calendar links (#31) ([`9fb3dcd`](https://github.com/OpenASL/HowSignBot/commit/9fb3dcd956474bf9bcd37010857b7f0564e4164b))
