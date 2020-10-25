@@ -514,20 +514,19 @@ def practice_impl(*, guild_id: int, host: str, start_time: str):
         "today pst",
     }:
         logger.info(f"practice invoked with {start_time}. sending error message")
-        return {"content": PRACTICE_ERROR}
+        raise commands.errors.BadArgument(PRACTICE_ERROR)
     logger.info(f"attempting to schedule new practice session: {start_time}")
     human_readable_datetime, quoted = get_and_strip_quoted_text(start_time)
     settings = dict(PREFER_DATES_FROM="future")
     dtime = parse_human_readable_datetime(human_readable_datetime, settings=settings)
     if not dtime:
-        return {
-            "content": f'⚠️Could not parse "{start_time}" into a date or time. Make sure to include "am" or "pm" as well as a timezone, e.g. "{PACIFIC_CURRENT_NAME.lower()}".'
-        }
+        raise commands.errors.BadArgument(
+            f'⚠️Could not parse "{start_time}" into a date or time. Make sure to include "am" or "pm" as well as a timezone, e.g. "{PACIFIC_CURRENT_NAME.lower()}".'
+        )
     if dtime < utcnow():
-        return {
-            "content": "⚠Parsed date or time is in the past. Try again with a future date or time."
-        }
-
+        raise commands.errors.BadArgument(
+            "⚠Parsed date or time is in the past. Try again with a future date or time."
+        )
     notes = quoted or ""
     display_dtime = dtime.astimezone(PACIFIC).strftime("%A, %B %d %I:%M %p %Z %Y")
     row = (display_dtime, host, notes)
@@ -564,8 +563,9 @@ async def practices_error(ctx, error):
             f"`{COMMAND_PREFIX}{ctx.invoked_with}` must be run within a server (not a DM)."
         )
     elif isinstance(error, commands.errors.MissingRequiredArgument):
-        logger.info(f"missing argument to '{ctx.invoked_with}'")
         await ctx.send(PRACTICE_ERROR)
+    elif isinstance(error, commands.errors.CommandError):
+        await ctx.send(error.args[0])
     else:
         logger.error(
             f"unexpected error when handling '{ctx.invoked_with}'", exc_info=error
