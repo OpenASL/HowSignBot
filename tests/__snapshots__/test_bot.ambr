@@ -222,49 +222,19 @@
   )
 ---
 # name: test_practice_invalid[invalid]
-  <class 'dict'> {
-    'content': '⚠️Could not parse "invalid" into a date or time. Make sure to include "am" or "pm" as well as a timezone, e.g. "pdt".',
-  }
+  BadArgument('⚠️Could not parse "invalid" into a date or time. Make sure to include "am" or "pm" as well as a timezone, e.g. "pdt".')
 ---
 # name: test_practice_invalid[today edt]
-  <class 'dict'> {
-    'content': '
-      ⚠️To schedule a practice, enter a time after `!practice`.
-      Example: `!practice today at 2pm edt`
-      Enter `!schedule` to see today's schedule.
-  
-    ',
-  }
+  BadArgument("⚠️To schedule a practice, enter a time after `!practice`.\nExample: `!practice today at 2pm edt`\nEnter `!schedule` to see today's schedule.\n")
 ---
 # name: test_practice_invalid[today pdt]
-  <class 'dict'> {
-    'content': '
-      ⚠️To schedule a practice, enter a time after `!practice`.
-      Example: `!practice today at 2pm edt`
-      Enter `!schedule` to see today's schedule.
-  
-    ',
-  }
+  BadArgument("⚠️To schedule a practice, enter a time after `!practice`.\nExample: `!practice today at 2pm edt`\nEnter `!schedule` to see today's schedule.\n")
 ---
 # name: test_practice_invalid[today]
-  <class 'dict'> {
-    'content': '
-      ⚠️To schedule a practice, enter a time after `!practice`.
-      Example: `!practice today at 2pm edt`
-      Enter `!schedule` to see today's schedule.
-  
-    ',
-  }
+  BadArgument("⚠️To schedule a practice, enter a time after `!practice`.\nExample: `!practice today at 2pm edt`\nEnter `!schedule` to see today's schedule.\n")
 ---
 # name: test_practice_invalid[tomorrow]
-  <class 'dict'> {
-    'content': '
-      ⚠️To schedule a practice, enter a time after `!practice`.
-      Example: `!practice today at 2pm edt`
-      Enter `!schedule` to see today's schedule.
-  
-    ',
-  }
+  BadArgument("⚠️To schedule a practice, enter a time after `!practice`.\nExample: `!practice today at 2pm edt`\nEnter `!schedule` to see today's schedule.\n")
 ---
 # name: test_schedule[9/27]
   <class 'dict'> {

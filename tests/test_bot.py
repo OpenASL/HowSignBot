@@ -4,6 +4,7 @@ from unittest import mock
 
 import gspread
 import pytest
+from discord.ext import commands
 from freezegun import freeze_time
 from syrupy.filters import props
 
@@ -137,9 +138,10 @@ def test_practice(snapshot, monkeypatch, mock_worksheet, start_time):
 )
 @freeze_time("2020-09-25 14:00:00")
 def test_practice_invalid(snapshot, monkeypatch, mock_worksheet, start_time):
-    result = bot.practice_impl(guild_id=1234, host="Steve", start_time=start_time)
+    with pytest.raises(commands.errors.CommandError) as excinfo:
+        bot.practice_impl(guild_id=1234, host="Steve", start_time=start_time)
     mock_worksheet.append_row.assert_not_called()
-    assert result == snapshot
+    assert excinfo.value == snapshot
 
 
 @pytest.mark.parametrize(
