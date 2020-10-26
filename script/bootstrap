@@ -10,7 +10,7 @@ fi
 if [ -z "$CI" ]; then
   name=${PWD##*/}
   # If python version is passed as first argument, use that, otherwise use 3.8
-  python_version=${1:-3.8.5}
+  python_version=${1:-3.9.0}
   echo "==> Bootstrapping a Python $python_version environment called $name..."
   pyenv install "$python_version" --skip-existing
   pyenv virtualenv "$python_version" "$name"
