@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.70.2 (2020-10-25)
+### Fix
+* Use aiohttp version compatible with discord.py (#36) ([`e253d44`](https://github.com/OpenASL/HowSignBot/commit/e253d44e50cd81a7e0ba3368fbaca6b013c3ceb8))
+
 ## v20.70.1 (2020-10-25)
 ### Fix
 * Don't add reaction when invalid input is passed (#34) ([`2c51a73`](https://github.com/OpenASL/HowSignBot/commit/2c51a73743fa83df74348c3d41d17ee96ea800a8))
