@@ -77,13 +77,14 @@ def _get_secret_slug(
 class JitsiMeet(NamedTuple):
     join_url: str
     deeplink: str
+    name: Optional[str]
 
 
 def create_jitsi_meet(name: Optional[str], *, secret: Optional[str]) -> JitsiMeet:
     """Return a Jitsi Meet URL."""
     slug = _get_secret_slug(name, secret)
     return JitsiMeet(
-        join_url=f"https://meet.jit.si/{slug}", deeplink=f"jitsi-meet://{slug}"
+        join_url=f"https://meet.jit.si/{slug}", deeplink=f"jitsi-meet://{slug}", name=name
     )
 
 

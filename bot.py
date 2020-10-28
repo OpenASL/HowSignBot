@@ -815,17 +815,27 @@ async def zoom_error(ctx, error):
 MEET_CLOSED_MESSAGE = "✨ _Jitsi Meet ended_"
 
 
-@bot.command(name="meet", aliases=("jitsi",), help="Start a Jitsi Meet meeting")
-async def meet_command(ctx: Context, *, name: Optional[str]):
-    meeting = meetings.create_jitsi_meet(name, secret=SECRET_KEY)
+def make_jitsi_embed(meeting: meetings.JitsiMeet):
+    title = f"<{meeting.join_url}>"
     content = (
         f"**Join URL**: <{meeting.join_url}>\n**Desktop App Link***: <{meeting.deeplink}>"
     )
-    if name:
-        content = f"{content}\n**Name**: {name}"
-    content = f"{content}\n🚀 This meeting is happening now. Go practice!\n*Desktop App Link requires <https://github.com/jitsi/jitsi-meet-electron>\n*After the meeting ends, click {STOP_SIGN} to remove this message.*"
+    if meeting.name:
+        content = f"{content}\n**Name**: {meeting.name}"
+    content = f"{content}\n\n🚀 This meeting is happening now. Go practice!\n*Desktop App Link requires <https://github.com/jitsi/jitsi-meet-electron>\n*After the meeting ends, click {STOP_SIGN} to remove this message.*"
     logger.info("sending jitsi meet info")
-    message = await ctx.send(content=content)
+    return discord.Embed(
+        title=title,
+        description=content,
+        color=discord.Color.blue(),
+    )
+
+
+@bot.command(name="meet", aliases=("jitsi",), help="Start a Jitsi Meet meeting")
+async def meet_command(ctx: Context, *, name: Optional[str]):
+    meeting = meetings.create_jitsi_meet(name, secret=SECRET_KEY)
+    logger.info("sending jitsi meet info")
+    message = await ctx.send(embed=make_jitsi_embed(meeting))
 
     await wait_for_stop_sign(message, replace_with=MEET_CLOSED_MESSAGE)
 
