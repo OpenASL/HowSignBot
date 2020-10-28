@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v20.71.0 (2020-10-27)
+### Feature
+* Display Jitsi meet in an embed (consistent with ?zoom) ([`d6baa7f`](https://github.com/OpenASL/HowSignBot/commit/d6baa7f5f856cc6c487eb4a0722cdf50d570c614))
+
+### Fix
+* Py39 not supported by black ([`482d96a`](https://github.com/OpenASL/HowSignBot/commit/482d96a9b3f5924ed45c99658abb54194c016f4f))
+
 ## v20.70.2 (2020-10-25)
 ### Fix
 * Use aiohttp version compatible with discord.py (#36) ([`e253d44`](https://github.com/OpenASL/HowSignBot/commit/e253d44e50cd81a7e0ba3368fbaca6b013c3ceb8))
