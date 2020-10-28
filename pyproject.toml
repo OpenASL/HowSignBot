@@ -1,6 +1,6 @@
 [tool.black]
 line-length = 90
-target-version = ['py38', 'py39']
+target-version = ['py38']
 
 [tool.semantic_release]
 version_variable = "bot.py:__version__"
