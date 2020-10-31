@@ -1040,6 +1040,16 @@ async def presence_command_error(ctx, error):
 
 # -----------------------------------------------------------------------------
 
+HOMEPAGE = "https://howsign.sloria.io"
+
+
+@bot.command(name="invite", help="Invite HowSignBot to another Discord server")
+async def invite_command(ctx: Context):
+    await ctx.send(f"Add me to your Discord server here: {HOMEPAGE}")
+
+
+# -----------------------------------------------------------------------------
+
 # Allow cleaning up Zoom, watch2gether, etc. rooms after bot restarts
 # Need to use on_raw_reaction_add to handle messages that aren't in the cache
 
