@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v20.72.0 (2020-10-31)
+### Feature
+* Allow pausing recurring practices (#43) ([`e74929e`](https://github.com/OpenASL/HowSignBot/commit/e74929eabf986096176b1e961ca656cd49ffbbf3))
+* Add invite command (#42) ([`34b8ce3`](https://github.com/OpenASL/HowSignBot/commit/34b8ce3b81647f2d0675a8ac0f28ee12c34d8eb6))
+
 ## v20.71.0 (2020-10-27)
 ### Feature
 * Display Jitsi meet in an embed (consistent with ?zoom) ([`d6baa7f`](https://github.com/OpenASL/HowSignBot/commit/d6baa7f5f856cc6c487eb4a0722cdf50d570c614))
