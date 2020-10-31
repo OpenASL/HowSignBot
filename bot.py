@@ -349,6 +349,8 @@ def get_practice_sessions(
                 session_dtime.astimezone(PACIFIC).date()
                 == dtime.astimezone(PACIFIC).date()
             )
+            # Filter out paused sessions
+            and not bool(row[3])
         ],
         key=lambda s: s.dtime,
     )

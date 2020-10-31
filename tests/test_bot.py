@@ -74,12 +74,13 @@ def mock_worksheet(monkeypatch):
     with mock.patch("bot.get_practice_worksheet_for_guild") as mock_get_worksheet:
         WorksheetMock = mock.Mock(spec=gspread.Worksheet)
         WorksheetMock.get_all_values.return_value = [
-            ["docs", "more docs"],
-            ["Start time", "Host (optional)", "Notes (optional)"],
-            ["Friday 5pm EDT", "Steve", "recurring"],
-            ["Wed 6pm edt", "", "another recurring"],
-            ["9/26 2pm PDT 2020", "Steve", "one time"],
-            ["Sunday, September 27 02:00 PM EDT 2020", "", "another 1️⃣"],
+            ["docs", "more docs", ""],
+            ["Start time", "Host (optional)", "Notes (optional)", ""],
+            ["Friday 5pm EDT", "Steve", "recurring", ""],
+            ["Friday 6pm EDT", "Steve", "paused", "x"],
+            ["Wed 6pm edt", "", "another recurring", ""],
+            ["9/26 2pm PDT 2020", "Steve", "one time", ""],
+            ["Sunday, September 27 02:00 PM EDT 2020", "", "another 1️⃣", ""],
         ]
         mock_get_worksheet.return_value = WorksheetMock
         yield WorksheetMock
