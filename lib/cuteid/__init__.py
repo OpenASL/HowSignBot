@@ -11,7 +11,7 @@ with (HERE / "adjectives.json").open("r") as fp:
 with (HERE / "animals.json").open("r") as fp:
     _animals = json.load(fp)
 
-_emoji = tuple(emoji.UNICODE_EMOJI.keys())
+_emoji = tuple(emoji.UNICODE_EMOJI.keys())  # type: ignore[attr-defined]
 
 
 def cuteid():

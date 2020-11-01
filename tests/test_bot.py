@@ -97,13 +97,13 @@ def mock_worksheet(monkeypatch):
     ),
 )
 @freeze_time("2020-09-25 14:00:00")
-def test_schedule(snapshot, monkeypatch, mock_worksheet, when):
+def test_schedule(snapshot, mock_worksheet, when):
     result = bot.schedule_impl(1234, when)
     assert result == snapshot
 
 
 @freeze_time("2020-09-25 14:00:00")
-def test_schedule_no_practices(snapshot, monkeypatch, mock_worksheet):
+def test_schedule_no_practices(snapshot, mock_worksheet):
     result = bot.schedule_impl(1234, "9/28/2020")
     embed = result["embed"]
     assert "September 28" in embed.description
@@ -131,7 +131,7 @@ def test_schedule_no_practices(snapshot, monkeypatch, mock_worksheet):
     ),
 )
 @freeze_time("2020-09-25 14:00:00")
-def test_practice(snapshot, monkeypatch, mock_worksheet, start_time):
+def test_practice(snapshot, mock_worksheet, start_time):
     bot.practice_impl(guild_id=1234, host="Steve", start_time=start_time)
     mock_worksheet.append_row.assert_called_once()
     assert mock_worksheet.append_row.call_args[0][0] == snapshot
@@ -156,7 +156,7 @@ def test_practice_nearby_date(snapshot, mock_worksheet):
     ),
 )
 @freeze_time("2020-09-25 14:00:00")
-def test_practice_common_mistakes(snapshot, monkeypatch, mock_worksheet, start_time):
+def test_practice_common_mistakes(snapshot, mock_worksheet, start_time):
     with pytest.raises(
         commands.errors.CommandError, match="️To schedule a practice, enter a time"
     ):
@@ -165,7 +165,7 @@ def test_practice_common_mistakes(snapshot, monkeypatch, mock_worksheet, start_t
 
 
 @freeze_time("2020-09-25 14:00:00")
-def test_practice_invalid(snapshot, monkeypatch, mock_worksheet):
+def test_practice_invalid(snapshot, mock_worksheet):
     with pytest.raises(
         commands.errors.CommandError,
         match='Could not parse "invalid" into a date or time. Make sure to include "am" or "pm" as well as a timezone',

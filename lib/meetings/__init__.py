@@ -40,7 +40,7 @@ async def create_zoom(
     )
 
 
-async def create_watch2gether(api_key: str, video_url: str = None) -> str:
+async def create_watch2gether(api_key: str, video_url: Optional[str] = None) -> str:
     """Create and return a watch2gether URL via the watch2gether API."""
     async with aiohttp.ClientSession() as client:
         payload = {"api_key": api_key, "video_url": video_url}
@@ -64,7 +64,7 @@ def _slug_with_signature(s: str, *, secret: str, signature_length=16):
 
 
 def _get_secret_slug(
-    name: Optional[str], secret: Optional[str], fallback: Callable = cuteid.cuteid
+    name: Optional[str], secret: str, fallback: Callable = cuteid.cuteid
 ) -> str:
     """Return a hard-to-guess slug to use for meeting URLs.
 
@@ -80,7 +80,7 @@ class JitsiMeet(NamedTuple):
     name: Optional[str]
 
 
-def create_jitsi_meet(name: Optional[str], *, secret: Optional[str]) -> JitsiMeet:
+def create_jitsi_meet(name: Optional[str], *, secret: str) -> JitsiMeet:
     """Return a Jitsi Meet URL."""
     slug = _get_secret_slug(name, secret)
     return JitsiMeet(
@@ -88,7 +88,7 @@ def create_jitsi_meet(name: Optional[str], *, secret: Optional[str]) -> JitsiMee
     )
 
 
-def create_speakeasy(name: Optional[str], *, secret: Optional[str]) -> str:
+def create_speakeasy(name: Optional[str], *, secret: str) -> str:
     """Return a Speakeasy URL."""
     slug = _get_secret_slug(name, secret, fallback=cuteid.emojid)
     return f"https://speakeasy.co/{slug}"
