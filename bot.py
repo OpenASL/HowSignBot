@@ -499,6 +499,22 @@ Enter `{COMMAND_PREFIX}schedule` to see today's schedule.
 )
 
 
+def parse_practice_time(human_readable_datetime: str) -> Optional[dt.datetime]:
+    # First try current_period to capture dates in the near future
+    dtime = parse_human_readable_datetime(
+        human_readable_datetime, settings={"PREFER_DATES_FROM": "current_period"}
+    )
+    # Can't parse into datetime, return early
+    if dtime is None:
+        return dtime
+    # If date is in the past, prefer future dates
+    if dtime < utcnow():
+        dtime = parse_human_readable_datetime(
+            human_readable_datetime, settings={"PREFER_DATES_FROM": "future"}
+        )
+    return dtime
+
+
 def practice_impl(*, guild_id: int, host: str, start_time: str):
     if start_time.lower() in {
         # Common mistakes: don't try to parse these into a datetime
@@ -519,8 +535,7 @@ def practice_impl(*, guild_id: int, host: str, start_time: str):
         raise commands.errors.BadArgument(PRACTICE_ERROR)
     logger.info(f"attempting to schedule new practice session: {start_time}")
     human_readable_datetime, quoted = get_and_strip_quoted_text(start_time)
-    settings = dict(PREFER_DATES_FROM="future")
-    dtime = parse_human_readable_datetime(human_readable_datetime, settings=settings)
+    dtime = parse_practice_time(human_readable_datetime)
     if not dtime:
         raise commands.errors.BadArgument(
             f'⚠️Could not parse "{start_time}" into a date or time. Make sure to include "am" or "pm" as well as a timezone, e.g. "{PACIFIC_CURRENT_NAME.lower()}".'
