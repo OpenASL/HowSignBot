@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.72.1 (2020-11-01)
+### Fix
+* Correctly parse dates in the near future (#47) ([`495d478`](https://github.com/OpenASL/HowSignBot/commit/495d478e69dd7419574e4464e20e2cf5a34b7fa0))
+
 ## v20.72.0 (2020-10-31)
 ### Feature
 * Allow pausing recurring practices (#43) ([`e74929e`](https://github.com/OpenASL/HowSignBot/commit/e74929eabf986096176b1e961ca656cd49ffbbf3))
