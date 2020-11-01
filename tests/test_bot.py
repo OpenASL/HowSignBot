@@ -137,6 +137,15 @@ def test_practice(snapshot, monkeypatch, mock_worksheet, start_time):
     assert mock_worksheet.append_row.call_args[0][0] == snapshot
 
 
+def test_practice_nearby_date(snapshot, mock_worksheet):
+    with freeze_time("2020-09-25 14:00:00"):
+        bot.practice_impl(guild_id=1234, host="Steve", start_time="10:30am edt")
+
+    mock_worksheet.append_row.assert_called_once()
+    appended_row = mock_worksheet.append_row.call_args[0][0]
+    assert appended_row == ("Friday, September 25 07:30 AM PDT 2020", "Steve", "")
+
+
 @pytest.mark.parametrize(
     "start_time",
     (
