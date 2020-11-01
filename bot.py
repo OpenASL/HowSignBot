@@ -5,7 +5,7 @@ import logging
 import random
 import re
 from contextlib import suppress
-from typing import Optional, NamedTuple, List, Tuple, Set
+from typing import Optional, NamedTuple, List, Tuple, Set, Dict, Sequence, Union
 from urllib.parse import quote_plus, urlencode
 
 import discord
@@ -153,12 +153,14 @@ def sign_impl(word: str):
         for word in words:
             word = word.strip()
             title = f"||{word.upper()}||" if spoiler else word.upper()
-            embed.add_field(name=title, value=word_display(word, has_spoiler=spoiler))
+            embed.add_field(
+                name=title, value=word_display(word, has_spoiler=bool(spoiler))
+            )
     else:
         title = f"||{word.upper()}||" if spoiler else word.upper()
         embed = discord.Embed(
             title=title,
-            description=word_display(word, has_spoiler=spoiler),
+            description=word_display(word, has_spoiler=bool(spoiler)),
         )
 
     return {"embed": embed}
@@ -379,7 +381,7 @@ Example: `{COMMAND_PREFIX}practice today 2pm {pacific}`
 
 def make_practice_session_embed(
     guild_id: int, sessions: List[PracticeSession], *, dtime: dt.datetime
-):
+) -> discord.Embed:
     now_pacific = utcnow().astimezone(PACIFIC)
     dtime_pacific = dtime.astimezone(PACIFIC)
     description = dtime_pacific.strftime("%A, %B %-d")
@@ -411,7 +413,7 @@ def make_practice_session_embed(
                 value += f"\nHost: {session.host}"
             if session.notes:
                 value += f"\nNotes: {session.notes}"
-            embed.add_field(name=title, value=value or "Practice", inline=False)
+            embed.add_field(name=title, value=value, inline=False)
     embed.add_field(
         name="🗓",
         value=f"[Schedule or edit a practice]({schedule_url})",
@@ -419,13 +421,13 @@ def make_practice_session_embed(
     return embed
 
 
-def make_practice_sessions_today_embed(guild_id: int):
+def make_practice_sessions_today_embed(guild_id: int) -> discord.Embed:
     now = utcnow()
     sessions = get_practice_sessions(guild_id, dtime=now)
     return make_practice_session_embed(guild_id, sessions, dtime=now)
 
 
-async def is_in_guild(ctx: Context):
+async def is_in_guild(ctx: Context) -> bool:
     return bool(ctx.guild)
 
 
@@ -446,8 +448,9 @@ Examples:
 
 
 def schedule_impl(guild_id: int, when: Optional[str]):
+    settings: Optional[Dict[str, str]]
     if when and when.strip().lower() != "today":
-        settings = dict(PREFER_DATES_FROM="future")
+        settings = {"PREFER_DATES_FROM": "future"}
         dtime = parse_human_readable_datetime(when, settings=settings) or utcnow()
     else:
         settings = None
@@ -906,7 +909,7 @@ WATCH2GETHER_CLOSED_MESSAGE = "✨ _watch2gether room closed_"
 
 
 @bot.command(name="w2g", aliases=("wtg", "watch2gether"), help=WATCH2GETHER_HELP)
-async def watch2gether_command(ctx: Context, video_url: str = None):
+async def watch2gether_command(ctx: Context, video_url: Optional[str] = None):
     logger.info("creating watch2gether meeting")
     try:
         url = await meetings.create_watch2gether(WATCH2GETHER_API_KEY, video_url)
@@ -937,13 +940,13 @@ def make_teams(players):
     return red, blue
 
 
-def format_team(players):
+def format_team(players: Sequence[Union[discord.User, discord.Member]]):
     names = [getattr(each, "nick", None) or each.name for each in players]
     return ", ".join(names)
 
 
 @bot.command(name="codenames", aliases=("cn",), help="Start a Codenames game")
-async def codenames_command(ctx: Context, name: str = None):
+async def codenames_command(ctx: Context, name: Optional[str] = None):
     name = name or cuteid.cuteid()
     url = f"https://horsepaste.com/{name}"
     base_message = f"🕵️ **Codenames** 🕵️\n{url}\nClick 👍 to join a team. Click 🔀 to shuffle the teams."
@@ -957,7 +960,7 @@ async def codenames_command(ctx: Context, name: str = None):
     def check(reaction, user):
         return reaction.message.id == message.id
 
-    players = []
+    players: List[Union[discord.User, discord.Member]] = []
     while True:
         done, pending = await asyncio.wait(
             (
@@ -993,7 +996,7 @@ NUM_CATCHPHRASE_WORDS = 8
 CATEGORIES_FORMATTED = ", ".join(catchphrase.CATEGORIES)
 
 
-def catchphrase_impl(category: str = None):
+def catchphrase_impl(category: Optional[str] = None):
     category = category.lower() if category else None
     if category == "categories":
         return {
@@ -1024,7 +1027,7 @@ def catchphrase_impl(category: str = None):
     aliases=("cp",),
     help="Generate a list of random words and phrases",
 )
-async def catchphrase_command(ctx: Context, category: str = None):
+async def catchphrase_command(ctx: Context, category: Optional[str] = None):
     await ctx.send(**catchphrase_impl(category))
 
 
@@ -1039,7 +1042,7 @@ def ActivityTypeConverter(argument) -> discord.ActivityType:
 
 @bot.command(name="presence", help="BOT OWNER ONLY: Change bot precense")
 @commands.is_owner()
-async def presence_command(ctx: Context, activity_type: ActivityTypeConverter, name: str):
+async def presence_command(ctx: Context, activity_type: ActivityTypeConverter, name: str):  # type: ignore[valid-type]
     activity = discord.Activity(
         name=name.format(p=COMMAND_PREFIX),
         type=activity_type,
