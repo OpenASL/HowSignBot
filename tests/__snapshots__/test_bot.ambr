@@ -221,21 +221,6 @@
     '',
   )
 ---
-# name: test_practice_invalid[invalid]
-  BadArgument('⚠️Could not parse "invalid" into a date or time. Make sure to include "am" or "pm" as well as a timezone, e.g. "pdt".')
----
-# name: test_practice_invalid[today edt]
-  BadArgument("⚠️To schedule a practice, enter a time after `!practice`.\nExample: `!practice today at 2pm edt`\nEnter `!schedule` to see today's schedule.\n")
----
-# name: test_practice_invalid[today pdt]
-  BadArgument("⚠️To schedule a practice, enter a time after `!practice`.\nExample: `!practice today at 2pm edt`\nEnter `!schedule` to see today's schedule.\n")
----
-# name: test_practice_invalid[today]
-  BadArgument("⚠️To schedule a practice, enter a time after `!practice`.\nExample: `!practice today at 2pm edt`\nEnter `!schedule` to see today's schedule.\n")
----
-# name: test_practice_invalid[tomorrow]
-  BadArgument("⚠️To schedule a practice, enter a time after `!practice`.\nExample: `!practice today at 2pm edt`\nEnter `!schedule` to see today's schedule.\n")
----
 # name: test_schedule[9/27]
   <class 'dict'> {
     'embed': <class 'Embed'> {
@@ -246,37 +231,6 @@
       description='Sunday, September 27',
       fields=<class 'list'> [
         EmbedProxy(inline=False, name='11 AM PDT / 12 PM MDT / 1 PM CDT / 2 PM EDT', value='[Add to Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+another+1%EF%B8%8F%E2%83%A3&dates=20200927T180000Z%2F20200927T190000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\nNotes: another 1️⃣'),
-        EmbedProxy(inline=True, name='🗓', value='[Schedule or edit a practice](https://docs.google.com/spreadsheets/d/abc/edit)'),
-      ],
-      footer=EmbedProxy(),
-      image=EmbedProxy(),
-      provider=EmbedProxy(),
-      thumbnail=EmbedProxy(),
-      timestamp=Embed.Empty,
-      title=Embed.Empty,
-      type='rich',
-      url=Embed.Empty,
-      video=EmbedProxy(),
-    },
-  }
----
-# name: test_schedule[9/28/2020]
-  <class 'dict'> {
-    'embed': <class 'Embed'> {
-      Empty=Embed.Empty,
-      author=EmbedProxy(),
-      color=<Colour value=15105570>,
-      colour=<Colour value=15105570>,
-      description='
-        Monday, September 28
-        
-        *There are no scheduled practices yet!*
-        
-        To schedule a practice, edit the schedule below or use the `!practice` command.
-        Example: `!practice today 2pm pdt`
-  
-      ',
-      fields=<class 'list'> [
         EmbedProxy(inline=True, name='🗓', value='[Schedule or edit a practice](https://docs.google.com/spreadsheets/d/abc/edit)'),
       ],
       footer=EmbedProxy(),

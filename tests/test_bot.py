@@ -94,13 +94,23 @@ def mock_worksheet(monkeypatch):
         "tomorrow",
         "saturday",
         "9/27",
-        "9/28/2020",
     ),
 )
 @freeze_time("2020-09-25 14:00:00")
 def test_schedule(snapshot, monkeypatch, mock_worksheet, when):
     result = bot.schedule_impl(1234, when)
     assert result == snapshot
+
+
+@freeze_time("2020-09-25 14:00:00")
+def test_schedule_no_practices(snapshot, monkeypatch, mock_worksheet):
+    result = bot.schedule_impl(1234, "9/28/2020")
+    embed = result["embed"]
+    assert "September 28" in embed.description
+    assert "There are no scheduled practices yet" in embed.description
+    assert (
+        "To schedule a practice, edit the schedule below or use the" in embed.description
+    )
 
 
 @pytest.mark.parametrize(
@@ -130,7 +140,6 @@ def test_practice(snapshot, monkeypatch, mock_worksheet, start_time):
 @pytest.mark.parametrize(
     "start_time",
     (
-        "invalid",
         "today",
         "tomorrow",
         "today edt",
@@ -138,11 +147,22 @@ def test_practice(snapshot, monkeypatch, mock_worksheet, start_time):
     ),
 )
 @freeze_time("2020-09-25 14:00:00")
-def test_practice_invalid(snapshot, monkeypatch, mock_worksheet, start_time):
-    with pytest.raises(commands.errors.CommandError) as excinfo:
+def test_practice_common_mistakes(snapshot, monkeypatch, mock_worksheet, start_time):
+    with pytest.raises(
+        commands.errors.CommandError, match="️To schedule a practice, enter a time"
+    ):
         bot.practice_impl(guild_id=1234, host="Steve", start_time=start_time)
     mock_worksheet.append_row.assert_not_called()
-    assert excinfo.value == snapshot
+
+
+@freeze_time("2020-09-25 14:00:00")
+def test_practice_invalid(snapshot, monkeypatch, mock_worksheet):
+    with pytest.raises(
+        commands.errors.CommandError,
+        match='Could not parse "invalid" into a date or time. Make sure to include "am" or "pm" as well as a timezone',
+    ):
+        bot.practice_impl(guild_id=1234, host="Steve", start_time="invalid")
+    mock_worksheet.append_row.assert_not_called()
 
 
 @pytest.mark.parametrize(
