@@ -48,7 +48,7 @@ GOOGLE_TOKEN_URI = env.str("GOOGLE_TOKEN_URI", "https://oauth2.googleapis.com/to
 FEEDBACK_SHEET_KEY = env.str("FEEDBACK_SHEET_KEY", required=True)
 SCHEDULE_SHEET_KEYS = env.dict("SCHEDULE_SHEET_KEYS", required=True, subcast_key=int)
 SCHEDULE_CHANNELS = env.dict(
-    "SCHEDULE_CHANNELS", required=True, subcast_key=int, subcast=int
+    "SCHEDULE_CHANNELS", required=True, subcast_key=int, subcast_values=int
 )
 
 
@@ -619,6 +619,23 @@ async def daily_practice_message():
             logger.exception(
                 f"could not send message to guild {guild_id}, channel {channel_id}"
             )
+
+
+@bot.command(
+    name="send_schedule",
+    help="BOT OWNER ONLY: Manually send daily practice schedule for a guild",
+)
+@commands.is_owner()
+async def send_schedule_command(ctx: Context, guild_id: int):
+    logger.info(ctx.channel.id)
+    guild = bot.get_guild(guild_id)
+    try:
+        channel_id = SCHEDULE_CHANNELS[guild_id]
+    except KeyError:
+        await ctx.send(f"⚠️ guild_id has not practice schedule: {guild_id}")
+        return
+    channel = guild.get_channel(channel_id)
+    await channel.send(embed=make_practice_sessions_today_embed(guild.id))
 
 
 # -----------------------------------------------------------------------------
