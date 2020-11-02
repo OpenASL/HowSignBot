@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.72.2 (2020-11-02)
+### Fix
+* Fix daily practice schedule (#49) ([`2ea1040`](https://github.com/OpenASL/HowSignBot/commit/2ea1040dc94032c798f55e909ba47122cb7808a0))
+
 ## v20.72.1 (2020-11-01)
 ### Fix
 * Correctly parse dates in the near future (#47) ([`495d478`](https://github.com/OpenASL/HowSignBot/commit/495d478e69dd7419574e4464e20e2cf5a34b7fa0))
