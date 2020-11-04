@@ -90,12 +90,16 @@ bot = commands.Bot(
 
 @bot.event
 async def on_ready():
+    await set_default_presence()
+    daily_practice_message.start()
+
+
+async def set_default_presence():
     activity = discord.Activity(
         name=f"{COMMAND_PREFIX}sign | {COMMAND_PREFIX}{COMMAND_PREFIX}",
         type=discord.ActivityType.watching,
     )
     await bot.change_presence(activity=activity)
-    daily_practice_message.start()
 
 
 # -----------------------------------------------------------------------------
@@ -1057,9 +1061,13 @@ def ActivityTypeConverter(argument) -> discord.ActivityType:
     return getattr(discord.ActivityType, argument)
 
 
-@bot.command(name="presence", help="BOT OWNER ONLY: Change bot precense")
+@bot.command(name="presence", help="BOT OWNER ONLY: Change bot presense")
 @commands.is_owner()
-async def presence_command(ctx: Context, activity_type: ActivityTypeConverter, name: str):  # type: ignore[valid-type]
+async def presence_command(ctx: Context, activity_type: Optional[ActivityTypeConverter] = None, name: str = ""):  # type: ignore[valid-type]
+    if not activity_type:
+        await set_default_presence()
+        await ctx.send("Presence reset.")
+        return
     activity = discord.Activity(
         name=name.format(p=COMMAND_PREFIX),
         type=activity_type,
