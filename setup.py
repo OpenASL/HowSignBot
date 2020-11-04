@@ -33,9 +33,10 @@ setup(
     packages=find_packages("lib"),
     package_dir={"": "lib"},
     package_data={
-        "handshapes": ["assets/*.png"],
         "catchphrase": ["*.yaml", "*.json"],
+        "clthat": ["*.json"],
         "cuteid": ["*.json"],
+        "handshapes": ["assets/*.png"],
     },
     include_package_data=True,
 )

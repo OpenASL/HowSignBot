@@ -25,6 +25,7 @@ import catchphrase
 import meetings
 import pytz_informal
 import database
+import clthat
 
 # -----------------------------------------------------------------------------
 
@@ -266,6 +267,40 @@ def handshapes_impl():
 async def handshapes_command(ctx):
     logger.info("sending handshapes list")
     await ctx.send(**handshapes_impl())
+
+
+# -----------------------------------------------------------------------------
+
+CLTHAT_HELP = """Show a text or GIF prompt for classifier practice
+
+Examples:
+{COMMAND_PREFIX}clthat
+{COMMAND_PREFIX}clthat gif
+{COMMAND_PREFIX}clthat text
+""".format(
+    COMMAND_PREFIX=COMMAND_PREFIX
+)
+
+
+def clthat_impl(kind: str):
+    kind = kind.lower()
+    logger.info(f"sending classifier practice, kind: {kind}")
+    if kind not in {"any", "text", "gif"}:
+        return {"content": "⚠️ `kind` must be one of: any, text, gif"}
+
+    content = "_CL That!_\n"
+    if kind == "any":
+        content += clthat.random()
+    elif kind == "text":
+        content += clthat.text()
+    else:
+        content += clthat.gif_url()
+    return {"content": content}
+
+
+@bot.command(name="clthat", aliases=("cl",), help=HANDSHAPE_HELP)
+async def clthat_command(ctx, kind="any"):
+    await ctx.send(**clthat_impl(kind))
 
 
 # -----------------------------------------------------------------------------
@@ -744,6 +779,14 @@ def get_daily_topics(dtime: Optional[dt.datetime] = None) -> Tuple[str, str]:
     return (rand.choice(rows)["content"], rand.choice(rows)["content"])
 
 
+def get_daily_clthat(dtime: Optional[dt.datetime] = None) -> handshapes.Handshape:
+    return clthat.text(get_today_random(dtime))
+
+
+TOPIC_DAYS = {0, 2, 4, 6}  # M W F Su
+CLTHAT_DAYS = {1, 3, 5}  # Tu Th Sa
+
+
 async def send_daily_message(channel_id: int, dtime: Optional[dt.datetime] = None):
     channel = bot.get_channel(channel_id)
     guild = channel.guild
@@ -767,9 +810,18 @@ async def send_daily_message(channel_id: int, dtime: Optional[dt.datetime] = Non
         )
 
     # Topics of the Day
-    if settings.get("include_topics_of_the_day"):
+    weekday = dtime.weekday()
+    if settings.get("include_topics_of_the_day") and weekday in TOPIC_DAYS:
         topic, topic2 = get_daily_topics(dtime)
         embed.add_field(name="Discuss...", value=f'"{topic}"\n\n"{topic2}"', inline=False)
+
+    # CL That
+    if settings.get("include_clthat") and weekday in CLTHAT_DAYS:
+        embed.add_field(
+            name="CL That!",
+            value=f'How would you sign: "{get_daily_clthat(dtime)}"',
+            inline=False,
+        )
 
     await channel.send(file=file_, embed=embed)
 
@@ -788,11 +840,15 @@ async def send_daily_message_command(
         await ctx.send(f"⚠️ Schedule channel not configured for Channel ID {channel_id}")
         return
     dtime = (
-        parse_human_readable_datetime(when, user_timezone=EASTERN)[0]
+        parse_human_readable_datetime(
+            when, settings={"PREFER_DATES_FROM": "future"}, user_timezone=EASTERN
+        )[0]
         if when
         else utcnow().astimezone(EASTERN)
     )
-    await send_daily_message(channel_id, dtime)
+    assert dtime is not None
+    send_dtime = EASTERN.localize(dt.datetime.combine(dtime, DAILY_PRACTICE_SEND_TIME))
+    await send_daily_message(channel_id, send_dtime)
 
     channel = bot.get_channel(channel_id)
     guild = channel.guild

@@ -15,7 +15,4 @@ fi
 echo "==> Running migrations"
 PYTHONPATH=. alembic upgrade head
 
-echo "==> Syncing topics"
-PYTHONPATH=. ./script/sync_topics.py
-
 echo "==> Update finished."
