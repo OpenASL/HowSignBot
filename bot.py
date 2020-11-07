@@ -57,10 +57,8 @@ ZOOM_JWT = env.str("ZOOM_JWT", required=True)
 ZOOM_HOOK_TOKEN = env.str("ZOOM_HOOK_TOKEN", required=True)
 
 WATCH2GETHER_API_KEY = env.str("WATCH2GETHER_API_KEY", required=True)
-# Default to 10 AM EDT
-_daily_practice_send_time_raw = env.str("DAILY_PRACTICE_SEND_TIME", "14:00")
-_hour, _min = _daily_practice_send_time_raw.split(":")
-DAILY_PRACTICE_SEND_TIME = dt.time(hour=int(_hour), minute=int(_min))
+# When to send practice schedules (in Eastern time)
+DAILY_PRACTICE_SEND_TIME = env.time("DAILY_PRACTICE_SEND_TIME", "10:00")
 
 env.seal()
 
@@ -598,24 +596,23 @@ async def practices_error(ctx, error):
 
 @tasks.loop(seconds=10.0)
 async def daily_practice_message():
-    now = utcnow()
-    date = now.date()
-    if now.time() > DAILY_PRACTICE_SEND_TIME:
-        date = now.date() + dt.timedelta(days=1)
-    then = dt.datetime.combine(date, DAILY_PRACTICE_SEND_TIME)
+    # DAILY_PRACTICE_SEND_TIME is defined in Eastern time
+    now_eastern = dt.datetime.now(EASTERN)
+    date = now_eastern.date()
+    if now_eastern.time() > DAILY_PRACTICE_SEND_TIME:
+        date = now_eastern.date() + dt.timedelta(days=1)
+    then = EASTERN.localize(dt.datetime.combine(date, DAILY_PRACTICE_SEND_TIME))
     logger.info(
         f"practice schedules for {len(SCHEDULE_CHANNELS)} channels will be sent at {then.isoformat()}"
     )
-    await discord.utils.sleep_until(then)
-    logger.info("sending daily practice schedules")
+    await discord.utils.sleep_until(then.astimezone(dt.timezone.utc))
     for guild_id, channel_id in SCHEDULE_CHANNELS.items():
         try:
-            logger.info(
-                f"sending daily practice schedule for guild {guild_id}, channel {channel_id}"
-            )
             guild = bot.get_guild(guild_id)
             channel = guild.get_channel(channel_id)
-
+            logger.info(
+                f'sending daily practice schedule for guild: "{guild.name}" in #{channel.name}'
+            )
             asyncio.create_task(
                 channel.send(embed=make_practice_sessions_today_embed(guild.id))
             )
