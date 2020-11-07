@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.74.0 (2020-11-07)
+### Feature
+* Add donate command ([`5b9d336`](https://github.com/OpenASL/HowSignBot/commit/5b9d336a4793342854070ef17999d42d94c12c02))
+
 ## v20.73.0 (2020-11-07)
 ### Feature
 * Define practice schedule send time in Eastern time (#51) ([`7400dbf`](https://github.com/OpenASL/HowSignBot/commit/7400dbfcd5610b6787d3bd13c510787937d48455))
