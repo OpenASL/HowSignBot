@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v20.73.0 (2020-11-07)
+### Feature
+* Define practice schedule send time in Eastern time (#51) ([`7400dbf`](https://github.com/OpenASL/HowSignBot/commit/7400dbfcd5610b6787d3bd13c510787937d48455))
+* Allow resetting presence ([`04fd135`](https://github.com/OpenASL/HowSignBot/commit/04fd135735fe7da4c655289ae6f3d2d97f631559))
+
 ## v20.72.2 (2020-11-02)
 ### Fix
 * Fix daily practice schedule (#49) ([`2ea1040`](https://github.com/OpenASL/HowSignBot/commit/2ea1040dc94032c798f55e909ba47122cb7808a0))
