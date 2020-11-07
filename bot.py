@@ -1082,12 +1082,22 @@ async def presence_command_error(ctx, error):
 
 # -----------------------------------------------------------------------------
 
-HOMEPAGE = "https://howsign.sloria.io"
+HOMEPAGE_URL = "https://howsign.sloria.io"
 
 
 @bot.command(name="invite", help="Invite HowSignBot to another Discord server")
 async def invite_command(ctx: Context):
-    await ctx.send(f"Add me to your Discord server here: {HOMEPAGE}")
+    await ctx.send(f"Add HowSignBot to another server here: {HOMEPAGE_URL}")
+
+
+DONATE_URL = "https://liberapay.com/HowSignBot"
+
+
+@bot.command(name="donate", help="Get the donation URL for HowSignBot")
+async def donate_command(ctx: Context):
+    await ctx.send(
+        f"🙌 If you find HowSignBot useful, consider supporting the project with a donation: {DONATE_URL}"
+    )
 
 
 # -----------------------------------------------------------------------------
