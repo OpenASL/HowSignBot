@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.76.0 (2020-11-08)
+### Feature
+* Add channelinfo command (#53) ([`614b68b`](https://github.com/OpenASL/HowSignBot/commit/614b68b66ed4911234d34559f0903e988807d765))
+
 ## v20.75.0 (2020-11-07)
 ### Feature
 * Add support for multiple users to have access to ?zoom (#52) ([`fd4de7b`](https://github.com/OpenASL/HowSignBot/commit/fd4de7b304af28dc0f1f5fdcb3c1b11425cf5c18))
