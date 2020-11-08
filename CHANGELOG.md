@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.77.2 (2020-11-08)
+### Fix
+* Validate that channel has configured schedule ([`07dff4a`](https://github.com/OpenASL/HowSignBot/commit/07dff4adc48064d0b49c53c592a3e9941b36ac8b))
+
 ## v20.77.1 (2020-11-08)
 ### Fix
 * Fix send_schedule ([`96d1de3`](https://github.com/OpenASL/HowSignBot/commit/96d1de34803c6bc4847625e697d99b3ffae45b7d))
