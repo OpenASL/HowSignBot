@@ -51,8 +51,7 @@ SCHEDULE_CHANNELS = env.dict(
     "SCHEDULE_CHANNELS", required=True, subcast_key=int, subcast_values=int
 )
 
-
-ZOOM_USER_ID = env.str("ZOOM_USER_ID", required=True)
+ZOOM_USERS = env.dict("ZOOM_USERS", required=True)
 ZOOM_JWT = env.str("ZOOM_JWT", required=True)
 ZOOM_HOOK_TOKEN = env.str("ZOOM_HOOK_TOKEN", required=True)
 
@@ -779,10 +778,19 @@ def make_zoom_embed(
     )
 
 
-@bot.command(name="zoom", help="BOT OWNER ONLY: Create a Zoom meeting")
-@commands.is_owner()
+def is_allowed_zoom_access(ctx):
+    if str(ctx.author) not in ZOOM_USERS:
+        raise commands.errors.CheckFailure(
+            f"⚠️ `{COMMAND_PREFIX}{ctx.invoked_with}` can only be used by authorized users under the bot owner's Zoom account."
+        )
+    return True
+
+
+@bot.command(name="zoom", help="AUTHORIZED USERS ONLY: Create a Zoom meeting")
+@commands.check(is_allowed_zoom_access)
 async def zoom_command(ctx: Context, meeting_id: Optional[int] = None):
-    logger.info("creating zoom meeting")
+    zoom_user = ZOOM_USERS[str(ctx.author)]
+    logger.info(f"creating zoom meeting for zoom user: {zoom_user}")
     if meeting_id in app["zoom_meeting_messages"]:
         state = app["zoom_meeting_messages"][meeting_id]
         message = await ctx.send(
@@ -802,7 +810,7 @@ async def zoom_command(ctx: Context, meeting_id: Optional[int] = None):
         try:
             meeting = await meetings.create_zoom(
                 token=ZOOM_JWT,
-                user_id=ZOOM_USER_ID,
+                user_id=zoom_user,
                 topic="",
                 settings={
                     "host_video": False,
@@ -839,9 +847,7 @@ async def zoom_command(ctx: Context, meeting_id: Optional[int] = None):
 @zoom_command.error
 async def zoom_error(ctx, error):
     if isinstance(error, commands.errors.CheckFailure):
-        await ctx.send(
-            f"⚠️ `{COMMAND_PREFIX}{ctx.invoked_with}` can only be used by the bot owner because it is using their Zoom account."
-        )
+        await ctx.send(error.args[0])
     else:
         logger.error(
             f"unexpected error when handling '{ctx.invoked_with}'", exc_info=error
