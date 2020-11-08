@@ -1086,6 +1086,26 @@ async def presence_command_error(ctx, error):
     await ctx.send(content=message)
 
 
+# Used for getting channel IDs for SCHEDULE_CHANNELS
+
+CHANNEL_INFO_TEMPLATE = """Guild name: {ctx.guild.name}
+Guild ID: {ctx.guild.id}
+Channel name: {ctx.channel.name}
+Channel ID: {ctx.channel.id}
+"""
+
+
+@bot.command(name="channelinfo")
+@commands.is_owner()
+async def channelinfo_command(ctx: Context):
+    await ctx.author.send(
+        embed=discord.Embed(
+            title="Channel Information", description=CHANNEL_INFO_TEMPLATE.format(ctx=ctx)
+        )
+    )
+    await ctx.send("ℹ️ _Channel info sent in DM_", delete_after=5)
+
+
 # -----------------------------------------------------------------------------
 
 HOMEPAGE_URL = "https://howsign.sloria.io"
