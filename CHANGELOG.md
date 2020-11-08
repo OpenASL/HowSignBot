@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.77.1 (2020-11-08)
+### Fix
+* Fix send_schedule ([`96d1de3`](https://github.com/OpenASL/HowSignBot/commit/96d1de34803c6bc4847625e697d99b3ffae45b7d))
+
 ## v20.77.0 (2020-11-08)
 ### Feature
 * Simplify SCHEDULE_CHANNELS (#54) ([`813282d`](https://github.com/OpenASL/HowSignBot/commit/813282d27fe56e0f401616fc9d91b4df856d3cdc))
