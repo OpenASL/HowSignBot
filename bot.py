@@ -622,16 +622,13 @@ async def daily_practice_message():
     help="BOT OWNER ONLY: Manually send daily practice schedule for a guild",
 )
 @commands.is_owner()
-async def send_schedule_command(ctx: Context, guild_id: int):
-    logger.info(ctx.channel.id)
-    guild = bot.get_guild(guild_id)
-    try:
-        channel_id = SCHEDULE_CHANNELS[guild_id]
-    except KeyError:
-        await ctx.send(f"⚠️ guild_id has not practice schedule: {guild_id}")
-        return
-    channel = guild.get_channel(channel_id)
+async def send_schedule_command(ctx: Context, channel_id: int):
+    if channel_id not in SCHEDULE_CHANNELS:
+        await ctx.send(f"⚠️ Schedule channel not configured for Channel ID {channel_id}")
+    channel = bot.get_channel(channel_id)
+    guild = channel.guild
     await channel.send(embed=make_practice_sessions_today_embed(guild.id))
+    await ctx.send(f'🗓 Schedule sent to "{guild.name}", #{channel.name}')
 
 
 # -----------------------------------------------------------------------------
