@@ -47,9 +47,7 @@ GOOGLE_CLIENT_EMAIL = env.str("GOOGLE_CLIENT_EMAIL", required=True)
 GOOGLE_TOKEN_URI = env.str("GOOGLE_TOKEN_URI", "https://oauth2.googleapis.com/token")
 FEEDBACK_SHEET_KEY = env.str("FEEDBACK_SHEET_KEY", required=True)
 SCHEDULE_SHEET_KEYS = env.dict("SCHEDULE_SHEET_KEYS", required=True, subcast_key=int)
-SCHEDULE_CHANNELS = env.dict(
-    "SCHEDULE_CHANNELS", required=True, subcast_key=int, subcast_values=int
-)
+SCHEDULE_CHANNELS = env.list("SCHEDULE_CHANNELS", required=True, subcast=int)
 
 ZOOM_USERS = env.dict("ZOOM_USERS", required=True)
 ZOOM_JWT = env.str("ZOOM_JWT", required=True)
@@ -605,10 +603,10 @@ async def daily_practice_message():
         f"practice schedules for {len(SCHEDULE_CHANNELS)} channels will be sent at {then.isoformat()}"
     )
     await discord.utils.sleep_until(then.astimezone(dt.timezone.utc))
-    for guild_id, channel_id in SCHEDULE_CHANNELS.items():
+    for channel_id in SCHEDULE_CHANNELS:
         try:
-            guild = bot.get_guild(guild_id)
-            channel = guild.get_channel(channel_id)
+            channel = bot.get_channel(channel_id)
+            guild = channel.guild
             logger.info(
                 f'sending daily practice schedule for guild: "{guild.name}" in #{channel.name}'
             )
@@ -616,9 +614,7 @@ async def daily_practice_message():
                 channel.send(embed=make_practice_sessions_today_embed(guild.id))
             )
         except Exception:
-            logger.exception(
-                f"could not send message to guild {guild_id}, channel {channel_id}"
-            )
+            logger.exception(f"could not send to channel {channel_id}")
 
 
 @bot.command(
