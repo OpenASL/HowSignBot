@@ -427,7 +427,20 @@ def make_practice_sessions_today_embed(guild_id: int) -> discord.Embed:
 
 
 async def is_in_guild(ctx: Context) -> bool:
-    return bool(ctx.guild)
+    if not bool(ctx.guild):
+        raise commands.errors.CheckFailure(
+            f"⚠️ `{COMMAND_PREFIX}{ctx.invoked_with}` must be run within a server (not a DM)."
+        )
+    return True
+
+
+async def has_practice_schedule(ctx: Context) -> bool:
+    await is_in_guild(ctx)
+    if ctx.guild.id not in SCHEDULE_SHEET_KEYS:
+        raise commands.errors.CheckFailure(
+            "⚠️ No configured practice schedule for this server. If you think this is a mistake, contact the bot owner."
+        )
+    return True
 
 
 SCHEDULE_HELP = """List the practice schedule for this server
@@ -464,7 +477,7 @@ def schedule_impl(guild_id: int, when: Optional[str]):
     aliases=("practices",),
     help=SCHEDULE_HELP,
 )
-@commands.check(is_in_guild)
+@commands.check(has_practice_schedule)
 async def schedule_command(ctx: Context, *, when: Optional[str]):
     await ctx.send(**schedule_impl(guild_id=ctx.guild.id, when=when))
 
@@ -564,7 +577,7 @@ def practice_impl(*, guild_id: int, host: str, start_time: str):
 
 
 @bot.command(name="practice", help=PRACTICE_HELP)
-@commands.check(is_in_guild)
+@commands.check(has_practice_schedule)
 async def practice_command(ctx: Context, *, start_time: str):
     host = getattr(ctx.author, "nick", None) or ctx.author.name
     message = await ctx.send(
@@ -577,14 +590,10 @@ async def practice_command(ctx: Context, *, start_time: str):
 @practice_command.error
 @schedule_command.error
 async def practices_error(ctx, error):
-    if isinstance(error, commands.errors.CheckFailure):
-        await ctx.send(
-            f"`{COMMAND_PREFIX}{ctx.invoked_with}` must be run within a server (not a DM)."
-        )
+    if isinstance(error, (commands.errors.CheckFailure, commands.errors.BadArgument)):
+        await ctx.send(error.args[0])
     elif isinstance(error, commands.errors.MissingRequiredArgument):
         await ctx.send(PRACTICE_ERROR)
-    elif isinstance(error, commands.errors.CommandError):
-        await ctx.send(error.args[0])
     else:
         logger.error(
             f"unexpected error when handling '{ctx.invoked_with}'", exc_info=error
@@ -619,7 +628,7 @@ async def daily_practice_message():
 
 @bot.command(
     name="send_schedule",
-    help="BOT OWNER ONLY: Manually send daily practice schedule for a guild",
+    help="BOT OWNER ONLY: Manually send a daily practice schedule for a channel",
 )
 @commands.is_owner()
 async def send_schedule_command(ctx: Context, channel_id: int):
