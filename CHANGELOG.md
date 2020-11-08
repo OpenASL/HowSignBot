@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.75.0 (2020-11-07)
+### Feature
+* Add support for multiple users to have access to ?zoom (#52) ([`fd4de7b`](https://github.com/OpenASL/HowSignBot/commit/fd4de7b304af28dc0f1f5fdcb3c1b11425cf5c18))
+
 ## v20.74.0 (2020-11-07)
 ### Feature
 * Add donate command ([`5b9d336`](https://github.com/OpenASL/HowSignBot/commit/5b9d336a4793342854070ef17999d42d94c12c02))
