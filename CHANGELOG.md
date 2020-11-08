@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.77.0 (2020-11-08)
+### Feature
+* Simplify SCHEDULE_CHANNELS (#54) ([`813282d`](https://github.com/OpenASL/HowSignBot/commit/813282d27fe56e0f401616fc9d91b4df856d3cdc))
+
 ## v20.76.0 (2020-11-08)
 ### Feature
 * Add channelinfo command (#53) ([`614b68b`](https://github.com/OpenASL/HowSignBot/commit/614b68b66ed4911234d34559f0903e988807d765))
