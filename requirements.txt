@@ -7,4 +7,5 @@ python-slugify==4.0.1
 emoji==0.6.0
 dateparser==1.0.0
 pytz==2020.4
+psycopg2==2.8.6
 .

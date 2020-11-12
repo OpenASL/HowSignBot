@@ -1,3 +1,4 @@
+import os
 import datetime as dt
 import random
 from unittest import mock
@@ -8,10 +9,33 @@ import pytz
 from discord.ext import commands
 from freezegun import freeze_time
 from syrupy.filters import props
+from sqlalchemy import create_engine
+from sqlalchemy_utils import create_database, drop_database
 
-import bot
+# Must be before bot import
+os.environ["TESTING"] = "true"
+
+import bot  # noqa:E402
 
 random.seed(1)
+
+
+# https://www.starlette.io/database/#test-isolation
+@pytest.fixture(scope="session", autouse=True)
+def create_test_database():
+    url = str(bot.TEST_DATABASE_URL)
+    engine = create_engine(url)
+    create_database(url)
+    bot.store.metadata.create_all(engine)
+    yield
+    drop_database(url)
+
+
+@pytest.fixture
+async def store():
+    await bot.store.connect()
+    yield bot.store
+    await bot.store.disconnect()
 
 
 @pytest.mark.parametrize(
@@ -132,15 +156,30 @@ def test_schedule_no_practices(snapshot, mock_worksheet):
     ),
 )
 @freeze_time("2020-09-25 14:00:00")
-def test_practice(snapshot, mock_worksheet, start_time):
-    bot.practice_impl(guild_id=1234, host="Steve", start_time=start_time)
+@pytest.mark.asyncio
+async def test_practice(snapshot, mock_worksheet, start_time, store):
+    await bot.practice_impl(
+        guild_id=1234, host="Steve", start_time=start_time, user_id=12345679
+    )
     mock_worksheet.append_row.assert_called_once()
     assert mock_worksheet.append_row.call_args[0][0] == snapshot
 
 
-def test_practice_nearby_date(snapshot, mock_worksheet):
+@pytest.mark.asyncio
+async def test_practice_caches_timezone(mock_worksheet, store):
+    await bot.practice_impl(
+        guild_id=1234, host="Steve", start_time="tomorrow 8pm est", user_id=123
+    )
+    timezone = await store.get_user_timezone(123)
+    assert timezone == pytz.timezone("America/New_York")
+
+
+@pytest.mark.asyncio
+async def test_practice_nearby_date(snapshot, mock_worksheet, store):
     with freeze_time("2020-09-25 14:00:00"):
-        bot.practice_impl(guild_id=1234, host="Steve", start_time="10:30am edt")
+        await bot.practice_impl(
+            guild_id=1234, host="Steve", start_time="10:30am edt", user_id=123
+        )
 
     mock_worksheet.append_row.assert_called_once()
     appended_row = mock_worksheet.append_row.call_args[0][0]
@@ -157,21 +196,27 @@ def test_practice_nearby_date(snapshot, mock_worksheet):
     ),
 )
 @freeze_time("2020-09-25 14:00:00")
-def test_practice_common_mistakes(snapshot, mock_worksheet, start_time):
+@pytest.mark.asyncio
+async def test_practice_common_mistakes(snapshot, mock_worksheet, start_time):
     with pytest.raises(
         commands.errors.CommandError, match="️To schedule a practice, enter a time"
     ):
-        bot.practice_impl(guild_id=1234, host="Steve", start_time=start_time)
+        await bot.practice_impl(
+            guild_id=1234, host="Steve", start_time=start_time, user_id=123
+        )
     mock_worksheet.append_row.assert_not_called()
 
 
 @freeze_time("2020-09-25 14:00:00")
-def test_practice_invalid(snapshot, mock_worksheet):
+@pytest.mark.asyncio
+async def test_practice_invalid(snapshot, mock_worksheet, store):
     with pytest.raises(
         commands.errors.CommandError,
         match='Could not parse "invalid" into a date or time. Make sure to include "am" or "pm" as well as a timezone',
     ):
-        bot.practice_impl(guild_id=1234, host="Steve", start_time="invalid")
+        await bot.practice_impl(
+            guild_id=1234, host="Steve", start_time="invalid", user_id=123
+        )
     mock_worksheet.append_row.assert_not_called()
 
 
