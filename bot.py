@@ -23,6 +23,7 @@ import handshapes
 import cuteid
 import catchphrase
 import meetings
+import pytz_informal
 
 # -----------------------------------------------------------------------------
 
@@ -279,34 +280,46 @@ def get_gsheet_client():
 # -----------------------------------------------------------------------------
 
 
-def utcnow():
+def utcnow() -> dt.datetime:
     return dt.datetime.now(dt.timezone.utc)
 
 
-PACIFIC = pytz.timezone("US/Pacific")
-MOUNTAIN = pytz.timezone("US/Mountain")
-CENTRAL = pytz.timezone("US/Central")
-EASTERN = pytz.timezone("US/Eastern")
+PACIFIC = pytz.timezone("America/Los_Angeles")
+MOUNTAIN = pytz.timezone("America/Denver")
+CENTRAL = pytz.timezone("America/Chicago")
+EASTERN = pytz.timezone("America/New_York")
 
 # EDT and PDT change to EST and PST during the winter
 # Show the current name in docs
 EASTERN_CURRENT_NAME = utcnow().astimezone(EASTERN).strftime("%Z")
 PACIFIC_CURRENT_NAME = utcnow().astimezone(PACIFIC).strftime("%Z")
 
-TIME_FORMAT = "%-I:%M %p %Z"
-TIME_FORMAT_NO_MINUTES = "%-I %p %Z"
+# Timezone is omitted because it is computed by display_timezone
+TIME_FORMAT = "%-I:%M %p "
+TIME_FORMAT_NO_MINUTES = "%-I %p "
+
+
+def normalize_timezone(dtime: dt.datetime):
+    assert dtime.tzinfo is not None
+    tzname = display_timezone(dtime.tzinfo)
+    normalized = dtime.replace(tzinfo=None)
+    tzone = pytz_informal.timezone(tzname)
+    return tzone.localize(normalized)
 
 
 def parse_human_readable_datetime(
     dstr: str, settings: Optional[dict] = None
-) -> Optional[dt.datetime]:
+) -> Tuple[Optional[dt.datetime], Optional[pytz.BaseTzInfo]]:
     parsed = dateparser.parse(dstr, settings=settings)
-    if not parsed:
-        return None
+    if parsed is None:
+        return None, None
     # Use Pacific time if timezone can't be parsed; return a UTC datetime
     if not parsed.tzinfo:
         parsed = PACIFIC.localize(parsed)
-    return parsed.astimezone(dt.timezone.utc)
+    else:
+        parsed = normalize_timezone(parsed)
+    used_timezone = parsed.tzinfo
+    return parsed.astimezone(dt.timezone.utc), used_timezone
 
 
 class PracticeSession(NamedTuple):
@@ -343,7 +356,7 @@ def get_practice_sessions(
             and (
                 session_dtime := parse_human_readable_datetime(
                     row[0], settings=parse_settings
-                )
+                )[0]
             )
             # Compare within Pacific timezone to include all of US
             and (
@@ -357,12 +370,20 @@ def get_practice_sessions(
     )
 
 
+def display_timezone(tzinfo: dt.tzinfo):
+    return tzinfo.tzname(dt.datetime.utcnow())
+
+
+def display_time(dtime: dt.datetime, time_format: str, tzinfo: pytz.BaseTzInfo):
+    return dtime.astimezone(tzinfo).strftime(time_format) + display_timezone(tzinfo)
+
+
 def format_multi_time(dtime: dt.datetime) -> str:
     time_format = TIME_FORMAT if dtime.minute != 0 else TIME_FORMAT_NO_MINUTES
-    pacific_dstr = dtime.astimezone(PACIFIC).strftime(time_format)
-    mountain_dstr = dtime.astimezone(MOUNTAIN).strftime(time_format)
-    central_dstr = dtime.astimezone(CENTRAL).strftime(time_format)
-    eastern_dstr = dtime.astimezone(EASTERN).strftime(time_format)
+    pacific_dstr = display_time(dtime, time_format, tzinfo=PACIFIC)
+    mountain_dstr = display_time(dtime, time_format, tzinfo=MOUNTAIN)
+    central_dstr = display_time(dtime, time_format, tzinfo=CENTRAL)
+    eastern_dstr = display_time(dtime, time_format, tzinfo=EASTERN)
     return " / ".join((pacific_dstr, mountain_dstr, central_dstr, eastern_dstr))
 
 
@@ -463,7 +484,8 @@ def schedule_impl(guild_id: int, when: Optional[str]):
     settings: Optional[Dict[str, str]]
     if when and when.strip().lower() != "today":
         settings = {"PREFER_DATES_FROM": "future"}
-        dtime = parse_human_readable_datetime(when, settings=settings) or utcnow()
+        dtime, _ = parse_human_readable_datetime(when, settings=settings) or utcnow()
+        dtime = dtime or utcnow()
     else:
         settings = None
         dtime = utcnow()
@@ -514,20 +536,22 @@ Enter `{COMMAND_PREFIX}schedule` to see today's schedule.
 )
 
 
-def parse_practice_time(human_readable_datetime: str) -> Optional[dt.datetime]:
+def parse_practice_time(
+    human_readable_datetime: str,
+) -> Tuple[Optional[dt.datetime], Optional[pytz.BaseTzInfo]]:
     # First try current_period to capture dates in the near future
-    dtime = parse_human_readable_datetime(
+    dtime, used_timezone = parse_human_readable_datetime(
         human_readable_datetime, settings={"PREFER_DATES_FROM": "current_period"}
     )
     # Can't parse into datetime, return early
     if dtime is None:
-        return dtime
+        return None, None
     # If date is in the past, prefer future dates
     if dtime < utcnow():
-        dtime = parse_human_readable_datetime(
+        dtime, used_timezone = parse_human_readable_datetime(
             human_readable_datetime, settings={"PREFER_DATES_FROM": "future"}
         )
-    return dtime
+    return dtime, used_timezone
 
 
 def practice_impl(*, guild_id: int, host: str, start_time: str):
@@ -550,17 +574,25 @@ def practice_impl(*, guild_id: int, host: str, start_time: str):
         raise commands.errors.BadArgument(PRACTICE_ERROR)
     logger.info(f"attempting to schedule new practice session: {start_time}")
     human_readable_datetime, quoted = get_and_strip_quoted_text(start_time)
-    dtime = parse_practice_time(human_readable_datetime)
+    dtime, used_timezone = parse_practice_time(human_readable_datetime)
     if not dtime:
         raise commands.errors.BadArgument(
             f'⚠️Could not parse "{start_time}" into a date or time. Make sure to include "am" or "pm" as well as a timezone, e.g. "{PACIFIC_CURRENT_NAME.lower()}".'
         )
+    assert used_timezone is not None
     if dtime < utcnow():
         raise commands.errors.BadArgument(
             "⚠Parsed date or time is in the past. Try again with a future date or time."
         )
     notes = quoted or ""
-    display_dtime = dtime.astimezone(PACIFIC).strftime("%A, %B %d %I:%M %p %Z %Y")
+    dtime_local = dtime.astimezone(used_timezone)
+    display_dtime = " ".join(
+        (
+            dtime_local.strftime("%A, %B %d %I:%M %p"),
+            display_timezone(used_timezone),
+            dtime_local.strftime("%Y"),
+        )
+    )
     row = (display_dtime, host, notes)
     logger.info(f"adding new practice session to sheet: {row}")
     worksheet = get_practice_worksheet_for_guild(guild_id)

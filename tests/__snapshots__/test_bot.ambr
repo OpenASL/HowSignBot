@@ -137,6 +137,24 @@
     ',
   }
 ---
+# name: test_parse_human_readable_datetime[9/25 2:30 pm cdt]
+  '2020-09-25T19:30:00+00:00'
+---
+# name: test_parse_human_readable_datetime[on friday at 2pm cst]
+  '2020-11-13T20:00:00+00:00'
+---
+# name: test_parse_human_readable_datetime[today 2pm edt]
+  '2020-11-13T19:00:00+00:00'
+---
+# name: test_parse_human_readable_datetime[today 8:25pm edt]
+  '2020-11-14T01:25:00+00:00'
+---
+# name: test_parse_human_readable_datetime[today at 2pm edt]
+  '2020-11-13T19:00:00+00:00'
+---
+# name: test_parse_human_readable_datetime[tomorrow 2pm pdt]
+  '2020-11-13T22:00:00+00:00'
+---
 # name: test_practice["classifiers" at 6pm pdt]
   <class 'tuple'> (
     'Friday, September 25 06:00 PM PDT 2020',
@@ -146,63 +164,63 @@
 ---
 # name: test_practice["games" 10am edt Sunday]
   <class 'tuple'> (
-    'Sunday, September 27 07:00 AM PDT 2020',
+    'Sunday, September 27 10:00 AM EDT 2020',
     'Steve',
     'games',
   )
 ---
 # name: test_practice["games" at 10am edt on 9/27]
   <class 'tuple'> (
-    'Sunday, September 27 07:00 AM PDT 2020',
+    'Sunday, September 27 10:00 AM EDT 2020',
     'Steve',
     'games',
   )
 ---
 # name: test_practice["games" at 10am edt on Sunday]
   <class 'tuple'> (
-    'Sunday, September 27 07:00 AM PDT 2020',
+    'Sunday, September 27 10:00 AM EDT 2020',
     'Steve',
     'games',
   )
 ---
 # name: test_practice[10am edt "games" on 9/27]
   <class 'tuple'> (
-    'Sunday, September 27 07:00 AM PDT 2020',
+    'Sunday, September 27 10:00 AM EDT 2020',
     'Steve',
     'games',
   )
 ---
 # name: test_practice[2pm edt "chat and games! \U0001f389"]
   <class 'tuple'> (
-    'Friday, September 25 11:00 AM PDT 2020',
+    'Friday, September 25 02:00 PM EDT 2020',
     'Steve',
     'chat and games! 🎉',
   )
 ---
 # name: test_practice[2pm edt]
   <class 'tuple'> (
-    'Friday, September 25 11:00 AM PDT 2020',
+    'Friday, September 25 02:00 PM EDT 2020',
     'Steve',
     '',
   )
 ---
 # name: test_practice[9/24 1:45pm edt \u201caround 45 min.-1 hour\u201d]
   <class 'tuple'> (
-    'Friday, September 24 10:45 AM PDT 2021',
+    'Friday, September 24 01:45 PM EDT 2021',
     'Steve',
     'around 45 min.-1 hour',
   )
 ---
 # name: test_practice[9/27 9am cdt]
   <class 'tuple'> (
-    'Sunday, September 27 07:00 AM PDT 2020',
+    'Sunday, September 27 09:00 AM CDT 2020',
     'Steve',
     '',
   )
 ---
 # name: test_practice[at 2pm edt]
   <class 'tuple'> (
-    'Friday, September 25 11:00 AM PDT 2020',
+    'Friday, September 25 02:00 PM EDT 2020',
     'Steve',
     '',
   )
