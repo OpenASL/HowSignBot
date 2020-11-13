@@ -11,11 +11,7 @@ abbreviations = {
     "America/St_Johns": ["nst", "ndt", "nt", "newfoundland", "nddt"],
 }
 
-data = {}
-
-for iana, abbrs in abbreviations.items():
-    for abbr in abbrs:
-        data[abbr] = iana
+data = {abbr: iana for iana, abbrs in abbreviations.items() for abbr in abbrs}
 
 
 def timezone(zone: str) -> pytz.BaseTzInfo:
