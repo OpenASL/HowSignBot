@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.78.0 (2020-11-12)
+### Feature
+* More robust timezone parsing; store in given timezone (#55) ([`0f79278`](https://github.com/OpenASL/HowSignBot/commit/0f79278d21cb7fe227b8bcc810644d70ff0e3a69))
+
 ## v20.77.2 (2020-11-08)
 ### Fix
 * Validate that channel has configured schedule ([`07dff4a`](https://github.com/OpenASL/HowSignBot/commit/07dff4adc48064d0b49c53c592a3e9941b36ac8b))
