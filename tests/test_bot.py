@@ -4,6 +4,7 @@ from unittest import mock
 
 import gspread
 import pytest
+import pytz
 from discord.ext import commands
 from freezegun import freeze_time
 from syrupy.filters import props
@@ -143,7 +144,7 @@ def test_practice_nearby_date(snapshot, mock_worksheet):
 
     mock_worksheet.append_row.assert_called_once()
     appended_row = mock_worksheet.append_row.call_args[0][0]
-    assert appended_row == ("Friday, September 25 07:30 AM PDT 2020", "Steve", "")
+    assert appended_row == ("Friday, September 25 10:30 AM EDT 2020", "Steve", "")
 
 
 @pytest.mark.parametrize(
@@ -200,6 +201,18 @@ def test_get_and_strip_quoted_text(value, expected):
         "9/25 2:30 pm cdt",
     ),
 )
-def test_parse_human_readable_datetime(value):
-    dtime = bot.parse_human_readable_datetime(value)
+def test_parse_human_readable_datetime(value, snapshot):
+    dtime, _ = bot.parse_human_readable_datetime(value)
     assert dtime.tzinfo == dt.timezone.utc
+    assert dtime.isoformat() == snapshot
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    (
+        (pytz.timezone("America/New_York"), "EST"),
+        (pytz.timezone("America/Los_Angeles"), "PST"),
+    ),
+)
+def test_display_timezone(value, expected):
+    assert bot.display_timezone(value) == expected
