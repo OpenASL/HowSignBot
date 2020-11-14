@@ -43,7 +43,7 @@ async def create_zoom(
 async def create_watch2gether(api_key: str, video_url: Optional[str] = None) -> str:
     """Create and return a watch2gether URL via the watch2gether API."""
     async with aiohttp.ClientSession() as client:
-        payload = {"api_key": api_key, "video_url": video_url}
+        payload = {"w2g_api_key": api_key, "share": video_url}
         resp = await client.post("https://w2g.tv/rooms/create.json", json=payload)
     resp.raise_for_status()
     data = await resp.json()
