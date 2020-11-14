@@ -961,18 +961,15 @@ Examples:
     COMMAND_PREFIX=COMMAND_PREFIX
 )
 
-WATCH2GETHER_TEMPLATE = """<{url}>
-🚀 Watch videos together!
-*When finished, click 🛑 to remove this message.*
-"""
-
-WATCH2GETHER_WITH_URL_TEMPLATE = """<{url}>
-🚀 Watch videos together!
-Queued video: <{video_url}>
-*When finished, click 🛑 to remove this message.*
-"""
-
 WATCH2GETHER_CLOSED_MESSAGE = "✨ _watch2gether room closed_"
+
+
+def make_watch2gether_embed(url: str, video_url: Optional[str]) -> discord.Embed:
+    description = "🚀 Watch videos together!"
+    if video_url:
+        description += f"\nQueued video: <{video_url}>"
+    description += "\n*When finished, click 🛑 to remove this message.*"
+    return discord.Embed(title=url, description=description, color=discord.Color.gold())
 
 
 @bot.command(name="w2g", aliases=("wtg", "watch2gether"), help=WATCH2GETHER_HELP)
@@ -986,9 +983,7 @@ async def watch2gether_command(ctx: Context, video_url: Optional[str] = None):
             content="🚨 _Could not create watch2gether room. That's embarrassing._"
         )
     else:
-        template = WATCH2GETHER_WITH_URL_TEMPLATE if video_url else WATCH2GETHER_TEMPLATE
-        content = template.format(url=url, video_url=video_url)
-        message = await ctx.send(content=content)
+        message = await ctx.send(embed=make_watch2gether_embed(url, video_url))
 
     await wait_for_stop_sign(message, replace_with=WATCH2GETHER_CLOSED_MESSAGE)
 
@@ -1179,7 +1174,7 @@ CLOSED_MESSAGE_MAP = {
     r"Could not create Zoom": ZOOM_CLOSED_MESSAGE,
     r"meet\.jit\.si": MEET_CLOSED_MESSAGE,
     r"Could not create watch2gether": WATCH2GETHER_CLOSED_MESSAGE,
-    r"Watch videos together": WATCH2GETHER_CLOSED_MESSAGE,
+    r"w2g\.tv": WATCH2GETHER_CLOSED_MESSAGE,
     r"Speakeasy": SPEAKEASY_CLOSED_MESSAGE,
 }
 
