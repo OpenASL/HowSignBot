@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.78.1 (2020-11-13)
+### Fix
+* Test fixes; minor refactor; docco (#58) ([`2626f2c`](https://github.com/OpenASL/HowSignBot/commit/2626f2c59864e83e1cb8998d04e3aa414a1eef02))
+
 ## v20.78.0 (2020-11-12)
 ### Feature
 * More robust timezone parsing; store in given timezone (#55) ([`0f79278`](https://github.com/OpenASL/HowSignBot/commit/0f79278d21cb7fe227b8bcc810644d70ff0e3a69))
