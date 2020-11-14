@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v20.79.0 (2020-11-14)
+### Feature
+* Improve display of watch2gether messages ([`12a8fd6`](https://github.com/OpenASL/HowSignBot/commit/12a8fd60a1b64e167e37f7b3c35dfc6ef9f172c3))
+
+### Fix
+* Use updated watch2gether API (#59) ([`1877799`](https://github.com/OpenASL/HowSignBot/commit/1877799469480ceb72623d6fafc5ff5193f271b9))
+
 ## v20.78.1 (2020-11-13)
 ### Fix
 * Test fixes; minor refactor; docco (#58) ([`2626f2c`](https://github.com/OpenASL/HowSignBot/commit/2626f2c59864e83e1cb8998d04e3aa414a1eef02))

@@ -27,7 +27,7 @@ import pytz_informal
 
 # -----------------------------------------------------------------------------
 
-__version__ = "20.78.1"
+__version__ = "20.79.0"
 
 app = web.Application()  # web app for listening to webhooks
 
