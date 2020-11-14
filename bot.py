@@ -294,17 +294,22 @@ EASTERN = pytz.timezone("America/New_York")
 EASTERN_CURRENT_NAME = utcnow().astimezone(EASTERN).strftime("%Z")
 PACIFIC_CURRENT_NAME = utcnow().astimezone(PACIFIC).strftime("%Z")
 
-# Timezone is omitted because it is computed by display_timezone
+# Timezone is omitted because it is computed using tzinfo.tzname
 TIME_FORMAT = "%-I:%M %p "
 TIME_FORMAT_NO_MINUTES = "%-I %p "
 
 
-def normalize_timezone(dtime: dt.datetime):
-    assert dtime.tzinfo is not None
-    tzname = display_timezone(dtime.tzinfo)
-    normalized = dtime.replace(tzinfo=None)
+def normalize_timezone(dtime: dt.datetime) -> dt.datetime:
+    """Normalizes informal N. American timezones ("EST", "PST") to
+    the IANA timezones ("America/Los_Angeles", "America/New_York")
+    """
+    tzinfo = dtime.tzinfo
+    assert tzinfo is not None
+    naive = dtime.replace(tzinfo=None)
+    tzname = tzinfo.tzname(naive)
+    assert tzname is not None
     tzone = pytz_informal.timezone(tzname)
-    return tzone.localize(normalized)
+    return tzone.localize(naive)
 
 
 def parse_human_readable_datetime(
@@ -370,12 +375,16 @@ def get_practice_sessions(
     )
 
 
-def display_timezone(tzinfo: dt.tzinfo):
-    return tzinfo.tzname(dt.datetime.utcnow())
+def display_timezone(tzinfo: dt.tzinfo, dtime: dt.datetime) -> str:
+    ret = tzinfo.tzname(dtime.replace(tzinfo=None))
+    assert ret is not None
+    return ret
 
 
-def display_time(dtime: dt.datetime, time_format: str, tzinfo: pytz.BaseTzInfo):
-    return dtime.astimezone(tzinfo).strftime(time_format) + display_timezone(tzinfo)
+def display_time(dtime: dt.datetime, time_format: str, tzinfo: pytz.BaseTzInfo) -> str:
+    return dtime.astimezone(tzinfo).strftime(time_format) + display_timezone(
+        tzinfo, dtime
+    )
 
 
 def format_multi_time(dtime: dt.datetime) -> str:
@@ -589,7 +598,7 @@ def practice_impl(*, guild_id: int, host: str, start_time: str):
     display_dtime = " ".join(
         (
             dtime_local.strftime("%A, %B %d %I:%M %p"),
-            display_timezone(used_timezone),
+            display_timezone(used_timezone, dtime),
             dtime_local.strftime("%Y"),
         )
     )
