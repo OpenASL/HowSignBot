@@ -15,6 +15,9 @@ data = {abbr: iana for iana, abbrs in abbreviations.items() for abbr in abbrs}
 
 
 def timezone(zone: str) -> pytz.BaseTzInfo:
+    """Same as pytz.timezone except that it normalizes abbreviated names, e.g. "EST",
+    to their corresponding IANA names, e.g. "America/New_York".
+    """
     zone_lower = zone.lower()
     if zone_lower in data:
         return pytz.timezone(data[zone_lower])
