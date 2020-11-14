@@ -215,6 +215,6 @@ def test_parse_human_readable_datetime(value, snapshot):
         (pytz.timezone("America/Los_Angeles"), "PDT"),
     ),
 )
-@freeze_time("2020-09-25 14:00:00")
 def test_display_timezone(value, expected):
-    assert bot.display_timezone(value, bot.utcnow()) == expected
+    dtime = dt.datetime(2020, 9, 25, tzinfo=dt.timezone.utc)
+    assert bot.display_timezone(value, dtime) == expected
