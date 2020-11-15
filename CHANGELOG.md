@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.80.0 (2020-11-15)
+### Feature
+* Cache user timezones (#60) ([`eb47814`](https://github.com/OpenASL/HowSignBot/commit/eb478142f221f36cd04a9ef2d6e45831d2bed6c2))
+
 ## v20.79.0 (2020-11-14)
 ### Feature
 * Improve display of watch2gether messages ([`12a8fd6`](https://github.com/OpenASL/HowSignBot/commit/12a8fd60a1b64e167e37f7b3c35dfc6ef9f172c3))
