@@ -19,6 +19,12 @@ if [ -z "$CI" ]; then
   unset name python_version
 fi
 
+# XXX Workaround to get psycopg2 to install properly on macOS
+if grep --quiet 'psycopg2' -- 'requirements.txt' && [ "$(uname -s)" = "Darwin" ]; then
+  echo "==> Installing psycopg2..."
+  LDFLAGS=-L/usr/local/opt/openssl/lib python -m pip install $(grep 'psycopg2' -- 'requirements.txt')
+fi
+
 if [[ -f requirements-dev.txt ]]; then
   echo "==> Installing/updating from requirements-dev.txt..."
   python -m pip install -U -r requirements-dev.txt

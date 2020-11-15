@@ -1,0 +1,16 @@
+version: '3.7'
+
+services:
+  db:
+    ports:
+      - 54321:5432 # don't conflict with Homebrew postgres
+    image: postgres:12
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=howsignbot
+      - POSTGRES_PASSWORD=howsignbot
+      - POSTGRES_DB=howsignbot_dev
+
+volumes:
+  postgres_data:

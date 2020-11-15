@@ -24,6 +24,7 @@ import cuteid
 import catchphrase
 import meetings
 import pytz_informal
+import database
 
 # -----------------------------------------------------------------------------
 
@@ -34,6 +35,9 @@ app = web.Application()  # web app for listening to webhooks
 env = Env(eager=False)
 env.read_env()
 
+DATABASE_URL = database.DatabaseURL(env.str("DATABASE_URL", required=True))
+TEST_DATABASE_URL = DATABASE_URL.replace(database="test_" + DATABASE_URL.database)
+TESTING = env.bool("TESTING", cast=bool, default=False)
 LOG_LEVEL = env.log_level("LOG_LEVEL", logging.INFO)
 DISCORD_TOKEN = env.str("DISCORD_TOKEN", required=True)
 OWNER_ID = env.int("OWNER_ID", required=True)
@@ -80,6 +84,8 @@ bot = commands.Bot(
     owner_id=OWNER_ID,
     intents=intents,
 )
+
+store = database.Store(database_url=DATABASE_URL, force_rollback=TESTING)
 
 # -----------------------------------------------------------------------------
 
@@ -312,17 +318,28 @@ def normalize_timezone(dtime: dt.datetime) -> dt.datetime:
     return tzone.localize(naive)
 
 
+class NoTimeZoneError(ValueError):
+    pass
+
+
 def parse_human_readable_datetime(
-    dstr: str, settings: Optional[dict] = None
+    dstr: str,
+    settings: Optional[dict] = None,
+    user_timezone: Optional[pytz.BaseTzInfo] = None,
+    # By default, use Pacific time if timezone can't be parsed
+    fallback_timezone: Optional[pytz.BaseTzInfo] = PACIFIC,
 ) -> Tuple[Optional[dt.datetime], Optional[pytz.BaseTzInfo]]:
     parsed = dateparser.parse(dstr, settings=settings)
     if parsed is None:
         return None, None
-    # Use Pacific time if timezone can't be parsed; return a UTC datetime
     if not parsed.tzinfo:
-        parsed = PACIFIC.localize(parsed)
-    else:
-        parsed = normalize_timezone(parsed)
+        if user_timezone is not None:
+            parsed = user_timezone.localize(parsed)
+        else:
+            if not fallback_timezone:
+                raise NoTimeZoneError(f"Time zone could not be parsed from {dstr}.")
+            parsed = fallback_timezone.localize(parsed)
+    parsed = normalize_timezone(parsed)
     used_timezone = parsed.tzinfo
     return parsed.astimezone(dt.timezone.utc), used_timezone
 
@@ -546,11 +563,14 @@ Enter `{COMMAND_PREFIX}schedule` to see today's schedule.
 
 
 def parse_practice_time(
-    human_readable_datetime: str,
+    human_readable_datetime: str, user_timezone: Optional[pytz.BaseTzInfo] = None
 ) -> Tuple[Optional[dt.datetime], Optional[pytz.BaseTzInfo]]:
     # First try current_period to capture dates in the near future
     dtime, used_timezone = parse_human_readable_datetime(
-        human_readable_datetime, settings={"PREFER_DATES_FROM": "current_period"}
+        human_readable_datetime,
+        settings={"PREFER_DATES_FROM": "current_period"},
+        user_timezone=user_timezone,
+        fallback_timezone=None,  # Error if time zone can't be parsed
     )
     # Can't parse into datetime, return early
     if dtime is None:
@@ -558,12 +578,15 @@ def parse_practice_time(
     # If date is in the past, prefer future dates
     if dtime < utcnow():
         dtime, used_timezone = parse_human_readable_datetime(
-            human_readable_datetime, settings={"PREFER_DATES_FROM": "future"}
+            human_readable_datetime,
+            settings={"PREFER_DATES_FROM": "future"},
+            user_timezone=user_timezone,
+            fallback_timezone=None,  # Error if time zone can't be parsed
         )
     return dtime, used_timezone
 
 
-def practice_impl(*, guild_id: int, host: str, start_time: str):
+async def practice_impl(*, guild_id: int, host: str, start_time: str, user_id: int):
     if start_time.lower() in {
         # Common mistakes: don't try to parse these into a datetime
         "today",
@@ -583,7 +606,15 @@ def practice_impl(*, guild_id: int, host: str, start_time: str):
         raise commands.errors.BadArgument(PRACTICE_ERROR)
     logger.info(f"attempting to schedule new practice session: {start_time}")
     human_readable_datetime, quoted = get_and_strip_quoted_text(start_time)
-    dtime, used_timezone = parse_practice_time(human_readable_datetime)
+    user_timezone = await store.get_user_timezone(user_id=user_id)
+    try:
+        dtime, used_timezone = parse_practice_time(
+            human_readable_datetime, user_timezone=user_timezone
+        )
+    except NoTimeZoneError:
+        raise commands.errors.BadArgument(
+            f'⚠️Could not parse time zone from "{start_time}". Make sure to include a time zone, e.g. "{PACIFIC_CURRENT_NAME.lower()}".'
+        )
     if not dtime:
         raise commands.errors.BadArgument(
             f'⚠️Could not parse "{start_time}" into a date or time. Make sure to include "am" or "pm" as well as a timezone, e.g. "{PACIFIC_CURRENT_NAME.lower()}".'
@@ -608,23 +639,50 @@ def practice_impl(*, guild_id: int, host: str, start_time: str):
     worksheet.append_row(row)
     dtime_pacific = dtime.astimezone(PACIFIC)
     short_display_date = f"{dtime_pacific:%a, %b %d} {format_multi_time(dtime)}"
-
     sessions = get_practice_sessions(guild_id=guild_id, dtime=dtime, worksheet=worksheet)
     embed = make_practice_session_embed(guild_id=guild_id, sessions=sessions, dtime=dtime)
+    if used_timezone != user_timezone:
+        await store.set_user_timezone(user_id, used_timezone)
     return {
         "content": f"🙌 New practice scheduled for *{short_display_date}*",
         "embed": embed,
+        # Return old and new timezone to send notification to user if they're different
+        "old_timezone": user_timezone,
+        "new_timezone": used_timezone,
     }
+
+
+TIMEZONE_CHANGE_TEMPLATE = """🙌 Thanks for scheduling a practice! I'll remember your time zone (**{new_timezone}**) so you don't need to include a time zone when scheduling future practices.
+Before: `{COMMAND_PREFIX}practice tomorrow 8pm {new_timezone_display}`
+After: `{COMMAND_PREFIX}practice tomorrow 8pm`
+To change your time zone, just schedule another practice with a different time zone.
+"""
 
 
 @bot.command(name="practice", help=PRACTICE_HELP)
 @commands.check(has_practice_schedule)
 async def practice_command(ctx: Context, *, start_time: str):
     host = getattr(ctx.author, "nick", None) or ctx.author.name
-    message = await ctx.send(
-        **practice_impl(guild_id=ctx.guild.id, host=host, start_time=start_time)
+    ret = await practice_impl(
+        guild_id=ctx.guild.id,
+        host=host,
+        start_time=start_time,
+        user_id=ctx.author.id,
     )
+    old_timezone = ret.pop("old_timezone")
+    new_timezone = ret.pop("new_timezone")
+    message = await ctx.send(**ret)
+    if str(old_timezone) != str(new_timezone):
+        new_timezone_display = display_timezone(new_timezone, utcnow()).lower()
+        await ctx.author.send(
+            TIMEZONE_CHANGE_TEMPLATE.format(
+                new_timezone=new_timezone,
+                new_timezone_display=new_timezone_display,
+                COMMAND_PREFIX=COMMAND_PREFIX,
+            )
+        )
     with suppress(Exception):
+
         await message.add_reaction("✅")
 
 
@@ -1306,11 +1364,13 @@ async def on_startup(app):
     app["bot"] = bot
     # Mapping of Zoom meeting IDs to a tuple of the form (channel_id, message_id, participant_count)
     app["zoom_meeting_messages"] = {}
+    await store.connect()
 
 
 async def on_shutdown(app):
     app["bot_task"].cancel()
     await app["bot_task"]
+    await store.disconnect()
 
 
 app.on_startup.append(on_startup)

@@ -1,0 +1,11 @@
+# Based on conventions from https://github.com/github/scripts-to-rule-them-all
+# script/update: Update application to run for its current checkout.
+
+if [ -z "$SKIP_BOOTSTRAP" ]; then
+  . script/bootstrap
+fi
+
+echo "==> Running migrations"
+PYTHONPATH=. alembic upgrade head
+
+echo "==> Update finished."

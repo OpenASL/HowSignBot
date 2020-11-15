@@ -9,7 +9,11 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.9.0
+    - name: Start containers
+      run: docker-compose up -d
     - name: Install dependencies
       run: . script/bootstrap
+    - name: Run migrations
+      run: PYTHONPATH=. alembic upgrade head
     - name: Run tests
       run: . script/test
