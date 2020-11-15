@@ -6,6 +6,8 @@ Run the bootstrap script to set up your local environment.
 
 NOTE: If you're not on macOS, you'll need to install [pyenv](https://github.com/pyenv/pyenv) and [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv) manually.
 
+With Docker running:
+
 ```
 . script/bootstrap
 ```
