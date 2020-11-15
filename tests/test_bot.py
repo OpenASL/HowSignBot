@@ -175,6 +175,14 @@ async def test_practice_caches_timezone(mock_worksheet, store):
 
 
 @pytest.mark.asyncio
+async def test_practice_errors_if_time_zone_cannot_be_parsed(mock_worksheet, store):
+    with pytest.raises(commands.errors.BadArgument, match="Could not parse time zone"):
+        await bot.practice_impl(
+            guild_id=1234, host="Steve", start_time="tomorrow 8pm", user_id=321
+        )
+
+
+@pytest.mark.asyncio
 async def test_practice_nearby_date(snapshot, mock_worksheet, store):
     with freeze_time("2020-09-25 14:00:00"):
         await bot.practice_impl(
