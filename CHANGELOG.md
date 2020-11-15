@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.81.0 (2020-11-15)
+### Feature
+* Add typing indicators ([`75f141b`](https://github.com/OpenASL/HowSignBot/commit/75f141b2cbfb20c8910ab720797b25395e545a5c))
+
 ## v20.80.0 (2020-11-15)
 ### Feature
 * Cache user timezones (#60) ([`eb47814`](https://github.com/OpenASL/HowSignBot/commit/eb478142f221f36cd04a9ef2d6e45831d2bed6c2))
