@@ -638,7 +638,7 @@ async def practice_impl(*, guild_id: int, host: str, start_time: str, user_id: i
     short_display_date = f"{dtime_pacific:%a, %b %d} {format_multi_time(dtime)}"
     sessions = get_practice_sessions(guild_id=guild_id, dtime=dtime, worksheet=worksheet)
     embed = make_practice_session_embed(guild_id=guild_id, sessions=sessions, dtime=dtime)
-    if used_timezone != user_timezone:
+    if str(used_timezone) != str(user_timezone):
         await store.set_user_timezone(user_id, used_timezone)
     return {
         "content": f"🙌 New practice scheduled for *{short_display_date}*",
