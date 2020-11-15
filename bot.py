@@ -652,7 +652,7 @@ async def practice_impl(*, guild_id: int, host: str, start_time: str, user_id: i
     }
 
 
-TIMEZONE_CHANGE_TEMPLATE = """🙌 Thanks for scheduling a practice! I've set your time zone to **{new_timezone}** so you don't need to include a time zone when scheduling future practices.
+TIMEZONE_CHANGE_TEMPLATE = """🙌 Thanks for scheduling a practice! I'll remember your time zone (**{new_timezone}**) so you don't need to include a time zone when scheduling future practices.
 Before: `{COMMAND_PREFIX}practice tomorrow 8pm {new_timezone_display}`
 After: `{COMMAND_PREFIX}practice tomorrow 8pm`
 To change your time zone, just schedule another practice with a different time zone.
