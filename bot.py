@@ -520,13 +520,10 @@ def schedule_impl(guild_id: int, when: Optional[str]):
     return {"embed": embed}
 
 
-@bot.command(
-    name="schedule",
-    aliases=("practices",),
-    help=SCHEDULE_HELP,
-)
+@bot.command(name="schedule", aliases=("practices",), help=SCHEDULE_HELP)
 @commands.check(has_practice_schedule)
 async def schedule_command(ctx: Context, *, when: Optional[str]):
+    await ctx.channel.trigger_typing()
     await ctx.send(**schedule_impl(guild_id=ctx.guild.id, when=when))
 
 
@@ -663,6 +660,7 @@ To change your time zone, just schedule another practice with a different time z
 @commands.check(has_practice_schedule)
 async def practice_command(ctx: Context, *, start_time: str):
     host = getattr(ctx.author, "nick", None) or ctx.author.name
+    await ctx.channel.trigger_typing()
     ret = await practice_impl(
         guild_id=ctx.guild.id,
         host=host,
@@ -682,7 +680,6 @@ async def practice_command(ctx: Context, *, start_time: str):
             )
         )
     with suppress(Exception):
-
         await message.add_reaction("✅")
 
 
