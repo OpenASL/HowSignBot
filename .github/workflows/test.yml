@@ -11,9 +11,9 @@ jobs:
         python-version: 3.9.0
     - name: Start containers
       run: docker-compose up -d
-    - name: Run migrations
-      run: PYTHONPATH=. alembic upgrade head
     - name: Install dependencies
       run: . script/bootstrap
+    - name: Run migrations
+      run: PYTHONPATH=. alembic upgrade head
     - name: Run tests
       run: . script/test
