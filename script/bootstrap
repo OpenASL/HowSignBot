@@ -1,3 +1,4 @@
+#!/bin/sh
 # script/bootstrap: Resolve all dependencies that the application requires to run.
 
 if [ -f "Brewfile" ] && [ "$(uname -s)" = "Darwin" ]; then
@@ -48,6 +49,11 @@ fi
 if [[ -f docker-compose.yml ]]; then
   echo "==> Starting containers..."
   docker-compose up -d
+fi
+
+if [[ -f setup.py ]]; then
+  echo "==> Installing from setup.py..."
+  python -m pip install -e '.[dev]'
 fi
 
 echo "==> Bootstrapping finished."

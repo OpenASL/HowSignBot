@@ -1,3 +1,4 @@
+import random
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -74,3 +75,8 @@ def get_handshape(name):
             f"Could not find handshape with name '{name}'"
         ) from error
     return Handshape(name=cased_name, path=path)
+
+
+def get_random_handshape():
+    name = random.choice(tuple(HANDSHAPES.keys()))
+    return get_handshape(name)

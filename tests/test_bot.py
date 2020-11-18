@@ -9,8 +9,6 @@ import pytz
 from discord.ext import commands
 from freezegun import freeze_time
 from syrupy.filters import props
-from sqlalchemy import create_engine
-from sqlalchemy_utils import create_database, drop_database
 
 # Must be before bot import
 os.environ["TESTING"] = "true"
@@ -18,24 +16,6 @@ os.environ["TESTING"] = "true"
 import bot  # noqa:E402
 
 random.seed(1)
-
-
-# https://www.starlette.io/database/#test-isolation
-@pytest.fixture(scope="session", autouse=True)
-def create_test_database():
-    url = str(bot.TEST_DATABASE_URL)
-    engine = create_engine(url)
-    create_database(url)
-    bot.store.metadata.create_all(engine)
-    yield
-    drop_database(url)
-
-
-@pytest.fixture
-async def store():
-    await bot.store.connect()
-    yield bot.store
-    await bot.store.disconnect()
 
 
 @pytest.mark.parametrize(

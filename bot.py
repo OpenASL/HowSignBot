@@ -85,7 +85,9 @@ bot = commands.Bot(
     intents=intents,
 )
 
-store = database.Store(database_url=DATABASE_URL, force_rollback=TESTING)
+store = database.Store(
+    database_url=TEST_DATABASE_URL if TESTING else DATABASE_URL, force_rollback=TESTING
+)
 
 # -----------------------------------------------------------------------------
 
@@ -207,12 +209,11 @@ Enter {COMMAND_PREFIX}handshapes to show a list of handshapes.
 
 def handshape_impl(name: str):
     logger.info(f"handshape: '{name}'")
-    if name == "random":
-        name = random.choice(tuple(handshapes.HANDSHAPES.keys()))
-        logger.info(f"chose '{name}'")
-
     try:
-        handshape = handshapes.get_handshape(name)
+        if name == "random":
+            handshape = handshapes.get_random_handshape()
+        else:
+            handshape = handshapes.get_handshape(name)
     except handshapes.HandshapeNotFoundError:
         logger.info(f"handshape '{name}' not found")
         suggestion = did_you_mean(name, tuple(handshapes.HANDSHAPES.keys()))
@@ -710,30 +711,46 @@ async def daily_practice_message():
     await discord.utils.sleep_until(then.astimezone(dt.timezone.utc))
     for channel_id in SCHEDULE_CHANNELS:
         try:
-            channel = bot.get_channel(channel_id)
-            guild = channel.guild
-            logger.info(
-                f'sending daily practice schedule for guild: "{guild.name}" in #{channel.name}'
-            )
-            asyncio.create_task(
-                channel.send(embed=make_practice_sessions_today_embed(guild.id))
-            )
+            asyncio.create_task(send_daily_message(channel_id))
         except Exception:
             logger.exception(f"could not send to channel {channel_id}")
 
 
+async def send_daily_message(channel_id: int):
+    channel = bot.get_channel(channel_id)
+    guild = channel.guild
+    logger.info(f'sending daily message for guild: "{guild.name}" in #{channel.name}')
+    embed = make_practice_sessions_today_embed(guild.id)
+
+    # Handshape of the Day
+    handshape = handshapes.get_random_handshape()
+    filename = f"{handshape.name}.png"
+    file_ = discord.File(handshape.path, filename=filename)
+    embed.set_thumbnail(url=f"attachment://{filename}")
+    embed.add_field(
+        name="Handshape of the Day", value=f'"{handshape.name}"', inline=False
+    )
+
+    # Topics of the Day
+    topic = await store.get_topic_for_guild(guild.id)
+    topic2 = await store.get_topic_for_guild(guild.id)
+    embed.add_field(name="Discuss...", value=f'"{topic}"\n\n"{topic2}"', inline=False)
+    await channel.send(file=file_, embed=embed)
+
+
 @bot.command(
-    name="send_schedule",
+    name="send_daily_message",
     help="BOT OWNER ONLY: Manually send a daily practice schedule for a channel",
 )
 @commands.is_owner()
-async def send_schedule_command(ctx: Context, channel_id: int):
+async def send_daily_message_command(ctx: Context, channel_id: int):
     if channel_id not in SCHEDULE_CHANNELS:
         await ctx.send(f"⚠️ Schedule channel not configured for Channel ID {channel_id}")
+    await send_daily_message(channel_id)
+
     channel = bot.get_channel(channel_id)
     guild = channel.guild
-    await channel.send(embed=make_practice_sessions_today_embed(guild.id))
-    await ctx.send(f'🗓 Schedule sent to "{guild.name}", #{channel.name}')
+    await ctx.send(f'🗓 Daily message sent to "{guild.name}", #{channel.name}')
 
 
 # -----------------------------------------------------------------------------
@@ -843,7 +860,6 @@ async def idiom_command(ctx, spoiler: Optional[str]):
 
 
 # -----------------------------------------------------------------------------
-
 
 ZOOM_CLOSED_MESSAGE = "✨ _Zoom meeting ended_"
 
