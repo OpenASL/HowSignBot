@@ -723,6 +723,18 @@ async def daily_practice_message():
             logger.exception(f"could not send to channel {channel_id}")
 
 
+random.seed("howsignbot")
+SHUFFLED_HANDSHAPE_NAMES = sorted(list(handshapes.HANDSHAPES.keys()))
+random.shuffle(SHUFFLED_HANDSHAPE_NAMES)
+
+
+def get_daily_handshape(dtime: Optional[dt.datetime] = None) -> handshapes.Handshape:
+    dtime = dtime or utcnow()
+    day_of_year = dtime.timetuple().tm_yday
+    name = SHUFFLED_HANDSHAPE_NAMES[day_of_year % len(SHUFFLED_HANDSHAPE_NAMES)]
+    return handshapes.get_handshape(name)
+
+
 async def send_daily_message(channel_id: int):
     channel = bot.get_channel(channel_id)
     guild = channel.guild
@@ -734,7 +746,7 @@ async def send_daily_message(channel_id: int):
 
     # Handshape of the Day
     if settings.get("include_handshape_of_the_day"):
-        handshape = handshapes.get_random_handshape()
+        handshape = get_daily_handshape()
         filename = f"{handshape.name}.png"
         file_ = discord.File(handshape.path, filename=filename)
         embed.set_thumbnail(url=f"attachment://{filename}")

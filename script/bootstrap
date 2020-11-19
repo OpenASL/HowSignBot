@@ -15,15 +15,15 @@ fi
 # XXX Workaround to get psycopg2 to install properly on macOS
 if grep --quiet 'psycopg2' -- 'requirements.txt' && [ "$(uname -s)" = "Darwin" ]; then
   echo "==> Installing psycopg2..."
-  LDFLAGS=-L/usr/local/opt/openssl/lib python -m pip install $(grep 'psycopg2' -- 'requirements.txt')
+  LDFLAGS=-L/usr/local/opt/openssl/lib python -m pip install -q $(grep 'psycopg2' -- 'requirements.txt')
 fi
 
 if [ -f requirements-dev.txt ]; then
   echo "==> Installing/updating from requirements-dev.txt..."
-  python -m pip install -U -r requirements-dev.txt
+  python -m pip install -q -U -r requirements-dev.txt
 elif [ -f requirements.txt ]; then
   echo "==> Installing/updating from requirements.txt..."
-  python -m pip install -U -r requirements.txt
+  python -m pip install -q -U -r requirements.txt
 fi
 
 if [ -f .pre-commit-config.yaml ]; then
@@ -45,7 +45,7 @@ fi
 
 if [ -f setup.py ]; then
   echo "==> Installing from setup.py..."
-  python -m pip install -e '.[dev]'
+  python -m pip install -q -e '.[dev]'
 fi
 
 echo "==> Bootstrapping finished."
