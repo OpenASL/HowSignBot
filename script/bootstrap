@@ -1,21 +1,13 @@
 #!/bin/sh
 # script/bootstrap: Resolve all dependencies that the application requires to run.
-
-if [ -f "Brewfile" ] && [ "$(uname -s)" = "Darwin" ]; then
-  brew bundle check >/dev/null 2>&1  || {
-    echo "==> Installing Homebrew dependencies..."
-    brew bundle
-  }
-fi
+set -e
 
 if [ -z "$CI" ]; then
   name=${PWD##*/}
   # If python version is passed as first argument, use that, otherwise use 3.8
   python_version=${1:-3.9.0}
   echo "==> Bootstrapping a Python $python_version environment called $name..."
-  pyenv install "$python_version" --skip-existing
-  pyenv virtualenv "$python_version" "$name"
-  pyenv local "$name"
+  pyenv virtualenv $python_version $name | true
   eval "$(pyenv init -)"
   unset name python_version
 fi
@@ -26,7 +18,7 @@ if grep --quiet 'psycopg2' -- 'requirements.txt' && [ "$(uname -s)" = "Darwin" ]
   LDFLAGS=-L/usr/local/opt/openssl/lib python -m pip install $(grep 'psycopg2' -- 'requirements.txt')
 fi
 
-if [[ -f requirements-dev.txt ]]; then
+if [ -f requirements-dev.txt ]; then
   echo "==> Installing/updating from requirements-dev.txt..."
   python -m pip install -U -r requirements-dev.txt
 elif [ -f requirements.txt ]; then
@@ -34,24 +26,24 @@ elif [ -f requirements.txt ]; then
   python -m pip install -U -r requirements.txt
 fi
 
-if [[ -f .pre-commit-config.yaml ]]; then
+if [ -f .pre-commit-config.yaml ]; then
   echo "==> Installing/updating pre-commit..."
   python -m pip install -U pre-commit
   echo "==> Installing/updating pre-commit hook..."
   pre-commit install -f
 fi
 
-if [[ -f .env.example && ! -f .env ]]; then
+if [ -f .env.example ] && [ ! -f .env ]; then
   echo "==> Copying .env.example to .env..."
   cp .env.example .env
 fi
 
-if [[ -f docker-compose.yml ]]; then
+if [ -f docker-compose.yml ]; then
   echo "==> Starting containers..."
   docker-compose up -d
 fi
 
-if [[ -f setup.py ]]; then
+if [ -f setup.py ]; then
   echo "==> Installing from setup.py..."
   python -m pip install -e '.[dev]'
 fi
