@@ -4,7 +4,7 @@
 set -e
 
 if [ -z "$SKIP_BOOTSTRAP" ]; then
-  . script/bootstrap
+  ./script/bootstrap
 fi
 
 if [ -n "$DB_RESET" ]; then
