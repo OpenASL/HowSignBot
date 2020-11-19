@@ -28,7 +28,7 @@ import database
 
 # -----------------------------------------------------------------------------
 
-__version__ = "20.81.0"
+__version__ = "20.82.0"
 
 app = web.Application()  # web app for listening to webhooks
 

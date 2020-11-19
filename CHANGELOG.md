@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v20.82.0 (2020-11-19)
+### Feature
+* Improved daily messages (#63) ([`322fc0f`](https://github.com/OpenASL/HowSignBot/commit/322fc0fe099d70905d5fbc062be6661864773b46))
+
+### Fix
+* Avoid unnecessary writes to DB ([`221e8e1`](https://github.com/OpenASL/HowSignBot/commit/221e8e1db03579d04f316d9e4b87e4fa6bb6c9d8))
+
 ## v20.81.0 (2020-11-15)
 ### Feature
 * Add typing indicators ([`75f141b`](https://github.com/OpenASL/HowSignBot/commit/75f141b2cbfb20c8910ab720797b25395e545a5c))
