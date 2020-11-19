@@ -9,7 +9,7 @@ NOTE: If you're not on macOS, you'll need to install [pyenv](https://github.com/
 With Docker running:
 
 ```
-. script/bootstrap
+./script/bootstrap
 ```
 
 Edit `.env` with the proper values.
@@ -19,13 +19,19 @@ Edit `.env` with the proper values.
 Re-run the bootstrap script
 
 ```
-. script/bootstrap
+./script/update
 ```
 
 ## Running tests
 
 ```
-. script/test
+./script/test
+```
+
+## Resetting the database
+
+```
+DB_RESET=1 SKIP_BOOTSTRAP=1 ./script/update
 ```
 
 ## Releasing

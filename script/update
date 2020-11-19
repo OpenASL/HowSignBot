@@ -1,6 +1,7 @@
 #!/bin/sh
 # Based on conventions from https://github.com/github/scripts-to-rule-them-all
 # script/update: Update application to run for its current checkout.
+set -e
 
 if [ -z "$SKIP_BOOTSTRAP" ]; then
   . script/bootstrap
@@ -13,5 +14,8 @@ fi
 
 echo "==> Running migrations"
 PYTHONPATH=. alembic upgrade head
+
+echo "==> Syncing topics"
+PYTHONPATH=. ./script/sync_topics.py
 
 echo "==> Update finished."
