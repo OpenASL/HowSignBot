@@ -257,3 +257,10 @@ def test_parse_human_readable_datetime(value, snapshot):
 def test_display_timezone(value, expected):
     dtime = dt.datetime(2020, 9, 25, tzinfo=dt.timezone.utc)
     assert bot.display_timezone(value, dtime) == expected
+
+
+@freeze_time("2020-09-25 14:00:00")
+def test_get_daily_handshape():
+    todays_handshape = bot.get_daily_handshape()
+    assert todays_handshape == bot.get_daily_handshape()
+    assert todays_handshape != bot.get_daily_handshape(dt.datetime(2020, 9, 26))

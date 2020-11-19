@@ -77,6 +77,7 @@ def get_handshape(name):
     return Handshape(name=cased_name, path=path)
 
 
-def get_random_handshape():
-    name = random.choice(tuple(HANDSHAPES.keys()))
+def get_random_handshape(rand=None):
+    rand = rand or random
+    name = rand.choice(tuple(HANDSHAPES.keys()))
     return get_handshape(name)

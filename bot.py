@@ -723,16 +723,10 @@ async def daily_practice_message():
             logger.exception(f"could not send to channel {channel_id}")
 
 
-random.seed("howsignbot")
-SHUFFLED_HANDSHAPE_NAMES = sorted(list(handshapes.HANDSHAPES.keys()))
-random.shuffle(SHUFFLED_HANDSHAPE_NAMES)
-
-
 def get_daily_handshape(dtime: Optional[dt.datetime] = None) -> handshapes.Handshape:
     dtime = dtime or utcnow()
     day_of_year = dtime.timetuple().tm_yday
-    name = SHUFFLED_HANDSHAPE_NAMES[day_of_year % len(SHUFFLED_HANDSHAPE_NAMES)]
-    return handshapes.get_handshape(name)
+    return handshapes.get_random_handshape(random.Random(day_of_year))
 
 
 async def send_daily_message(channel_id: int):
