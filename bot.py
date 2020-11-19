@@ -769,6 +769,7 @@ async def send_daily_message(channel_id: int):
 )
 @commands.is_owner()
 async def send_daily_message_command(ctx: Context, channel_id: int):
+    await ctx.channel.trigger_typing()
     channel_ids = set(await store.get_daily_message_channel_ids())
     if channel_id not in channel_ids:
         await ctx.send(f"⚠️ Schedule channel not configured for Channel ID {channel_id}")
@@ -796,6 +797,7 @@ def post_feedback(username: str, feedback: str, guild: Optional[str]):
 
 @bot.command(name="feedback", help="Anonymously share an idea or report a bug")
 async def feedback_command(ctx: Context, *, feedback):
+    await ctx.channel.trigger_typing()
     author = ctx.author
     username = ctx.author.name
     guild = author.guild.name if hasattr(author, "guild") else None
