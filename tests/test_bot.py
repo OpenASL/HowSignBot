@@ -6,36 +6,18 @@ from unittest import mock
 import gspread
 import pytest
 import pytz
+from asynctest import patch
 from discord.ext import commands
 from freezegun import freeze_time
 from syrupy.filters import props
-from sqlalchemy import create_engine
-from sqlalchemy_utils import create_database, drop_database
 
 # Must be before bot import
 os.environ["TESTING"] = "true"
 
 import bot  # noqa:E402
+import database  # noqa:E402
 
 random.seed(1)
-
-
-# https://www.starlette.io/database/#test-isolation
-@pytest.fixture(scope="session", autouse=True)
-def create_test_database():
-    url = str(bot.TEST_DATABASE_URL)
-    engine = create_engine(url)
-    create_database(url)
-    bot.store.metadata.create_all(engine)
-    yield
-    drop_database(url)
-
-
-@pytest.fixture
-async def store():
-    await bot.store.connect()
-    yield bot.store
-    await bot.store.disconnect()
 
 
 @pytest.mark.parametrize(
@@ -93,10 +75,12 @@ def test_idiom(snapshot, spoiler):
 
 
 @pytest.fixture
-def mock_worksheet(monkeypatch):
-    monkeypatch.setattr(bot, "SCHEDULE_SHEET_KEYS", {1234: "abc"}, raising=True)
+async def mock_worksheet(monkeypatch, db):
     monkeypatch.setattr(bot, "GOOGLE_PRIVATE_KEY", "fake", raising=True)
-    with mock.patch("bot.get_practice_worksheet_for_guild") as mock_get_worksheet:
+    await db.execute(
+        database.guild_settings.insert(), {"guild_id": 1234, "schedule_sheet_key": "abc"}
+    )
+    with patch("bot.get_practice_worksheet_for_guild") as mock_get_worksheet:
         WorksheetMock = mock.Mock(spec=gspread.Worksheet)
         WorksheetMock.get_all_values.return_value = [
             ["docs", "more docs", ""],
@@ -121,15 +105,17 @@ def mock_worksheet(monkeypatch):
         "9/27",
     ),
 )
+@pytest.mark.asyncio
 @freeze_time("2020-09-25 14:00:00")
-def test_schedule(snapshot, mock_worksheet, when):
-    result = bot.schedule_impl(1234, when)
+async def test_schedule(snapshot, mock_worksheet, store, when):
+    result = await bot.schedule_impl(1234, when)
     assert result == snapshot
 
 
+@pytest.mark.asyncio
 @freeze_time("2020-09-25 14:00:00")
-def test_schedule_no_practices(snapshot, mock_worksheet):
-    result = bot.schedule_impl(1234, "9/28/2020")
+async def test_schedule_no_practices(snapshot, mock_worksheet):
+    result = await bot.schedule_impl(1234, "9/28/2020")
     embed = result["embed"]
     assert "September 28" in embed.description
     assert "There are no scheduled practices yet" in embed.description

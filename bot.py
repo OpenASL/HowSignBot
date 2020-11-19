@@ -51,8 +51,6 @@ GOOGLE_PRIVATE_KEY_ID = env.str("GOOGLE_PRIVATE_KEY_ID", required=True)
 GOOGLE_CLIENT_EMAIL = env.str("GOOGLE_CLIENT_EMAIL", required=True)
 GOOGLE_TOKEN_URI = env.str("GOOGLE_TOKEN_URI", "https://oauth2.googleapis.com/token")
 FEEDBACK_SHEET_KEY = env.str("FEEDBACK_SHEET_KEY", required=True)
-SCHEDULE_SHEET_KEYS = env.dict("SCHEDULE_SHEET_KEYS", required=True, subcast_key=int)
-SCHEDULE_CHANNELS = env.list("SCHEDULE_CHANNELS", required=True, subcast=int)
 
 ZOOM_USERS = env.dict("ZOOM_USERS", required=True)
 ZOOM_JWT = env.str("ZOOM_JWT", required=True)
@@ -85,7 +83,9 @@ bot = commands.Bot(
     intents=intents,
 )
 
-store = database.Store(database_url=DATABASE_URL, force_rollback=TESTING)
+store = database.Store(
+    database_url=TEST_DATABASE_URL if TESTING else DATABASE_URL, force_rollback=TESTING
+)
 
 # -----------------------------------------------------------------------------
 
@@ -207,12 +207,11 @@ Enter {COMMAND_PREFIX}handshapes to show a list of handshapes.
 
 def handshape_impl(name: str):
     logger.info(f"handshape: '{name}'")
-    if name == "random":
-        name = random.choice(tuple(handshapes.HANDSHAPES.keys()))
-        logger.info(f"chose '{name}'")
-
     try:
-        handshape = handshapes.get_handshape(name)
+        if name == "random":
+            handshape = handshapes.get_random_handshape()
+        else:
+            handshape = handshapes.get_handshape(name)
     except handshapes.HandshapeNotFoundError:
         logger.info(f"handshape '{name}' not found")
         suggestion = did_you_mean(name, tuple(handshapes.HANDSHAPES.keys()))
@@ -350,21 +349,23 @@ class PracticeSession(NamedTuple):
     notes: str
 
 
-def get_practice_worksheet_for_guild(guild_id: int):
+async def get_practice_worksheet_for_guild(guild_id: int):
     logger.info(f"fetching practice worksheet {guild_id}")
     client = get_gsheet_client()
-    sheet = client.open_by_key(SCHEDULE_SHEET_KEYS[guild_id])
+    sheet_key = await store.get_guild_schedule_sheet_key(guild_id)
+    assert sheet_key is not None
+    sheet = client.open_by_key(sheet_key)
     return sheet.get_worksheet(0)
 
 
-def get_practice_sessions(
+async def get_practice_sessions(
     guild_id: int,
     dtime: dt.datetime,
     *,
     worksheet=None,
     parse_settings: Optional[dict] = None,
 ) -> List[PracticeSession]:
-    worksheet = worksheet or get_practice_worksheet_for_guild(guild_id)
+    worksheet = worksheet or await get_practice_worksheet_for_guild(guild_id)
     all_values = worksheet.get_all_values()
     return sorted(
         [
@@ -425,7 +426,7 @@ Example: `{COMMAND_PREFIX}practice today 2pm {pacific}`
 )
 
 
-def make_practice_session_embed(
+async def make_practice_session_embed(
     guild_id: int, sessions: List[PracticeSession], *, dtime: dt.datetime
 ) -> discord.Embed:
     now_pacific = utcnow().astimezone(PACIFIC)
@@ -435,7 +436,7 @@ def make_practice_session_embed(
         description = f"Today - {description}"
     elif (dtime_pacific.date() - now_pacific.date()).days == 1:
         description = f"Tomorrow - {description}"
-    sheet_key = SCHEDULE_SHEET_KEYS[guild_id]
+    sheet_key = await store.get_guild_schedule_sheet_key(guild_id)
     schedule_url = f"https://docs.google.com/spreadsheets/d/{sheet_key}/edit"
     embed = discord.Embed(
         description=description,
@@ -467,10 +468,10 @@ def make_practice_session_embed(
     return embed
 
 
-def make_practice_sessions_today_embed(guild_id: int) -> discord.Embed:
+async def make_practice_sessions_today_embed(guild_id: int) -> discord.Embed:
     now = utcnow()
-    sessions = get_practice_sessions(guild_id, dtime=now)
-    return make_practice_session_embed(guild_id, sessions, dtime=now)
+    sessions = await get_practice_sessions(guild_id, dtime=now)
+    return await make_practice_session_embed(guild_id, sessions, dtime=now)
 
 
 async def is_in_guild(ctx: Context) -> bool:
@@ -483,7 +484,8 @@ async def is_in_guild(ctx: Context) -> bool:
 
 async def has_practice_schedule(ctx: Context) -> bool:
     await is_in_guild(ctx)
-    if ctx.guild.id not in SCHEDULE_SHEET_KEYS:
+    has_practice_schedule = await store.guild_has_practice_schedule(ctx.guild.id)
+    if not has_practice_schedule:
         raise commands.errors.CheckFailure(
             "⚠️ No configured practice schedule for this server. If you think this is a mistake, contact the bot owner."
         )
@@ -506,7 +508,7 @@ Examples:
 )
 
 
-def schedule_impl(guild_id: int, when: Optional[str]):
+async def schedule_impl(guild_id: int, when: Optional[str]):
     settings: Optional[Dict[str, str]]
     if when and when.strip().lower() != "today":
         settings = {"PREFER_DATES_FROM": "future"}
@@ -515,8 +517,8 @@ def schedule_impl(guild_id: int, when: Optional[str]):
     else:
         settings = None
         dtime = utcnow()
-    sessions = get_practice_sessions(guild_id, dtime=dtime, parse_settings=settings)
-    embed = make_practice_session_embed(guild_id, sessions, dtime=dtime)
+    sessions = await get_practice_sessions(guild_id, dtime=dtime, parse_settings=settings)
+    embed = await make_practice_session_embed(guild_id, sessions, dtime=dtime)
     return {"embed": embed}
 
 
@@ -524,7 +526,8 @@ def schedule_impl(guild_id: int, when: Optional[str]):
 @commands.check(has_practice_schedule)
 async def schedule_command(ctx: Context, *, when: Optional[str]):
     await ctx.channel.trigger_typing()
-    await ctx.send(**schedule_impl(guild_id=ctx.guild.id, when=when))
+    ret = await schedule_impl(guild_id=ctx.guild.id, when=when)
+    await ctx.send(**ret)
 
 
 PRACTICE_HELP = """Schedule a practice session
@@ -632,12 +635,16 @@ async def practice_impl(*, guild_id: int, host: str, start_time: str, user_id: i
     )
     row = (display_dtime, host, notes)
     logger.info(f"adding new practice session to sheet: {row}")
-    worksheet = get_practice_worksheet_for_guild(guild_id)
+    worksheet = await get_practice_worksheet_for_guild(guild_id)
     worksheet.append_row(row)
     dtime_pacific = dtime.astimezone(PACIFIC)
     short_display_date = f"{dtime_pacific:%a, %b %d} {format_multi_time(dtime)}"
-    sessions = get_practice_sessions(guild_id=guild_id, dtime=dtime, worksheet=worksheet)
-    embed = make_practice_session_embed(guild_id=guild_id, sessions=sessions, dtime=dtime)
+    sessions = await get_practice_sessions(
+        guild_id=guild_id, dtime=dtime, worksheet=worksheet
+    )
+    embed = await make_practice_session_embed(
+        guild_id=guild_id, sessions=sessions, dtime=dtime
+    )
     if str(used_timezone) != str(user_timezone):
         await store.set_user_timezone(user_id, used_timezone)
     return {
@@ -704,36 +711,73 @@ async def daily_practice_message():
     if now_eastern.time() > DAILY_PRACTICE_SEND_TIME:
         date = now_eastern.date() + dt.timedelta(days=1)
     then = EASTERN.localize(dt.datetime.combine(date, DAILY_PRACTICE_SEND_TIME))
+    channel_ids = list(await store.get_daily_message_channel_ids())
     logger.info(
-        f"practice schedules for {len(SCHEDULE_CHANNELS)} channels will be sent at {then.isoformat()}"
+        f"practice schedules for {len(channel_ids)} channels will be sent at {then.isoformat()}"
     )
     await discord.utils.sleep_until(then.astimezone(dt.timezone.utc))
-    for channel_id in SCHEDULE_CHANNELS:
+    for channel_id in channel_ids:
         try:
-            channel = bot.get_channel(channel_id)
-            guild = channel.guild
-            logger.info(
-                f'sending daily practice schedule for guild: "{guild.name}" in #{channel.name}'
-            )
-            asyncio.create_task(
-                channel.send(embed=make_practice_sessions_today_embed(guild.id))
-            )
+            asyncio.create_task(send_daily_message(channel_id))
         except Exception:
             logger.exception(f"could not send to channel {channel_id}")
 
 
+random.seed("howsignbot")
+SHUFFLED_HANDSHAPE_NAMES = sorted(list(handshapes.HANDSHAPES.keys()))
+random.shuffle(SHUFFLED_HANDSHAPE_NAMES)
+
+
+def get_daily_handshape(dtime: Optional[dt.datetime] = None) -> handshapes.Handshape:
+    dtime = dtime or utcnow()
+    day_of_year = dtime.timetuple().tm_yday
+    name = SHUFFLED_HANDSHAPE_NAMES[day_of_year % len(SHUFFLED_HANDSHAPE_NAMES)]
+    return handshapes.get_handshape(name)
+
+
+async def send_daily_message(channel_id: int):
+    channel = bot.get_channel(channel_id)
+    guild = channel.guild
+    logger.info(f'sending daily message for guild: "{guild.name}" in #{channel.name}')
+    embed = await make_practice_sessions_today_embed(guild.id)
+    file_ = None
+
+    settings = await store.get_guild_settings(guild.id)
+
+    # Handshape of the Day
+    if settings.get("include_handshape_of_the_day"):
+        handshape = get_daily_handshape()
+        filename = f"{handshape.name}.png"
+        file_ = discord.File(handshape.path, filename=filename)
+        embed.set_thumbnail(url=f"attachment://{filename}")
+        embed.add_field(
+            name="Handshape of the Day", value=f'"{handshape.name}"', inline=False
+        )
+
+    # Topics of the Day
+    if settings.get("include_topics_of_the_day"):
+        topic = await store.get_topic_for_guild(guild.id)
+        topic2 = await store.get_topic_for_guild(guild.id)
+        embed.add_field(name="Discuss...", value=f'"{topic}"\n\n"{topic2}"', inline=False)
+
+    await channel.send(file=file_, embed=embed)
+
+
 @bot.command(
-    name="send_schedule",
+    name="send_daily_message",
     help="BOT OWNER ONLY: Manually send a daily practice schedule for a channel",
 )
 @commands.is_owner()
-async def send_schedule_command(ctx: Context, channel_id: int):
-    if channel_id not in SCHEDULE_CHANNELS:
+async def send_daily_message_command(ctx: Context, channel_id: int):
+    channel_ids = set(await store.get_daily_message_channel_ids())
+    if channel_id not in channel_ids:
         await ctx.send(f"⚠️ Schedule channel not configured for Channel ID {channel_id}")
+        return
+    await send_daily_message(channel_id)
+
     channel = bot.get_channel(channel_id)
     guild = channel.guild
-    await channel.send(embed=make_practice_sessions_today_embed(guild.id))
-    await ctx.send(f'🗓 Schedule sent to "{guild.name}", #{channel.name}')
+    await ctx.send(f'🗓 Daily message sent to "{guild.name}", #{channel.name}')
 
 
 # -----------------------------------------------------------------------------
@@ -843,7 +887,6 @@ async def idiom_command(ctx, spoiler: Optional[str]):
 
 
 # -----------------------------------------------------------------------------
-
 
 ZOOM_CLOSED_MESSAGE = "✨ _Zoom meeting ended_"
 
@@ -1178,8 +1221,6 @@ async def presence_command_error(ctx, error):
     message = error.args[0]
     await ctx.send(content=message)
 
-
-# Used for getting channel IDs for SCHEDULE_CHANNELS
 
 CHANNEL_INFO_TEMPLATE = """Guild name: {ctx.guild.name}
 Guild ID: {ctx.guild.id}

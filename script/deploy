@@ -1,3 +1,4 @@
+#!/bin/sh
 echo "==> Checking out master..."
 git checkout master
 echo "==> Merging dev into master..."

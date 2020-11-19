@@ -10,8 +10,8 @@ jobs:
       with:
         python-version: 3.9.0
     - name: Install dependencies
-      run: . script/bootstrap
+      run: ./script/bootstrap
     - name: Run migrations
       run: PYTHONPATH=. alembic upgrade head
     - name: Run tests
-      run: . script/test
+      run: ./script/test
