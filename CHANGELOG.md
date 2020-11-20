@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.84.0 (2020-11-20)
+### Feature
+* Simplify further ([`0f3f3b1`](https://github.com/OpenASL/HowSignBot/commit/0f3f3b1b567a09cf30f1515e8e71f8bdbfe95c99))
+
 ## v20.83.0 (2020-11-19)
 ### Feature
 * Try a much simpler way of managing daily topics (#64) ([`348f8a6`](https://github.com/OpenASL/HowSignBot/commit/348f8a6a82a9426945c6bb50548ca38468d433c4))
