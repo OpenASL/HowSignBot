@@ -523,7 +523,7 @@ async def schedule_impl(guild_id: int, when: Optional[str]):
     return {"embed": embed}
 
 
-@bot.command(name="schedule", aliases=("practices",), help=SCHEDULE_HELP)
+@bot.command(name="schedule", aliases=("sched", "practices"), help=SCHEDULE_HELP)
 @commands.check(has_practice_schedule)
 async def schedule_command(ctx: Context, *, when: Optional[str]):
     await ctx.channel.trigger_typing()
