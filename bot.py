@@ -744,18 +744,21 @@ def get_daily_topics(dtime: Optional[dt.datetime] = None) -> Tuple[str, str]:
     return (rand.choice(rows)["content"], rand.choice(rows)["content"])
 
 
-async def send_daily_message(channel_id: int):
+async def send_daily_message(channel_id: int, dtime: Optional[dt.datetime] = None):
     channel = bot.get_channel(channel_id)
     guild = channel.guild
     logger.info(f'sending daily message for guild: "{guild.name}" in #{channel.name}')
-    embed = await make_practice_sessions_today_embed(guild.id)
+    guild_id = guild.id
+    dtime = dtime or utcnow()
+    sessions = await get_practice_sessions(guild_id, dtime=dtime)
+    embed = await make_practice_session_embed(guild_id, sessions, dtime=dtime)
     file_ = None
 
     settings = await store.get_guild_settings(guild.id)
 
     # Handshape of the Day
     if settings.get("include_handshape_of_the_day"):
-        handshape = get_daily_handshape()
+        handshape = get_daily_handshape(dtime)
         filename = f"{handshape.name}.png"
         file_ = discord.File(handshape.path, filename=filename)
         embed.set_thumbnail(url=f"attachment://{filename}")
@@ -765,7 +768,7 @@ async def send_daily_message(channel_id: int):
 
     # Topics of the Day
     if settings.get("include_topics_of_the_day"):
-        topic, topic2 = get_daily_topics()
+        topic, topic2 = get_daily_topics(dtime)
         embed.add_field(name="Discuss...", value=f'"{topic}"\n\n"{topic2}"', inline=False)
 
     await channel.send(file=file_, embed=embed)
@@ -776,13 +779,20 @@ async def send_daily_message(channel_id: int):
     help="BOT OWNER ONLY: Manually send a daily practice schedule for a channel",
 )
 @commands.is_owner()
-async def send_daily_message_command(ctx: Context, channel_id: int):
+async def send_daily_message_command(
+    ctx: Context, channel_id: int, when: Optional[str] = None
+):
     await ctx.channel.trigger_typing()
     channel_ids = set(await store.get_daily_message_channel_ids())
     if channel_id not in channel_ids:
         await ctx.send(f"⚠️ Schedule channel not configured for Channel ID {channel_id}")
         return
-    await send_daily_message(channel_id)
+    dtime = (
+        parse_human_readable_datetime(when, user_timezone=EASTERN)[0]
+        if when
+        else utcnow().astimezone(EASTERN)
+    )
+    await send_daily_message(channel_id, dtime)
 
     channel = bot.get_channel(channel_id)
     guild = channel.guild
