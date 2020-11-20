@@ -50,6 +50,7 @@ GOOGLE_PRIVATE_KEY = env.str("GOOGLE_PRIVATE_KEY", required=True)
 GOOGLE_PRIVATE_KEY_ID = env.str("GOOGLE_PRIVATE_KEY_ID", required=True)
 GOOGLE_CLIENT_EMAIL = env.str("GOOGLE_CLIENT_EMAIL", required=True)
 GOOGLE_TOKEN_URI = env.str("GOOGLE_TOKEN_URI", "https://oauth2.googleapis.com/token")
+TOPICS_SHEET_KEY = env.str("TOPICS_SHEET_KEY", required=True)
 FEEDBACK_SHEET_KEY = env.str("FEEDBACK_SHEET_KEY", required=True)
 
 ZOOM_USERS = env.dict("ZOOM_USERS", required=True)
@@ -729,6 +730,20 @@ def get_daily_handshape(dtime: Optional[dt.datetime] = None) -> handshapes.Hands
     return handshapes.get_random_handshape(random.Random(day_of_year))
 
 
+def get_daily_topics(dtime: Optional[dt.datetime] = None) -> Tuple[str, str]:
+    client = get_gsheet_client()
+    sheet = client.open_by_key(TOPICS_SHEET_KEY)
+    worksheet = sheet.get_worksheet(0)
+    rows = worksheet.get_all_records()
+
+    dtime = dtime or utcnow()
+    day_of_year = dtime.timetuple().tm_yday
+
+    rand = random.Random(day_of_year)
+
+    return (rand.choice(rows)["content"], rand.choice(rows)["content"])
+
+
 async def send_daily_message(channel_id: int):
     channel = bot.get_channel(channel_id)
     guild = channel.guild
@@ -750,8 +765,7 @@ async def send_daily_message(channel_id: int):
 
     # Topics of the Day
     if settings.get("include_topics_of_the_day"):
-        topic = await store.get_topic_for_guild(guild.id)
-        topic2 = await store.get_topic_for_guild(guild.id)
+        topic, topic2 = get_daily_topics()
         embed.add_field(name="Discuss...", value=f'"{topic}"\n\n"{topic2}"', inline=False)
 
     await channel.send(file=file_, embed=embed)
