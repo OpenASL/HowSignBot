@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v20.83.0 (2020-11-19)
+### Feature
+* Try a much simpler way of managing daily topics (#64) ([`348f8a6`](https://github.com/OpenASL/HowSignBot/commit/348f8a6a82a9426945c6bb50548ca38468d433c4))
+* Add typing indicator to send_practice_message and feedback ([`f2eae5f`](https://github.com/OpenASL/HowSignBot/commit/f2eae5f5128b670608cda6b60917be5bff2a437f))
+
 ## v20.82.0 (2020-11-19)
 ### Feature
 * Improved daily messages (#63) ([`322fc0f`](https://github.com/OpenASL/HowSignBot/commit/322fc0fe099d70905d5fbc062be6661864773b46))
