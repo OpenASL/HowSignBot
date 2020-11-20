@@ -724,10 +724,13 @@ async def daily_practice_message():
             logger.exception(f"could not send to channel {channel_id}")
 
 
-def get_daily_handshape(dtime: Optional[dt.datetime] = None) -> handshapes.Handshape:
+def get_today_random(dtime: Optional[dt.datetime] = None) -> random.Random:
     dtime = dtime or utcnow()
-    day_of_year = dtime.timetuple().tm_yday
-    return handshapes.get_random_handshape(random.Random(day_of_year))
+    return random.Random(dtime.date().isoformat())
+
+
+def get_daily_handshape(dtime: Optional[dt.datetime] = None) -> handshapes.Handshape:
+    return handshapes.get_random_handshape(get_today_random(dtime))
 
 
 def get_daily_topics(dtime: Optional[dt.datetime] = None) -> Tuple[str, str]:
@@ -736,10 +739,7 @@ def get_daily_topics(dtime: Optional[dt.datetime] = None) -> Tuple[str, str]:
     worksheet = sheet.get_worksheet(0)
     rows = worksheet.get_all_records()
 
-    dtime = dtime or utcnow()
-    day_of_year = dtime.timetuple().tm_yday
-
-    rand = random.Random(day_of_year)
+    rand = get_today_random(dtime)
 
     return (rand.choice(rows)["content"], rand.choice(rows)["content"])
 
