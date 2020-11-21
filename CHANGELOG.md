@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v20.85.0 (2020-11-21)
+### Feature
+* Add holiday emojis (#66) ([`5e70c02`](https://github.com/OpenASL/HowSignBot/commit/5e70c021ae7e2cb526a8513babe15678e9464407))
+* Add clthat (classifier practice) (#65) ([`65ed57c`](https://github.com/OpenASL/HowSignBot/commit/65ed57cc9ed239386a12c55d355eb140810d1aa0))
+* Add sched alias ([`6c0ef35`](https://github.com/OpenASL/HowSignBot/commit/6c0ef354b54c75ee9cf95ebe9247ec1895b527b2))
+* Allow sending daily message for specific day ([`21772e4`](https://github.com/OpenASL/HowSignBot/commit/21772e41c6f1e4a6a366209ba39bfb0258486397))
+
 ## v20.84.0 (2020-11-20)
 ### Feature
 * Simplify further ([`0f3f3b1`](https://github.com/OpenASL/HowSignBot/commit/0f3f3b1b567a09cf30f1515e8e71f8bdbfe95c99))
