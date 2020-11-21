@@ -119,6 +119,13 @@ async def test_schedule(snapshot, mock_worksheet, store, when):
 
 
 @pytest.mark.asyncio
+@freeze_time("2020-11-26 14:00:00")
+async def test_schedule_on_a_holiday(snapshot, mock_worksheet, store):
+    result = await bot.schedule_impl(1234, None)
+    assert result == snapshot
+
+
+@pytest.mark.asyncio
 @freeze_time("2020-09-25 14:00:00")
 async def test_schedule_no_practices(snapshot, mock_worksheet):
     result = await bot.schedule_impl(1234, "9/28/2020")

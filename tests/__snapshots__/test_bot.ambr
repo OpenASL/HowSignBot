@@ -383,6 +383,37 @@
     },
   }
 ---
+# name: test_schedule_on_a_holiday
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=<Colour value=15105570>,
+      colour=<Colour value=15105570>,
+      description='
+        Today - Thursday, November 26 🦃
+        
+        *There are no scheduled practices yet!*
+        
+        To schedule a practice, edit the schedule below or use the `!practice` command.
+        Example: `!practice today 2pm pst`
+  
+      ',
+      fields=<class 'list'> [
+        EmbedProxy(inline=True, name='🗓', value='[Schedule or edit a practice](https://docs.google.com/spreadsheets/d/abc/edit)'),
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title=Embed.Empty,
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
 # name: test_sentence[None]
   <class 'dict'> {
     'content': 'The father died during childbirth.',
