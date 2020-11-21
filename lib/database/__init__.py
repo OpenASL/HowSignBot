@@ -43,6 +43,7 @@ guild_settings = sa.Table(
     "guild_settings",
     metadata,
     sa.Column("guild_id", BIGINT, primary_key=True),
+    sa.Column("name", sa.Text),  # Not used, just for ease of use
     sa.Column("schedule_sheet_key", sa.Text),
     sa.Column("daily_message_channel_id", BIGINT),
     sa.Column(
@@ -53,6 +54,12 @@ guild_settings = sa.Table(
     ),
     sa.Column(
         "include_topics_of_the_day",
+        sa.Boolean,
+        server_default=sql.false(),
+        nullable=False,
+    ),
+    sa.Column(
+        "include_clthat",
         sa.Boolean,
         server_default=sql.false(),
         nullable=False,
