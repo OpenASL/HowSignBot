@@ -20,6 +20,7 @@ from google.oauth2.service_account import Credentials
 import pytz
 
 import handshapes
+import holiday_emojis
 import cuteid
 import catchphrase
 import meetings
@@ -472,6 +473,9 @@ async def make_practice_session_embed(
         description = f"Today - {description}"
     elif (dtime_pacific.date() - now_pacific.date()).days == 1:
         description = f"Tomorrow - {description}"
+    emoji = holiday_emojis.get(dtime_pacific.date())
+    if emoji:
+        description += f" {emoji}"
     sheet_key = await store.get_guild_schedule_sheet_key(guild_id)
     schedule_url = f"https://docs.google.com/spreadsheets/d/{sheet_key}/edit"
     embed = discord.Embed(
