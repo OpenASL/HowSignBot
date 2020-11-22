@@ -138,9 +138,8 @@ Examples:
 )
 
 
-def word_display(word: str, *, has_spoiler: bool):
+def word_display(word: str, *, template: str = SIGN_TEMPLATE):
     quoted_word = quote_plus(word)
-    template = SIGN_SPOILER_TEMPLATE if has_spoiler else SIGN_TEMPLATE
     return template.format(
         word_uppercased=word.upper(),
         lifeprint=f"https://www.google.com/search?&q=site%3Alifeprint.com+{quoted_word}",
@@ -156,20 +155,19 @@ def sign_impl(word: str):
     spoiler = get_spoiler_text(word)
     word = spoiler if spoiler else word
     has_multiple = "," in word
+    template = SIGN_SPOILER_TEMPLATE if spoiler else SIGN_TEMPLATE
     if has_multiple:
         words = word.split(",")
         embed = discord.Embed()
         for word in words:
             word = word.strip()
             title = f"||{word.upper()}||" if spoiler else word.upper()
-            embed.add_field(
-                name=title, value=word_display(word, has_spoiler=bool(spoiler))
-            )
+            embed.add_field(name=title, value=word_display(word, template=template))
     else:
         title = f"||{word.upper()}||" if spoiler else word.upper()
         embed = discord.Embed(
             title=title,
-            description=word_display(word, has_spoiler=bool(spoiler)),
+            description=word_display(word, template=template),
         )
 
     return {"embed": embed}
@@ -473,9 +471,9 @@ async def make_practice_session_embed(
         description = f"Today - {description}"
     elif (dtime_pacific.date() - now_pacific.date()).days == 1:
         description = f"Tomorrow - {description}"
-    emoji = holiday_emojis.get(dtime_pacific.date())
-    if emoji:
-        description += f" {emoji}"
+    holiday = holiday_emojis.get(dtime_pacific.date())
+    if holiday and holiday.emoji:
+        description += f" {holiday.emoji}"
     sheet_key = await store.get_guild_schedule_sheet_key(guild_id)
     schedule_url = f"https://docs.google.com/spreadsheets/d/{sheet_key}/edit"
     embed = discord.Embed(
@@ -793,6 +791,8 @@ def get_daily_clthat(dtime: Optional[dt.datetime] = None) -> handshapes.Handshap
 TOPIC_DAYS = {0, 2, 4, 6}  # M W F Su
 CLTHAT_DAYS = {1, 3, 5}  # Tu Th Sa
 
+DAILY_MESSAGE_SIGN_TEMPLATE = "[👋 **Handspeak** ]({handspeak}) [🧬 **Lifeprint**]({lifeprint}) [🤝 **SigningSavvy**]({signingsavvy}) [🌐 **Spread The Sign**]({spread_the_sign}) [📹 **YouGlish**]({youglish})"
+
 
 async def send_daily_message(channel_id: int, dtime: Optional[dt.datetime] = None):
     channel = bot.get_channel(channel_id)
@@ -806,8 +806,15 @@ async def send_daily_message(channel_id: int, dtime: Optional[dt.datetime] = Non
 
     settings = await store.get_guild_settings(guild.id)
 
-    # Handshape of the Day
-    if settings.get("include_handshape_of_the_day"):
+    holiday = holiday_emojis.get(dtime.date())
+    if holiday and holiday.term is not None:
+        embed.add_field(
+            name=holiday.term.upper(),
+            value=word_display(holiday.term),
+            inline=False,
+        )
+    elif settings.get("include_handshape_of_the_day"):
+        # Handshape of the Day
         handshape = get_daily_handshape(dtime)
         filename = f"{handshape.name}.png"
         file_ = discord.File(handshape.path, filename=filename)
