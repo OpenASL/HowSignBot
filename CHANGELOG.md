@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.87.0 (2020-11-25)
+### Feature
+* Only show holiday term on holidays ([`a34db0f`](https://github.com/OpenASL/HowSignBot/commit/a34db0f909bcd688ae1994b91886cb1bbb0e791c))
+
 ## v20.86.0 (2020-11-25)
 ### Feature
 * Improve daily messages on holidays (#67) ([`d0ff3a6`](https://github.com/OpenASL/HowSignBot/commit/d0ff3a6c3cb50982b2136f5f3ecca65e2c09f1b7))
