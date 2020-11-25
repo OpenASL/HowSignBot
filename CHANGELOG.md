@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v20.86.0 (2020-11-25)
+### Feature
+* Improve daily messages on holidays (#67) ([`d0ff3a6`](https://github.com/OpenASL/HowSignBot/commit/d0ff3a6c3cb50982b2136f5f3ecca65e2c09f1b7))
+
+### Fix
+* Handle 403 when sending DM ([`c2f57a2`](https://github.com/OpenASL/HowSignBot/commit/c2f57a2179d8bcaa2af8f638387e4d814571f88b))
+
 ## v20.85.0 (2020-11-21)
 ### Feature
 * Add holiday emojis (#66) ([`5e70c02`](https://github.com/OpenASL/HowSignBot/commit/5e70c021ae7e2cb526a8513babe15678e9464407))
