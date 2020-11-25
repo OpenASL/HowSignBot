@@ -719,13 +719,16 @@ async def practice_command(ctx: Context, *, start_time: str):
     message = await ctx.send(**ret)
     if str(old_timezone) != str(new_timezone):
         new_timezone_display = display_timezone(new_timezone, utcnow()).lower()
-        await ctx.author.send(
-            TIMEZONE_CHANGE_TEMPLATE.format(
-                new_timezone=new_timezone,
-                new_timezone_display=new_timezone_display,
-                COMMAND_PREFIX=COMMAND_PREFIX,
+        try:
+            await ctx.author.send(
+                TIMEZONE_CHANGE_TEMPLATE.format(
+                    new_timezone=new_timezone,
+                    new_timezone_display=new_timezone_display,
+                    COMMAND_PREFIX=COMMAND_PREFIX,
+                )
             )
-        )
+        except discord.errors.Forbidden:
+            logger.warn("cannot send DM to user. skipping...")
     with suppress(Exception):
         await message.add_reaction("✅")
 
