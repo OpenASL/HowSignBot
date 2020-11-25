@@ -823,19 +823,22 @@ async def send_daily_message(channel_id: int, dtime: Optional[dt.datetime] = Non
             name="Handshape of the Day", value=f'"{handshape.name}"', inline=False
         )
 
-    # Topics of the Day
-    weekday = dtime.weekday()
-    if settings.get("include_topics_of_the_day") and weekday in TOPIC_DAYS:
-        topic, topic2 = get_daily_topics(dtime)
-        embed.add_field(name="Discuss...", value=f'"{topic}"\n\n"{topic2}"', inline=False)
+    if not holiday:
+        # Topics of the Day
+        weekday = dtime.weekday()
+        if settings.get("include_topics_of_the_day") and weekday in TOPIC_DAYS:
+            topic, topic2 = get_daily_topics(dtime)
+            embed.add_field(
+                name="Discuss...", value=f'"{topic}"\n\n"{topic2}"', inline=False
+            )
 
-    # CL That
-    if settings.get("include_clthat") and weekday in CLTHAT_DAYS:
-        embed.add_field(
-            name="CL That!",
-            value=f'How would you sign: "{get_daily_clthat(dtime)}"',
-            inline=False,
-        )
+        # CL That
+        if settings.get("include_clthat") and weekday in CLTHAT_DAYS:
+            embed.add_field(
+                name="CL That!",
+                value=f'How would you sign: "{get_daily_clthat(dtime)}"',
+                inline=False,
+            )
 
     await channel.send(file=file_, embed=embed)
 
