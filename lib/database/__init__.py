@@ -1,6 +1,4 @@
-import datetime as dt
 import logging
-import random
 from typing import Optional, Union, Iterator
 
 import databases
@@ -73,23 +71,6 @@ user_settings = sa.Table(
     sa.Column("timezone", TimeZone),
 )
 
-topics = sa.Table(
-    "topics",
-    metadata,
-    sa.Column("id", sa.Integer, primary_key=True),
-    sa.Column("content", sa.Text, unique=True),
-)
-
-topic_usages = sa.Table(
-    "topic_usages",
-    metadata,
-    sa.Column("guild_id", BIGINT, primary_key=True),
-    sa.Column(
-        "topic_id", sa.ForeignKey(topics.c.id, ondelete="CASCADE"), primary_key=True
-    ),
-    sa.Column("last_used_at", TIMESTAMP, nullable=False),
-)
-
 # -----------------------------------------------------------------------------
 
 
@@ -156,49 +137,3 @@ class Store:
             )
         )
         return (record.get("daily_message_channel_id") for record in all_settings)
-
-    async def mark_topic_used(self, guild_id: int, topic_id: int):
-        # Upsert topic_usage
-        stmt = insert(topic_usages).values(
-            topic_id=topic_id,
-            last_used_at=dt.datetime.now(dt.timezone.utc),
-            guild_id=guild_id,
-        )
-        stmt = stmt.on_conflict_do_update(
-            index_elements=(topic_usages.c.topic_id, topic_usages.c.guild_id),
-            set_=dict(
-                last_used_at=stmt.excluded.last_used_at,
-                guild_id=stmt.excluded.guild_id,
-            ),
-        )
-        await self.db.execute(stmt)
-
-    async def get_topic_for_guild(self, guild_id: Optional[int] = None) -> str:
-        # If not sending within a guild, just randomly choose among all topics
-        if not guild_id:
-            all_topics = await self.db.fetch_all(topics.select())
-            return random.choice(all_topics).get("content")
-
-        unused_topics_records = await self.db.fetch_all(
-            topics.select().where(
-                ~sa.exists().where(topic_usages.c.topic_id == topics.c.id)
-            )
-        )
-        if unused_topics_records:
-            # Randomly select among unused topics
-            topic = random.choice(unused_topics_records)
-        else:
-            # Randomly choose from 20 least-recently used topics
-            least_recently_used = await self.db.fetch_all(
-                topics.select()
-                .select_from(
-                    topics.join(topic_usages, topic_usages.c.topic_id == topics.c.id)
-                )
-                .order_by(topic_usages.c.last_used_at)
-                .limit(20)
-            )
-            topic = random.choice(least_recently_used)
-
-        await self.mark_topic_used(guild_id, topic.get("id"))
-
-        return topic.get("content")
