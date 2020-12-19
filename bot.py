@@ -791,8 +791,6 @@ def get_daily_clthat(dtime: Optional[dt.datetime] = None) -> handshapes.Handshap
 TOPIC_DAYS = {0, 2, 4, 6}  # M W F Su
 CLTHAT_DAYS = {1, 3, 5}  # Tu Th Sa
 
-DAILY_MESSAGE_SIGN_TEMPLATE = "[👋 **Handspeak** ]({handspeak}) [🧬 **Lifeprint**]({lifeprint}) [🤝 **SigningSavvy**]({signingsavvy}) [🌐 **Spread The Sign**]({spread_the_sign}) [📹 **YouGlish**]({youglish})"
-
 
 async def send_daily_message(channel_id: int, dtime: Optional[dt.datetime] = None):
     channel = bot.get_channel(channel_id)
