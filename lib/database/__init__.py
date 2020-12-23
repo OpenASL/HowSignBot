@@ -136,7 +136,7 @@ class Store:
         record = await self.db.fetch_one(select)
         return record.get("result")
 
-    async def get_guild_ids_with_practice_schedules(self) -> Iterator[str]:
+    async def get_guild_ids_with_practice_schedules(self) -> Iterator[int]:
         all_settings = await self.db.fetch_all(
             guild_settings.select().where(
                 guild_settings.c.daily_message_channel_id != NULL
