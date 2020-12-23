@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.88.0 (2020-12-23)
+### Feature
+* Allow scheduling practices through DM (#79) ([`6523c74`](https://github.com/OpenASL/HowSignBot/commit/6523c740cd2214304914107d1788ecdf58ad4806))
+
 ## v20.87.0 (2020-11-25)
 ### Feature
 * Only show holiday term on holidays ([`a34db0f`](https://github.com/OpenASL/HowSignBot/commit/a34db0f909bcd688ae1994b91886cb1bbb0e791c))
