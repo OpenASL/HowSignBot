@@ -28,7 +28,7 @@ fi
 
 if [ -f .pre-commit-config.yaml ]; then
   echo "==> Installing/updating pre-commit..."
-  python -m pip install -U pre-commit
+  python -m pip install -q -U pre-commit
   echo "==> Installing/updating pre-commit hook..."
   pre-commit install -f
 fi
@@ -45,7 +45,7 @@ fi
 
 if [ -f setup.py ]; then
   echo "==> Installing from setup.py..."
-  python -m pip install -q -e '.[dev]'
+  python -m pip install -q -e '.'
 fi
 
 echo "==> Bootstrapping finished."
