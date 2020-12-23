@@ -116,6 +116,12 @@ class Store:
             query=query, column=guild_settings.c.schedule_sheet_key
         )
 
+    async def get_guild_daily_message_channel_id(self, guild_id: int) -> Optional[int]:
+        query = guild_settings.select().where(guild_settings.c.guild_id == guild_id)
+        return await self.db.fetch_val(
+            query=query, column=guild_settings.c.daily_message_channel_id
+        )
+
     async def guild_has_practice_schedule(self, guild_id: int) -> bool:
         select = sa.select(
             (
@@ -129,6 +135,14 @@ class Store:
         )
         record = await self.db.fetch_one(select)
         return record.get("result")
+
+    async def get_guild_ids_with_practice_schedules(self) -> Iterator[str]:
+        all_settings = await self.db.fetch_all(
+            guild_settings.select().where(
+                guild_settings.c.daily_message_channel_id != NULL
+            )
+        )
+        return (record.get("guild_id") for record in all_settings)
 
     async def get_daily_message_channel_ids(self) -> Iterator[int]:
         all_settings = await self.db.fetch_all(

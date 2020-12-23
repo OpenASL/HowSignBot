@@ -702,33 +702,72 @@ To change your time zone, just schedule another practice with a different time z
 
 
 @bot.command(name="practice", help=PRACTICE_HELP)
-@commands.check(has_practice_schedule)
 async def practice_command(ctx: Context, *, start_time: str):
-    host = getattr(ctx.author, "nick", None) or ctx.author.name
     await ctx.channel.trigger_typing()
-    ret = await practice_impl(
-        guild_id=ctx.guild.id,
-        host=host,
-        start_time=start_time,
-        user_id=ctx.author.id,
-    )
-    old_timezone = ret.pop("old_timezone")
-    new_timezone = ret.pop("new_timezone")
-    message = await ctx.send(**ret)
-    if str(old_timezone) != str(new_timezone):
-        new_timezone_display = display_timezone(new_timezone, utcnow()).lower()
-        try:
-            await ctx.author.send(
-                TIMEZONE_CHANGE_TEMPLATE.format(
-                    new_timezone=new_timezone,
-                    new_timezone_display=new_timezone_display,
-                    COMMAND_PREFIX=COMMAND_PREFIX,
-                )
+
+    is_dm = not bool(ctx.guild)
+    if is_dm:
+        guild_ids_with_schedules = await store.get_guild_ids_with_practice_schedules()
+        print(guild_ids_with_schedules)
+        guild_ids = []
+        for guild_id in guild_ids_with_schedules:
+            guild = bot.get_guild(guild_id)
+            # Use fetch_member to check membership instead of get_member because cache might not be populated
+            try:
+                await guild.fetch_member(ctx.author.id)
+            except Exception:
+                pass
+            else:
+                guild_ids.append(guild_id)
+    else:
+        has_practice_schedule = await store.guild_has_practice_schedule(ctx.guild.id)
+        if not has_practice_schedule:
+            raise commands.errors.CheckFailure(
+                "⚠️ No configured practice schedule for this server. If you think this is a mistake, contact the bot owner."
             )
+        guild_ids = [ctx.guild.id]
+    host = getattr(ctx.author, "nick", None) or ctx.author.name
+
+    dm_response = None
+    old_timezone, new_timezone = None, None
+    for guild_id in guild_ids:
+        ret = await practice_impl(
+            guild_id=guild_id,
+            host=host,
+            start_time=start_time,
+            user_id=ctx.author.id,
+        )
+        old_timezone = ret.pop("old_timezone")
+        new_timezone = ret.pop("new_timezone")
+        channel_id = await store.get_guild_daily_message_channel_id(guild_id)
+        channel = bot.get_channel(channel_id)
+        message = await channel.send(**ret)
+        with suppress(Exception):
+            await message.add_reaction("✅")
+    if is_dm:
+        if guild_ids:
+            dm_response = "🙌 Thanks for scheduling a practice in the following servers:\n"
+            for guild_id in guild_ids:
+                guild = bot.get_guild(guild_id)
+                dm_response += f"*{guild.name}*\n"
+        else:
+            dm_response = (
+                "⚠️ You are not a member of any servers that have a practice schedule."
+            )
+    else:
+        if str(old_timezone) != str(new_timezone):
+            assert new_timezone is not None
+            new_timezone_display = display_timezone(new_timezone, utcnow()).lower()
+            dm_response = TIMEZONE_CHANGE_TEMPLATE.format(
+                new_timezone=new_timezone,
+                new_timezone_display=new_timezone_display,
+                COMMAND_PREFIX=COMMAND_PREFIX,
+            )
+    if dm_response:
+        try:
+            await ctx.author.send(dm_response)
         except discord.errors.Forbidden:
             logger.warn("cannot send DM to user. skipping...")
-    with suppress(Exception):
-        await message.add_reaction("✅")
 
 
 @practice_command.error
