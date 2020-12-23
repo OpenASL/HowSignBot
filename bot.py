@@ -708,7 +708,6 @@ async def practice_command(ctx: Context, *, start_time: str):
     is_dm = not bool(ctx.guild)
     if is_dm:
         guild_ids_with_schedules = await store.get_guild_ids_with_practice_schedules()
-        print(guild_ids_with_schedules)
         guild_ids = []
         for guild_id in guild_ids_with_schedules:
             guild = bot.get_guild(guild_id)
