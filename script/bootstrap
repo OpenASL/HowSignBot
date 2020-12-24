@@ -1,6 +1,6 @@
 #!/bin/sh
 # script/bootstrap: Resolve all dependencies that the application requires to run.
-set -euo pipefail
+set -eu
 
 if [ -z "${CI:-}" ]; then
   name=${PWD##*/}
