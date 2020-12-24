@@ -1074,6 +1074,7 @@ def is_allowed_zoom_access(ctx):
 @bot.command(name="zoom", help="AUTHORIZED USERS ONLY: Create a Zoom meeting")
 @commands.check(is_allowed_zoom_access)
 async def zoom_command(ctx: Context, meeting_id: Optional[int] = None):
+    await ctx.channel.trigger_typing()
     zoom_user = ZOOM_USERS[ctx.author.id]
     logger.info(f"creating zoom meeting for zoom user: {zoom_user}")
     if meeting_id in app["zoom_meeting_messages"]:
