@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v20.89.0 (2020-12-24)
+### Feature
+* Update holidays ([`36ada5d`](https://github.com/OpenASL/HowSignBot/commit/36ada5d39e19f7bb8237d7e8e8a6054d3645dd17))
+
+### Fix
+* **zoom:** Use user IDs instead of usernames for ?zoom ([`cc47752`](https://github.com/OpenASL/HowSignBot/commit/cc477528b85c800affe7a4f2666751210a039f26))
+* Remove print statement ([`8acc7fd`](https://github.com/OpenASL/HowSignBot/commit/8acc7fd47148c495a7a2592965397cb799c2c4ce))
+
 ## v20.88.0 (2020-12-23)
 ### Feature
 * Allow scheduling practices through DM (#79) ([`6523c74`](https://github.com/OpenASL/HowSignBot/commit/6523c740cd2214304914107d1788ecdf58ad4806))
