@@ -1027,6 +1027,20 @@ class ZoomMeetingState(NamedTuple):
     meeting: meetings.ZoomMeeting
 
 
+def get_participant_emoji():
+    today_pacific = utcnow().astimezone(PACIFIC).date()
+    holiday_name = holiday_emojis.get_holiday_name(today_pacific)
+    if holiday_name == "Halloween":
+        return "👻"
+    elif holiday_name == "Thanksgiving":
+        return "🦃"
+    elif holiday_name in {"Christmas Eve", "Christmas Day"}:
+        return "🎄"
+    elif today_pacific.month == 12:
+        return "⛄️"
+    return "👤"
+
+
 def make_zoom_embed(
     meeting: meetings.ZoomMeeting, num_participants: int
 ) -> discord.Embed:
@@ -1036,7 +1050,8 @@ def make_zoom_embed(
         description = f"{description}\n**Topic**: {meeting.topic}"
 
     if num_participants:
-        description += "\n" + "👤" * num_participants
+        emoji = get_participant_emoji()
+        description += "\n" + emoji * num_participants
     else:
         description += "\n"
 

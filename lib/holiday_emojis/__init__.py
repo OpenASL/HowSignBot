@@ -176,10 +176,18 @@ _HOLIDAY_EMOJI_MAP = {
     "Autumnal Equinox": Holiday("🍂", "equinox"),
 }
 
+HOLIDAYS = make_holidays()
+
 
 def get(date: dt.date) -> Optional[Holiday]:
-    holidays = make_holidays()
-    holiday_names = holidays.get_list(date)
+    holiday_names = HOLIDAYS.get_list(date)
     if holiday_names:
         return _HOLIDAY_EMOJI_MAP.get(holiday_names[0], None)
+    return None
+
+
+def get_holiday_name(date: dt.date) -> Optional[Holiday]:
+    holiday_names = HOLIDAYS.get_list(date)
+    if holiday_names:
+        return holiday_names[0]
     return None
