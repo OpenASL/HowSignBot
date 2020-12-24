@@ -55,7 +55,7 @@ GOOGLE_TOKEN_URI = env.str("GOOGLE_TOKEN_URI", "https://oauth2.googleapis.com/to
 TOPICS_SHEET_KEY = env.str("TOPICS_SHEET_KEY", required=True)
 FEEDBACK_SHEET_KEY = env.str("FEEDBACK_SHEET_KEY", required=True)
 
-ZOOM_USERS = env.dict("ZOOM_USERS", required=True)
+ZOOM_USERS = env.dict("ZOOM_USERS", subcast_key=int, required=True)
 ZOOM_JWT = env.str("ZOOM_JWT", required=True)
 ZOOM_HOOK_TOKEN = env.str("ZOOM_HOOK_TOKEN", required=True)
 
@@ -1049,7 +1049,7 @@ def make_zoom_embed(
 
 
 def is_allowed_zoom_access(ctx):
-    if str(ctx.author) not in ZOOM_USERS:
+    if ctx.author.id not in ZOOM_USERS:
         raise commands.errors.CheckFailure(
             f"⚠️ `{COMMAND_PREFIX}{ctx.invoked_with}` can only be used by authorized users under the bot owner's Zoom account."
         )
@@ -1059,7 +1059,7 @@ def is_allowed_zoom_access(ctx):
 @bot.command(name="zoom", help="AUTHORIZED USERS ONLY: Create a Zoom meeting")
 @commands.check(is_allowed_zoom_access)
 async def zoom_command(ctx: Context, meeting_id: Optional[int] = None):
-    zoom_user = ZOOM_USERS[str(ctx.author)]
+    zoom_user = ZOOM_USERS[ctx.author.id]
     logger.info(f"creating zoom meeting for zoom user: {zoom_user}")
     if meeting_id in app["zoom_meeting_messages"]:
         state = app["zoom_meeting_messages"][meeting_id]
