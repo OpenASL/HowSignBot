@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v20.89.1 (2020-12-24)
+### Fix
+* Fix builds ([#84](https://github.com/OpenASL/HowSignBot/issues/84)) ([`9f68140`](https://github.com/OpenASL/HowSignBot/commit/9f681406657d28d200ea3eaa8042ef142e2fed5c))
+
+### Documentation
+* Update DEVELOPING ([`d522f20`](https://github.com/OpenASL/HowSignBot/commit/d522f20b7f68589f776b6fd2f16f34c1fc2687a3))
+
 ## v20.89.0 (2020-12-24)
 ### Feature
 * Update holidays ([`36ada5d`](https://github.com/OpenASL/HowSignBot/commit/36ada5d39e19f7bb8237d7e8e8a6054d3645dd17))
