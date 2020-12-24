@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.91.0 (2020-12-24)
+### Feature
+* **zoom:** Add typing indicator ([`30982b8`](https://github.com/OpenASL/HowSignBot/commit/30982b8153e8785891ae451d0fa8e3bdb55ce421))
+
 ## v20.90.0 (2020-12-24)
 ### Feature
 * **zoom:** Funner emojis ([#85](https://github.com/OpenASL/HowSignBot/issues/85)) ([`38a9d12`](https://github.com/OpenASL/HowSignBot/commit/38a9d12ae650359f87d67ee604aad89b6846db9b))
