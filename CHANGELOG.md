@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.90.0 (2020-12-24)
+### Feature
+* **zoom:** Funner emojis ([#85](https://github.com/OpenASL/HowSignBot/issues/85)) ([`38a9d12`](https://github.com/OpenASL/HowSignBot/commit/38a9d12ae650359f87d67ee604aad89b6846db9b))
+
 ## v20.89.1 (2020-12-24)
 ### Fix
 * Fix builds ([#84](https://github.com/OpenASL/HowSignBot/issues/84)) ([`9f68140`](https://github.com/OpenASL/HowSignBot/commit/9f681406657d28d200ea3eaa8042ef142e2fed5c))
