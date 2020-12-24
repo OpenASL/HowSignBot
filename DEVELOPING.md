@@ -41,7 +41,7 @@ As a pre-requisite, set the `GH_TOKEN` environment variable to a personal access
 To release a new version of the bot:
 
 ```
-. script/deploy
+./script/deploy
 ```
 
 This will tag, push, and deploy to production.
