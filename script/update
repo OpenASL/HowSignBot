@@ -1,7 +1,7 @@
 #!/bin/sh
 # Based on conventions from https://github.com/github/scripts-to-rule-them-all
 # script/update: Update application to run for its current checkout.
-set -euo pipefail
+set -eu
 
 if [ -z "${SKIP_BOOTSTRAP:-}" ]; then
   ./script/bootstrap
