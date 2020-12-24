@@ -1,4 +1,6 @@
 #!/bin/sh
+set -euo pipefail
+
 echo "==> Checking out master..."
 git checkout master
 echo "==> Merging dev into master..."

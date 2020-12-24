@@ -1,18 +1,18 @@
 #!/bin/sh
 # Based on conventions from https://github.com/github/scripts-to-rule-them-all
 # script/update: Update application to run for its current checkout.
-set -e
+set -euo pipefail
 
-if [ -z "$SKIP_BOOTSTRAP" ]; then
+if [ -z "${SKIP_BOOTSTRAP:-}" ]; then
   ./script/bootstrap
 fi
 
-if [ -n "$DB_RESET" ]; then
+if [ -n "${DB_RESET:-}" ]; then
   echo "==> Recreating database"
   PYTHONPATH=. ./script/reset_db.py
 fi
 
 echo "==> Running migrations"
-PYTHONPATH=. alembic upgrade head
+PYTHONPATH=. alembic upgrade head >/dev/null 2>&1
 
 echo "==> Update finished."
