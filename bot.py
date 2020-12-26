@@ -55,7 +55,7 @@ GOOGLE_TOKEN_URI = env.str("GOOGLE_TOKEN_URI", "https://oauth2.googleapis.com/to
 TOPICS_SHEET_KEY = env.str("TOPICS_SHEET_KEY", required=True)
 FEEDBACK_SHEET_KEY = env.str("FEEDBACK_SHEET_KEY", required=True)
 
-ZOOM_USERS = env.dict("ZOOM_USERS", subcast_key=int, required=True)
+ZOOM_USERS = env.dict("ZOOM_USERS", subcast_keys=int, required=True)
 ZOOM_JWT = env.str("ZOOM_JWT", required=True)
 ZOOM_HOOK_TOKEN = env.str("ZOOM_HOOK_TOKEN", required=True)
 
