@@ -729,6 +729,7 @@ async def practice_command(ctx: Context, *, start_time: str):
 
     dm_response = None
     old_timezone, new_timezone = None, None
+    channel_id, channel = None, None
     for guild_id in guild_ids:
         ret = await practice_impl(
             guild_id=guild_id,
@@ -745,7 +746,9 @@ async def practice_command(ctx: Context, *, start_time: str):
             await message.add_reaction("✅")
     if is_dm:
         if guild_ids:
-            dm_response = "🙌 Thanks for scheduling a practice in the following servers:\n"
+            dm_response = (
+                "🙌  Thanks for scheduling a practice in the following servers:\n"
+            )
             for guild_id in guild_ids:
                 guild = bot.get_guild(guild_id)
                 dm_response += f"*{guild.name}*\n"
@@ -762,6 +765,9 @@ async def practice_command(ctx: Context, *, start_time: str):
                 new_timezone_display=new_timezone_display,
                 COMMAND_PREFIX=COMMAND_PREFIX,
             )
+        # message sent outside of practice schedule channel
+        if channel_id and channel and ctx.channel.id != channel_id:
+            await ctx.channel.send(f"🙌  New practice posted in {channel.mention}.")
     if dm_response:
         try:
             await ctx.author.send(dm_response)
