@@ -45,6 +45,7 @@ DISCORD_TOKEN = env.str("DISCORD_TOKEN", required=True)
 OWNER_ID = env.int("OWNER_ID", required=True)
 SECRET_KEY = env.str("SECRET_KEY", required=True)
 COMMAND_PREFIX = env.str("COMMAND_PREFIX", "?")
+PARTICIPANT_EMOJI = env.str("PARTICIPANT_EMOJI", default=None)
 PORT = env.int("PORT", 5000)
 
 GOOGLE_PROJECT_ID = env.str("GOOGLE_PROJECT_ID", required=True)
@@ -1033,7 +1034,9 @@ class ZoomMeetingState(NamedTuple):
     meeting: meetings.ZoomMeeting
 
 
-def get_participant_emoji():
+def get_participant_emoji() -> str:
+    if PARTICIPANT_EMOJI:
+        return PARTICIPANT_EMOJI
     today_pacific = utcnow().astimezone(PACIFIC).date()
     holiday_name = holiday_emojis.get_holiday_name(today_pacific)
     if holiday_name == "Halloween":
