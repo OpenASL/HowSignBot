@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v20.92.0 (2020-12-29)
+### Feature
+* **zoom:** Participant emoji envvar override ([#89](https://github.com/OpenASL/HowSignBot/issues/89)) ([`649d71c`](https://github.com/OpenASL/HowSignBot/commit/649d71c3f854477eb438afe6b895c4457a8d93d6))
+* **practice:** Send feedback message when user sends outside of practice channel ([#88](https://github.com/OpenASL/HowSignBot/issues/88)) ([`bea021e`](https://github.com/OpenASL/HowSignBot/commit/bea021e2a513f03dccac1d3bf29be5ec7178ff46))
+
 ## v20.91.0 (2020-12-24)
 ### Feature
 * **zoom:** Add typing indicator ([`30982b8`](https://github.com/OpenASL/HowSignBot/commit/30982b8153e8785891ae451d0fa8e3bdb55ce421))
