@@ -1034,7 +1034,7 @@ class ZoomMeetingState(NamedTuple):
     meeting: meetings.ZoomMeeting
 
 
-def get_participant_emoji():
+def get_participant_emoji() -> str:
     if PARTICIPANT_EMOJI:
         return PARTICIPANT_EMOJI
     today_pacific = utcnow().astimezone(PACIFIC).date()
