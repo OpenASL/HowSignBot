@@ -46,6 +46,7 @@ OWNER_ID = env.int("OWNER_ID", required=True)
 SECRET_KEY = env.str("SECRET_KEY", required=True)
 COMMAND_PREFIX = env.str("COMMAND_PREFIX", "?")
 PARTICIPANT_EMOJI = env.str("PARTICIPANT_EMOJI", default=None)
+DAILY_MESSAGE_RANDOM_SEED = env.str("DAILY_MESSAGE_RANDOM_SEED", default=None)
 PORT = env.int("PORT", 5000)
 
 GOOGLE_PROJECT_ID = env.str("GOOGLE_PROJECT_ID", required=True)
@@ -811,7 +812,8 @@ async def daily_practice_message():
 
 def get_today_random(dtime: Optional[dt.datetime] = None) -> random.Random:
     dtime = dtime or utcnow()
-    return random.Random(dtime.date().isoformat())
+    seed = DAILY_MESSAGE_RANDOM_SEED or dtime.date().timetuple()
+    return random.Random(seed)
 
 
 def get_daily_handshape(dtime: Optional[dt.datetime] = None) -> handshapes.Handshape:
