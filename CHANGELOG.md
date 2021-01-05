@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.93.0 (2021-01-04)
+### Feature
+* Allow overriding random seed ([#90](https://github.com/OpenASL/HowSignBot/issues/90)) ([`320e470`](https://github.com/OpenASL/HowSignBot/commit/320e470d18f0b3d4bbbca0e21ddec07989c4c815))
+
 ## v20.92.0 (2020-12-29)
 ### Feature
 * **zoom:** Participant emoji envvar override ([#89](https://github.com/OpenASL/HowSignBot/issues/89)) ([`649d71c`](https://github.com/OpenASL/HowSignBot/commit/649d71c3f854477eb438afe6b895c4457a8d93d6))
