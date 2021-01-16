@@ -1113,7 +1113,7 @@ async def zoom_command(ctx: Context, meeting_id: Optional[int] = None):
                     "host_video": False,
                     "participant_video": False,
                     "mute_upon_entry": True,
-                    "waiting_room": False,
+                    "waiting_room": True,
                 },
             )
         except Exception:
