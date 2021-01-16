@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.94.0 (2021-01-15)
+### Feature
+* **zoom:** Enable waiting room ([#93](https://github.com/OpenASL/HowSignBot/issues/93)) ([`d157066`](https://github.com/OpenASL/HowSignBot/commit/d157066cfeb2a82f52ae72257dfab20b68befe8c))
+
 ## v20.93.0 (2021-01-04)
 ### Feature
 * Allow overriding random seed ([#90](https://github.com/OpenASL/HowSignBot/issues/90)) ([`320e470`](https://github.com/OpenASL/HowSignBot/commit/320e470d18f0b3d4bbbca0e21ddec07989c4c815))
