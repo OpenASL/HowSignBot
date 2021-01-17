@@ -1036,8 +1036,46 @@ class ZoomMeetingState(NamedTuple):
     meeting: meetings.ZoomMeeting
 
 
+FACES = (
+    "😀",
+    "😄",
+    "😁",
+    "😆",
+    "😉",
+    "😊",
+    "🤩",
+    "☺️",
+    "😋",
+    "😛",
+    "😜",
+    "🤪",
+    "😝",
+    "🤗",
+    "😐",
+    "😶",
+    "😑",
+    "😏",
+    "😬",
+    "😌",
+    "😴",
+    "😷",
+    "🥴",
+    "🤠",
+    "🥳",
+    "🥸",
+    "😎",
+    "🤓",
+    "😺",
+    "😸",
+    "😹",
+    "😼",
+)
+
+
 def get_participant_emoji() -> str:
     if PARTICIPANT_EMOJI:
+        if PARTICIPANT_EMOJI == "face":
+            return random.choice(FACES)
         return PARTICIPANT_EMOJI
     today_pacific = utcnow().astimezone(PACIFIC).date()
     holiday_name = holiday_emojis.get_holiday_name(today_pacific)
@@ -1061,8 +1099,9 @@ def make_zoom_embed(
         description = f"{description}\n**Topic**: {meeting.topic}"
 
     if num_participants:
-        emoji = get_participant_emoji()
-        description += "\n" + emoji * num_participants
+        description += "\n" + "".join(
+            get_participant_emoji() for _ in range(num_participants)
+        )
     else:
         description += "\n"
 
