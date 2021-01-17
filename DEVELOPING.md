@@ -65,4 +65,5 @@ heroku logs -a howsign-staging -t
   - End Meeting
   - Participant/Host joined meeting
   - Participant/Host left meeting
+  - Participant was admitted into meeting
 - Copy the verification token and set the `ZOOM_HOOK_TOKEN` environment variable in the app's configuration.

@@ -1462,6 +1462,7 @@ async def ping(request):
 
 SUPPORTED_EVENTS = {
     "meeting.participant_joined",
+    "meeting.participant_admitted",
     "meeting.participant_left",
     "meeting.ended",
 }
@@ -1485,8 +1486,13 @@ async def handle_zoom_event(data: dict):
                 f"automatically ending meeting {meeting_id}, message {message_id}"
             )
             edit_kwargs = {"content": "✨ _Zoom meeting ended by host_", "embed": None}
-        elif event == "meeting.participant_joined":
-            participant_id = data["payload"]["object"]["participant"]["user_id"]
+        elif event in {"meeting.participant_admitted", "meeting.participant_joined"}:
+            participant_id = data["payload"]["object"]["participant"]["id"]
+            if (
+                event == "meeting.participant_joined"
+                and participant_id != data["payload"]["object"]["host_id"]
+            ):
+                return
             next_state = ZoomMeetingState(
                 channel_ids=state.channel_ids,
                 message_ids=state.message_ids,
@@ -1502,7 +1508,7 @@ async def handle_zoom_event(data: dict):
             )
             edit_kwargs = {"embed": embed}
         elif event == "meeting.participant_left":
-            participant_id = data["payload"]["object"]["participant"]["user_id"]
+            participant_id = data["payload"]["object"]["participant"]["id"]
             next_state = ZoomMeetingState(
                 channel_ids=state.channel_ids,
                 message_ids=state.message_ids,
