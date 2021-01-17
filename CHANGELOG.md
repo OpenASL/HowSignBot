@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.95.0 (2021-01-17)
+### Feature
+* **zoom:** Add face participant indicators ([`d8f0cca`](https://github.com/OpenASL/HowSignBot/commit/d8f0cca4e6e4b5cced65afbba93172aa4abdebb8))
+
 ## v20.94.1 (2021-01-16)
 ### Fix
 * **zoom:** Fix participant indicator accuracy with waiting room ([#94](https://github.com/OpenASL/HowSignBot/issues/94)) ([`b91c40f`](https://github.com/OpenASL/HowSignBot/commit/b91c40f8ab694922a7838d314dde7d329bb3391d))
