@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.94.1 (2021-01-16)
+### Fix
+* **zoom:** Fix participant indicator accuracy with waiting room ([#94](https://github.com/OpenASL/HowSignBot/issues/94)) ([`b91c40f`](https://github.com/OpenASL/HowSignBot/commit/b91c40f8ab694922a7838d314dde7d329bb3391d))
+
 ## v20.94.0 (2021-01-15)
 ### Feature
 * **zoom:** Enable waiting room ([#93](https://github.com/OpenASL/HowSignBot/issues/93)) ([`d157066`](https://github.com/OpenASL/HowSignBot/commit/d157066cfeb2a82f52ae72257dfab20b68befe8c))
