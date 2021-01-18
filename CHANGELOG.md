@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.95.1 (2021-01-17)
+### Fix
+* **zoom:** Fix participant indicators ([#95](https://github.com/OpenASL/HowSignBot/issues/95)) ([`50ee575`](https://github.com/OpenASL/HowSignBot/commit/50ee575f1aa82a29e148fb88fe655d0596665037))
+
 ## v20.95.0 (2021-01-17)
 ### Feature
 * **zoom:** Add face participant indicators ([`d8f0cca`](https://github.com/OpenASL/HowSignBot/commit/d8f0cca4e6e4b5cced65afbba93172aa4abdebb8))
