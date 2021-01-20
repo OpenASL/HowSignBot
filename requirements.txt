@@ -2,7 +2,7 @@ discord.py==1.6.0
 environs==9.3.0
 gspread==3.6.0
 aiohttp==3.6.3
-pyyaml==5.3.1
+pyyaml==5.4
 python-slugify==4.0.1
 emoji==0.6.0
 dateparser==1.0.0
@@ -12,7 +12,7 @@ holidays==0.10.4
 python-dateutil==2.8.1
 
 # catchphrase
-PyYAML==5.3.1
+PyYAML==5.4
 # meetings
 python-slugify==4.0.1
 # cuteid
