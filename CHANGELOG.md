@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.95.2 (2021-01-21)
+### Fix
+* **zoom:** Fix end meeting race condition ([#102](https://github.com/OpenASL/HowSignBot/issues/102)) ([`bb00e06`](https://github.com/OpenASL/HowSignBot/commit/bb00e06f41b5b553a23e7de560dbf95166fd8e23))
+
 ## v20.95.1 (2021-01-17)
 ### Fix
 * **zoom:** Fix participant indicators ([#95](https://github.com/OpenASL/HowSignBot/issues/95)) ([`50ee575`](https://github.com/OpenASL/HowSignBot/commit/50ee575f1aa82a29e148fb88fe655d0596665037))
