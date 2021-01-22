@@ -1169,7 +1169,8 @@ async def zoom_command(ctx: Context, meeting_id: Optional[int] = None):
                 participant_ids=set(),
                 meeting=meeting,
             )
-            app["zoom_meeting_messages"][meeting.id] = meeting_state
+            meeting_id = meeting.id
+            app["zoom_meeting_messages"][meeting_id] = meeting_state
             logger.info(f"setting info for meeting {meeting.id}")
 
     await wait_for_stop_sign(
@@ -1177,7 +1178,7 @@ async def zoom_command(ctx: Context, meeting_id: Optional[int] = None):
     )
 
     with suppress(KeyError):
-        del app["zoom_meeting_messages"][meeting.id]
+        del app["zoom_meeting_messages"][meeting_id]
 
 
 @zoom_command.error
@@ -1515,10 +1516,13 @@ async def handle_zoom_event(data: dict):
         state: ZoomMeetingState = app["zoom_meeting_messages"][meeting_id]
     except KeyError:
         return
+    if event == "meeting.ended":
+        del app["zoom_meeting_messages"][meeting_id]
     logging.info(f"handling zoom event {event} for meeting {meeting_id}")
     for channel_id, message_id in zip(state.channel_ids, state.message_ids):
         channel = bot.get_channel(channel_id)
         message = await channel.fetch_message(message_id)
+        edit_kwargs = None
         if event == "meeting.ended":
             logger.info(
                 f"automatically ending meeting {meeting_id}, message {message_id}"
@@ -1558,10 +1562,8 @@ async def handle_zoom_event(data: dict):
                 next_state.meeting, num_participants=len(next_state.participant_ids)
             )
             edit_kwargs = {"embed": embed}
-        await message.edit(**edit_kwargs)
-
-    if event == "meeting.ended":
-        del app["zoom_meeting_messages"][meeting_id]
+        if edit_kwargs:
+            await message.edit(**edit_kwargs)
 
 
 async def zoom(request):
