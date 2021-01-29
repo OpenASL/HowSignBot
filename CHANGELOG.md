@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.96.0 (2021-01-28)
+### Feature
+* **zoom:** Add message about waiting room ([`3ea98ed`](https://github.com/OpenASL/HowSignBot/commit/3ea98ed7e27d60ff69411b51a9b38063aad50a13))
+
 ## v20.95.2 (2021-01-21)
 ### Fix
 * **zoom:** Fix end meeting race condition ([#102](https://github.com/OpenASL/HowSignBot/issues/102)) ([`bb00e06`](https://github.com/OpenASL/HowSignBot/commit/bb00e06f41b5b553a23e7de560dbf95166fd8e23))
