@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.97.0 (2021-01-28)
+### Feature
+* **zoom:** Edit message ([`5f56f7f`](https://github.com/OpenASL/HowSignBot/commit/5f56f7f3ab197f4290b6ec3622d49533b9cdc433))
+
 ## v20.96.0 (2021-01-28)
 ### Feature
 * **zoom:** Add message about waiting room ([`3ea98ed`](https://github.com/OpenASL/HowSignBot/commit/3ea98ed7e27d60ff69411b51a9b38063aad50a13))
