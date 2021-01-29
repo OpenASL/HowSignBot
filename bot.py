@@ -1105,7 +1105,7 @@ def make_zoom_embed(
     else:
         description += "\n"
 
-    description += "\n🚀 This meeting is happening now. Go practice!\n**If you're in the waiting room for more than 10 seconds, @-mention the host below.**\n*This message will be cleared when the meeting ends.*"
+    description += "\n🚀 This meeting is happening now. Go practice!\n**If you're in the waiting room for more than 10 seconds, @-mention the host below with your Zoom display name.**\n*This message will be cleared when the meeting ends.*"
     return discord.Embed(
         title=title,
         description=description,
