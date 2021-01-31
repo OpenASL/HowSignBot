@@ -5,7 +5,7 @@ import logging
 import random
 import re
 from contextlib import suppress
-from typing import Optional, NamedTuple, List, Tuple, Set, Dict, Sequence, Union
+from typing import Optional, NamedTuple, List, Tuple, Dict, Sequence, Union
 from urllib.parse import quote_plus, urlencode
 
 import discord
@@ -1032,7 +1032,7 @@ ZOOM_CLOSED_MESSAGE = "✨ _Zoom meeting ended_"
 class ZoomMeetingState(NamedTuple):
     channel_ids: Tuple[int]
     message_ids: Tuple[int]
-    participant_ids: Set[str]
+    participants: Dict[str, str]
     meeting: meetings.ZoomMeeting
 
 
@@ -1072,10 +1072,17 @@ FACES = (
 )
 
 
+def display_participant_names(names: Sequence[str]) -> str:
+    max_to_display = 1
+    ret = ", ".join(name for name in names[:max_to_display])
+    remaining = max(len(names) - max_to_display, 0)
+    if remaining:
+        ret += f", +{remaining}"
+    return ret
+
+
 def get_participant_emoji() -> str:
     if PARTICIPANT_EMOJI:
-        if PARTICIPANT_EMOJI == "face":
-            return random.choice(FACES)
         return PARTICIPANT_EMOJI
     today_pacific = utcnow().astimezone(PACIFIC).date()
     holiday_name = holiday_emojis.get_holiday_name(today_pacific)
@@ -1087,20 +1094,21 @@ def get_participant_emoji() -> str:
         return "🎄"
     elif today_pacific.month == 12:
         return "⛄️"
-    return "👤"
+    return random.choice(FACES)
 
 
 def make_zoom_embed(
-    meeting: meetings.ZoomMeeting, num_participants: int
+    meeting: meetings.ZoomMeeting, participants: Dict[str, str]
 ) -> discord.Embed:
     title = f"<{meeting.join_url}>"
     description = f"**Meeting ID:**: {meeting.id}\n**Passcode**: {meeting.passcode}"
     if meeting.topic:
         description = f"{description}\n**Topic**: {meeting.topic}"
 
-    if num_participants:
-        description += "\n" + "".join(
-            get_participant_emoji() for _ in range(num_participants)
+    if participants:
+        description += "\n" + "".join(get_participant_emoji() for _ in participants)
+        description += (
+            "\n*" + display_participant_names(tuple(participants.values())) + "*"
         )
     else:
         description += "\n"
@@ -1130,15 +1138,13 @@ async def zoom_command(ctx: Context, meeting_id: Optional[int] = None):
     if meeting_id in app["zoom_meeting_messages"]:
         state = app["zoom_meeting_messages"][meeting_id]
         message = await ctx.send(
-            embed=make_zoom_embed(
-                state.meeting, num_participants=len(state.participant_ids)
-            )
+            embed=make_zoom_embed(state.meeting, participants=state.participants)
         )
         logger.info(f"updating meeting state for meeting id {meeting_id}")
         next_state = ZoomMeetingState(
             channel_ids=state.channel_ids + (ctx.channel.id,),
             message_ids=state.message_ids + (message.id,),
-            participant_ids=state.participant_ids,
+            participants=state.participants,
             meeting=state.meeting,
         )
         app["zoom_meeting_messages"][meeting_id] = next_state
@@ -1162,11 +1168,11 @@ async def zoom_command(ctx: Context, meeting_id: Optional[int] = None):
             )
             return
         else:
-            message = await ctx.send(embed=make_zoom_embed(meeting, num_participants=0))
+            message = await ctx.send(embed=make_zoom_embed(meeting, participants={}))
             meeting_state = ZoomMeetingState(
                 channel_ids=(ctx.channel.id,),
                 message_ids=(message.id,),
-                participant_ids=set(),
+                participants={},
                 meeting=meeting,
             )
             meeting_id = meeting.id
@@ -1531,10 +1537,14 @@ async def handle_zoom_event(data: dict):
         elif event in {"meeting.participant_joined"}:
             participant = data["payload"]["object"]["participant"]
             participant_id = participant["user_id"]
+            participant_name = participant["user_name"]
             next_state = ZoomMeetingState(
                 channel_ids=state.channel_ids,
                 message_ids=state.message_ids,
-                participant_ids=state.participant_ids | {participant_id},
+                participants={
+                    **state.participants,
+                    participant_id: participant_name,
+                },
                 meeting=state.meeting,
             )
             logger.info(
@@ -1542,16 +1552,18 @@ async def handle_zoom_event(data: dict):
             )
             app["zoom_meeting_messages"][meeting_id] = next_state
             embed = make_zoom_embed(
-                next_state.meeting, num_participants=len(next_state.participant_ids)
+                next_state.meeting, participants=next_state.participants
             )
             edit_kwargs = {"embed": embed}
         elif event == "meeting.participant_left":
             participant = data["payload"]["object"]["participant"]
             participant_id = participant["user_id"]
+            next_participants = state.participants.copy()
+            del next_participants[participant_id]
             next_state = ZoomMeetingState(
                 channel_ids=state.channel_ids,
                 message_ids=state.message_ids,
-                participant_ids=state.participant_ids - {participant_id},
+                participants=next_participants,
                 meeting=state.meeting,
             )
             logger.info(
@@ -1559,7 +1571,7 @@ async def handle_zoom_event(data: dict):
             )
             app["zoom_meeting_messages"][meeting_id] = next_state
             embed = make_zoom_embed(
-                next_state.meeting, num_participants=len(next_state.participant_ids)
+                next_state.meeting, participants=next_state.participants
             )
             edit_kwargs = {"embed": embed}
         if edit_kwargs:
