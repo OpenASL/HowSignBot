@@ -1073,7 +1073,7 @@ FACES = (
 
 
 def display_participant_names(names: Sequence[str]) -> str:
-    max_to_display = 1
+    max_to_display = 4
     ret = ", ".join(name for name in names[:max_to_display])
     remaining = max(len(names) - max_to_display, 0)
     if remaining:
