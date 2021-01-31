@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v20.98.0 (2021-01-31)
+### Feature
+* **zoom:** Change max to display ([`6d34909`](https://github.com/OpenASL/HowSignBot/commit/6d34909d133ca049a5b00ac9a573ae9cabfe1131))
+* **zoom:** Show participant names ([#110](https://github.com/OpenASL/HowSignBot/issues/110)) ([`8000c6f`](https://github.com/OpenASL/HowSignBot/commit/8000c6fb7047f7c5c24620c5bf2723a297b562d3))
+
+### Fix
+* Fix emojids ([#109](https://github.com/OpenASL/HowSignBot/issues/109)) ([`5584046`](https://github.com/OpenASL/HowSignBot/commit/5584046057745981a7e128daf47edf6a13ab029b))
+
 ## v20.97.0 (2021-01-28)
 ### Feature
 * **zoom:** Edit message ([`5f56f7f`](https://github.com/OpenASL/HowSignBot/commit/5f56f7f3ab197f4290b6ec3622d49533b9cdc433))
