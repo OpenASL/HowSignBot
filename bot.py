@@ -5,7 +5,7 @@ import logging
 import random
 import re
 from contextlib import suppress
-from typing import Optional, NamedTuple, List, Tuple, Dict, Sequence, Union
+from typing import Optional, NamedTuple, List, Tuple, Dict, Sequence, Union, Any
 from urllib.parse import quote_plus, urlencode
 
 import discord
@@ -549,9 +549,14 @@ Examples:
 
 
 async def schedule_impl(guild_id: int, when: Optional[str]):
-    settings: Optional[Dict[str, str]]
+    settings: Optional[Dict[str, Any]]
     if when and when.strip().lower() != "today":
-        settings = {"PREFER_DATES_FROM": "future"}
+        now_pacific = utcnow().astimezone(PACIFIC)
+        settings = {
+            "PREFER_DATES_FROM": "future",
+            # Workaround for https://github.com/scrapinghub/dateparser/issues/403
+            "RELATIVE_BASE": now_pacific.replace(tzinfo=None),
+        }
         dtime, _ = parse_human_readable_datetime(when, settings=settings) or utcnow()
         dtime = dtime or utcnow()
     else:
