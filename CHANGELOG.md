@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.98.1 (2021-02-01)
+### Fix
+* **schedule:** Fix date parsing ([#115](https://github.com/OpenASL/HowSignBot/issues/115)) ([`ffaa753`](https://github.com/OpenASL/HowSignBot/commit/ffaa75317082239e55df3ec9b6d172ca721c5523))
+
 ## v20.98.0 (2021-01-31)
 ### Feature
 * **zoom:** Change max to display ([`6d34909`](https://github.com/OpenASL/HowSignBot/commit/6d34909d133ca049a5b00ac9a573ae9cabfe1131))
