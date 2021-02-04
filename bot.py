@@ -1537,7 +1537,6 @@ async def handle_zoom_event(data: dict):
     logging.info(f"handling zoom event {event} for meeting {meeting_id}")
     for channel_id, message_id in zip(state.channel_ids, state.message_ids):
         channel = bot.get_channel(channel_id)
-        message = await channel.fetch_message(message_id)
         edit_kwargs = None
         if event == "meeting.ended":
             logger.info(
@@ -1581,7 +1580,6 @@ async def handle_zoom_event(data: dict):
                 # .Unfortunately the payload doesn't give us a better way to distinbuish
                 #  "leaving breakout room" vs "leaving meeting".
                 if abs((leave_time - join_time).seconds) < 2:
-                    print("!!!SKIPPING")
                     return
             next_participants = state.participants.copy()
             del next_participants[participant_name]
@@ -1600,6 +1598,7 @@ async def handle_zoom_event(data: dict):
             )
             edit_kwargs = {"embed": embed}
         if edit_kwargs:
+            message = await channel.fetch_message(message_id)
             await message.edit(**edit_kwargs)
 
 
