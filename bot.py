@@ -7,6 +7,7 @@ import re
 from contextlib import suppress
 from typing import Optional, NamedTuple, List, Tuple, Dict, Sequence, Union, Any
 from urllib.parse import quote_plus, urlencode
+from nameparser import HumanName
 
 import discord
 import dateparser
@@ -1033,11 +1034,13 @@ async def idiom_command(ctx, spoiler: Optional[str]):
 
 ZOOM_CLOSED_MESSAGE = "✨ _Zoom meeting ended_"
 
+Participants = Dict[str, Dict[str, Any]]
+
 
 class ZoomMeetingState(NamedTuple):
     channel_ids: Tuple[int]
     message_ids: Tuple[int]
-    participants: Dict[str, str]
+    participants: Participants
     meeting: meetings.ZoomMeeting
 
 
@@ -1078,8 +1081,9 @@ FACES = (
 
 
 def display_participant_names(names: Sequence[str]) -> str:
-    max_to_display = 4
-    ret = ", ".join(name for name in names[:max_to_display])
+    max_to_display = 8
+    # Only display first name to save real estate
+    ret = ", ".join(HumanName(name).first for name in names[:max_to_display])
     remaining = max(len(names) - max_to_display, 0)
     if remaining:
         ret += f", +{remaining}"
@@ -1103,7 +1107,7 @@ def get_participant_emoji() -> str:
 
 
 def make_zoom_embed(
-    meeting: meetings.ZoomMeeting, participants: Dict[str, str]
+    meeting: meetings.ZoomMeeting, participants: Participants
 ) -> discord.Embed:
     title = f"<{meeting.join_url}>"
     description = f"**Meeting ID:**: {meeting.id}\n**Passcode**: {meeting.passcode}"
@@ -1112,9 +1116,7 @@ def make_zoom_embed(
 
     if participants:
         description += "\n" + "".join(get_participant_emoji() for _ in participants)
-        description += (
-            "\n*" + display_participant_names(tuple(participants.values())) + "*"
-        )
+        description += "\n*" + display_participant_names(tuple(participants.keys())) + "*"
     else:
         description += "\n"
 
@@ -1522,6 +1524,9 @@ async def handle_zoom_event(data: dict):
     event = data["event"]
     if event not in SUPPORTED_EVENTS:
         return
+    # meeting ID can be None for breakout room events
+    if data["payload"]["object"]["id"] is None:
+        return
     meeting_id = int(data["payload"]["object"]["id"])
     try:
         state: ZoomMeetingState = app["zoom_meeting_messages"][meeting_id]
@@ -1539,16 +1544,17 @@ async def handle_zoom_event(data: dict):
                 f"automatically ending meeting {meeting_id}, message {message_id}"
             )
             edit_kwargs = {"content": "✨ _Zoom meeting ended by host_", "embed": None}
-        elif event in {"meeting.participant_joined"}:
+        elif event == "meeting.participant_joined":
             participant = data["payload"]["object"]["participant"]
-            participant_id = participant["user_id"]
+            # Use user_name as the identifier for participants because id isn't guaranteed to
+            #   be present and user_id will differ for the same user if breakout rooms are used.
             participant_name = participant["user_name"]
             next_state = ZoomMeetingState(
                 channel_ids=state.channel_ids,
                 message_ids=state.message_ids,
                 participants={
                     **state.participants,
-                    participant_id: participant_name,
+                    participant_name: participant,
                 },
                 meeting=state.meeting,
             )
@@ -1562,9 +1568,23 @@ async def handle_zoom_event(data: dict):
             edit_kwargs = {"embed": embed}
         elif event == "meeting.participant_left":
             participant = data["payload"]["object"]["participant"]
-            participant_id = participant["user_id"]
+            participant_name = participant["user_name"]
+            if participant_name not in state.participants:
+                return
+            prev_participant = state.participants[participant_name]
+            if "join_time" in prev_participant:
+                join_time = dateparser.parse(prev_participant["join_time"])
+                leave_time = dateparser.parse(participant["leave_time"])
+                # XXX If the leave time is within a few seconds of the join time
+                #  this likely a "leave" event for moving into a breakout room rather than
+                #  a participant actually leaving. In this case, bail early.
+                # .Unfortunately the payload doesn't give us a better way to distinbuish
+                #  "leaving breakout room" vs "leaving meeting".
+                if abs((leave_time - join_time).seconds) < 2:
+                    print("!!!SKIPPING")
+                    return
             next_participants = state.participants.copy()
-            del next_participants[participant_id]
+            del next_participants[participant_name]
             next_state = ZoomMeetingState(
                 channel_ids=state.channel_ids,
                 message_ids=state.message_ids,
