@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.1.0 (2021-02-07)
+### Feature
+* **schedule:** Copy changes ([#121](https://github.com/OpenASL/HowSignBot/issues/121)) ([`8f235c6`](https://github.com/OpenASL/HowSignBot/commit/8f235c6482c8849ed497c3cf8247831b7451fdd3))
+
 ## v21.0.0 (2021-02-07)
 ### Feature
 * New year new version ([`504ad3c`](https://github.com/OpenASL/HowSignBot/commit/504ad3c5440de6974684bbcda839d13d393bb8cb))
