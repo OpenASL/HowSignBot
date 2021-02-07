@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v21.0.0 (2021-02-07)
+### Feature
+* New year new version ([`504ad3c`](https://github.com/OpenASL/HowSignBot/commit/504ad3c5440de6974684bbcda839d13d393bb8cb))
+
+### Breaking
+* new year new version ([`504ad3c`](https://github.com/OpenASL/HowSignBot/commit/504ad3c5440de6974684bbcda839d13d393bb8cb))
+
 ## v20.100.1 (2021-02-07)
 ### Fix
 * Remove debug logging ([`5e2dbae`](https://github.com/OpenASL/HowSignBot/commit/5e2dbae2667cf97c112bcb30ec3142a34bdd0ec8))
