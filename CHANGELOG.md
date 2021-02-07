@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v20.99.0 (2021-02-07)
+### Feature
+* **zoom:** Better log message ([`1c6c37d`](https://github.com/OpenASL/HowSignBot/commit/1c6c37dac6bce167edd72e557bce0b9f6b37b652))
+* **zoom:** More robust Zoom state handling ([#120](https://github.com/OpenASL/HowSignBot/issues/120)) ([`6f757c4`](https://github.com/OpenASL/HowSignBot/commit/6f757c4ab1bc18673b1e325bd722c33bce55a159))
+
+### Fix
+* **sign:** Ignore ?? ([`c197f13`](https://github.com/OpenASL/HowSignBot/commit/c197f13a0c952544a473d4452faf58ec42e9fc93))
+
 ## v20.98.2 (2021-02-03)
 ### Fix
 * **zoom:** Fix participant indicators when breakout rooms are used ([#118](https://github.com/OpenASL/HowSignBot/issues/118)) ([`75e5a40`](https://github.com/OpenASL/HowSignBot/commit/75e5a40c8e09f748bb27ad91b13ae3b761b6e808))
