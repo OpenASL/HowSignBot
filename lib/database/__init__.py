@@ -1,3 +1,4 @@
+import datetime as dt
 import logging
 from typing import Optional, Union, Iterator
 
@@ -7,6 +8,7 @@ from databases.backends.postgres import Record
 import sqlalchemy as sa
 from sqlalchemy import sql
 from sqlalchemy.dialects.postgresql import insert, BIGINT, TIMESTAMP as _TIMESTAMP
+from sqlalchemy.sql.schema import ForeignKey
 
 # re-export
 DatabaseURL = databases.DatabaseURL
@@ -15,6 +17,10 @@ metadata = sa.MetaData()
 NULL = sql.null()
 
 logger = logging.getLogger(__name__)
+
+
+def now():
+    return dt.datetime.now(dt.timezone.utc)
 
 
 class TimeZone(sa.TypeDecorator):
@@ -35,15 +41,27 @@ class TIMESTAMP(sa.TypeDecorator):
     impl = _TIMESTAMP(timezone=True)
 
 
+def created_at_column(name="created_at", **kwargs):
+    return sa.Column(name, TIMESTAMP, nullable=False, default=now, **kwargs)
+
+
 # -----------------------------------------------------------------------------
 
 guild_settings = sa.Table(
     "guild_settings",
     metadata,
-    sa.Column("guild_id", BIGINT, primary_key=True),
-    sa.Column("name", sa.Text),  # Not used, just for ease of use
-    sa.Column("schedule_sheet_key", sa.Text),
-    sa.Column("daily_message_channel_id", BIGINT),
+    sa.Column("guild_id", BIGINT, primary_key=True, doc="Discord guild ID"),
+    sa.Column("name", sa.Text, doc="Name of the guild, for readability in clients"),
+    sa.Column(
+        "schedule_sheet_key",
+        sa.Text,
+        doc="Google sheet key for the guild's practice schedule",
+    ),
+    sa.Column(
+        "daily_message_channel_id",
+        BIGINT,
+        doc="Discord channel ID where to post daily schedule message.",
+    ),
     sa.Column(
         "include_handshape_of_the_day",
         sa.Boolean,
@@ -67,8 +85,40 @@ guild_settings = sa.Table(
 user_settings = sa.Table(
     "user_settings",
     metadata,
-    sa.Column("user_id", BIGINT, primary_key=True),
+    sa.Column("user_id", BIGINT, primary_key=True, doc="Discord user ID"),
     sa.Column("timezone", TimeZone),
+)
+
+zoom_meetings = sa.Table(
+    "zoom_meetings",
+    metadata,
+    sa.Column("meeting_id", BIGINT, primary_key=True, doc="Meeting ID issued by Zoom"),
+    sa.Column("zoom_user", sa.Text, nullable=False),
+    sa.Column("join_url", sa.Text, nullable=False),
+    sa.Column("passcode", sa.Text, nullable=False),
+    sa.Column("topic", sa.Text, nullable=False),
+    created_at_column(),
+)
+
+zoom_messages = sa.Table(
+    "zoom_messages",
+    metadata,
+    sa.Column("message_id", BIGINT, primary_key=True, doc="Discord message ID"),
+    sa.Column("channel_id", BIGINT, nullable=False, doc="Discord channel ID"),
+    sa.Column("meeting_id", ForeignKey(zoom_meetings.c.meeting_id, ondelete="CASCADE")),
+    created_at_column(),
+)
+
+zoom_participants = sa.Table(
+    "zoom_participants",
+    metadata,
+    sa.Column(
+        "meeting_id",
+        ForeignKey(zoom_meetings.c.meeting_id, ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    sa.Column("name", sa.Text, primary_key=True),
+    sa.Column("joined_at", TIMESTAMP),
 )
 
 # -----------------------------------------------------------------------------
@@ -90,6 +140,9 @@ class Store:
 
     def disconnect(self):
         return self.db.disconnect()
+
+    def transaction(self):
+        return self.db.transaction()
 
     async def set_user_timezone(self, user_id: int, timezone: Optional[pytz.BaseTzInfo]):
         logger.info(f"setting timezone for user_id {user_id}")
@@ -151,3 +204,96 @@ class Store:
             )
         )
         return (record.get("daily_message_channel_id") for record in all_settings)
+
+    # Zoom
+
+    async def create_zoom_meeting(
+        self, *, zoom_user: str, meeting_id: int, join_url: str, passcode: str, topic: str
+    ):
+        stmt = insert(zoom_meetings).values(
+            zoom_user=zoom_user,
+            meeting_id=meeting_id,
+            join_url=join_url,
+            passcode=passcode,
+            topic=topic,
+            # NOTE: need to pass created_at because default=now
+            #  doesn't have an effect when using postgresql.insert
+            created_at=now(),
+        )
+        await self.db.execute(stmt)
+
+    async def get_zoom_meeting(self, meeting_id: int) -> Record:
+        query = zoom_meetings.select().where(zoom_meetings.c.meeting_id == meeting_id)
+        return await self.db.fetch_one(query=query)
+
+    async def end_zoom_meeting(self, meeting_id: int):
+        await self.db.execute(
+            zoom_meetings.delete().where(zoom_meetings.c.meeting_id == meeting_id)
+        )
+        await self.db.execute(
+            zoom_messages.delete().where(zoom_messages.c.meeting_id == meeting_id)
+        )
+
+    async def zoom_meeting_exists(self, meeting_id: int) -> bool:
+        select = sa.select(
+            (sa.exists().where(zoom_meetings.c.meeting_id == meeting_id).label("result"),)
+        )
+        record = await self.db.fetch_one(select)
+        return record.get("result")
+
+    async def create_zoom_message(
+        self, *, meeting_id: int, message_id: int, channel_id: int
+    ):
+        await self.db.execute(
+            insert(zoom_messages).values(
+                meeting_id=meeting_id,
+                message_id=message_id,
+                channel_id=channel_id,
+                # NOTE: need to pass created_at because default=now
+                #  doesn't have an effect when using postgresql.insert
+                created_at=now(),
+            )
+        )
+
+    async def remove_zoom_message(self, *, message_id: int):
+        await self.db.execute(
+            zoom_messages.delete().where(zoom_messages.c.message_id == message_id)
+        )
+
+    async def get_zoom_messages(self, meeting_id: int) -> Iterator[Record]:
+        return await self.db.fetch_all(
+            zoom_messages.select().where(zoom_messages.c.meeting_id == meeting_id)
+        )
+
+    async def add_zoom_participant(
+        self, *, meeting_id: int, name: str, joined_at: dt.datetime
+    ):
+        logger.error(f"upserting zoom_participant {name}")
+        stmt = insert(zoom_participants).values(
+            meeting_id=meeting_id, name=name, joined_at=joined_at
+        )
+        stmt = stmt.on_conflict_do_update(
+            index_elements=(zoom_participants.c.meeting_id, zoom_participants.c.name),
+            set_=dict(joined_at=stmt.excluded.joined_at),
+        )
+        await self.db.execute(stmt)
+
+    async def get_zoom_participant(self, *, meeting_id: int, name: str) -> Record:
+        query = zoom_participants.select().where(
+            (zoom_participants.c.meeting_id == meeting_id)
+            & (zoom_participants.c.name == name)
+        )
+        return await self.db.fetch_one(query=query)
+
+    async def get_zoom_participants(self, meeting_id: int) -> Iterator[Record]:
+        return await self.db.fetch_all(
+            zoom_participants.select().where(zoom_participants.c.meeting_id == meeting_id)
+        )
+
+    async def remove_zoom_participant(self, *, meeting_id: int, name: str):
+        await self.db.execute(
+            zoom_participants.delete().where(
+                (zoom_participants.c.meeting_id == meeting_id)
+                & (zoom_participants.c.name == name)
+            )
+        )

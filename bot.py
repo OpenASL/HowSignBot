@@ -1034,16 +1034,6 @@ async def idiom_command(ctx, spoiler: Optional[str]):
 
 ZOOM_CLOSED_MESSAGE = "✨ _Zoom meeting ended_"
 
-Participants = Dict[str, Dict[str, Any]]
-
-
-class ZoomMeetingState(NamedTuple):
-    channel_ids: Tuple[int]
-    message_ids: Tuple[int]
-    participants: Participants
-    meeting: meetings.ZoomMeeting
-
-
 FACES = (
     "😀",
     "😄",
@@ -1083,7 +1073,7 @@ FACES = (
 def display_participant_names(names: Sequence[str]) -> str:
     max_to_display = 8
     # Only display first name to save real estate
-    ret = ", ".join(HumanName(name).first for name in names[:max_to_display])
+    ret = ", ".join(HumanName(name).first or name for name in names[:max_to_display])
     remaining = max(len(names) - max_to_display, 0)
     if remaining:
         ret += f", +{remaining}"
@@ -1106,17 +1096,21 @@ def get_participant_emoji() -> str:
     return random.choice(FACES)
 
 
-def make_zoom_embed(
-    meeting: meetings.ZoomMeeting, participants: Participants
+async def make_zoom_embed(
+    meeting_id: int,
 ) -> discord.Embed:
-    title = f"<{meeting.join_url}>"
-    description = f"**Meeting ID:**: {meeting.id}\n**Passcode**: {meeting.passcode}"
-    if meeting.topic:
-        description = f"{description}\n**Topic**: {meeting.topic}"
+    meeting = await store.get_zoom_meeting(meeting_id)
+    title = f"<{meeting['join_url']}>"
+    description = f"**Meeting ID:**: {meeting_id}\n**Passcode**: {meeting['passcode']}"
+    if meeting["topic"]:
+        description = f"{description}\n**Topic**: {meeting['topic']}"
 
+    participants = await store.get_zoom_participants(meeting_id)
     if participants:
         description += "\n" + "".join(get_participant_emoji() for _ in participants)
-        description += "\n*" + display_participant_names(tuple(participants.keys())) + "*"
+        description += (
+            "\n*" + display_participant_names([p["name"] for p in participants]) + "*"
+        )
     else:
         description += "\n"
 
@@ -1142,19 +1136,19 @@ async def zoom_command(ctx: Context, meeting_id: Optional[int] = None):
     await ctx.channel.trigger_typing()
     zoom_user = ZOOM_USERS[ctx.author.id]
     logger.info(f"creating zoom meeting for zoom user: {zoom_user}")
-    if meeting_id in app["zoom_meeting_messages"]:
-        state = app["zoom_meeting_messages"][meeting_id]
-        message = await ctx.send(
-            embed=make_zoom_embed(state.meeting, participants=state.participants)
+    if meeting_id:
+        meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
+        if not meeting_exists:
+            raise commands.errors.CheckFailure(
+                f"⚠️ Could not find Zoom meeting with ID {meeting_id}. Double check the ID or use `{COMMAND_PREFIX}zoom` to create a new meeting."
+            )
+        message = await ctx.send(embed=await make_zoom_embed(meeting_id=meeting_id))
+        logger.info(
+            f"creating zoom meeting message for message {message.id} in channel {ctx.channel.id}"
         )
-        logger.info(f"updating meeting state for meeting id {meeting_id}")
-        next_state = ZoomMeetingState(
-            channel_ids=state.channel_ids + (ctx.channel.id,),
-            message_ids=state.message_ids + (message.id,),
-            participants=state.participants,
-            meeting=state.meeting,
+        await store.create_zoom_message(
+            meeting_id=meeting_id, message_id=message.id, channel_id=ctx.channel.id
         )
-        app["zoom_meeting_messages"][meeting_id] = next_state
     else:
         try:
             meeting = await meetings.create_zoom(
@@ -1175,23 +1169,29 @@ async def zoom_command(ctx: Context, meeting_id: Optional[int] = None):
             )
             return
         else:
-            message = await ctx.send(embed=make_zoom_embed(meeting, participants={}))
-            meeting_state = ZoomMeetingState(
-                channel_ids=(ctx.channel.id,),
-                message_ids=(message.id,),
-                participants={},
-                meeting=meeting,
-            )
-            meeting_id = meeting.id
-            app["zoom_meeting_messages"][meeting_id] = meeting_state
-            logger.info(f"setting info for meeting {meeting.id}")
+            logger.info(f"creating meeting {meeting.id}")
+            async with store.transaction():
+                await store.create_zoom_meeting(
+                    zoom_user=zoom_user,
+                    meeting_id=meeting.id,
+                    join_url=meeting.join_url,
+                    passcode=meeting.passcode,
+                    topic=meeting.topic,
+                )
+                message = await ctx.send(embed=await make_zoom_embed(meeting.id))
+                logger.info(
+                    f"creating zoom meeting message for message {message.id} in channel {ctx.channel.id}"
+                )
+                await store.create_zoom_message(
+                    meeting_id=meeting.id,
+                    message_id=message.id,
+                    channel_id=ctx.channel.id,
+                )
 
     await wait_for_stop_sign(
         message, add_reaction=False, replace_with=ZOOM_CLOSED_MESSAGE
     )
-
-    with suppress(KeyError):
-        del app["zoom_meeting_messages"][meeting_id]
+    await store.remove_zoom_message(message_id=message.id)
 
 
 @zoom_command.error
@@ -1527,77 +1527,69 @@ async def handle_zoom_event(data: dict):
     # meeting ID can be None for breakout room events
     if data["payload"]["object"]["id"] is None:
         return
+
     meeting_id = int(data["payload"]["object"]["id"])
-    try:
-        state: ZoomMeetingState = app["zoom_meeting_messages"][meeting_id]
-    except KeyError:
+    meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
+    if not meeting_exists:
         return
-    if event == "meeting.ended":
-        del app["zoom_meeting_messages"][meeting_id]
+    messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
     logging.info(f"handling zoom event {event} for meeting {meeting_id}")
-    for channel_id, message_id in zip(state.channel_ids, state.message_ids):
+
+    edit_kwargs = None
+    if event == "meeting.ended":
+        logger.info(f"automatically ending zoom meeting {meeting_id}")
+        await store.end_zoom_meeting(meeting_id=meeting_id)
+        edit_kwargs = {"content": "✨ _Zoom meeting ended by host_", "embed": None}
+    elif event == "meeting.participant_joined":
+        participant_data = data["payload"]["object"]["participant"]
+        # Use user_name as the identifier for participants because id isn't guaranteed to
+        #   be present and user_id will differ for the same user if breakout rooms are used.
+        participant_name = participant_data["user_name"]
+        joined_at = dateparser.parse(participant_data["join_time"]).astimezone(
+            dt.timezone.utc
+        )
+        logger.info(f"adding new participant for meeting id {meeting_id}")
+        await store.add_zoom_participant(
+            meeting_id=meeting_id,
+            name=participant_name,
+            joined_at=joined_at,
+        )
+        embed = await make_zoom_embed(meeting_id=meeting_id)
+        edit_kwargs = {"embed": embed}
+    elif event == "meeting.participant_left":
+        # XXX Sleep to reduce the likelihood that particpants will be removed
+        #   after leaving breakout rooms.
+        await asyncio.sleep(1)
+        participant_data = data["payload"]["object"]["participant"]
+        participant_name = participant_data["user_name"]
+        prev_participant = await store.get_zoom_participant(
+            meeting_id=meeting_id, name=participant_name
+        )
+        if not prev_participant:
+            return
+        # XXX If the leave time is within a few seconds of the join time
+        #  this likely a "leave" event for moving into a breakout room rather than
+        #  a participant actually leaving. In this case, bail early.
+        # .Unfortunately the payload doesn't give us a better way to distinbuish
+        #  "leaving breakout room" vs "leaving meeting".
+        joined_at = prev_participant["joined_at"]
+        left_at = dateparser.parse(participant_data["leave_time"]).astimezone(
+            dt.timezone.utc
+        )
+        if abs((left_at - joined_at).seconds) < 2:
+            logger.info("skipping!")
+            return
+        logger.info(f"removing participant for meeting id {meeting_id}")
+        await store.remove_zoom_participant(meeting_id=meeting_id, name=participant_name)
+        embed = await make_zoom_embed(meeting_id=meeting_id)
+        edit_kwargs = {"embed": embed}
+
+    for message in messages:
+        channel_id = message["channel_id"]
+        message_id = message["message_id"]
         channel = bot.get_channel(channel_id)
-        edit_kwargs = None
-        if event == "meeting.ended":
-            logger.info(
-                f"automatically ending meeting {meeting_id}, message {message_id}"
-            )
-            edit_kwargs = {"content": "✨ _Zoom meeting ended by host_", "embed": None}
-        elif event == "meeting.participant_joined":
-            participant = data["payload"]["object"]["participant"]
-            # Use user_name as the identifier for participants because id isn't guaranteed to
-            #   be present and user_id will differ for the same user if breakout rooms are used.
-            participant_name = participant["user_name"]
-            next_state = ZoomMeetingState(
-                channel_ids=state.channel_ids,
-                message_ids=state.message_ids,
-                participants={
-                    **state.participants,
-                    participant_name: participant,
-                },
-                meeting=state.meeting,
-            )
-            logger.info(
-                f"adding new participant for meeting id {meeting_id}, message {message_id}"
-            )
-            app["zoom_meeting_messages"][meeting_id] = next_state
-            embed = make_zoom_embed(
-                next_state.meeting, participants=next_state.participants
-            )
-            edit_kwargs = {"embed": embed}
-        elif event == "meeting.participant_left":
-            participant = data["payload"]["object"]["participant"]
-            participant_name = participant["user_name"]
-            if participant_name not in state.participants:
-                return
-            prev_participant = state.participants[participant_name]
-            if "join_time" in prev_participant:
-                join_time = dateparser.parse(prev_participant["join_time"])
-                leave_time = dateparser.parse(participant["leave_time"])
-                # XXX If the leave time is within a few seconds of the join time
-                #  this likely a "leave" event for moving into a breakout room rather than
-                #  a participant actually leaving. In this case, bail early.
-                # .Unfortunately the payload doesn't give us a better way to distinbuish
-                #  "leaving breakout room" vs "leaving meeting".
-                if abs((leave_time - join_time).seconds) < 2:
-                    return
-            next_participants = state.participants.copy()
-            del next_participants[participant_name]
-            next_state = ZoomMeetingState(
-                channel_ids=state.channel_ids,
-                message_ids=state.message_ids,
-                participants=next_participants,
-                meeting=state.meeting,
-            )
-            logger.info(
-                f"removing participant for meeting id {meeting_id}, message {message_id}"
-            )
-            app["zoom_meeting_messages"][meeting_id] = next_state
-            embed = make_zoom_embed(
-                next_state.meeting, participants=next_state.participants
-            )
-            edit_kwargs = {"embed": embed}
         if edit_kwargs:
+            logger.info(f"editing zoom message {message_id} for event {event}")
             message = await channel.fetch_message(message_id)
             await message.edit(**edit_kwargs)
 
@@ -1625,8 +1617,6 @@ async def start_bot():
 async def on_startup(app):
     app["bot_task"] = asyncio.create_task(start_bot())
     app["bot"] = bot
-    # Mapping of Zoom meeting IDs to a tuple of the form (channel_id, message_id, participant_count)
-    app["zoom_meeting_messages"] = {}
     await store.connect()
 
 
