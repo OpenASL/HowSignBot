@@ -184,9 +184,8 @@ async def sign_command(ctx: Context, *, word: str):
 @sign_command.error
 async def sign_error(ctx, error):
     if isinstance(error, commands.errors.MissingRequiredArgument):
-        logger.info(f"missing argument to '{ctx.invoked_with}'")
-        await ctx.send(
-            f"Enter a word or phrase after `{COMMAND_PREFIX}{ctx.invoked_with}`"
+        logger.info(
+            f"no argument passed to {COMMAND_PREFIX}{ctx.invoked_with}. ignoring..."
         )
     else:
         logger.error(
