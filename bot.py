@@ -1577,7 +1577,9 @@ async def handle_zoom_event(data: dict):
             dt.timezone.utc
         )
         if abs((left_at - joined_at).seconds) < 2:
-            logger.info("skipping!")
+            logger.debug(
+                f"left_at and joined_at within 2 seconds (likely breakout room event). skipping {event} for meeting id {meeting_id}"
+            )
             return
         logger.info(f"removing participant for meeting id {meeting_id}")
         await store.remove_zoom_participant(meeting_id=meeting_id, name=participant_name)
