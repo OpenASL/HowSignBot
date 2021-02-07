@@ -268,7 +268,6 @@ class Store:
     async def add_zoom_participant(
         self, *, meeting_id: int, name: str, joined_at: dt.datetime
     ):
-        logger.error(f"upserting zoom_participant {name}")
         stmt = insert(zoom_participants).values(
             meeting_id=meeting_id, name=name, joined_at=joined_at
         )
