@@ -131,7 +131,7 @@ async def test_schedule_no_practices(snapshot, mock_worksheet):
     result = await bot.schedule_impl(1234, "9/28/2020")
     embed = result["embed"]
     assert "September 28" in embed.description
-    assert "There are no scheduled practices yet" in embed.description
+    assert "There are no scheduled practices today" in embed.description
     assert (
         "To schedule a practice, edit the schedule below or use the" in embed.description
     )

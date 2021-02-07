@@ -453,7 +453,7 @@ def format_multi_time(dtime: dt.datetime) -> str:
 
 NO_PRACTICES = """
 
-*There are no scheduled practices yet!*
+*There are no scheduled practices today!*
 
 To schedule a practice, edit the schedule below or use the `{COMMAND_PREFIX}practice` command.
 Example: `{COMMAND_PREFIX}practice today 2pm {pacific}`
@@ -502,8 +502,8 @@ async def make_practice_session_embed(
                 value += f"\nNotes: {session.notes}"
             embed.add_field(name=title, value=value, inline=False)
     embed.add_field(
-        name="🗓",
-        value=f"[Schedule or edit a practice]({schedule_url})",
+        name="🗓 View or edit the schedule using the link below.",
+        value=f"[Full schedule]({schedule_url})",
     )
     return embed
 
