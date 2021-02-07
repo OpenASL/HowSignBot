@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v20.100.1 (2021-02-07)
+### Fix
+* Remove debug logging ([`5e2dbae`](https://github.com/OpenASL/HowSignBot/commit/5e2dbae2667cf97c112bcb30ec3142a34bdd0ec8))
+
 ## v20.100.0 (2021-02-07)
 ### Feature
 * **zoom:** Randomize participant emoji from envvar ([`24f0a53`](https://github.com/OpenASL/HowSignBot/commit/24f0a537cb8b3f23a3aa6dd4e60e913654290c10))
