@@ -1081,7 +1081,7 @@ def display_participant_names(names: Sequence[str]) -> str:
 
 def get_participant_emoji() -> str:
     if PARTICIPANT_EMOJI:
-        return PARTICIPANT_EMOJI
+        return random.choice(PARTICIPANT_EMOJI)
     today_pacific = utcnow().astimezone(PACIFIC).date()
     holiday_name = holiday_emojis.get_holiday_name(today_pacific)
     if holiday_name == "Halloween":
