@@ -112,14 +112,14 @@ async def set_default_presence():
 
 # -----------------------------------------------------------------------------
 
-SIGN_TEMPLATE = """[👋 **Handspeak** - Search results]({handspeak})
+SIGN_TEMPLATE = """[🤲 **Handspeak** - Search results]({handspeak})
 [🧬 **Lifeprint** - Search results]({lifeprint})
 [🤝 **SigningSavvy** - Sign for {word_uppercased}]({signingsavvy})
 [🌐 **Spread The Sign** - {word_uppercased}]({spread_the_sign})
 [📹 **YouGlish** - ASL videos with {word_uppercased}]({youglish})
 """
 
-SIGN_SPOILER_TEMPLATE = """[👋 **Handspeak** - Search results]({handspeak})
+SIGN_SPOILER_TEMPLATE = """[🤲 **Handspeak** - Search results]({handspeak})
 [🧬 **Lifeprint** - Search results]({lifeprint})
 [🤝 **SigningSavvy** - Sign for ||{word_uppercased}||]({signingsavvy})
 [🌐 **Spread The Sign** - ||{word_uppercased}||]({spread_the_sign})
