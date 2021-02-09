@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.2.0 (2021-02-09)
+### Feature
+* Update emoji for handspeak to match howsign website ([`af6739a`](https://github.com/OpenASL/HowSignBot/commit/af6739aafce2f43fba0037d3712ecf9d78eb81ca))
+
 ## v21.1.0 (2021-02-07)
 ### Feature
 * **schedule:** Copy changes ([#121](https://github.com/OpenASL/HowSignBot/issues/121)) ([`8f235c6`](https://github.com/OpenASL/HowSignBot/commit/8f235c6482c8849ed497c3cf8247831b7451fdd3))
