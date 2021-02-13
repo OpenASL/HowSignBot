@@ -737,11 +737,10 @@ async def practice_command(ctx: Context, *, start_time: str):
     old_timezone, new_timezone = None, None
     channel_id, channel = None, None
     for member, guild in members_and_guilds:
-        host = getattr(member, "nick", None) or member.name
         guild_id = guild.id
         ret = await practice_impl(
             guild_id=guild_id,
-            host=host,
+            host=display_name(member),
             start_time=start_time,
             user_id=ctx.author.id,
         )
@@ -1309,7 +1308,7 @@ def make_teams(players):
 
 
 def format_team(players: Sequence[Union[discord.User, discord.Member]]):
-    names = [getattr(each, "nick", None) or each.name for each in players]
+    names = [f"_{display_name(each)}_" for each in players]
     return ", ".join(names)
 
 
@@ -1678,6 +1677,10 @@ def create_gcal_url(
     if description:
         params["details"] = description
     return "?".join((base_url, urlencode(params)))
+
+
+def display_name(user: Union[discord.User, discord.Member]) -> str:
+    return getattr(user, "nick", None) or user.name
 
 
 async def wait_for_stop_sign(
