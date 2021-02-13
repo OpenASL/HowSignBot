@@ -715,29 +715,30 @@ async def practice_command(ctx: Context, *, start_time: str):
     is_dm = not bool(ctx.guild)
     if is_dm:
         guild_ids_with_schedules = await store.get_guild_ids_with_practice_schedules()
-        guild_ids = []
+        members_and_guilds = []
         for guild_id in guild_ids_with_schedules:
             guild = bot.get_guild(guild_id)
             # Use fetch_member to check membership instead of get_member because cache might not be populated
             try:
-                await guild.fetch_member(ctx.author.id)
+                member = await guild.fetch_member(ctx.author.id)
             except Exception:
                 pass
             else:
-                guild_ids.append(guild_id)
+                members_and_guilds.append((member, guild))
     else:
         has_practice_schedule = await store.guild_has_practice_schedule(ctx.guild.id)
         if not has_practice_schedule:
             raise commands.errors.CheckFailure(
                 "⚠️ No configured practice schedule for this server. If you think this is a mistake, contact the bot owner."
             )
-        guild_ids = [ctx.guild.id]
-    host = getattr(ctx.author, "nick", None) or ctx.author.name
+        members_and_guilds = [(ctx.author, ctx.guild)]
 
     dm_response = None
     old_timezone, new_timezone = None, None
     channel_id, channel = None, None
-    for guild_id in guild_ids:
+    for member, guild in members_and_guilds:
+        host = getattr(member, "nick", None) or member.name
+        guild_id = guild.id
         ret = await practice_impl(
             guild_id=guild_id,
             host=host,
@@ -752,12 +753,11 @@ async def practice_command(ctx: Context, *, start_time: str):
         with suppress(Exception):
             await message.add_reaction("✅")
     if is_dm:
-        if guild_ids:
+        if members_and_guilds:
             dm_response = (
                 "🙌  Thanks for scheduling a practice in the following servers:\n"
             )
-            for guild_id in guild_ids:
-                guild = bot.get_guild(guild_id)
+            for _, guild in members_and_guilds:
                 dm_response += f"*{guild.name}*\n"
         else:
             dm_response = (
