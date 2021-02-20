@@ -1074,13 +1074,15 @@ FACES = (
 )
 
 
-def display_participant_names(participants: Sequence[Record], meeting: Record) -> str:
+def display_participant_names(
+    participants: Sequence[Record], meeting: Record, max_to_display: int = 15
+) -> str:
     names: List[str] = []
     for participant in participants:
         if participant["email"] in ZOOM_EMAILS:
             # Display authorized zoom users as mentions
             discord_id = ZOOM_EMAILS[participant["email"]]
-            display_name = f"**<@{discord_id}>**"
+            display_name = f"<@{discord_id}>"
         else:
             # Only display first name to save real estate, fall back to full name
             display_name = HumanName(participant["name"]).first or participant["name"]
@@ -1089,13 +1091,13 @@ def display_participant_names(participants: Sequence[Record], meeting: Record) -
             names.insert(0, f"**{display_name}**")
         else:
             names.append(display_name)
-    max_to_display = 20
-    ret = ", ".join(names[:max_to_display])
+    ret = "\n".join(
+        f"{get_participant_emoji()} {name}" for name in names[:max_to_display]
+    )
     remaining = max(len(names) - max_to_display, 0)
     if remaining:
-        ret += f", +{remaining}"
-    # Italicize
-    return f"*{ret}*"
+        ret += f"\n+{remaining} more"
+    return ret
 
 
 def get_participant_emoji() -> str:
@@ -1123,21 +1125,20 @@ async def make_zoom_embed(
     if meeting["topic"]:
         description = f"{description}\n**Topic**: {meeting['topic']}"
     description += "\n"
+    description += "\n🚀 This meeting is happening now. Go practice!\n**If you're in the waiting room for more than 10 seconds, @-mention the host below with your Zoom display name.**\n*This message will be cleared when the meeting ends.*"
+    embed = discord.Embed(
+        color=discord.Color.blue(),
+    )
+    embed.add_field(name=title, value=description)
 
     participants = tuple(await store.get_zoom_participants(meeting_id))
     if participants:
-        description += "".join(get_participant_emoji() for _ in participants)
-        description += "\n"
-        description += display_participant_names(
+        participant_names = display_participant_names(
             participants=participants, meeting=meeting
         )
+        embed.add_field(name="Participants", value=participant_names, inline=True)
 
-    description += "\n🚀 This meeting is happening now. Go practice!\n**If you're in the waiting room for more than 10 seconds, @-mention the host below with your Zoom display name.**\n*This message will be cleared when the meeting ends.*"
-    return discord.Embed(
-        title=title,
-        description=description,
-        color=discord.Color.blue(),
-    )
+    return embed
 
 
 def is_allowed_zoom_access(ctx):
