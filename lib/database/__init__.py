@@ -97,6 +97,7 @@ zoom_meetings = sa.Table(
     sa.Column("join_url", sa.Text, nullable=False),
     sa.Column("passcode", sa.Text, nullable=False),
     sa.Column("topic", sa.Text, nullable=False),
+    sa.Column("host_id", sa.Text, doc="Last cached zoom ID of the host"),
     created_at_column(),
 )
 
@@ -118,6 +119,7 @@ zoom_participants = sa.Table(
         primary_key=True,
     ),
     sa.Column("name", sa.Text, primary_key=True),
+    sa.Column("zoom_id", sa.Text, doc="Zoom user ID (null for non-registered users)"),
     sa.Column("joined_at", TIMESTAMP),
 )
 
@@ -234,6 +236,13 @@ class Store:
             zoom_messages.delete().where(zoom_messages.c.meeting_id == meeting_id)
         )
 
+    async def set_zoom_meeting_host_id(self, meeting_id: int, *, host_id: str):
+        await self.db.execute(
+            zoom_meetings.update()
+            .where(zoom_meetings.c.meeting_id == meeting_id)
+            .values(host_id=host_id)
+        )
+
     async def zoom_meeting_exists(self, meeting_id: int) -> bool:
         select = sa.select(
             (sa.exists().where(zoom_meetings.c.meeting_id == meeting_id).label("result"),)
@@ -266,14 +275,14 @@ class Store:
         )
 
     async def add_zoom_participant(
-        self, *, meeting_id: int, name: str, joined_at: dt.datetime
+        self, *, meeting_id: int, name: str, zoom_id: str, joined_at: dt.datetime
     ):
         stmt = insert(zoom_participants).values(
-            meeting_id=meeting_id, name=name, joined_at=joined_at
+            meeting_id=meeting_id, name=name, zoom_id=zoom_id, joined_at=joined_at
         )
         stmt = stmt.on_conflict_do_update(
             index_elements=(zoom_participants.c.meeting_id, zoom_participants.c.name),
-            set_=dict(joined_at=stmt.excluded.joined_at),
+            set_=dict(zoom_id=stmt.excluded.zoom_id, joined_at=stmt.excluded.joined_at),
         )
         await self.db.execute(stmt)
 

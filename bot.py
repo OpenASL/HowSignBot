@@ -13,6 +13,7 @@ import discord
 import dateparser
 import gspread
 from aiohttp import web
+from databases.backends.postgres import Record
 from discord.ext import commands, tasks
 from discord.ext.commands import Context
 from environs import Env
@@ -1071,14 +1072,23 @@ FACES = (
 )
 
 
-def display_participant_names(names: Sequence[str]) -> str:
-    max_to_display = 8
-    # Only display first name to save real estate
-    ret = ", ".join(HumanName(name).first or name for name in names[:max_to_display])
+def display_participant_names(participants: Sequence[Record], meeting: Record) -> str:
+    names: List[str] = []
+    for participant in participants:
+        # Only display first name to save real estate, fall back to full name
+        display_name = HumanName(participant["name"]).first or participant["name"]
+        if participant["zoom_id"] and participant["zoom_id"] == meeting["host_id"]:
+            # Display host first and in bold
+            names.insert(0, f"**{display_name}**")
+        else:
+            names.append(display_name)
+    max_to_display = 20
+    ret = ", ".join(names[:max_to_display])
     remaining = max(len(names) - max_to_display, 0)
     if remaining:
         ret += f", +{remaining}"
-    return ret
+    # Italicize
+    return f"*{ret}*"
 
 
 def get_participant_emoji() -> str:
@@ -1105,15 +1115,15 @@ async def make_zoom_embed(
     description = f"**Meeting ID:**: {meeting_id}\n**Passcode**: {meeting['passcode']}"
     if meeting["topic"]:
         description = f"{description}\n**Topic**: {meeting['topic']}"
+    description += "\n"
 
-    participants = await store.get_zoom_participants(meeting_id)
+    participants = tuple(await store.get_zoom_participants(meeting_id))
     if participants:
-        description += "\n" + "".join(get_participant_emoji() for _ in participants)
-        description += (
-            "\n*" + display_participant_names([p["name"] for p in participants]) + "*"
-        )
-    else:
+        description += "".join(get_participant_emoji() for _ in participants)
         description += "\n"
+        description += display_participant_names(
+            participants=participants, meeting=meeting
+        )
 
     description += "\n🚀 This meeting is happening now. Go practice!\n**If you're in the waiting room for more than 10 seconds, @-mention the host below with your Zoom display name.**\n*This message will be cleared when the meeting ends.*"
     return discord.Embed(
@@ -1536,6 +1546,16 @@ async def handle_zoom_event(data: dict):
     messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
     logging.info(f"handling zoom event {event} for meeting {meeting_id}")
 
+    # Update cached host id
+    # XXX: As of this 2021-02-20, Zoom does not update the host_id in webhooks
+    #  even after the host has changed, so this won't actually have any effect on
+    #  the participant indicators, but it doesn't hurt to do this.
+    if "host_id" in data["payload"]["object"]:
+        logger.info(f"setting host ID for meeting {meeting_id}")
+        await store.set_zoom_meeting_host_id(
+            meeting_id, host_id=data["payload"]["object"]["host_id"]
+        )
+
     edit_kwargs = None
     if event == "meeting.ended":
         logger.info(f"automatically ending zoom meeting {meeting_id}")
@@ -1553,6 +1573,7 @@ async def handle_zoom_event(data: dict):
         await store.add_zoom_participant(
             meeting_id=meeting_id,
             name=participant_name,
+            zoom_id=participant_data["id"],
             joined_at=joined_at,
         )
         embed = await make_zoom_embed(meeting_id=meeting_id)
