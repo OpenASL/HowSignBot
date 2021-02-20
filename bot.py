@@ -503,9 +503,9 @@ async def make_practice_session_embed(
             )
             value = f"[Add to Google Calendar]({gcal_url})"
             if session.host:
-                value += f"\nHost: {session.host}"
+                value += f"\n> Host: {session.host}"
             if session.notes:
-                value += f"\nNotes: {session.notes}"
+                value += f"\n> Notes: {session.notes}"
             embed.add_field(name=title, value=value, inline=False)
     embed.add_field(
         name="🗓 View or edit the schedule using the link below.",
