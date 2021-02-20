@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v21.3.0 (2021-02-20)
+### Feature
+* **schedule:** Indent host and notes ([#132](https://github.com/OpenASL/HowSignBot/issues/132)) ([`bc0bebd`](https://github.com/OpenASL/HowSignBot/commit/bc0bebda3ef63ae68daf3ab71587d8a5ddfc7b05))
+* **zoom:** Display authorized users as mentions ([#131](https://github.com/OpenASL/HowSignBot/issues/131)) ([`0d34c4b`](https://github.com/OpenASL/HowSignBot/commit/0d34c4b1cc84d5d067a620a35bfcf575c5d8223b))
+* **zoom:** Embolden host ([#130](https://github.com/OpenASL/HowSignBot/issues/130)) ([`67f913a`](https://github.com/OpenASL/HowSignBot/commit/67f913a53afccf8ec6ccb38e93fabc98339cf239))
+* **sign:** Add howsign.app links ([#129](https://github.com/OpenASL/HowSignBot/issues/129)) ([`eb3ea11`](https://github.com/OpenASL/HowSignBot/commit/eb3ea113d9b6b47b1411e67c4bd54e06d37604e2))
+* **codenames:** Italicize names ([#126](https://github.com/OpenASL/HowSignBot/issues/126)) ([`de3235f`](https://github.com/OpenASL/HowSignBot/commit/de3235f2276ee2234f009c550eb43fe254848b57))
+
+### Fix
+* **practice:** Use host's nickname when DMing practice ([#125](https://github.com/OpenASL/HowSignBot/issues/125)) ([`a69d699`](https://github.com/OpenASL/HowSignBot/commit/a69d699779b19f08234fed41e19b2ec638c20153))
+
 ## v21.2.0 (2021-02-09)
 ### Feature
 * Update emoji for handspeak to match howsign website ([`af6739a`](https://github.com/OpenASL/HowSignBot/commit/af6739aafce2f43fba0037d3712ecf9d78eb81ca))
