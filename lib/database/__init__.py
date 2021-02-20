@@ -120,6 +120,7 @@ zoom_participants = sa.Table(
     ),
     sa.Column("name", sa.Text, primary_key=True),
     sa.Column("zoom_id", sa.Text, doc="Zoom user ID (null for non-registered users)"),
+    sa.Column("email", sa.Text, doc="Zoom email (null for non-registered users)"),
     sa.Column("joined_at", TIMESTAMP),
 )
 
@@ -275,14 +276,28 @@ class Store:
         )
 
     async def add_zoom_participant(
-        self, *, meeting_id: int, name: str, zoom_id: str, joined_at: dt.datetime
+        self,
+        *,
+        meeting_id: int,
+        name: str,
+        zoom_id: Optional[str],
+        email: Optional[str],
+        joined_at: dt.datetime,
     ):
         stmt = insert(zoom_participants).values(
-            meeting_id=meeting_id, name=name, zoom_id=zoom_id, joined_at=joined_at
+            meeting_id=meeting_id,
+            name=name,
+            zoom_id=zoom_id,
+            email=email,
+            joined_at=joined_at,
         )
         stmt = stmt.on_conflict_do_update(
             index_elements=(zoom_participants.c.meeting_id, zoom_participants.c.name),
-            set_=dict(zoom_id=stmt.excluded.zoom_id, joined_at=stmt.excluded.joined_at),
+            set_=dict(
+                zoom_id=stmt.excluded.zoom_id,
+                email=stmt.excluded.email,
+                joined_at=stmt.excluded.joined_at,
+            ),
         )
         await self.db.execute(stmt)
 
