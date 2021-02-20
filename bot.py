@@ -117,6 +117,7 @@ SIGN_TEMPLATE = """[🤲 **Handspeak** - Search results]({handspeak})
 [🤝 **SigningSavvy** - Sign for {word_uppercased}]({signingsavvy})
 [🌐 **Spread The Sign** - {word_uppercased}]({spread_the_sign})
 [📹 **YouGlish** - ASL videos with {word_uppercased}]({youglish})
+Share: {howsign}
 """
 
 SIGN_SPOILER_TEMPLATE = """[🤲 **Handspeak** - Search results]({handspeak})
@@ -124,6 +125,7 @@ SIGN_SPOILER_TEMPLATE = """[🤲 **Handspeak** - Search results]({handspeak})
 [🤝 **SigningSavvy** - Sign for ||{word_uppercased}||]({signingsavvy})
 [🌐 **Spread The Sign** - ||{word_uppercased}||]({spread_the_sign})
 [📹 **YouGlish** - ASL videos with ||{word_uppercased}||]({youglish})
+Share: ||{howsign}||
 """
 
 SIGN_HELP = """Look up a word or phrase
@@ -145,6 +147,7 @@ def word_display(word: str, *, template: str = SIGN_TEMPLATE):
     quoted_word = quote_plus(word)
     return template.format(
         word_uppercased=word.upper(),
+        howsign=f"https://howsign.app/?s={quoted_word}",
         lifeprint=f"https://www.google.com/search?&q=site%3Alifeprint.com+{quoted_word}",
         handspeak=f"https://www.google.com/search?&q=site%3Ahandspeak.com+{quoted_word}",
         signingsavvy=f"https://www.signingsavvy.com/search/{quoted_word}",
