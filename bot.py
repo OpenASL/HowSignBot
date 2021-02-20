@@ -59,7 +59,9 @@ GOOGLE_TOKEN_URI = env.str("GOOGLE_TOKEN_URI", "https://oauth2.googleapis.com/to
 TOPICS_SHEET_KEY = env.str("TOPICS_SHEET_KEY", required=True)
 FEEDBACK_SHEET_KEY = env.str("FEEDBACK_SHEET_KEY", required=True)
 
+# Mapping of Discord user IDs => emails
 ZOOM_USERS = env.dict("ZOOM_USERS", subcast_keys=int, required=True)
+ZOOM_EMAILS = {email: zoom_id for zoom_id, email in ZOOM_USERS.items()}
 ZOOM_JWT = env.str("ZOOM_JWT", required=True)
 ZOOM_HOOK_TOKEN = env.str("ZOOM_HOOK_TOKEN", required=True)
 
@@ -1075,8 +1077,13 @@ FACES = (
 def display_participant_names(participants: Sequence[Record], meeting: Record) -> str:
     names: List[str] = []
     for participant in participants:
-        # Only display first name to save real estate, fall back to full name
-        display_name = HumanName(participant["name"]).first or participant["name"]
+        if participant["email"] in ZOOM_EMAILS:
+            # Display authorized zoom users as mentions
+            discord_id = ZOOM_EMAILS[participant["email"]]
+            display_name = f"**<@{discord_id}>**"
+        else:
+            # Only display first name to save real estate, fall back to full name
+            display_name = HumanName(participant["name"]).first or participant["name"]
         if participant["zoom_id"] and participant["zoom_id"] == meeting["host_id"]:
             # Display host first and in bold
             names.insert(0, f"**{display_name}**")
@@ -1551,7 +1558,6 @@ async def handle_zoom_event(data: dict):
     #  even after the host has changed, so this won't actually have any effect on
     #  the participant indicators, but it doesn't hurt to do this.
     if "host_id" in data["payload"]["object"]:
-        logger.info(f"setting host ID for meeting {meeting_id}")
         await store.set_zoom_meeting_host_id(
             meeting_id, host_id=data["payload"]["object"]["host_id"]
         )
@@ -1574,6 +1580,7 @@ async def handle_zoom_event(data: dict):
             meeting_id=meeting_id,
             name=participant_name,
             zoom_id=participant_data["id"],
+            email=participant_data["email"],
             joined_at=joined_at,
         )
         embed = await make_zoom_embed(meeting_id=meeting_id)
