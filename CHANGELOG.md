@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.4.0 (2021-02-20)
+### Feature
+* **zoom:** 2-column display ([#133](https://github.com/OpenASL/HowSignBot/issues/133)) ([`96ba6c5`](https://github.com/OpenASL/HowSignBot/commit/96ba6c59bf45719ad25cd91db101a2f41f2e9ca1))
+
 ## v21.3.0 (2021-02-20)
 ### Feature
 * **schedule:** Indent host and notes ([#132](https://github.com/OpenASL/HowSignBot/issues/132)) ([`bc0bebd`](https://github.com/OpenASL/HowSignBot/commit/bc0bebda3ef63ae68daf3ab71587d8a5ddfc7b05))
