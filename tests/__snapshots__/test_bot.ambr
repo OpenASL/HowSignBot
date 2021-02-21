@@ -1,14 +1,14 @@
 # name: test_catchphrase
   <class 'dict'> {
     'content': '
+      ||skirt||
+      ||green||
       ||bay||
       ||snowman||
       ||Steve Martin||
       ||river rafting||
       ||Spain||
       ||dredge||
-      ||earthquake||
-      ||wrinkle||
       Enter `!cp` or `!cp [category]` for more.
       Categories: easy, medium, hard, animals, food, travel, people, household
     ',
@@ -17,6 +17,7 @@
 # name: test_catchphrase_categories[Hard]
   <class 'dict'> {
     'content': '
+      ||wreath||
       ||through||
       ||highway||
       ||cardboard||
@@ -24,7 +25,6 @@
       ||mast||
       ||wool||
       ||blimp||
-      ||standard||
       Enter `!cp` or `!cp [category]` for more.
       Categories: easy, medium, hard, animals, food, travel, people, household
     ',
@@ -41,40 +41,16 @@
 # name: test_catchphrase_categories[food]
   <class 'dict'> {
     'content': '
+      ||scone||
+      ||chicken pot pie||
       ||blanch||
       ||clams||
       ||Kool-aid||
       ||corn on the cob||
       ||pineapple||
       ||yam||
-      ||egg salad sandwich||
-      ||chocolate cake||
       Enter `!cp` or `!cp [category]` for more.
       Categories: easy, medium, hard, animals, food, travel, people, household
-    ',
-  }
----
-# name: test_clthat[any]
-  <class 'dict'> {
-    'content': '
-      _CL That!_
-      https://tenor.com/wJRR.gif
-    ',
-  }
----
-# name: test_clthat[gif]
-  <class 'dict'> {
-    'content': '
-      _CL That!_
-      https://tenor.com/LyDa.gif
-    ',
-  }
----
-# name: test_clthat[text]
-  <class 'dict'> {
-    'content': '
-      _CL That!_
-      Dog catching a frisbee in the air
     ',
   }
 ---
@@ -146,8 +122,8 @@
 # name: test_idiom[None]
   <class 'dict'> {
     'content': '
-      **Roll With the Punches**
-      Meaning: To tolerate or endure through the unexpected mishappenings you may encounter from time to time.
+      **Put a Sock In It**
+      Meaning: Asking someone to be quiet or to shut up.
   
     ',
   }
@@ -155,8 +131,8 @@
 # name: test_idiom[||]
   <class 'dict'> {
     'content': '
-      ||**Back To the Drawing Board**||
-      Meaning: ||Starting over again on a new design from a previously failed attempt.||
+      ||**Hit Below The Belt**||
+      Meaning: ||A boxing term. Also often used to refer to inappropriate words, or comments that are too personal.||
   
     ',
   }
@@ -416,12 +392,12 @@
 ---
 # name: test_sentence[None]
   <class 'dict'> {
-    'content': 'The father died during childbirth.',
+    'content': "Hang on, my kittens are scratching at the bathtub and they'll upset by the lack of biscuits.",
   }
 ---
 # name: test_sentence[||]
   <class 'dict'> {
-    'content': '||Lightning Paradise was the local hangout joint where the group usually ended up spending the night.||',
+    'content': '||I love eating toasted cheese and tuna sandwiches.||',
   }
 ---
 # name: test_sign[need, ask]
