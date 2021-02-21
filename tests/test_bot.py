@@ -56,12 +56,6 @@ def test_handshapes(snapshot):
     assert result == snapshot
 
 
-@pytest.mark.parametrize("kind", ("any", "text", "gif"))
-def test_clthat(snapshot, kind):
-    result = bot.clthat_impl(kind)
-    assert result == snapshot
-
-
 def test_catchphrase(snapshot):
     result = bot.catchphrase_impl()
     assert result == snapshot

@@ -282,40 +282,6 @@ async def handshapes_command(ctx):
 
 # -----------------------------------------------------------------------------
 
-CLTHAT_HELP = """Show a text or GIF prompt for classifier practice
-
-Examples:
-{COMMAND_PREFIX}clthat
-{COMMAND_PREFIX}clthat gif
-{COMMAND_PREFIX}clthat text
-""".format(
-    COMMAND_PREFIX=COMMAND_PREFIX
-)
-
-
-def clthat_impl(kind: str):
-    kind = kind.lower()
-    logger.info(f"sending classifier practice, kind: {kind}")
-    if kind not in {"any", "text", "gif"}:
-        return {"content": "⚠️ `kind` must be one of: any, text, gif"}
-
-    content = "_CL That!_\n"
-    if kind == "any":
-        content += clthat.random()
-    elif kind == "text":
-        content += clthat.text()
-    else:
-        content += clthat.gif_url()
-    return {"content": content}
-
-
-@bot.command(name="clthat", aliases=("cl",), help=HANDSHAPE_HELP)
-async def clthat_command(ctx, kind="any"):
-    await ctx.send(**clthat_impl(kind))
-
-
-# -----------------------------------------------------------------------------
-
 
 def get_gsheet_client():
     signer = RSASigner.from_string(key=GOOGLE_PRIVATE_KEY, key_id=GOOGLE_PRIVATE_KEY_ID)
@@ -904,13 +870,15 @@ async def send_daily_message(channel_id: int, dtime: Optional[dt.datetime] = Non
 
 @bot.command(
     name="send_daily_message",
+    aliases=("sdm",),
     help="BOT OWNER ONLY: Manually send a daily practice schedule for a channel",
 )
 @commands.is_owner()
 async def send_daily_message_command(
-    ctx: Context, channel_id: int, when: Optional[str] = None
+    ctx: Context, channel_id: Optional[int] = None, when: Optional[str] = None
 ):
     await ctx.channel.trigger_typing()
+    channel_id = channel_id or ctx.channel.id
     channel_ids = set(await store.get_daily_message_channel_ids())
     if channel_id not in channel_ids:
         await ctx.send(f"⚠️ Schedule channel not configured for Channel ID {channel_id}")
@@ -926,9 +894,10 @@ async def send_daily_message_command(
     send_dtime = EASTERN.localize(dt.datetime.combine(dtime, DAILY_PRACTICE_SEND_TIME))
     await send_daily_message(channel_id, send_dtime)
 
-    channel = bot.get_channel(channel_id)
-    guild = channel.guild
-    await ctx.send(f'🗓 Daily message sent to "{guild.name}", #{channel.name}')
+    if channel_id != ctx.channel.id:
+        channel = bot.get_channel(channel_id)
+        guild = channel.guild
+        await ctx.send(f'🗓 Daily message sent to "{guild.name}", #{channel.name}')
 
 
 # -----------------------------------------------------------------------------
@@ -1452,24 +1421,6 @@ async def presence_command(ctx: Context, activity_type: Optional[ActivityTypeCon
 async def presence_command_error(ctx, error):
     message = error.args[0]
     await ctx.send(content=message)
-
-
-CHANNEL_INFO_TEMPLATE = """Guild name: {ctx.guild.name}
-Guild ID: {ctx.guild.id}
-Channel name: {ctx.channel.name}
-Channel ID: {ctx.channel.id}
-"""
-
-
-@bot.command(name="channelinfo")
-@commands.is_owner()
-async def channelinfo_command(ctx: Context):
-    await ctx.author.send(
-        embed=discord.Embed(
-            title="Channel Information", description=CHANNEL_INFO_TEMPLATE.format(ctx=ctx)
-        )
-    )
-    await ctx.send("ℹ️ _Channel info sent in DM_", delete_after=5)
 
 
 # -----------------------------------------------------------------------------
