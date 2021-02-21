@@ -121,7 +121,12 @@ zoom_participants = sa.Table(
     sa.Column("name", sa.Text, primary_key=True),
     sa.Column("zoom_id", sa.Text, doc="Zoom user ID (null for non-registered users)"),
     sa.Column("email", sa.Text, doc="Zoom email (null for non-registered users)"),
-    sa.Column("joined_at", TIMESTAMP),
+    sa.Column(
+        "joined_at",
+        TIMESTAMP,
+        doc="Join time from webhook payload. Unlike created_at, this will be updated when a participant is moved to and from a breakout room.",
+    ),
+    created_at_column(),
 )
 
 # -----------------------------------------------------------------------------
@@ -290,6 +295,9 @@ class Store:
             zoom_id=zoom_id,
             email=email,
             joined_at=joined_at,
+            # NOTE: need to pass created_at because `default` doesn't execute
+            #  when using postgres's insert
+            created_at=now(),
         )
         stmt = stmt.on_conflict_do_update(
             index_elements=(zoom_participants.c.meeting_id, zoom_participants.c.name),
@@ -310,7 +318,9 @@ class Store:
 
     async def get_zoom_participants(self, meeting_id: int) -> Iterator[Record]:
         return await self.db.fetch_all(
-            zoom_participants.select().where(zoom_participants.c.meeting_id == meeting_id)
+            zoom_participants.select()
+            .where(zoom_participants.c.meeting_id == meeting_id)
+            .order_by(zoom_participants.c.created_at)
         )
 
     async def remove_zoom_participant(self, *, meeting_id: int, name: str):
