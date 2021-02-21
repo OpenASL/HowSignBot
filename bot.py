@@ -146,8 +146,10 @@ Examples:
 )
 
 
-def word_display(word: str, *, template: str = SIGN_TEMPLATE):
-    quoted_word = quote_plus(word)
+def word_display(word: str, *, template: str = SIGN_TEMPLATE, max_length: int = 100):
+    if len(word) > max_length:
+        raise commands.errors.BadArgument("⚠️ Input too long. Try a shorter query.")
+    quoted_word = quote_plus(word).lower()
     return template.format(
         word_uppercased=word.upper(),
         howsign=f"https://howsign.app/?s={quoted_word}",
@@ -193,6 +195,8 @@ async def sign_error(ctx, error):
         logger.info(
             f"no argument passed to {COMMAND_PREFIX}{ctx.invoked_with}. ignoring..."
         )
+    elif isinstance(error, (commands.errors.CheckFailure, commands.errors.BadArgument)):
+        await ctx.send(error.args[0])
     else:
         logger.error(
             f"unexpected error when handling '{ctx.invoked_with}'", exc_info=error

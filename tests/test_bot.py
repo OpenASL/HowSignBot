@@ -36,6 +36,11 @@ def test_sign(snapshot, word):
     assert result == snapshot
 
 
+def test_sign_long_input():
+    with pytest.raises(commands.errors.BadArgument, match="too long"):
+        bot.sign_impl("a" * 101)
+
+
 @pytest.mark.parametrize("name", ("random", "open8", "open9"))
 def test_handshape(snapshot, name):
     result = bot.handshape_impl(name)
