@@ -1098,11 +1098,12 @@ async def make_zoom_embed(
     if meeting["topic"]:
         description = f"{description}\n**Topic**: {meeting['topic']}"
     description += "\n"
-    description += "\n🚀 This meeting is happening now. Go practice!\n**If you're in the waiting room for more than 10 seconds, @-mention the host below with your Zoom display name.**\n*This message will be cleared when the meeting ends.*"
+    description += "\n🚀 This meeting is happening now. Go practice!\n**If you're in the waiting room for more than 10 seconds, @-mention the host below with your Zoom display name.**"
     embed = discord.Embed(
         color=discord.Color.blue(),
     )
     embed.add_field(name=title, value=description)
+    embed.set_footer(text="This message will be cleared when the meeting ends.")
 
     participants = tuple(await store.get_zoom_participants(meeting_id))
     if participants:
@@ -1421,6 +1422,15 @@ async def presence_command(ctx: Context, activity_type: Optional[ActivityTypeCon
 async def presence_command_error(ctx, error):
     message = error.args[0]
     await ctx.send(content=message)
+
+
+@bot.command(name="stats", help="BOW OWNER ONLY: Get bot stats")
+@commands.is_owner()
+async def stats_command(ctx):
+    embed = discord.Embed(title="HowSignBot Stats", color=discord.Color.blue())
+    servers_amount = len(bot.guilds)
+    embed.add_field(name="Servers: ", value=f"`{servers_amount} servers`")
+    await ctx.send(embed=embed)
 
 
 # -----------------------------------------------------------------------------
