@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v21.5.0 (2021-02-21)
+### Feature
+* **zoom:** Order participants by join time; fix closing zooms ([#137](https://github.com/OpenASL/HowSignBot/issues/137)) ([`a331e4a`](https://github.com/OpenASL/HowSignBot/commit/a331e4ad6268af10d40e7957cc0f8294bb84cf14))
+* **sign:** Lowercase query in URL; validate length ([#136](https://github.com/OpenASL/HowSignBot/issues/136)) ([`14f8262`](https://github.com/OpenASL/HowSignBot/commit/14f826208c8091a0cd91b3c16fc73b798e2a4dd7))
+* **codenames:** Display mentions; address DeprecationWarning ([#134](https://github.com/OpenASL/HowSignBot/issues/134)) ([`103b7cf`](https://github.com/OpenASL/HowSignBot/commit/103b7cf20c9527be17bb7305107e443755266d47))
+
 ## v21.4.0 (2021-02-20)
 ### Feature
 * **zoom:** 2-column display ([#133](https://github.com/OpenASL/HowSignBot/issues/133)) ([`96ba6c5`](https://github.com/OpenASL/HowSignBot/commit/96ba6c59bf45719ad25cd91db101a2f41f2e9ca1))
