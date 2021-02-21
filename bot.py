@@ -1428,8 +1428,13 @@ async def presence_command_error(ctx, error):
 @commands.is_owner()
 async def stats_command(ctx):
     embed = discord.Embed(title="HowSignBot Stats", color=discord.Color.blue())
-    servers_amount = len(bot.guilds)
-    embed.add_field(name="Servers: ", value=f"`{servers_amount} servers`")
+    n_servers = len(bot.guilds)
+    max_to_display = 50
+    servers_display = "\n".join(guild.name for guild in bot.guilds)
+    remaining = max(n_servers - max_to_display, 0)
+    if remaining:
+        servers_display += f"\n+{remaining} more"
+    embed.add_field(name=f"Servers ({n_servers})", value=servers_display)
     await ctx.send(embed=embed)
 
 
