@@ -1140,7 +1140,7 @@ async def make_zoom_embed(
         participant_names = display_participant_names(
             participants=participants, meeting=meeting
         )
-        embed.add_field(name="Participants", value=participant_names, inline=True)
+        embed.add_field(name="👥 Participants", value=participant_names, inline=True)
 
     return embed
 
@@ -1515,10 +1515,15 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
         for pattern, close_message in CLOSED_MESSAGE_MAP.items():
             if message.embeds:
                 for embed in message.embeds:
-                    if re.search(pattern, embed.title):
+                    if embed.title and re.search(pattern, embed.title):
                         logger.info(f"cleaning up room with message: {close_message}")
                         await message.edit(content=close_message, embed=None)
                         return
+                    for field in embed.fields:
+                        if field.name and re.search(pattern, field.name):
+                            logger.info(f"cleaning up room with message: {close_message}")
+                            await message.edit(content=close_message, embed=None)
+                            return
             if re.search(pattern, message.content):
                 logger.info(f"cleaning up room with message: {close_message}")
                 await message.edit(content=close_message, embed=None)
