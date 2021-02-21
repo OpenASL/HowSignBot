@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v21.6.0 (2021-02-21)
+### Feature
+* Improve stats ([`a47f5e6`](https://github.com/OpenASL/HowSignBot/commit/a47f5e63f4e0a129a749e2e8210ccc9f1ec6a57b))
+* Add stats command ([`431301c`](https://github.com/OpenASL/HowSignBot/commit/431301cffde303965c6824e4f00c57ed1c96235a))
+
 ## v21.5.0 (2021-02-21)
 ### Feature
 * **zoom:** Order participants by join time; fix closing zooms ([#137](https://github.com/OpenASL/HowSignBot/issues/137)) ([`a331e4a`](https://github.com/OpenASL/HowSignBot/commit/a331e4ad6268af10d40e7957cc0f8294bb84cf14))
