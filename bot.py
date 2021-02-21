@@ -1329,7 +1329,7 @@ def make_teams(players):
 
 
 def format_team(players: Sequence[Union[discord.User, discord.Member]]):
-    names = [f"_{display_name(each)}_" for each in players]
+    names = [each.mention for each in players]
     return ", ".join(names)
 
 
@@ -1352,8 +1352,8 @@ async def codenames_command(ctx: Context, name: Optional[str] = None):
     while True:
         done, pending = await asyncio.wait(
             (
-                bot.wait_for("reaction_add", check=check),
-                bot.wait_for("reaction_remove", check=check),
+                asyncio.create_task(bot.wait_for("reaction_add", check=check)),
+                asyncio.create_task(bot.wait_for("reaction_remove", check=check)),
             ),
             return_when=asyncio.FIRST_COMPLETED,
         )
