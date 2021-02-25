@@ -19,3 +19,8 @@ import pytz_informal
 )
 def test_find(input_value, expected):
     assert pytz_informal.timezone(input_value) == pytz.timezone(expected)
+
+
+def test_handle_invalid():
+    with pytest.raises(pytz.UnknownTimeZoneError):
+        pytz_informal.timezone("eat")

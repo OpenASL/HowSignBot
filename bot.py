@@ -636,6 +636,8 @@ async def practice_impl(*, guild_id: int, host: str, start_time: str, user_id: i
         raise commands.errors.BadArgument(
             f'⚠️Could not parse time zone from "{start_time}". Make sure to include a time zone, e.g. "{PACIFIC_CURRENT_NAME.lower()}".'
         )
+    except pytz.UnknownTimeZoneError:
+        raise commands.errors.BadArgument("⚠️Invalid time zone. Please try again.")
     if not dtime:
         raise commands.errors.BadArgument(
             f'⚠️Could not parse "{start_time}" into a date or time. Make sure to include "am" or "pm" as well as a timezone, e.g. "{PACIFIC_CURRENT_NAME.lower()}".'
