@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.6.1 (2021-02-24)
+### Fix
+* **practice:** Handle invalid timezone ([#139](https://github.com/OpenASL/HowSignBot/issues/139)) ([`49d79ec`](https://github.com/OpenASL/HowSignBot/commit/49d79ec25f8b70328ae29e13eb73af642aac1f40))
+
 ## v21.6.0 (2021-02-21)
 ### Feature
 * Improve stats ([`a47f5e6`](https://github.com/OpenASL/HowSignBot/commit/a47f5e63f4e0a129a749e2e8210ccc9f1ec6a57b))
