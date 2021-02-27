@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v21.7.0 (2021-02-27)
+### Feature
+* **zoom:** Add more faces; refactor error handling ([#142](https://github.com/OpenASL/HowSignBot/issues/142)) ([`fee54d2`](https://github.com/OpenASL/HowSignBot/commit/fee54d2f0d37608c62745b4138a442cb95b51e32))
+* **zoom:** Polish ([#141](https://github.com/OpenASL/HowSignBot/issues/141)) ([`5395bd6`](https://github.com/OpenASL/HowSignBot/commit/5395bd6f2b60cb5fe383c216a6f5da67fc41f304))
+
 ## v21.6.1 (2021-02-24)
 ### Fix
 * **practice:** Handle invalid timezone ([#139](https://github.com/OpenASL/HowSignBot/issues/139)) ([`49d79ec`](https://github.com/OpenASL/HowSignBot/commit/49d79ec25f8b70328ae29e13eb73af642aac1f40))
