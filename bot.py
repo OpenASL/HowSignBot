@@ -152,7 +152,7 @@ Examples:
 )
 
 
-def word_display(word: str, *, template: str = SIGN_TEMPLATE, max_length: int = 2):
+def word_display(word: str, *, template: str = SIGN_TEMPLATE, max_length: int = 100):
     if len(word) > max_length:
         raise commands.errors.BadArgument("⚠️ Input too long. Try a shorter query.")
     quoted_word = quote_plus(word).lower()
