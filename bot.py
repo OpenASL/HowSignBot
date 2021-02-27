@@ -105,6 +105,12 @@ async def on_ready():
     daily_practice_message.start()
 
 
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, (commands.errors.CheckFailure, commands.errors.BadArgument)):
+        await ctx.send(error)
+
+
 async def set_default_presence():
     activity = discord.Activity(
         name=f"{COMMAND_PREFIX}sign | {COMMAND_PREFIX}{COMMAND_PREFIX}",
@@ -146,7 +152,7 @@ Examples:
 )
 
 
-def word_display(word: str, *, template: str = SIGN_TEMPLATE, max_length: int = 100):
+def word_display(word: str, *, template: str = SIGN_TEMPLATE, max_length: int = 2):
     if len(word) > max_length:
         raise commands.errors.BadArgument("⚠️ Input too long. Try a shorter query.")
     quoted_word = quote_plus(word).lower()
@@ -191,15 +197,10 @@ async def sign_command(ctx: Context, *, word: str):
 
 @sign_command.error
 async def sign_error(ctx, error):
+    # Ignore "??"
     if isinstance(error, commands.errors.MissingRequiredArgument):
         logger.info(
             f"no argument passed to {COMMAND_PREFIX}{ctx.invoked_with}. ignoring..."
-        )
-    elif isinstance(error, (commands.errors.CheckFailure, commands.errors.BadArgument)):
-        await ctx.send(error.args[0])
-    else:
-        logger.error(
-            f"unexpected error when handling '{ctx.invoked_with}'", exc_info=error
         )
 
 
@@ -762,14 +763,8 @@ async def practice_command(ctx: Context, *, start_time: str):
 @practice_command.error
 @schedule_command.error
 async def practices_error(ctx, error):
-    if isinstance(error, (commands.errors.CheckFailure, commands.errors.BadArgument)):
-        await ctx.send(error.args[0])
-    elif isinstance(error, commands.errors.MissingRequiredArgument):
+    if isinstance(error, commands.errors.MissingRequiredArgument):
         await ctx.send(PRACTICE_ERROR)
-    else:
-        logger.error(
-            f"unexpected error when handling '{ctx.invoked_with}'", exc_info=error
-        )
 
 
 @tasks.loop(seconds=10.0)
@@ -929,13 +924,8 @@ async def feedback_command(ctx: Context, *, feedback):
 @feedback_command.error
 async def feedback_error(ctx, error):
     if isinstance(error, commands.errors.MissingRequiredArgument):
-        logger.info("missing argument to 'feedback'")
         await ctx.send(
             f"I ♥️ feedback! Enter a your feedback after `{COMMAND_PREFIX}feedback`"
-        )
-    else:
-        logger.error(
-            f"unexpected error when handling '{ctx.invoked_with}'", exc_info=error
         )
 
 
@@ -1015,19 +1005,37 @@ ZOOM_CLOSED_MESSAGE = "✨ _Zoom meeting ended_"
 
 FACES = (
     "😀",
+    "😃",
     "😄",
     "😁",
     "😆",
+    "😅",
+    "🤣",
+    "😂",
+    "🙂",
+    "🙃",
     "😉",
+    "😇",
+    "🥰",
+    "😍",
     "😊",
     "🤩",
     "☺️",
+    "🥲",
     "😋",
     "😛",
     "😜",
     "🤪",
     "😝",
+    "🤑",
     "🤗",
+    "🤭",
+    "🤫",
+    "🤔",
+    "🤐",
+    "🤨",
+    "🙄",
+    "🤤",
     "😐",
     "😶",
     "😑",
@@ -1037,6 +1045,9 @@ FACES = (
     "😴",
     "😷",
     "🥴",
+    "😵",
+    "🤯",
+    "🥱",
     "🤠",
     "🥳",
     "🥸",
@@ -1046,6 +1057,7 @@ FACES = (
     "😸",
     "😹",
     "😼",
+    "🙀",
 )
 
 
@@ -1187,16 +1199,6 @@ async def zoom_command(ctx: Context, meeting_id: Optional[int] = None):
         message, add_reaction=False, replace_with=ZOOM_CLOSED_MESSAGE
     )
     await store.remove_zoom_message(message_id=message.id)
-
-
-@zoom_command.error
-async def zoom_error(ctx, error):
-    if isinstance(error, commands.errors.CheckFailure):
-        await ctx.send(error.args[0])
-    else:
-        logger.error(
-            f"unexpected error when handling '{ctx.invoked_with}'", exc_info=error
-        )
 
 
 # -----------------------------------------------------------------------------
@@ -1418,12 +1420,6 @@ async def presence_command(ctx: Context, activity_type: Optional[ActivityTypeCon
     logger.info(f"changing presence to {activity}")
     await bot.change_presence(activity=activity)
     await ctx.send(f"Changed presence to: `{activity}`")
-
-
-@presence_command.error
-async def presence_command_error(ctx, error):
-    message = error.args[0]
-    await ctx.send(content=message)
 
 
 @bot.command(name="stats", help="BOW OWNER ONLY: Get bot stats")
