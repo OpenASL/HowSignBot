@@ -900,7 +900,7 @@ async def send_daily_message_command(
 # -----------------------------------------------------------------------------
 
 
-def post_feedback(username: str, feedback: str, guild: Optional[str]):
+def post_feedback(feedback: str, guild: Optional[str]):
     client = get_gsheet_client()
     # Assumes rows are in the format (date, feedback, guild, version)
     sheet = client.open_by_key(FEEDBACK_SHEET_KEY)
@@ -915,9 +915,8 @@ def post_feedback(username: str, feedback: str, guild: Optional[str]):
 async def feedback_command(ctx: Context, *, feedback):
     await ctx.channel.trigger_typing()
     author = ctx.author
-    username = ctx.author.name
     guild = author.guild.name if hasattr(author, "guild") else None
-    post_feedback(username, feedback, guild)
+    post_feedback(feedback, guild)
     await ctx.send("🙌 Your feedback has been received! Thank you for your help.")
 
 
