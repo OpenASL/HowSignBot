@@ -789,7 +789,7 @@ async def daily_practice_message():
 
 def get_today_random(dtime: Optional[dt.datetime] = None) -> random.Random:
     dtime = dtime or utcnow()
-    seed = DAILY_MESSAGE_RANDOM_SEED or dtime.date().timetuple()
+    seed = DAILY_MESSAGE_RANDOM_SEED or dtime.date().toordinal()
     return random.Random(seed)
 
 
