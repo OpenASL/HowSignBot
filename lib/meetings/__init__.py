@@ -45,7 +45,7 @@ async def get_zoom(
     token: str,
     meeting_id: int,
 ) -> ZoomMeeting:
-    """Create and return a Zoom meeting via the Zoom API."""
+    """Get an existing Zoom meeting via the Zoom API."""
     async with aiohttp.ClientSession() as client:
         resp = await client.get(
             f"https://api.zoom.us/v2/meetings/{meeting_id}",
