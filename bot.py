@@ -12,7 +12,7 @@ from nameparser import HumanName
 import discord
 import dateparser
 import gspread
-from aiohttp import web
+from aiohttp import web, client
 from databases.backends.postgres import Record
 from discord.ext import commands, tasks
 from discord.ext.commands import Context
@@ -1149,9 +1149,21 @@ async def zoom_command(ctx: Context, meeting_id: Optional[int] = None):
     if meeting_id:
         meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
         if not meeting_exists:
-            raise commands.errors.CheckFailure(
-                f"⚠️ Could not find Zoom meeting with ID {meeting_id}. Double check the ID or use `{COMMAND_PREFIX}zoom` to create a new meeting."
-            )
+            try:
+                meeting = await meetings.get_zoom(token=ZOOM_JWT, meeting_id=meeting_id)
+            except client.ClientResponseError as error:
+                logger.exception(f"error when fetching zoom meeting {meeting_id}")
+                raise commands.errors.CheckFailure(
+                    f"⚠️ Could not find Zoom meeting with ID {meeting_id}. Double check the ID or use `{COMMAND_PREFIX}zoom` to create a new meeting."
+                ) from error
+            else:
+                await store.create_zoom_meeting(
+                    zoom_user=zoom_user,
+                    meeting_id=meeting.id,
+                    join_url=meeting.join_url,
+                    passcode=meeting.passcode,
+                    topic=meeting.topic,
+                )
         message = await ctx.send(embed=await make_zoom_embed(meeting_id=meeting_id))
         logger.info(
             f"creating zoom meeting message for message {message.id} in channel {ctx.channel.id}"
