@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.8.0 (2021-02-28)
+### Feature
+* **zoom:** Allow usage with scheduled meetings ([#144](https://github.com/OpenASL/HowSignBot/issues/144)) ([`f153e77`](https://github.com/OpenASL/HowSignBot/commit/f153e774acea14fca4660bf1e4cfc572db94aa97))
+
 ## v21.7.0 (2021-02-27)
 ### Feature
 * **zoom:** Add more faces; refactor error handling ([#142](https://github.com/OpenASL/HowSignBot/issues/142)) ([`fee54d2`](https://github.com/OpenASL/HowSignBot/commit/fee54d2f0d37608c62745b4138a442cb95b51e32))

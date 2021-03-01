@@ -32,7 +32,7 @@ import clthat
 
 # -----------------------------------------------------------------------------
 
-__version__ = "21.7.0"
+__version__ = "21.8.0"
 
 app = web.Application()  # web app for listening to webhooks
 
