@@ -40,6 +40,27 @@ async def create_zoom(
     )
 
 
+async def get_zoom(
+    *,
+    token: str,
+    meeting_id: int,
+) -> ZoomMeeting:
+    """Get an existing Zoom meeting via the Zoom API."""
+    async with aiohttp.ClientSession() as client:
+        resp = await client.get(
+            f"https://api.zoom.us/v2/meetings/{meeting_id}",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    resp.raise_for_status()
+    data = await resp.json()
+    return ZoomMeeting(
+        id=data["id"],
+        join_url=data["join_url"],
+        passcode=data["password"],
+        topic=data["topic"],
+    )
+
+
 async def create_watch2gether(api_key: str, video_url: Optional[str] = None) -> str:
     """Create and return a watch2gether URL via the watch2gether API."""
     async with aiohttp.ClientSession() as client:
