@@ -1299,6 +1299,7 @@ async def zoom_start(ctx: Context, meeting_id: int):
         await ctx.send(embed=discord.Embed(title="🚀 Meeting Started", description=links))
 
 
+@zoom_setup.error
 @zoom_start.error
 async def zoom_start_error(ctx, error):
     if isinstance(error, commands.errors.MissingRequiredArgument):
