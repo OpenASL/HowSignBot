@@ -1264,6 +1264,7 @@ async def zoom_setup(ctx: Context, meeting_id: int):
 
 
 @zoom_group.command(name="start")
+@commands.check(is_allowed_zoom_access)
 async def zoom_start(ctx: Context, meeting_id: int):
     await ctx.channel.trigger_typing()
     meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
