@@ -107,8 +107,13 @@ async def on_ready():
 
 @bot.event
 async def on_command_error(ctx, error):
-    if isinstance(error, (commands.errors.CheckFailure, commands.errors.BadArgument)):
+    if isinstance(
+        error,
+        (commands.errors.CheckFailure, commands.errors.BadArgument),
+    ):
         await ctx.send(error)
+    else:
+        logger.error(f"unhandled exception from command: {ctx.command}", exc_info=error)
 
 
 async def set_default_presence():
@@ -1104,13 +1109,16 @@ def get_participant_emoji() -> str:
 
 async def make_zoom_embed(
     meeting_id: int,
+    *,
+    include_instructions: bool = True,
 ) -> discord.Embed:
     meeting = await store.get_zoom_meeting(meeting_id)
     title = f"<{meeting['join_url']}>"
     description = f"**Meeting ID:**: {meeting_id}\n**Passcode**: {meeting['passcode']}"
     if meeting["topic"]:
         description = f"{description}\n**Topic**: {meeting['topic']}"
-    description += "\n🚀 This meeting is happening now. Go practice!\n**If you're in the waiting room for more than 10 seconds, @-mention the host below with your Zoom display name.**"
+    if include_instructions:
+        description += "\n🚀 This meeting is happening now. Go practice!\n**If you're in the waiting room for more than 10 seconds, @-mention the host below with your Zoom display name.**"
     embed = discord.Embed(
         color=discord.Color.blue(),
     )
@@ -1120,7 +1128,8 @@ async def make_zoom_embed(
         url=meeting["join_url"],
         icon_url="https://user-images.githubusercontent.com/2379650/109329673-df945f80-7828-11eb-9e35-1b60b6e7bb93.png",
     )
-    embed.set_footer(text="This message will be cleared when the meeting ends.")
+    if include_instructions:
+        embed.set_footer(text="This message will be cleared when the meeting ends.")
 
     participants = tuple(await store.get_zoom_participants(meeting_id))
     if participants:
@@ -1132,38 +1141,47 @@ async def make_zoom_embed(
     return embed
 
 
-def is_allowed_zoom_access(ctx):
+def is_allowed_zoom_access(ctx: Context):
     if ctx.author.id not in ZOOM_USERS:
         raise commands.errors.CheckFailure(
-            f"⚠️ `{COMMAND_PREFIX}{ctx.invoked_with}` can only be used by authorized users under the bot owner's Zoom account."
+            f"⚠️ `{COMMAND_PREFIX}{ctx.command}` can only be used by authorized users under the bot owner's Zoom account."
         )
     return True
 
 
-@bot.command(name="zoom", help="AUTHORIZED USERS ONLY: Create a Zoom meeting")
+async def maybe_create_zoom_meeting(zoom_user: str, meeting_id: int, set_up: bool):
+    meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
+    if not meeting_exists:
+        try:
+            meeting = await meetings.get_zoom(token=ZOOM_JWT, meeting_id=meeting_id)
+        except client.ClientResponseError as error:
+            logger.exception(f"error when fetching zoom meeting {meeting_id}")
+            raise commands.errors.CheckFailure(
+                f"⚠️ Could not find Zoom meeting with ID {meeting_id}. Double check the ID or use `{COMMAND_PREFIX}zoom` to create a new meeting."
+            ) from error
+        else:
+            await store.create_zoom_meeting(
+                zoom_user=zoom_user,
+                meeting_id=meeting.id,
+                join_url=meeting.join_url,
+                passcode=meeting.passcode,
+                topic=meeting.topic,
+                set_up=set_up,
+            )
+
+
+@bot.group(
+    name="zoom",
+    help="AUTHORIZED USERS ONLY: Create a Zoom meeting",
+    invoke_without_command=True,
+)
 @commands.check(is_allowed_zoom_access)
-async def zoom_command(ctx: Context, meeting_id: Optional[int] = None):
+async def zoom_group(ctx: Context, meeting_id: Optional[int] = None):
     await ctx.channel.trigger_typing()
     zoom_user = ZOOM_USERS[ctx.author.id]
     logger.info(f"creating zoom meeting for zoom user: {zoom_user}")
     if meeting_id:
-        meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
-        if not meeting_exists:
-            try:
-                meeting = await meetings.get_zoom(token=ZOOM_JWT, meeting_id=meeting_id)
-            except client.ClientResponseError as error:
-                logger.exception(f"error when fetching zoom meeting {meeting_id}")
-                raise commands.errors.CheckFailure(
-                    f"⚠️ Could not find Zoom meeting with ID {meeting_id}. Double check the ID or use `{COMMAND_PREFIX}zoom` to create a new meeting."
-                ) from error
-            else:
-                await store.create_zoom_meeting(
-                    zoom_user=zoom_user,
-                    meeting_id=meeting.id,
-                    join_url=meeting.join_url,
-                    passcode=meeting.passcode,
-                    topic=meeting.topic,
-                )
+        await maybe_create_zoom_meeting(zoom_user, meeting_id, set_up=True)
         message = await ctx.send(embed=await make_zoom_embed(meeting_id=meeting_id))
         logger.info(
             f"creating zoom meeting message for message {message.id} in channel {ctx.channel.id}"
@@ -1199,6 +1217,7 @@ async def zoom_command(ctx: Context, meeting_id: Optional[int] = None):
                     join_url=meeting.join_url,
                     passcode=meeting.passcode,
                     topic=meeting.topic,
+                    set_up=True,
                 )
                 message = await ctx.send(embed=await make_zoom_embed(meeting.id))
                 logger.info(
@@ -1214,6 +1233,77 @@ async def zoom_command(ctx: Context, meeting_id: Optional[int] = None):
         message, add_reaction=False, replace_with=ZOOM_CLOSED_MESSAGE
     )
     await store.remove_zoom_message(message_id=message.id)
+
+
+@zoom_group.command(name="setup")
+@commands.check(is_allowed_zoom_access)
+async def zoom_setup(ctx: Context, meeting_id: int):
+    await ctx.channel.trigger_typing()
+    zoom_user = ZOOM_USERS[ctx.author.id]
+    async with store.transaction():
+        await maybe_create_zoom_meeting(zoom_user, meeting_id, set_up=False)
+        zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
+        message = await ctx.channel.send(
+            embed=discord.Embed(
+                color=discord.Color.blue(),
+                title="✋ Stand By",
+                description="Zoom details will be posted here when the meeting is ready to start.",
+            )
+        )
+        await store.create_zoom_message(
+            meeting_id=meeting_id, message_id=message.id, channel_id=ctx.channel.id
+        )
+    # Send DM with Zoom link and start command
+    if not zoom_messages:
+        await ctx.author.send(
+            content="🔨 Set up your meeting below",
+            embed=await make_zoom_embed(meeting_id, include_instructions=False),
+        )
+        await ctx.author.send(
+            f"When you're ready for people to join, enter:\n`{COMMAND_PREFIX}zoom start {meeting_id}`"
+        )
+
+
+@zoom_group.command(name="start")
+@commands.check(is_allowed_zoom_access)
+async def zoom_start(ctx: Context, meeting_id: int):
+    await ctx.channel.trigger_typing()
+    meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
+    if not meeting_exists:
+        raise commands.errors.CheckFailure(
+            f"⚠️ Could not find Zoom meeting with ID {meeting_id}. Make sure to run `{COMMAND_PREFIX}zoom setup {meeting_id}` first."
+        )
+    await store.set_up_zoom_meeting(meeting_id=meeting_id)
+    zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
+    if not zoom_messages:
+        raise commands.errors.CheckFailure(
+            f"⚠️ No meeting messages for meeting {meeting_id}."
+        )
+    embed = await make_zoom_embed(meeting_id=meeting_id)
+    messages = []
+    for message_info in zoom_messages:
+        channel_id = message_info["channel_id"]
+        message_id = message_info["message_id"]
+        channel = bot.get_channel(channel_id)
+        message: discord.Message = await channel.fetch_message(message_id)
+        messages.append(message)
+        logger.info(
+            f"revealing meeting details in channel {channel_id}, message {message_id}"
+        )
+        await message.edit(embed=embed)
+    if ctx.guild is None:
+        links = "\n".join(
+            f"[{message.guild} - #{message.channel}]({message.jump_url})"
+            for message in messages
+        )
+        await ctx.send(embed=discord.Embed(title="🚀 Meeting Started", description=links))
+
+
+@zoom_setup.error
+@zoom_start.error
+async def zoom_start_error(ctx, error):
+    if isinstance(error, commands.errors.MissingRequiredArgument):
+        await ctx.send("⚠️ Must pass meeting ID.")
 
 
 # -----------------------------------------------------------------------------
@@ -1536,8 +1626,8 @@ async def handle_zoom_event(data: dict):
         return
 
     meeting_id = int(data["payload"]["object"]["id"])
-    meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
-    if not meeting_exists:
+    zoom_meeting = await store.get_zoom_meeting(meeting_id=meeting_id)
+    if not zoom_meeting:
         return
     messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
     logging.info(f"handling zoom event {event} for meeting {meeting_id}")
@@ -1604,14 +1694,15 @@ async def handle_zoom_event(data: dict):
         embed = await make_zoom_embed(meeting_id=meeting_id)
         edit_kwargs = {"embed": embed}
 
-    for message in messages:
-        channel_id = message["channel_id"]
-        message_id = message["message_id"]
-        channel = bot.get_channel(channel_id)
-        if edit_kwargs:
-            logger.info(f"editing zoom message {message_id} for event {event}")
-            message = await channel.fetch_message(message_id)
-            await message.edit(**edit_kwargs)
+    if zoom_meeting["setup_at"]:
+        for message in messages:
+            channel_id = message["channel_id"]
+            message_id = message["message_id"]
+            channel = bot.get_channel(channel_id)
+            if edit_kwargs:
+                logger.info(f"editing zoom message {message_id} for event {event}")
+                message = await channel.fetch_message(message_id)
+                await message.edit(**edit_kwargs)
 
 
 async def zoom(request):
@@ -1703,21 +1794,27 @@ def display_name(user: Union[discord.User, discord.Member]) -> str:
     return getattr(user, "nick", None) or user.name
 
 
-async def wait_for_stop_sign(
-    message: discord.Message, *, add_reaction: bool = True, replace_with: str
+async def wait_for_emoji(
+    message: discord.Message, emoji: str, *, add_reaction: bool = True
 ):
     if add_reaction:
         with suppress(Exception):
-            await message.add_reaction(STOP_SIGN)
+            await message.add_reaction(emoji)
 
     def check(reaction, user):
         return (
             user.id != bot.user.id
             and reaction.message.id == message.id
-            and str(reaction.emoji) == STOP_SIGN
+            and str(reaction.emoji) == emoji
         )
 
     await bot.wait_for("reaction_add", check=check)
+
+
+async def wait_for_stop_sign(
+    message: discord.Message, *, add_reaction: bool = True, replace_with: str
+):
+    await wait_for_emoji(message, STOP_SIGN, add_reaction=add_reaction)
     logger.info(f"replacing message with: {replace_with}")
     await message.edit(content=replace_with, embed=None)
 
