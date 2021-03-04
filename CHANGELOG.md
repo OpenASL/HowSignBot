@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.9.0 (2021-03-04)
+### Feature
+* **zoom:** Add setup subcommand ([#146](https://github.com/OpenASL/HowSignBot/issues/146)) ([`a806078`](https://github.com/OpenASL/HowSignBot/commit/a806078efd7de0c1d65c25ab0200e2885f4cf36f))
+
 ## v21.8.0 (2021-02-28)
 ### Feature
 * **zoom:** Allow usage with scheduled meetings ([#144](https://github.com/OpenASL/HowSignBot/issues/144)) ([`f153e77`](https://github.com/OpenASL/HowSignBot/commit/f153e774acea14fca4660bf1e4cfc572db94aa97))
