@@ -1240,8 +1240,19 @@ async def zoom_group(ctx: Context, meeting_id: Optional[int] = None):
 async def zoom_setup(ctx: Context, meeting_id: int):
     await ctx.channel.trigger_typing()
     zoom_user = ZOOM_USERS[ctx.author.id]
-    await maybe_create_zoom_meeting(zoom_user, meeting_id, set_up=False)
-    zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
+    async with store.transaction():
+        await maybe_create_zoom_meeting(zoom_user, meeting_id, set_up=False)
+        zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
+        message = await ctx.channel.send(
+            embed=discord.Embed(
+                color=discord.Color.blue(),
+                title="✋ Stand By",
+                description="Zoom details will be posted here when the meeting is ready to start.",
+            )
+        )
+        await store.create_zoom_message(
+            meeting_id=meeting_id, message_id=message.id, channel_id=ctx.channel.id
+        )
     # Send DM with Zoom link and start command
     if not zoom_messages:
         await ctx.author.send(
@@ -1251,16 +1262,6 @@ async def zoom_setup(ctx: Context, meeting_id: int):
         await ctx.author.send(
             f"When you're ready for people to join, enter:\n`{COMMAND_PREFIX}zoom start {meeting_id}`"
         )
-    message = await ctx.channel.send(
-        embed=discord.Embed(
-            color=discord.Color.blue(),
-            title="✋ Stand By",
-            description="Zoom details will be posted here when the meeting is ready to start.",
-        )
-    )
-    await store.create_zoom_message(
-        meeting_id=meeting_id, message_id=message.id, channel_id=ctx.channel.id
-    )
 
 
 @zoom_group.command(name="start")
