@@ -98,6 +98,7 @@ zoom_meetings = sa.Table(
     sa.Column("passcode", sa.Text, nullable=False),
     sa.Column("topic", sa.Text, nullable=False),
     sa.Column("host_id", sa.Text, doc="Last cached zoom ID of the host"),
+    sa.Column("setup_at", TIMESTAMP),
     created_at_column(),
 )
 
@@ -216,8 +217,16 @@ class Store:
     # Zoom
 
     async def create_zoom_meeting(
-        self, *, zoom_user: str, meeting_id: int, join_url: str, passcode: str, topic: str
+        self,
+        *,
+        zoom_user: str,
+        meeting_id: int,
+        join_url: str,
+        passcode: str,
+        topic: str,
+        set_up: bool,
     ):
+        created_at = now()
         stmt = insert(zoom_meetings).values(
             zoom_user=zoom_user,
             meeting_id=meeting_id,
@@ -226,13 +235,21 @@ class Store:
             topic=topic,
             # NOTE: need to pass created_at because default=now
             #  doesn't have an effect when using postgresql.insert
-            created_at=now(),
+            created_at=created_at,
+            setup_at=created_at if set_up else None,
         )
         await self.db.execute(stmt)
 
     async def get_zoom_meeting(self, meeting_id: int) -> Record:
         query = zoom_meetings.select().where(zoom_meetings.c.meeting_id == meeting_id)
         return await self.db.fetch_one(query=query)
+
+    async def set_up_zoom_meeting(self, meeting_id: int):
+        await self.db.execute(
+            zoom_meetings.update()
+            .where(zoom_meetings.c.meeting_id == meeting_id)
+            .values(setup_at=now())
+        )
 
     async def end_zoom_meeting(self, meeting_id: int):
         await self.db.execute(
