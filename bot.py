@@ -1292,15 +1292,18 @@ async def zoom_setup(ctx: Context, meeting_id: Optional[int] = None):
         set_up=False,
     )
 
-    await ctx.author.send(
-        content="🔨 Set up your meeting below",
-        embed=await make_zoom_embed(meeting_id, include_instructions=False),
-    )
-    await ctx.author.send(
-        "To post in another channel, send the following command in that channel:\n"
-        f"`{COMMAND_PREFIX}zoom setup {meeting_id}`\n"
-        f"When you're ready for people to join, enter:\n`{COMMAND_PREFIX}zoom start {meeting_id}`\nin this DM."
-    )
+    zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
+    # DM zoom link and instructions once
+    if len(zoom_messages) <= 1:
+        await ctx.author.send(
+            content="🔨 Set up your meeting below",
+            embed=await make_zoom_embed(meeting_id, include_instructions=False),
+        )
+        await ctx.author.send(
+            "To post in another channel, send the following command in that channel:\n"
+            f"`{COMMAND_PREFIX}zoom setup {meeting_id}`\n"
+            f"When you're ready for people to join, enter:\n`{COMMAND_PREFIX}zoom start {meeting_id}`\nin this DM."
+        )
 
 
 @zoom_group.command(name="start")
