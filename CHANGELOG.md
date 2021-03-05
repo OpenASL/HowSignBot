@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.9.1 (2021-03-05)
+### Fix
+* Allow clearing zoom standby messages ([`a2ed67b`](https://github.com/OpenASL/HowSignBot/commit/a2ed67bee692904985345f3da389a042c655f612))
+
 ## v21.9.0 (2021-03-04)
 ### Feature
 * **zoom:** Add setup subcommand ([#146](https://github.com/OpenASL/HowSignBot/issues/146)) ([`a806078`](https://github.com/OpenASL/HowSignBot/commit/a806078efd7de0c1d65c25ab0200e2885f4cf36f))
