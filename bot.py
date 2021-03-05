@@ -1558,6 +1558,7 @@ async def invite_command(ctx: Context):
 
 CLOSED_MESSAGE_MAP = {
     r"zoom\.us": ZOOM_CLOSED_MESSAGE,
+    r"Stand By": ZOOM_CLOSED_MESSAGE,
     r"Could not create Zoom": ZOOM_CLOSED_MESSAGE,
     r"meet\.jit\.si": MEET_CLOSED_MESSAGE,
     r"Could not create watch2gether": WATCH2GETHER_CLOSED_MESSAGE,
