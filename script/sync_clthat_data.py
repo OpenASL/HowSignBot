@@ -3,7 +3,7 @@ from pathlib import Path
 
 from environs import Env
 
-from bot import get_gsheet_client
+from bot.utils.gsheets import get_gsheet_client
 
 env = Env()
 env.read_env()

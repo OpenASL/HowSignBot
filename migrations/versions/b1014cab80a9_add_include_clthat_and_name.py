@@ -7,7 +7,7 @@ Create Date: 2020-11-20 19:19:45.578853
 """
 from alembic import op
 import sqlalchemy as sa
-import database
+from bot import database
 
 
 # revision identifiers, used by Alembic.
