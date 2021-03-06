@@ -1,0 +1,235 @@
+# name: test_practice["classifiers" at 6pm pdt]
+  <class 'tuple'> (
+    'Friday, September 25 06:00 PM PDT 2020',
+    'Steve',
+    'classifiers',
+  )
+---
+# name: test_practice["games" 10am edt Sunday]
+  <class 'tuple'> (
+    'Sunday, September 27 10:00 AM EDT 2020',
+    'Steve',
+    'games',
+  )
+---
+# name: test_practice["games" at 10am edt on 9/27]
+  <class 'tuple'> (
+    'Sunday, September 27 10:00 AM EDT 2020',
+    'Steve',
+    'games',
+  )
+---
+# name: test_practice["games" at 10am edt on Sunday]
+  <class 'tuple'> (
+    'Sunday, September 27 10:00 AM EDT 2020',
+    'Steve',
+    'games',
+  )
+---
+# name: test_practice[10am edt "games" on 9/27]
+  <class 'tuple'> (
+    'Sunday, September 27 10:00 AM EDT 2020',
+    'Steve',
+    'games',
+  )
+---
+# name: test_practice[2pm edt "chat and games! \U0001f389"]
+  <class 'tuple'> (
+    'Friday, September 25 02:00 PM EDT 2020',
+    'Steve',
+    'chat and games! 🎉',
+  )
+---
+# name: test_practice[2pm edt]
+  <class 'tuple'> (
+    'Friday, September 25 02:00 PM EDT 2020',
+    'Steve',
+    '',
+  )
+---
+# name: test_practice[9/24 1:45pm edt \u201caround 45 min.-1 hour\u201d]
+  <class 'tuple'> (
+    'Friday, September 24 01:45 PM EDT 2021',
+    'Steve',
+    'around 45 min.-1 hour',
+  )
+---
+# name: test_practice[9/27 9am cdt]
+  <class 'tuple'> (
+    'Sunday, September 27 09:00 AM CDT 2020',
+    'Steve',
+    '',
+  )
+---
+# name: test_practice[at 2pm edt]
+  <class 'tuple'> (
+    'Friday, September 25 02:00 PM EDT 2020',
+    'Steve',
+    '',
+  )
+---
+# name: test_practice[sunday 10:30pm pdt]
+  <class 'tuple'> (
+    'Sunday, September 27 10:30 PM PDT 2020',
+    'Steve',
+    '',
+  )
+---
+# name: test_practice[tomorrow 2pm pdt]
+  <class 'tuple'> (
+    'Saturday, September 26 02:00 PM PDT 2020',
+    'Steve',
+    '',
+  )
+---
+# name: test_schedule[9/27]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=<Colour value=15105570>,
+      colour=<Colour value=15105570>,
+      description='Sunday, September 27',
+      fields=<class 'list'> [
+        EmbedProxy(inline=False, name='11 AM PDT / 12 PM MDT / 1 PM CDT / 2 PM EDT', value='[Add to Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+another+1%EF%B8%8F%E2%83%A3&dates=20200927T180000Z%2F20200927T190000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Notes: another 1️⃣'),
+        EmbedProxy(inline=True, name='🗓 View or edit the schedule using the link below.', value='[Full schedule](https://docs.google.com/spreadsheets/d/abc/edit)'),
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title=Embed.Empty,
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
+# name: test_schedule[None]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=<Colour value=15105570>,
+      colour=<Colour value=15105570>,
+      description='Today - Friday, September 25',
+      fields=<class 'list'> [
+        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[Add to Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+recurring&dates=20200925T210000Z%2F20200925T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: Steve\n> Notes: recurring'),
+        EmbedProxy(inline=True, name='🗓 View or edit the schedule using the link below.', value='[Full schedule](https://docs.google.com/spreadsheets/d/abc/edit)'),
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title=Embed.Empty,
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
+# name: test_schedule[saturday]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=<Colour value=15105570>,
+      colour=<Colour value=15105570>,
+      description='Tomorrow - Saturday, September 26',
+      fields=<class 'list'> [
+        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[Add to Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+one+time&dates=20200926T210000Z%2F20200926T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: Steve\n> Notes: one time'),
+        EmbedProxy(inline=True, name='🗓 View or edit the schedule using the link below.', value='[Full schedule](https://docs.google.com/spreadsheets/d/abc/edit)'),
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title=Embed.Empty,
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
+# name: test_schedule[today]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=<Colour value=15105570>,
+      colour=<Colour value=15105570>,
+      description='Today - Friday, September 25',
+      fields=<class 'list'> [
+        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[Add to Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+recurring&dates=20200925T210000Z%2F20200925T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: Steve\n> Notes: recurring'),
+        EmbedProxy(inline=True, name='🗓 View or edit the schedule using the link below.', value='[Full schedule](https://docs.google.com/spreadsheets/d/abc/edit)'),
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title=Embed.Empty,
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
+# name: test_schedule[tomorrow]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=<Colour value=15105570>,
+      colour=<Colour value=15105570>,
+      description='Tomorrow - Saturday, September 26',
+      fields=<class 'list'> [
+        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[Add to Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+one+time&dates=20200926T210000Z%2F20200926T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: Steve\n> Notes: one time'),
+        EmbedProxy(inline=True, name='🗓 View or edit the schedule using the link below.', value='[Full schedule](https://docs.google.com/spreadsheets/d/abc/edit)'),
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title=Embed.Empty,
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
+# name: test_schedule_on_a_holiday
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=<Colour value=15105570>,
+      colour=<Colour value=15105570>,
+      description='
+        Today - Thursday, November 26 🦃
+        
+        *There are no scheduled practices today!*
+        
+        To schedule a practice, edit the schedule below or use the `!practice` command.
+        Example: `!practice today 2pm pst`
+  
+      ',
+      fields=<class 'list'> [
+        EmbedProxy(inline=True, name='🗓 View or edit the schedule using the link below.', value='[Full schedule](https://docs.google.com/spreadsheets/d/abc/edit)'),
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title=Embed.Empty,
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---

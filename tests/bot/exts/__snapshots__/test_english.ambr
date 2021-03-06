@@ -1,0 +1,28 @@
+# name: test_idiom[None]
+  <class 'dict'> {
+    'content': '
+      **Dropping Like Flies**
+      Meaning: To fall down ill or to die in large numbers.
+  
+    ',
+  }
+---
+# name: test_idiom[||]
+  <class 'dict'> {
+    'content': '
+      ||**What Goes Up Must Come Down**||
+      Meaning: ||Things that go up must eventually return to the earth due to gravity.||
+  
+    ',
+  }
+---
+# name: test_sentence[None]
+  <class 'dict'> {
+    'content': 'Malls are great places to shop; I can find everything I need under one roof.',
+  }
+---
+# name: test_sentence[||]
+  <class 'dict'> {
+    'content': '||He was the type of guy who liked Christmas lights on his house in the middle of July.||',
+  }
+---

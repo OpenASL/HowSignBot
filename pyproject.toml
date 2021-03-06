@@ -3,7 +3,7 @@ line-length = 90
 target-version = ['py38']
 
 [tool.semantic_release]
-version_variable = "bot.py:__version__"
+version_variable = "bot/__init__.py:__version__"
 upload_to_pypi = false
 upload_to_release = false
 build_command = ""

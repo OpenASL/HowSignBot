@@ -9,27 +9,27 @@ from sqlalchemy_utils import create_database, drop_database
 # Must be before bot import
 os.environ["TESTING"] = "true"
 
-import bot  # noqa:E402
+from bot import settings, database  # noqa:E402
 
 
 # https://www.starlette.io/database/#test-isolation
 @pytest.fixture(scope="session", autouse=True)
 def create_test_database():
-    url = str(bot.TEST_DATABASE_URL)
+    url = str(settings.TEST_DATABASE_URL)
     engine = create_engine(url)
     with suppress(ProgrammingError):
         drop_database(url)
     create_database(url)
-    bot.store.metadata.create_all(engine)
+    database.store.metadata.create_all(engine)
     yield
     drop_database(url)
 
 
 @pytest.fixture
 async def store(create_test_database):
-    await bot.store.connect()
-    yield bot.store
-    await bot.store.disconnect()
+    await database.store.connect()
+    yield database.store
+    await database.store.disconnect()
 
 
 @pytest.fixture
