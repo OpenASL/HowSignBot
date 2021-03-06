@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v21.10.0 (2021-03-05)
+### Feature
+* **zoom:** Add stop command ([#148](https://github.com/OpenASL/HowSignBot/issues/148)) ([`9535384`](https://github.com/OpenASL/HowSignBot/commit/953538477137a9b63b4f2f85c77c0cffb53f2e19))
+* **zoom:** Allow using setup with non-scheduled meetings ([#147](https://github.com/OpenASL/HowSignBot/issues/147)) ([`7f7e89e`](https://github.com/OpenASL/HowSignBot/commit/7f7e89ed99dd43be5d0d508a47ec66de1f79b194))
+
 ## v21.9.1 (2021-03-05)
 ### Fix
 * Allow clearing zoom standby messages ([`a2ed67b`](https://github.com/OpenASL/HowSignBot/commit/a2ed67bee692904985345f3da389a042c655f612))
