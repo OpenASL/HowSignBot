@@ -10,8 +10,7 @@ from sqlalchemy import sql
 from sqlalchemy.dialects.postgresql import insert, BIGINT, TIMESTAMP as _TIMESTAMP
 from sqlalchemy.sql.schema import ForeignKey
 
-# re-export
-DatabaseURL = databases.DatabaseURL
+from . import settings
 
 metadata = sa.MetaData()
 NULL = sql.null()
@@ -353,3 +352,11 @@ class Store:
                 & (zoom_participants.c.name == name)
             )
         )
+
+
+store = Store(
+    database_url=settings.TEST_DATABASE_URL
+    if settings.TESTING
+    else settings.DATABASE_URL,
+    force_rollback=settings.TESTING,
+)

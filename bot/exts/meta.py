@@ -1,0 +1,89 @@
+import logging
+from typing import Optional
+
+import discord
+from discord.ext import commands
+from discord.ext.commands import Bot, Cog, Context, command, is_owner
+
+from bot import settings, __version__
+from bot.bot import set_default_presence
+from bot.utils.gsheets import get_gsheet_client
+from bot.utils.datetimes import utcnow
+
+logger = logging.getLogger(__name__)
+
+COMMAND_PREFIX = settings.COMMAND_PREFIX
+HOMEPAGE_URL = "https://howsign.sloria.io"
+
+
+def post_feedback(feedback: str, guild: Optional[str]):
+    client = get_gsheet_client()
+    # Assumes rows are in the format (date, feedback, guild, version)
+    sheet = client.open_by_key(settings.FEEDBACK_SHEET_KEY)
+    now = utcnow()
+    worksheet = sheet.get_worksheet(0)
+    row = (now.isoformat(), feedback, guild or "", __version__)
+    logger.info(f"submitting feedback: {row}")
+    return worksheet.append_row(row)
+
+
+def ActivityTypeConverter(argument) -> discord.ActivityType:
+    if argument not in discord.ActivityType._enum_member_names_:
+        raise commands.CommandError(f'⚠️"{argument}" is not a valid activity type.')
+    return getattr(discord.ActivityType, argument)
+
+
+class Meta(Cog):
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+
+    @command(name="invite", help="Invite HowSignBot to another Discord server")
+    async def invite_command(self, ctx: Context):
+        await ctx.send(f"Add HowSignBot to another server here: {HOMEPAGE_URL}")
+
+    @command(name="feedback", help="Anonymously share an idea or report a bug")
+    async def feedback_command(self, ctx: Context, *, feedback):
+        await ctx.channel.trigger_typing()
+        author = ctx.author
+        guild = author.guild.name if hasattr(author, "guild") else None
+        post_feedback(feedback, guild)
+        await ctx.send("🙌 Your feedback has been received! Thank you for your help.")
+
+    @feedback_command.error
+    async def feedback_error(self, ctx, error):
+        if isinstance(error, commands.errors.MissingRequiredArgument):
+            await ctx.send(
+                f"I ♥️ feedback! Enter a your feedback after `{COMMAND_PREFIX}feedback`"
+            )
+
+    @command(name="presence", help="BOT OWNER ONLY: Change bot presense")
+    @is_owner()
+    async def presence_command(self, ctx: Context, activity_type: Optional[ActivityTypeConverter] = None, name: str = ""):  # type: ignore[valid-type]
+        if not activity_type:
+            await set_default_presence()
+            await ctx.send("Presence reset.")
+            return
+        activity = discord.Activity(
+            name=name.format(p=COMMAND_PREFIX),
+            type=activity_type,
+        )
+        logger.info(f"changing presence to {activity}")
+        await self.bot.change_presence(activity=activity)
+        await ctx.send(f"Changed presence to: `{activity}`")
+
+    @command(name="stats", help="BOT OWNER ONLY: Get bot stats")
+    @is_owner()
+    async def stats_command(self, ctx: Context):
+        embed = discord.Embed(title="HowSignBot Stats", color=discord.Color.blue())
+        n_servers = len(self.bot.guilds)
+        max_to_display = 50
+        servers_display = "\n".join(guild.name for guild in self.bot.guilds)
+        remaining = max(n_servers - max_to_display, 0)
+        if remaining:
+            servers_display += f"\n+{remaining} more"
+        embed.add_field(name=f"Servers ({n_servers})", value=servers_display)
+        await ctx.send(embed=embed)
+
+
+def setup(bot: Bot) -> None:
+    bot.add_cog(Meta(bot))

@@ -5,7 +5,8 @@ import pytest
 # Must be before bot import
 os.environ["TESTING"] = "true"
 
-import bot  # noqa:E402
+from bot.bot import bot  # noqa:E402
+from bot.exts.meetings.zoom_webhooks import handle_zoom_event  # noqa:E402
 
 # Copied examples from https://marketplace.zoom.us/docs/api-reference/webhook-reference/meeting-events/
 PARTICIPANT_JOINED = {
@@ -89,4 +90,4 @@ MEETING_ENDED = {
 @pytest.mark.asyncio
 async def test_handle_zoom_event(data, db):
     # Just test that the handler doesn't raise any uncaught exceptions
-    await bot.handle_zoom_event(data)
+    await handle_zoom_event(bot, data)

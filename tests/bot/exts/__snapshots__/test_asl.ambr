@@ -1,0 +1,233 @@
+# name: test_handshape[open8]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=Embed.Empty,
+      colour=Embed.Empty,
+      description=Embed.Empty,
+      fields=<class 'list'> [
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(url='attachment://Open8.png'),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title='Open8',
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+    'file': <class 'File'> {
+      filename='Open8.png',
+    },
+  }
+---
+# name: test_handshape[open9]
+  <class 'dict'> {
+    'content': '"open9" not found. Did you mean "OpenX"? Enter `!handshapes` to see a list of handshapes.',
+  }
+---
+# name: test_handshape[random]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=Embed.Empty,
+      colour=Embed.Empty,
+      description=Embed.Empty,
+      fields=<class 'list'> [
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(url='attachment://8.png'),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title='8',
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+    'file': <class 'File'> {
+      filename='8.png',
+    },
+  }
+---
+# name: test_handshapes
+  <class 'dict'> {
+    'content': '
+      1, 3, Bent3, 4, 5, Claw5, 6, 7, 8, Open8, 9, Flat9, A, OpenA, B, BentB, FlatB, OpenB, C, FlatC, SmallC, D, E, G, H, I, K, L, M, OpenM, N, OpenN, O, FlatO, SmallO, R, S, T, V, BentV, X, OpenX, Y, ILY, Corna
+      
+      Enter `!handshape` to display a random handshape or `!handshape [name]` to display a specific handshape.
+  
+    ',
+  }
+---
+# name: test_sign[need, ask]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=Embed.Empty,
+      colour=Embed.Empty,
+      description=Embed.Empty,
+      fields=<class 'list'> [
+        EmbedProxy(inline=True, name='NEED', value='[🤲 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+need)\n[🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+need)\n[🤝 **SigningSavvy** - Sign for NEED](https://www.signingsavvy.com/search/need)\n[🌐 **Spread The Sign** - NEED](https://www.spreadthesign.com/en.us/search/?q=need)\n[📹 **YouGlish** - ASL videos with NEED](https://youglish.com/pronounce/need/signlanguage/asl)\nShare: https://howsign.app/?s=need\n'),
+        EmbedProxy(inline=True, name='ASK', value='[🤲 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+ask)\n[🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+ask)\n[🤝 **SigningSavvy** - Sign for ASK](https://www.signingsavvy.com/search/ask)\n[🌐 **Spread The Sign** - ASK](https://www.spreadthesign.com/en.us/search/?q=ask)\n[📹 **YouGlish** - ASL videos with ASK](https://youglish.com/pronounce/ask/signlanguage/asl)\nShare: https://howsign.app/?s=ask\n'),
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title=Embed.Empty,
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
+# name: test_sign[tiger]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=Embed.Empty,
+      colour=Embed.Empty,
+      description='
+        [🤲 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+tiger)
+        [🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+tiger)
+        [🤝 **SigningSavvy** - Sign for TIGER](https://www.signingsavvy.com/search/tiger)
+        [🌐 **Spread The Sign** - TIGER](https://www.spreadthesign.com/en.us/search/?q=tiger)
+        [📹 **YouGlish** - ASL videos with TIGER](https://youglish.com/pronounce/tiger/signlanguage/asl)
+        Share: https://howsign.app/?s=tiger
+  
+      ',
+      fields=<class 'list'> [
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title='TIGER',
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
+# name: test_sign[what's up]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=Embed.Empty,
+      colour=Embed.Empty,
+      description='
+        [🤲 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+what%27s+up)
+        [🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+what%27s+up)
+        [🤝 **SigningSavvy** - Sign for WHAT'S UP](https://www.signingsavvy.com/search/what%27s+up)
+        [🌐 **Spread The Sign** - WHAT'S UP](https://www.spreadthesign.com/en.us/search/?q=what%27s+up)
+        [📹 **YouGlish** - ASL videos with WHAT'S UP](https://youglish.com/pronounce/what%27s+up/signlanguage/asl)
+        Share: https://howsign.app/?s=what%27s+up
+  
+      ',
+      fields=<class 'list'> [
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title="WHAT'S UP",
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
+# name: test_sign[||need, ask||]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=Embed.Empty,
+      colour=Embed.Empty,
+      description=Embed.Empty,
+      fields=<class 'list'> [
+        EmbedProxy(inline=True, name='||NEED||', value='[🤲 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+need)\n[🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+need)\n[🤝 **SigningSavvy** - Sign for ||NEED||](https://www.signingsavvy.com/search/need)\n[🌐 **Spread The Sign** - ||NEED||](https://www.spreadthesign.com/en.us/search/?q=need)\n[📹 **YouGlish** - ASL videos with ||NEED||](https://youglish.com/pronounce/need/signlanguage/asl)\nShare: ||https://howsign.app/?s=need||\n'),
+        EmbedProxy(inline=True, name='||ASK||', value='[🤲 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+ask)\n[🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+ask)\n[🤝 **SigningSavvy** - Sign for ||ASK||](https://www.signingsavvy.com/search/ask)\n[🌐 **Spread The Sign** - ||ASK||](https://www.spreadthesign.com/en.us/search/?q=ask)\n[📹 **YouGlish** - ASL videos with ||ASK||](https://youglish.com/pronounce/ask/signlanguage/asl)\nShare: ||https://howsign.app/?s=ask||\n'),
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title=Embed.Empty,
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
+# name: test_sign[||tiger||]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=Embed.Empty,
+      colour=Embed.Empty,
+      description='
+        [🤲 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+tiger)
+        [🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+tiger)
+        [🤝 **SigningSavvy** - Sign for ||TIGER||](https://www.signingsavvy.com/search/tiger)
+        [🌐 **Spread The Sign** - ||TIGER||](https://www.spreadthesign.com/en.us/search/?q=tiger)
+        [📹 **YouGlish** - ASL videos with ||TIGER||](https://youglish.com/pronounce/tiger/signlanguage/asl)
+        Share: ||https://howsign.app/?s=tiger||
+  
+      ',
+      fields=<class 'list'> [
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title='||TIGER||',
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---
+# name: test_sign[||what's up||]
+  <class 'dict'> {
+    'embed': <class 'Embed'> {
+      Empty=Embed.Empty,
+      author=EmbedProxy(),
+      color=Embed.Empty,
+      colour=Embed.Empty,
+      description='
+        [🤲 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+what%27s+up)
+        [🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+what%27s+up)
+        [🤝 **SigningSavvy** - Sign for ||WHAT'S UP||](https://www.signingsavvy.com/search/what%27s+up)
+        [🌐 **Spread The Sign** - ||WHAT'S UP||](https://www.spreadthesign.com/en.us/search/?q=what%27s+up)
+        [📹 **YouGlish** - ASL videos with ||WHAT'S UP||](https://youglish.com/pronounce/what%27s+up/signlanguage/asl)
+        Share: ||https://howsign.app/?s=what%27s+up||
+  
+      ',
+      fields=<class 'list'> [
+      ],
+      footer=EmbedProxy(),
+      image=EmbedProxy(),
+      provider=EmbedProxy(),
+      thumbnail=EmbedProxy(),
+      timestamp=Embed.Empty,
+      title="||WHAT'S UP||",
+      type='rich',
+      url=Embed.Empty,
+      video=EmbedProxy(),
+    },
+  }
+---

@@ -5,7 +5,8 @@ from sqlalchemy import pool
 
 from alembic import context
 
-import bot
+from bot import settings
+from bot.database import store
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -19,8 +20,8 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-config.set_main_option("sqlalchemy.url", str(bot.DATABASE_URL))
-target_metadata = bot.store.metadata
+config.set_main_option("sqlalchemy.url", str(settings.DATABASE_URL))
+target_metadata = store.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

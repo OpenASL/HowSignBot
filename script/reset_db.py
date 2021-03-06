@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 from sqlalchemy_utils import create_database, drop_database
 
-import bot
+from bot import settings
 
 
 def main():
-    drop_database(str(bot.DATABASE_URL))
-    create_database(str(bot.DATABASE_URL))
+    drop_database(str(settings.DATABASE_URL))
+    create_database(str(settings.DATABASE_URL))
 
 
 if __name__ == "__main__":

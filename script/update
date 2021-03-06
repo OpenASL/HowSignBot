@@ -13,6 +13,6 @@ if [ -n "${DB_RESET:-}" ]; then
 fi
 
 echo "==> Running migrations"
-PYTHONPATH=. alembic upgrade head >/dev/null 2>&1
+PYTHONPATH=. alembic upgrade head
 
 echo "==> Update finished."
