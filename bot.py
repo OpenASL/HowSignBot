@@ -1323,6 +1323,7 @@ async def zoom_error(ctx, error):
 )
 @commands.check(is_allowed_zoom_access)
 async def zoom_start(ctx: Context, meeting_id: Optional[int] = None):
+    await ctx.channel.trigger_typing()
     if meeting_id:
         meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
         if not meeting_exists:
@@ -1344,7 +1345,7 @@ async def zoom_start(ctx: Context, meeting_id: Optional[int] = None):
             f"⚠️ No meeting messages for meeting {meeting_id}."
         )
     embed = await make_zoom_embed(meeting_id=meeting_id)
-    messages = []
+    messages: List[discord.Message] = []
     for message_info in zoom_messages:
         channel_id = message_info["channel_id"]
         message_id = message_info["message_id"]
@@ -1360,7 +1361,24 @@ async def zoom_start(ctx: Context, meeting_id: Optional[int] = None):
             f"[{message.guild} - #{message.channel}]({message.jump_url})"
             for message in messages
         )
-        await ctx.send(embed=discord.Embed(title="🚀 Meeting Started", description=links))
+        await ctx.send(
+            embed=discord.Embed(title="🚀 Meeting Details Revealed", description=links)
+        )
+    else:
+        link = next(
+            (
+                message.jump_url
+                for message in messages
+                if message.channel.id == ctx.channel.id
+            ),
+            None,
+        )
+        content = (
+            f"🚀 Meeting details revealed: {link}"
+            if link
+            else "🚀 Meeting details revealed."
+        )
+        await ctx.channel.send(content)
 
 
 @zoom_group.command(
