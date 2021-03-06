@@ -244,6 +244,12 @@ class Store:
         query = zoom_meetings.select().where(zoom_meetings.c.meeting_id == meeting_id)
         return await self.db.fetch_one(query=query)
 
+    async def get_latest_pending_zoom_meeting_for_user(self, zoom_user: str) -> Record:
+        query = zoom_meetings.select().where(
+            (zoom_meetings.c.zoom_user == zoom_user) & (zoom_meetings.c.setup_at == NULL)
+        )
+        return await self.db.fetch_one(query=query)
+
     async def set_up_zoom_meeting(self, meeting_id: int):
         await self.db.execute(
             zoom_meetings.update()
