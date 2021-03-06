@@ -156,9 +156,14 @@ class ASL(Cog):
     async def sign_error(self, ctx: Context, error: Exception):
         # Ignore "??"
         if isinstance(error, errors.MissingRequiredArgument):
-            logger.info(
-                f"no argument passed to {COMMAND_PREFIX}{ctx.invoked_with}. ignoring..."
-            )
+            if ctx.invoked_with == COMMAND_PREFIX:
+                logger.info(
+                    f"no argument passed to {COMMAND_PREFIX}{ctx.invoked_with}. ignoring..."
+                )
+            else:
+                await ctx.send(
+                    f"⚠️ Enter a word or phrase to search for after `{COMMAND_PREFIX}{ctx.invoked_with}`."
+                )
 
     @command(name="handshape", aliases=("shape",), help=HANDSHAPE_HELP)
     async def handshape_command(self, ctx: Context, name="random"):
