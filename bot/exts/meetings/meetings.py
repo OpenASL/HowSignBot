@@ -172,20 +172,16 @@ class Meetings(Cog):
                 embed=discord.Embed(title="🚀 Meeting Details Revealed", description=links)
             )
         else:
-            link = next(
-                (
-                    message.jump_url
-                    for message in messages
-                    if message.channel.id == ctx.channel.id
-                ),
+            channel_message = next(
+                (message for message in messages if message.channel.id == ctx.channel.id),
                 None,
             )
-            content = (
-                f"🚀 Meeting details revealed: {link}"
-                if link
-                else "🚀 Meeting details revealed."
-            )
-            await ctx.channel.send(content)
+            if channel_message:
+                await channel_message.reply(
+                    f"🚀 Meeting details revealed: {channel_message.jump_url}"
+                )
+            else:
+                await ctx.channel.send("🚀 Meeting details revealed.")
 
     @zoom_group.command(
         name="stop",
