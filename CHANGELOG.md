@@ -2,6 +2,15 @@
 
 <!--next-version-placeholder-->
 
+## v21.11.0 (2021-03-06)
+### Feature
+* **zoom:** Reply when starting pending zoom in channel ([#153](https://github.com/OpenASL/HowSignBot/issues/153)) ([`52db38c`](https://github.com/OpenASL/HowSignBot/commit/52db38ccd411cc3e91e4b257a643b8aa905c943b))
+* Code organization (cogs); better help command ([#150](https://github.com/OpenASL/HowSignBot/issues/150)) ([`c6227b4`](https://github.com/OpenASL/HowSignBot/commit/c6227b4c4d11e539c082cda282da111b23dcb752))
+
+### Fix
+* **zoom:** Fix starting latest pending zoom ([#152](https://github.com/OpenASL/HowSignBot/issues/152)) ([`00e5428`](https://github.com/OpenASL/HowSignBot/commit/00e5428391cdb4a7fb971f1f4bb89f789be94b7a))
+* **sign:** Only ignore ?? but not ?sign ([#151](https://github.com/OpenASL/HowSignBot/issues/151)) ([`b883c13`](https://github.com/OpenASL/HowSignBot/commit/b883c133ebc181e9a3b2f92cf0b1307adb2dc016))
+
 ## v21.10.0 (2021-03-05)
 ### Feature
 * **zoom:** Add stop command ([#148](https://github.com/OpenASL/HowSignBot/issues/148)) ([`9535384`](https://github.com/OpenASL/HowSignBot/commit/953538477137a9b63b4f2f85c77c0cffb53f2e19))
