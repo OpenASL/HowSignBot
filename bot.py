@@ -6,6 +6,7 @@ import random
 import re
 from contextlib import suppress
 from typing import (
+    cast,
     Optional,
     NamedTuple,
     List,
@@ -1271,7 +1272,9 @@ async def zoom_group(ctx: Context, meeting_id: Optional[int] = None):
     await store.remove_zoom_message(message_id=message.id)
 
 
-@zoom_group.command(name="setup")
+@zoom_group.command(
+    name="setup", help="Set up a Zoom. Useful for meetings that have breakout rooms."
+)
 @commands.check(is_allowed_zoom_access)
 async def zoom_setup(ctx: Context, meeting_id: Optional[int] = None):
     await ctx.channel.trigger_typing()
@@ -1302,18 +1305,38 @@ async def zoom_setup(ctx: Context, meeting_id: Optional[int] = None):
         await ctx.author.send(
             "To post in another channel, send the following command in that channel:\n"
             f"`{COMMAND_PREFIX}zoom setup {meeting_id}`\n"
-            f"When you're ready for people to join, enter:\n`{COMMAND_PREFIX}zoom start {meeting_id}`\nin this DM."
+            f"When you're ready for people to join, enter the following in this DM:\n`{COMMAND_PREFIX}zoom start`"
         )
 
 
-@zoom_group.command(name="start")
+@zoom_group.error
+@zoom_setup.error
+async def zoom_error(ctx, error):
+    if isinstance(error, ZoomCreateError):
+        logger.error("could not create zoom due to unexpected error", exc_info=error)
+        await ctx.send(error)
+
+
+@zoom_group.command(
+    name="start",
+    help="Reveal meeting details for a meeting started with the setup command.",
+)
 @commands.check(is_allowed_zoom_access)
-async def zoom_start(ctx: Context, meeting_id: int):
-    meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
-    if not meeting_exists:
-        raise commands.errors.CheckFailure(
-            f"⚠️ Could not find Zoom meeting with ID {meeting_id}. Make sure to run `{COMMAND_PREFIX}zoom setup {meeting_id}` first."
-        )
+async def zoom_start(ctx: Context, meeting_id: Optional[int] = None):
+    if meeting_id:
+        meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
+        if not meeting_exists:
+            raise commands.errors.CheckFailure(
+                f"⚠️ Could not find Zoom meeting with ID {meeting_id}. Make sure to run `{COMMAND_PREFIX}zoom setup {meeting_id}` first."
+            )
+    else:
+        zoom_user = ZOOM_USERS[ctx.author.id]
+        latest_meeting = await store.get_latest_pending_zoom_meeting_for_user(zoom_user)
+        if not latest_meeting:
+            raise commands.errors.CheckFailure(
+                f"⚠️ You do not have any pending Zoom meetings. Make sure to run `{COMMAND_PREFIX}zoom setup [meeting_id]` first."
+            )
+        meeting_id = cast(int, latest_meeting["meeting_id"])
     await store.set_up_zoom_meeting(meeting_id=meeting_id)
     zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
     if not zoom_messages:
@@ -1338,20 +1361,6 @@ async def zoom_start(ctx: Context, meeting_id: int):
             for message in messages
         )
         await ctx.send(embed=discord.Embed(title="🚀 Meeting Started", description=links))
-
-
-@zoom_group.error
-@zoom_start.error
-async def zoom_error(ctx, error):
-    if isinstance(error, ZoomCreateError):
-        logger.error("could not create zoom due to unexpected error", exc_info=error)
-        await ctx.send(error)
-
-
-@zoom_start.error
-async def zoom_start_error(ctx, error):
-    if isinstance(error, commands.errors.MissingRequiredArgument):
-        await ctx.send("⚠️ Must pass meeting ID.")
 
 
 # -----------------------------------------------------------------------------
