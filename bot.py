@@ -1363,6 +1363,45 @@ async def zoom_start(ctx: Context, meeting_id: Optional[int] = None):
         await ctx.send(embed=discord.Embed(title="🚀 Meeting Started", description=links))
 
 
+@zoom_group.command(
+    name="stop",
+    help="Remove meeting details for a meeting.",
+)
+@commands.check(is_allowed_zoom_access)
+async def zoom_stop(ctx: Context, meeting_id: int):
+    await ctx.channel.trigger_typing()
+    meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
+    if not meeting_exists:
+        raise commands.errors.CheckFailure(
+            f"⚠️ Could not find Zoom meeting with ID {meeting_id}. Make sure to run `{COMMAND_PREFIX}zoom setup {meeting_id}` first."
+        )
+    zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
+    if not zoom_messages:
+        raise commands.errors.CheckFailure(
+            f"⚠️ No meeting messages for meeting {meeting_id}."
+        )
+    messages = []
+    for message_info in zoom_messages:
+        channel_id = message_info["channel_id"]
+        message_id = message_info["message_id"]
+        channel = bot.get_channel(channel_id)
+        message: discord.Message = await channel.fetch_message(message_id)
+        messages.append(message)
+        logger.info(
+            f"revealing meeting details for meeting {meeting_id} in channel {channel_id}, message {message_id}"
+        )
+        await message.edit(content=ZOOM_CLOSED_MESSAGE, embed=None)
+    await store.end_zoom_meeting(meeting_id=meeting_id)
+    if ctx.guild is None:
+        links = "\n".join(
+            f"[{message.guild} - #{message.channel}]({message.jump_url})"
+            for message in messages
+        )
+        await ctx.send(embed=discord.Embed(title="🛑 Meeting Ended", description=links))
+    else:
+        await ctx.channel.send("🛑 Meeting details removed.")
+
+
 # -----------------------------------------------------------------------------
 
 MEET_CLOSED_MESSAGE = "✨ _Jitsi Meet ended_"
