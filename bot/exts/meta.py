@@ -80,7 +80,9 @@ class Meta(Cog):
             sum(guild.member_count for guild in self.bot.guilds) / n_guilds
         )
         max_to_display = 50
-        servers_display = "\n".join(guild.name for guild in self.bot.guilds)
+        servers_display = "\n".join(
+            f"{guild.name} `{guild.member_count}`" for guild in self.bot.guilds
+        )
         remaining = max(n_guilds - max_to_display, 0)
         if remaining:
             servers_display += f"\n+{remaining} more"
