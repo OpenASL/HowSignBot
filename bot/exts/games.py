@@ -1,7 +1,7 @@
 import logging
 import random
 from contextlib import suppress
-from typing import Iterable, Optional, Union, Sequence
+from typing import Optional, Union, Sequence
 
 import discord
 from discord.ext.commands import Context, Bot, Cog, command
@@ -79,7 +79,7 @@ class Games(Cog):
         name = name or cuteid.cuteid()
         url = f"https://horsepaste.com/{name}"
         base_message = f"🕵️ **Codenames** 🕵️\n{url}\nClick 👍 to join a team. Click 🔀 to shuffle the teams."
-        logger.info(f"starting codenames game at {url}")
+        logger.info("starting codenames game")
         message = await ctx.send(base_message)
 
         with suppress(Exception):
@@ -90,31 +90,14 @@ class Games(Cog):
     async def on_raw_reaction_remove(
         self, payload: discord.RawReactionActionEvent
     ) -> None:
-        if not self.should_handle_reaction(payload, {"👍"}):
-            return
-        message = await self.get_reaction_message(payload)
-        if not message:
-            return
-
-        if str(payload.emoji) == "👍":
-            reaction = next((r for r in message.reactions if str(r.emoji) == "👍"), None)
-            if not reaction:
-                return
-            players = [
-                player
-                for player in await reaction.users().flatten()
-                if player.id != self.bot.user.id
-            ]
-            red, blue = make_teams(players)
-            team_embed = discord.Embed(
-                title="Teams",
-                description=f"🔴 Red: {format_team(red)}\n🔵 Blue: {format_team(blue)}",
-            )
-            await message.edit(embed=team_embed)
+        await self.handle_reaction(payload)
 
     @Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> None:
-        if not self.should_handle_reaction(payload, {"👍", "🔀"}):
+        await self.handle_reaction(payload)
+
+    async def handle_reaction(self, payload: discord.RawReactionActionEvent) -> None:
+        if not self.should_handle_reaction(payload):
             return
 
         message = await self.get_reaction_message(payload)
@@ -139,11 +122,9 @@ class Games(Cog):
         )
         await message.edit(embed=team_embed)
 
-    def should_handle_reaction(
-        self, payload: discord.RawReactionActionEvent, emojis: Iterable[str]
-    ) -> bool:
+    def should_handle_reaction(self, payload: discord.RawReactionActionEvent) -> bool:
         # Is this a control emoji?
-        if str(payload.emoji) not in emojis:
+        if str(payload.emoji) not in {"👍", "🔀"}:
             return False
         # Was the message sent in a channel (not a DM)?
         if not payload.channel_id:
