@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.12.1 (2021-03-07)
+### Fix
+* **codenames:** Fix team maker ([#156](https://github.com/OpenASL/HowSignBot/issues/156)) ([`aa16507`](https://github.com/OpenASL/HowSignBot/commit/aa165073d2b9850dc5d4617ca9e17ea6ece466f6))
+
 ## v21.12.0 (2021-03-07)
 ### Feature
 * **meta:** Show direct invite link; stats improvements ([#155](https://github.com/OpenASL/HowSignBot/issues/155)) ([`2de1dc7`](https://github.com/OpenASL/HowSignBot/commit/2de1dc715fd96091587bcd55bc6be7c7f7612df1))
