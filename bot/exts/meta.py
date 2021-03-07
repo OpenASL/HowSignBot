@@ -56,7 +56,7 @@ class Meta(Cog):
                 f"I ♥️ feedback! Enter a your feedback after `{COMMAND_PREFIX}feedback`"
             )
 
-    @command(name="presence", help="BOT OWNER ONLY: Change bot presense")
+    @command(name="presence", hidden=True, help="BOT OWNER ONLY: Change bot presense")
     @is_owner()
     async def presence_command(self, ctx: Context, activity_type: Optional[ActivityTypeConverter] = None, name: str = ""):  # type: ignore[valid-type]
         if not activity_type:
@@ -71,7 +71,7 @@ class Meta(Cog):
         await self.bot.change_presence(activity=activity)
         await ctx.send(f"Changed presence to: `{activity}`")
 
-    @command(name="stats", help="BOT OWNER ONLY: Get bot stats")
+    @command(name="stats", hidden=True, help="BOT OWNER ONLY: Get bot stats")
     @is_owner()
     async def stats_command(self, ctx: Context):
         embed = discord.Embed(title="HowSignBot Stats", color=discord.Color.blue())
