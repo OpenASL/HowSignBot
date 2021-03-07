@@ -13,7 +13,6 @@ from bot.utils.datetimes import utcnow
 logger = logging.getLogger(__name__)
 
 COMMAND_PREFIX = settings.COMMAND_PREFIX
-HOMEPAGE_URL = "https://howsign.sloria.io"
 
 
 def post_feedback(feedback: str, guild: Optional[str]):
@@ -39,7 +38,8 @@ class Meta(Cog):
 
     @command(name="invite", help="Invite HowSignBot to another Discord server")
     async def invite_command(self, ctx: Context):
-        await ctx.send(f"Add HowSignBot to another server here: {HOMEPAGE_URL}")
+        url = discord.utils.oauth_url(self.bot.user.id)
+        await ctx.send(f"Add HowSignBot to another server here:\n<{url}>")
 
     @command(name="feedback", help="Anonymously share an idea or report a bug")
     async def feedback_command(self, ctx: Context, *, feedback):
@@ -75,13 +75,19 @@ class Meta(Cog):
     @is_owner()
     async def stats_command(self, ctx: Context):
         embed = discord.Embed(title="HowSignBot Stats", color=discord.Color.blue())
-        n_servers = len(self.bot.guilds)
+        n_guilds = len(self.bot.guilds)
+        avg_members = round(
+            sum(guild.member_count for guild in self.bot.guilds) / n_guilds
+        )
         max_to_display = 50
         servers_display = "\n".join(guild.name for guild in self.bot.guilds)
-        remaining = max(n_servers - max_to_display, 0)
+        remaining = max(n_guilds - max_to_display, 0)
         if remaining:
             servers_display += f"\n+{remaining} more"
-        embed.add_field(name=f"Servers ({n_servers})", value=servers_display)
+        embed.add_field(
+            name=f"Servers ({n_guilds}, avg {avg_members} users/server)",
+            value=servers_display,
+        )
         await ctx.send(embed=embed)
 
 
