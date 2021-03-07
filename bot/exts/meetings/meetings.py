@@ -29,7 +29,7 @@ COMMAND_PREFIX = settings.COMMAND_PREFIX
 
 MEET_CLOSED_MESSAGE = "✨ _Jitsi Meet ended_"
 SPEAKEASY_CLOSED_MESSAGE = "✨ _Speakeasy event ended_"
-WATCH2GETHER_HELP = """Create a new watch2gether room
+WATCH2GETHER_HELP = """Start a watch2gether session
 
 You can optionally pass a URL to use for the first video.
 
@@ -74,7 +74,7 @@ class Meetings(Cog):
     @group(name="zoom", invoke_without_command=True)
     @check(is_allowed_zoom_access)
     async def zoom_group(self, ctx: Context, meeting_id: Optional[int] = None):
-        """AUTHORIZED USERS ONLY: Create a Zoom meeting"""
+        """AUTHORIZED USERS ONLY: Start a Zoom meeting"""
         await ctx.channel.trigger_typing()
 
         async def send_channel_message(mid: int):

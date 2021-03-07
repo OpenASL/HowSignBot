@@ -196,7 +196,6 @@ class HelpCommand(commands.HelpCommand):
         else:
             embed = discord.Embed(
                 color=items.pop("color", self.color),
-                description=items.pop("description", "No description available."),
             )
             embed.set_author(
                 name=items.pop(
