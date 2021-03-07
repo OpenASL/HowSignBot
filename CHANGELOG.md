@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.14.2 (2021-03-07)
+### Fix
+* **help:** More consistent copy ([`2c0f8fb`](https://github.com/OpenASL/HowSignBot/commit/2c0f8fbc818a99b67eefef32ed5ee4ec2ff7a7c6))
+
 ## v21.14.1 (2021-03-07)
 ### Fix
 * Hide sdm from help ([`4db9242`](https://github.com/OpenASL/HowSignBot/commit/4db92429ba741c2480a7e05ec28d08a64b35d6b1))
