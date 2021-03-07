@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.14.0 (2021-03-07)
+### Feature
+* **meta:** Hide owner-only commands from help ([#159](https://github.com/OpenASL/HowSignBot/issues/159)) ([`56eab59`](https://github.com/OpenASL/HowSignBot/commit/56eab59eda6358f83195b69841c4af5d2c9ca6be))
+
 ## v21.13.0 (2021-03-07)
 ### Feature
 * **zoom:** React with ↩️ to repost zoom ([#158](https://github.com/OpenASL/HowSignBot/issues/158)) ([`2ff6273`](https://github.com/OpenASL/HowSignBot/commit/2ff627393119b4b85c8f60b2548366176aca0080))
