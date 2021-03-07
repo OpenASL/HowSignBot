@@ -7,9 +7,16 @@ from discord.ext.commands import Bot, Context, Cog, errors, group, check, comman
 import meetings
 from bot import settings
 from bot.database import store
-from bot.utils.reactions import handle_close_reaction, add_stop_sign, STOP_SIGN
+from bot.utils.reactions import (
+    handle_close_reaction,
+    add_stop_sign,
+    STOP_SIGN,
+    get_reaction_message,
+    should_handle_reaction,
+)
 from ._zoom import (
     make_zoom_embed,
+    add_repost_after_delay,
     zoom_impl,
     is_allowed_zoom_access,
     ZOOM_CLOSED_MESSAGE,
@@ -113,8 +120,9 @@ class Meetings(Cog):
             )
             await ctx.author.send(
                 "To post in another channel, send the following command in that channel:\n"
-                f"`{COMMAND_PREFIX}zoom setup {meeting_id}`\n"
-                f"When you're ready for people to join, enter the following in this DM:\n`{COMMAND_PREFIX}zoom start`"
+                f"```{COMMAND_PREFIX}zoom setup {meeting_id}```\n"
+                "When you're ready for people to join, reply with:\n"
+                f"```{COMMAND_PREFIX}zoom start {meeting_id}```"
             )
 
     @zoom_group.error
@@ -163,6 +171,7 @@ class Meetings(Cog):
                 f"revealing meeting details for meeting {meeting_id} in channel {channel_id}, message {message_id}"
             )
             await message.edit(embed=embed)
+            add_repost_after_delay(self.bot, message)
         if ctx.guild is None:
             links = "\n".join(
                 f"[{message.guild} - #{message.channel}]({message.jump_url})"
@@ -227,7 +236,7 @@ class Meetings(Cog):
         logger.info("sending jitsi meet info")
         message = await ctx.send(embed=make_jitsi_embed(meeting))
 
-        await add_stop_sign(self.bot, message)
+        await add_stop_sign(message)
 
     @command(name="speakeasy", help="Start a Speakeasy (https://speakeasy.co/) event")
     async def speakeasy_command(self, ctx: Context, *, name: Optional[str]):
@@ -238,7 +247,7 @@ class Meetings(Cog):
         content = f"{content}\n🚀 This event is happening now. Make a friend!"
         logger.info("sending speakeasy info")
         message = await ctx.send(content=content)
-        await add_stop_sign(self.bot, message)
+        await add_stop_sign(message)
 
     @command(name="w2g", aliases=("wtg", "watch2gether"), help=WATCH2GETHER_HELP)
     async def watch2gether_command(self, ctx: Context, video_url: Optional[str] = None):
@@ -255,15 +264,42 @@ class Meetings(Cog):
         else:
             message = await ctx.send(embed=make_watch2gether_embed(url, video_url))
 
-        await add_stop_sign(self.bot, message)
+        await add_stop_sign(message)
 
     @Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> None:
+        if should_handle_reaction(self.bot, payload, {"↩️"}):
+            message = await get_reaction_message(self.bot, payload)
+            if not message:
+                return
+            zoom_message = await store.get_zoom_message(message.id)
+            if not zoom_message:
+                return
+            await message.edit(content="✨ *Meeting details moved below.*", embed=None)
+
+            new_message = await message.reply(
+                content="👐 **This meeting is still going**. Come on in!",
+                embed=await make_zoom_embed(zoom_message["meeting_id"]),
+            )
+            add_repost_after_delay(self.bot, new_message)
+
+            async with store.transaction():
+                await store.create_zoom_message(
+                    message_id=new_message.id,
+                    channel_id=new_message.channel.id,
+                    meeting_id=zoom_message["meeting_id"],
+                )
+                await store.remove_zoom_message(message_id=zoom_message["message_id"])
+
+        async def close_zoom_message(msg: discord.Message):
+            await store.remove_zoom_message(message_id=msg.id)
+            return ZOOM_CLOSED_MESSAGE
+
         await handle_close_reaction(
             self.bot,
             payload,
             close_messages={
-                r"zoom\.us|Stand By|Could not create Zoom": ZOOM_CLOSED_MESSAGE,
+                r"zoom\.us|Stand By|Could not create Zoom": close_zoom_message,
                 r"meet\.jit\.si": MEET_CLOSED_MESSAGE,
                 r"Speakeasy": SPEAKEASY_CLOSED_MESSAGE,
                 r"w2g\.tv|Could not create watch2gether": WATCH2GETHER_CLOSED_MESSAGE,

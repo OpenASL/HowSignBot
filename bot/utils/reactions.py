@@ -1,7 +1,7 @@
 import logging
 import re
 from contextlib import suppress
-from typing import Mapping, Optional, Iterable
+from typing import Awaitable, Mapping, Optional, Iterable, Union, Callable
 
 import discord
 from discord.ext.commands import Bot
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 STOP_SIGN = "🛑"
 
 
-async def add_stop_sign(bot: Bot, message: discord.Message):
+async def add_stop_sign(message: discord.Message):
     with suppress(Exception):
         await message.add_reaction(STOP_SIGN)
 
@@ -52,7 +52,7 @@ async def handle_close_reaction(
     bot: Bot,
     payload: discord.RawReactionActionEvent,
     *,
-    close_messages: Mapping[str, str],
+    close_messages: Mapping[str, Union[str, Callable[[discord.Message], Awaitable]]],
     emoji: str = STOP_SIGN,
 ) -> None:
     if not should_handle_reaction(bot, payload, {emoji}):
@@ -69,15 +69,21 @@ async def handle_close_reaction(
         if message.embeds:
             for embed in message.embeds:
                 if embed.title and re.search(pattern, embed.title):
+                    if callable(close_message):
+                        close_message = await close_message(message)
                     logger.info(f"cleaning up room with message: {close_message}")
                     await message.edit(content=close_message, embed=None)
                     return
                 for field in embed.fields:
                     if field.name and re.search(pattern, field.name):
+                        if callable(close_message):
+                            close_message = await close_message(message)
                         logger.info(f"cleaning up room with message: {close_message}")
                         await message.edit(content=close_message, embed=None)
                         return
         if re.search(pattern, message.content):
+            if callable(close_message):
+                close_message = await close_message(message)
             logger.info(f"cleaning up room with message: {close_message}")
             await message.edit(content=close_message, embed=None)
             return
