@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.12.0 (2021-03-07)
+### Feature
+* **meta:** Show direct invite link; stats improvements ([#155](https://github.com/OpenASL/HowSignBot/issues/155)) ([`2de1dc7`](https://github.com/OpenASL/HowSignBot/commit/2de1dc715fd96091587bcd55bc6be7c7f7612df1))
+
 ## v21.11.0 (2021-03-06)
 ### Feature
 * **zoom:** Reply when starting pending zoom in channel ([#153](https://github.com/OpenASL/HowSignBot/issues/153)) ([`52db38c`](https://github.com/OpenASL/HowSignBot/commit/52db38ccd411cc3e91e4b257a643b8aa905c943b))
