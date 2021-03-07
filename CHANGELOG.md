@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.14.1 (2021-03-07)
+### Fix
+* Hide sdm from help ([`4db9242`](https://github.com/OpenASL/HowSignBot/commit/4db92429ba741c2480a7e05ec28d08a64b35d6b1))
+
 ## v21.14.0 (2021-03-07)
 ### Feature
 * **meta:** Hide owner-only commands from help ([#159](https://github.com/OpenASL/HowSignBot/issues/159)) ([`56eab59`](https://github.com/OpenASL/HowSignBot/commit/56eab59eda6358f83195b69841c4af5d2c9ca6be))
