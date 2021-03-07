@@ -66,6 +66,7 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
     @command(
         name="send_daily_message",
         aliases=("sdm",),
+        hidden=True,
         help="BOT OWNER ONLY: Manually send a daily practice schedule for a channel",
     )
     @is_owner()
