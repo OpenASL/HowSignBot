@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v21.13.0 (2021-03-07)
+### Feature
+* **zoom:** React with ↩️ to repost zoom ([#158](https://github.com/OpenASL/HowSignBot/issues/158)) ([`2ff6273`](https://github.com/OpenASL/HowSignBot/commit/2ff627393119b4b85c8f60b2548366176aca0080))
+
+### Fix
+* **codenames:** Shuffle button always shuffles ([#157](https://github.com/OpenASL/HowSignBot/issues/157)) ([`4cc0202`](https://github.com/OpenASL/HowSignBot/commit/4cc0202170c56051a62df176a59548ea9978644e))
+
 ## v21.12.1 (2021-03-07)
 ### Fix
 * **codenames:** Fix team maker ([#156](https://github.com/OpenASL/HowSignBot/issues/156)) ([`aa16507`](https://github.com/OpenASL/HowSignBot/commit/aa165073d2b9850dc5d4617ca9e17ea6ece466f6))
