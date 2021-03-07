@@ -10,6 +10,7 @@ import cuteid
 import catchphrase
 from bot import settings
 from bot.utils import did_you_mean
+from bot.utils.reactions import should_handle_reaction, get_reaction_message
 
 logger = logging.getLogger(__name__)
 
@@ -97,11 +98,13 @@ class Games(Cog):
         await self.handle_reaction(payload)
 
     async def handle_reaction(self, payload: discord.RawReactionActionEvent) -> None:
-        if not self.should_handle_reaction(payload):
+        if not should_handle_reaction(self.bot, payload, {"👍", "🔀"}):
             return
-
-        message = await self.get_reaction_message(payload)
+        message = await get_reaction_message(self.bot, payload)
         if not message:
+            return
+        # Was the message sent by the bot?
+        if message.author.id != self.bot.user.id:
             return
 
         reaction = next((r for r in message.reactions if str(r.emoji) == "👍"), None)
@@ -121,33 +124,6 @@ class Games(Cog):
             description=f"🔴 Red: {format_team(red)}\n🔵 Blue: {format_team(blue)}",
         )
         await message.edit(embed=team_embed)
-
-    def should_handle_reaction(self, payload: discord.RawReactionActionEvent) -> bool:
-        # Is this a control emoji?
-        if str(payload.emoji) not in {"👍", "🔀"}:
-            return False
-        # Was the message sent in a channel (not a DM)?
-        if not payload.channel_id:
-            return False
-        if not self.reactor_is_human(payload):
-            return False
-        return True
-
-    async def get_reaction_message(
-        self,
-        payload: discord.RawReactionActionEvent,
-    ) -> Optional[discord.Message]:
-        with suppress(discord.NotFound):
-            channel = self.bot.get_channel(payload.channel_id)
-            if not channel:
-                return None
-            message: discord.Message = await channel.fetch_message(payload.message_id)
-        return message
-
-    def reactor_is_human(self, payload: discord.RawReactionActionEvent) -> bool:
-        with suppress(discord.NotFound):
-            member = self.bot.get_user(payload.user_id)
-        return not bool(getattr(member, "bot", None))
 
 
 def setup(bot: Bot) -> None:

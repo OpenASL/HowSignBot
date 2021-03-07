@@ -1,11 +1,13 @@
+import asyncio
 import logging
 import random
+from contextlib import suppress
 from typing import Sequence, List, Optional, Callable, Awaitable, Tuple
 
 import discord
 from aiohttp import client
 from databases.backends.postgres import Record
-from discord.ext.commands import Context, errors
+from discord.ext.commands import Context, errors, Bot
 from nameparser import HumanName
 
 import holiday_emojis
@@ -18,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 COMMAND_PREFIX = settings.COMMAND_PREFIX
 
+REPOST_EMOJI = "↩️"
 ZOOM_CLOSED_MESSAGE = "✨ _Zoom meeting ended_"
 
 FACES = (
@@ -189,6 +192,16 @@ class ZoomCreateError(errors.CommandError):
     pass
 
 
+async def add_repost_after_delay_impl(message: discord.Message, delay: int = 2):
+    await asyncio.sleep(delay)
+    with suppress(Exception):
+        await message.add_reaction(REPOST_EMOJI)
+
+
+def add_repost_after_delay(bot: Bot, message: discord.Message, delay: int = 30):
+    bot.loop.create_task(add_repost_after_delay_impl(message, delay))
+
+
 async def zoom_impl(
     ctx: Context,
     *,
@@ -203,6 +216,8 @@ async def zoom_impl(
         async with store.transaction():
             await maybe_create_zoom_meeting(zoom_user, meeting_id, set_up=set_up)
             message = await send_channel_message(meeting_id)
+            if set_up:
+                add_repost_after_delay(ctx.bot, message)
             logger.info(
                 f"creating zoom meeting message for message {message.id} in channel {ctx.channel.id}"
             )
@@ -239,6 +254,8 @@ async def zoom_impl(
                     set_up=set_up,
                 )
                 message = await send_channel_message(meeting.id)
+                if set_up:
+                    add_repost_after_delay(ctx.bot, message)
                 logger.info(
                     f"creating zoom meeting message for message {message.id} in channel {ctx.channel.id}"
                 )

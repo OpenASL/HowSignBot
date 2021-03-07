@@ -1,6 +1,6 @@
 import datetime as dt
 import logging
-from typing import Optional, Union, Iterator
+from typing import Optional, Union, Iterator, Mapping, List
 
 import databases
 import pytz
@@ -302,7 +302,12 @@ class Store:
             zoom_messages.delete().where(zoom_messages.c.message_id == message_id)
         )
 
-    async def get_zoom_messages(self, meeting_id: int) -> Iterator[Record]:
+    async def get_zoom_message(self, message_id: int) -> Optional[Mapping]:
+        return await self.db.fetch_one(
+            zoom_messages.select().where(zoom_messages.c.message_id == message_id)
+        )
+
+    async def get_zoom_messages(self, meeting_id: int) -> List[Mapping]:
         return await self.db.fetch_all(
             zoom_messages.select().where(zoom_messages.c.meeting_id == meeting_id)
         )
