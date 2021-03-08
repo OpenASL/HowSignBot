@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import random
-from contextlib import suppress
 from typing import Sequence, List, Optional, Callable, Awaitable, Tuple
 
 import discord
@@ -14,13 +13,14 @@ import holiday_emojis
 import meetings
 from bot import settings
 from bot.utils.datetimes import utcnow, PACIFIC
+from bot.utils.reactions import maybe_add_reaction
 from bot.database import store
 
 logger = logging.getLogger(__name__)
 
 COMMAND_PREFIX = settings.COMMAND_PREFIX
 
-REPOST_EMOJI = "↩️"
+REPOST_EMOJI = "⏬"
 REPOST_EMOJI_DELAY = 30
 ZOOM_CLOSED_MESSAGE = "✨ _Zoom meeting ended_"
 
@@ -195,8 +195,8 @@ class ZoomCreateError(errors.CommandError):
 
 async def add_repost_after_delay_impl(message: discord.Message, delay: int):
     await asyncio.sleep(delay)
-    with suppress(Exception):
-        await message.add_reaction(REPOST_EMOJI)
+    if await store.get_zoom_message(message.id):
+        await maybe_add_reaction(message, REPOST_EMOJI)
 
 
 def add_repost_after_delay(
@@ -246,7 +246,7 @@ async def zoom_impl(
                 "🚨 _Could not create Zoom meeting. That's embarrassing._"
             ) from error
         else:
-            logger.info(f"creating meeting {meeting_id}")
+            logger.info(f"creating new meeting {meeting.id}")
             async with store.transaction():
                 await store.create_zoom_meeting(
                     zoom_user=zoom_user,

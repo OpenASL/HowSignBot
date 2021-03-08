@@ -11,9 +11,24 @@ logger = logging.getLogger(__name__)
 STOP_SIGN = "🛑"
 
 
+async def maybe_clear_reaction(message: discord.Message, emoji: str, *, log: bool = True):
+    try:
+        await message.clear_reaction(emoji)
+    except Exception:
+        if log:
+            logger.exception("could not remove reaction")
+
+
+async def maybe_add_reaction(message: discord.Message, emoji: str, *, log: bool = False):
+    try:
+        await message.add_reaction(emoji)
+    except Exception:
+        if log:
+            logger.exception("could not add reaction")
+
+
 async def add_stop_sign(message: discord.Message):
-    with suppress(Exception):
-        await message.add_reaction(STOP_SIGN)
+    await maybe_add_reaction(message, STOP_SIGN)
 
 
 async def get_reaction_message(
