@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.15.0 (2021-03-07)
+### Feature
+* **zoom:** Remove ↩️  when zoom is closed ([#161](https://github.com/OpenASL/HowSignBot/issues/161)) ([`4820ae2`](https://github.com/OpenASL/HowSignBot/commit/4820ae2d8c15f86b8affcfa57c9d750a11eb6642))
+
 ## v21.14.2 (2021-03-07)
 ### Fix
 * **help:** More consistent copy ([`2c0f8fb`](https://github.com/OpenASL/HowSignBot/commit/2c0f8fbc818a99b67eefef32ed5ee4ec2ff7a7c6))
