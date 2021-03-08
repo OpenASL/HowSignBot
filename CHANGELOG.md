@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.15.2 (2021-03-07)
+### Fix
+* Log exception if reaction can't be cleared ([`f25b662`](https://github.com/OpenASL/HowSignBot/commit/f25b662ef2bd632c38cb2e978650e0cf60349552))
+
 ## v21.15.1 (2021-03-07)
 ### Fix
 * **zoom:** Remove reaction when using zoom stop ([`af565eb`](https://github.com/OpenASL/HowSignBot/commit/af565ebc063f9ed7540ba1ee79480ad88052e4bd))
