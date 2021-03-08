@@ -38,7 +38,10 @@ class Meta(Cog):
 
     @command(name="invite", help="Invite HowSignBot to another Discord server")
     async def invite_command(self, ctx: Context):
-        url = discord.utils.oauth_url(self.bot.user.id)
+        url = discord.utils.oauth_url(
+            self.bot.user.id,
+            permissions=discord.Permissions(permissions=59456),
+        )
         await ctx.send(f"Add HowSignBot to another server here:\n<{url}>")
 
     @command(name="feedback", help="Anonymously share an idea or report a bug")
