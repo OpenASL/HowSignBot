@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.15.1 (2021-03-07)
+### Fix
+* **zoom:** Remove reaction when using zoom stop ([`af565eb`](https://github.com/OpenASL/HowSignBot/commit/af565ebc063f9ed7540ba1ee79480ad88052e4bd))
+
 ## v21.15.0 (2021-03-07)
 ### Feature
 * **zoom:** Remove ↩️  when zoom is closed ([#161](https://github.com/OpenASL/HowSignBot/issues/161)) ([`4820ae2`](https://github.com/OpenASL/HowSignBot/commit/4820ae2d8c15f86b8affcfa57c9d750a11eb6642))
