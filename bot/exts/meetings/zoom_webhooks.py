@@ -2,7 +2,6 @@ import asyncio
 import datetime as dt
 import logging
 from typing import cast
-from contextlib import suppress
 
 import dateparser
 from aiohttp import web
@@ -109,8 +108,10 @@ async def handle_zoom_event(bot: Bot, data: dict):
                 discord_message: discord.Message = await channel.fetch_message(message_id)
                 await discord_message.edit(**edit_kwargs)
                 if event == "meeting.ended":
-                    with suppress(Exception):
+                    try:
                         await discord_message.clear_reaction(REPOST_EMOJI)
+                    except Exception:
+                        logger.exception("could not remove reaction")
 
 
 def setup(bot: Bot) -> None:

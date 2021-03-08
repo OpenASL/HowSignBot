@@ -1,6 +1,5 @@
 import logging
 from typing import List, Optional, cast
-from contextlib import suppress
 
 import discord
 from discord.ext.commands import Bot, Context, Cog, errors, group, check, command
@@ -219,9 +218,11 @@ class Meetings(Cog):
             logger.info(
                 f"scrubbing meeting details for meeting {meeting_id} in channel {channel_id}, message {message_id}"
             )
-            with suppress(Exception):
-                await message.clear_reaction(REPOST_EMOJI)
             await message.edit(content=ZOOM_CLOSED_MESSAGE, embed=None)
+            try:
+                await message.clear_reaction(REPOST_EMOJI)
+            except Exception:
+                logger.exception("could not remove reaction")
         await store.end_zoom_meeting(meeting_id=meeting_id)
         if ctx.guild is None:
             links = "\n".join(
@@ -297,8 +298,10 @@ class Meetings(Cog):
 
         async def close_zoom_message(msg: discord.Message):
             await store.remove_zoom_message(message_id=msg.id)
-            with suppress(Exception):
+            try:
                 await msg.clear_reaction(REPOST_EMOJI)
+            except Exception:
+                logger.exception("could not remove reaction")
             return ZOOM_CLOSED_MESSAGE
 
         await handle_close_reaction(
