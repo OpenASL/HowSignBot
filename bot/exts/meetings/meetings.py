@@ -136,7 +136,7 @@ class Meetings(Cog):
 
     @zoom_group.command(
         name="start",
-        help="Reveal meeting details for a meeting started with the setup command.",
+        help="Reveal meeting details for a meeting started with the setup command",
     )
     @check(is_allowed_zoom_access)
     async def zoom_start(self, ctx: Context, meeting_id: Optional[int] = None):
@@ -196,7 +196,7 @@ class Meetings(Cog):
 
     @zoom_group.command(
         name="stop",
-        help="Remove meeting details for a meeting.",
+        help="Remove meeting details for a meeting",
     )
     @check(is_allowed_zoom_access)
     async def zoom_stop(self, ctx: Context, meeting_id: int):
@@ -217,8 +217,10 @@ class Meetings(Cog):
             message: discord.Message = await channel.fetch_message(message_id)
             messages.append(message)
             logger.info(
-                f"revealing meeting details for meeting {meeting_id} in channel {channel_id}, message {message_id}"
+                f"scrubbing meeting details for meeting {meeting_id} in channel {channel_id}, message {message_id}"
             )
+            with suppress(Exception):
+                await message.clear_reaction(REPOST_EMOJI)
             await message.edit(content=ZOOM_CLOSED_MESSAGE, embed=None)
         await store.end_zoom_meeting(meeting_id=meeting_id)
         if ctx.guild is None:
