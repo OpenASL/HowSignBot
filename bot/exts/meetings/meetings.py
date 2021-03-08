@@ -12,6 +12,7 @@ from bot.utils.reactions import (
     add_stop_sign,
     STOP_SIGN,
     get_reaction_message,
+    maybe_clear_reaction,
     should_handle_reaction,
 )
 from ._zoom import (
@@ -219,10 +220,7 @@ class Meetings(Cog):
                 f"scrubbing meeting details for meeting {meeting_id} in channel {channel_id}, message {message_id}"
             )
             await message.edit(content=ZOOM_CLOSED_MESSAGE, embed=None)
-            try:
-                await message.clear_reaction(REPOST_EMOJI)
-            except Exception:
-                logger.exception("could not remove reaction")
+            await maybe_clear_reaction(message, REPOST_EMOJI)
         await store.end_zoom_meeting(meeting_id=meeting_id)
         if ctx.guild is None:
             links = "\n".join(
@@ -273,14 +271,16 @@ class Meetings(Cog):
 
     @Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> None:
-        if should_handle_reaction(self.bot, payload, {"↩️"}):
+        if should_handle_reaction(self.bot, payload, {REPOST_EMOJI}):
             message = await get_reaction_message(self.bot, payload)
             if not message:
                 return
             zoom_message = await store.get_zoom_message(message.id)
             if not zoom_message:
                 return
-            await message.edit(content="✨ *Meeting details moved below.*", embed=None)
+            await message.edit(
+                content=f"{REPOST_EMOJI} *Meeting details moved below.*", embed=None
+            )
 
             new_message = await message.reply(
                 content="👐 **This meeting is still going**. Come on in!",
@@ -296,12 +296,12 @@ class Meetings(Cog):
                 )
                 await store.remove_zoom_message(message_id=zoom_message["message_id"])
 
+            await maybe_clear_reaction(message, REPOST_EMOJI)
+            return
+
         async def close_zoom_message(msg: discord.Message):
             await store.remove_zoom_message(message_id=msg.id)
-            try:
-                await msg.clear_reaction(REPOST_EMOJI)
-            except Exception:
-                logger.exception("could not remove reaction")
+            await maybe_clear_reaction(msg, REPOST_EMOJI)
             return ZOOM_CLOSED_MESSAGE
 
         await handle_close_reaction(

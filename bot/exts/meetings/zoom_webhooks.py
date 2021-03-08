@@ -10,6 +10,7 @@ import discord
 from discord.ext.commands import Bot
 from bot.database import store
 from bot import settings
+from bot.utils.reactions import maybe_clear_reaction
 from ._zoom import make_zoom_embed, REPOST_EMOJI
 
 logger = logging.getLogger(__name__)
@@ -108,10 +109,7 @@ async def handle_zoom_event(bot: Bot, data: dict):
                 discord_message: discord.Message = await channel.fetch_message(message_id)
                 await discord_message.edit(**edit_kwargs)
                 if event == "meeting.ended":
-                    try:
-                        await discord_message.clear_reaction(REPOST_EMOJI)
-                    except Exception:
-                        logger.exception("could not remove reaction")
+                    await maybe_clear_reaction(discord_message, REPOST_EMOJI)
 
 
 def setup(bot: Bot) -> None:
