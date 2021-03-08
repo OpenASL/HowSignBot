@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.16.0 (2021-03-08)
+### Feature
+* **zoom:** Change repost emoji; clear after clicking; bit o refactoring ([#162](https://github.com/OpenASL/HowSignBot/issues/162)) ([`205b883`](https://github.com/OpenASL/HowSignBot/commit/205b883587447b98c37243571fabbfbe1c16584a))
+
 ## v21.15.2 (2021-03-07)
 ### Fix
 * Log exception if reaction can't be cleared ([`f25b662`](https://github.com/OpenASL/HowSignBot/commit/f25b662ef2bd632c38cb2e978650e0cf60349552))
