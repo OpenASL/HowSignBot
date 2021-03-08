@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 COMMAND_PREFIX = settings.COMMAND_PREFIX
 
 REPOST_EMOJI = "↩️"
+REPOST_EMOJI_DELAY = 30
 ZOOM_CLOSED_MESSAGE = "✨ _Zoom meeting ended_"
 
 FACES = (
@@ -192,13 +193,15 @@ class ZoomCreateError(errors.CommandError):
     pass
 
 
-async def add_repost_after_delay_impl(message: discord.Message, delay: int = 2):
+async def add_repost_after_delay_impl(message: discord.Message, delay: int):
     await asyncio.sleep(delay)
     with suppress(Exception):
         await message.add_reaction(REPOST_EMOJI)
 
 
-def add_repost_after_delay(bot: Bot, message: discord.Message, delay: int = 30):
+def add_repost_after_delay(
+    bot: Bot, message: discord.Message, delay: int = REPOST_EMOJI_DELAY
+):
     bot.loop.create_task(add_repost_after_delay_impl(message, delay))
 
 

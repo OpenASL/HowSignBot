@@ -1,5 +1,6 @@
 import logging
 from typing import List, Optional, cast
+from contextlib import suppress
 
 import discord
 from discord.ext.commands import Bot, Context, Cog, errors, group, check, command
@@ -20,6 +21,7 @@ from ._zoom import (
     zoom_impl,
     is_allowed_zoom_access,
     ZOOM_CLOSED_MESSAGE,
+    REPOST_EMOJI,
     ZoomCreateError,
 )
 
@@ -293,6 +295,8 @@ class Meetings(Cog):
 
         async def close_zoom_message(msg: discord.Message):
             await store.remove_zoom_message(message_id=msg.id)
+            with suppress(Exception):
+                await msg.clear_reaction(REPOST_EMOJI)
             return ZOOM_CLOSED_MESSAGE
 
         await handle_close_reaction(

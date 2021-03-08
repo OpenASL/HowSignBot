@@ -2,14 +2,16 @@ import asyncio
 import datetime as dt
 import logging
 from typing import cast
+from contextlib import suppress
 
 import dateparser
 from aiohttp import web
 
+import discord
 from discord.ext.commands import Bot
 from bot.database import store
 from bot import settings
-from ._zoom import make_zoom_embed
+from ._zoom import make_zoom_embed, REPOST_EMOJI
 
 logger = logging.getLogger(__name__)
 
@@ -104,8 +106,11 @@ async def handle_zoom_event(bot: Bot, data: dict):
             channel = bot.get_channel(channel_id)
             if edit_kwargs:
                 logger.info(f"editing zoom message {message_id} for event {event}")
-                discord_message = await channel.fetch_message(message_id)
+                discord_message: discord.Message = await channel.fetch_message(message_id)
                 await discord_message.edit(**edit_kwargs)
+                if event == "meeting.ended":
+                    with suppress(Exception):
+                        await discord_message.clear_reaction(REPOST_EMOJI)
 
 
 def setup(bot: Bot) -> None:
