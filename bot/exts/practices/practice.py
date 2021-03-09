@@ -119,7 +119,7 @@ Enter `{COMMAND_PREFIX}schedule` to see today's schedule.
 
 def parse_practice_time(
     human_readable_datetime: str, user_timezone: Optional[pytz.BaseTzInfo] = None
-) -> Tuple[Optional[dt.datetime], Optional[pytz.BaseTzInfo]]:
+) -> Tuple[Optional[dt.datetime], Optional[dt.tzinfo]]:
     # First try current_period to capture dates in the near future
     dtime, used_timezone = parse_human_readable_datetime(
         human_readable_datetime,

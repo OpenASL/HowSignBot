@@ -50,7 +50,7 @@ def parse_human_readable_datetime(
     user_timezone: Optional[pytz.BaseTzInfo] = None,
     # By default, use Pacific time if timezone can't be parsed
     fallback_timezone: Optional[pytz.BaseTzInfo] = PACIFIC,
-) -> Tuple[Optional[dt.datetime], Optional[pytz.BaseTzInfo]]:
+) -> Tuple[Optional[dt.datetime], Optional[dt.tzinfo]]:
     parsed = dateparser.parse(dstr, settings=settings)
     if parsed is None:
         return None, None

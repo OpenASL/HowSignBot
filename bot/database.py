@@ -9,7 +9,6 @@ from typing import Union
 import databases
 import pytz
 import sqlalchemy as sa
-from databases.backends.postgres import Record
 from sqlalchemy import sql
 from sqlalchemy.dialects.postgresql import BIGINT
 from sqlalchemy.dialects.postgresql import insert
@@ -158,7 +157,7 @@ class Store:
     def transaction(self):
         return self.db.transaction()
 
-    async def set_user_timezone(self, user_id: int, timezone: Optional[pytz.BaseTzInfo]):
+    async def set_user_timezone(self, user_id: int, timezone: Optional[dt.tzinfo]):
         logger.info(f"setting timezone for user_id {user_id}")
         stmt = insert(user_settings).values(user_id=user_id, timezone=timezone)
         stmt = stmt.on_conflict_do_update(
@@ -172,7 +171,7 @@ class Store:
         query = user_settings.select().where(user_settings.c.user_id == user_id)
         return await self.db.fetch_val(query=query, column=user_settings.c.timezone)
 
-    async def get_guild_settings(self, guild_id: int) -> Record:
+    async def get_guild_settings(self, guild_id: int) -> Optional[Mapping]:
         logger.info(f"retrieving guild settings sheet key for guild_id {guild_id}")
         query = guild_settings.select().where(guild_settings.c.guild_id == guild_id)
         return await self.db.fetch_one(query=query)
@@ -201,7 +200,9 @@ class Store:
             )
         )
         record = await self.db.fetch_one(select)
-        return record.get("result")
+        if not record:
+            return False
+        return record["result"]
 
     async def get_guild_ids_with_practice_schedules(self) -> Iterator[int]:
         all_settings = await self.db.fetch_all(
@@ -209,7 +210,7 @@ class Store:
                 guild_settings.c.daily_message_channel_id != NULL
             )
         )
-        return (record.get("guild_id") for record in all_settings)
+        return (record["guild_id"] for record in all_settings)
 
     async def get_daily_message_channel_ids(self) -> Iterator[int]:
         all_settings = await self.db.fetch_all(
@@ -217,7 +218,7 @@ class Store:
                 guild_settings.c.daily_message_channel_id != NULL
             )
         )
-        return (record.get("daily_message_channel_id") for record in all_settings)
+        return (record["daily_message_channel_id"] for record in all_settings)
 
     # Zoom
 
@@ -245,11 +246,13 @@ class Store:
         )
         await self.db.execute(stmt)
 
-    async def get_zoom_meeting(self, meeting_id: int) -> Record:
+    async def get_zoom_meeting(self, meeting_id: int) -> Optional[Mapping]:
         query = zoom_meetings.select().where(zoom_meetings.c.meeting_id == meeting_id)
         return await self.db.fetch_one(query=query)
 
-    async def get_latest_pending_zoom_meeting_for_user(self, zoom_user: str) -> Record:
+    async def get_latest_pending_zoom_meeting_for_user(
+        self, zoom_user: str
+    ) -> Optional[Mapping]:
         query = (
             zoom_meetings.select()
             .where(
@@ -287,7 +290,9 @@ class Store:
             (sa.exists().where(zoom_meetings.c.meeting_id == meeting_id).label("result"),)
         )
         record = await self.db.fetch_one(select)
-        return record.get("result")
+        if not record:
+            return False
+        return record["result"]
 
     async def create_zoom_message(
         self, *, meeting_id: int, message_id: int, channel_id: int
@@ -347,14 +352,16 @@ class Store:
         )
         await self.db.execute(stmt)
 
-    async def get_zoom_participant(self, *, meeting_id: int, name: str) -> Record:
+    async def get_zoom_participant(
+        self, *, meeting_id: int, name: str
+    ) -> Optional[Mapping]:
         query = zoom_participants.select().where(
             (zoom_participants.c.meeting_id == meeting_id)
             & (zoom_participants.c.name == name)
         )
         return await self.db.fetch_one(query=query)
 
-    async def get_zoom_participants(self, meeting_id: int) -> Iterator[Record]:
+    async def get_zoom_participants(self, meeting_id: int) -> List[Mapping]:
         return await self.db.fetch_all(
             zoom_participants.select()
             .where(zoom_participants.c.meeting_id == meeting_id)
