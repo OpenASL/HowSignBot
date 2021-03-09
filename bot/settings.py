@@ -30,6 +30,7 @@ ZOOM_USERS = env.dict("ZOOM_USERS", subcast_keys=int, required=True)
 ZOOM_EMAILS = {email: zoom_id for zoom_id, email in ZOOM_USERS.items()}
 ZOOM_JWT = env.str("ZOOM_JWT", required=True)
 ZOOM_HOOK_TOKEN = env.str("ZOOM_HOOK_TOKEN", required=True)
+ZOOM_REPOST_COOLDOWN = env.int("ZOOM_REPOST_COOLDOWN", 30)
 
 WATCH2GETHER_API_KEY = env.str("WATCH2GETHER_API_KEY", required=True)
 # When to send practice schedules (in Eastern time)
