@@ -84,9 +84,9 @@ class Meetings(Cog):
         await ctx.channel.trigger_typing()
 
         async def send_channel_message(mid: int):
-            return await ctx.send(embed=await make_zoom_embed(mid))
+            return await ctx.reply(embed=await make_zoom_embed(mid))
 
-        _, message = await zoom_impl(
+        await zoom_impl(
             ctx,
             meeting_id=meeting_id,
             send_channel_message=send_channel_message,
@@ -102,7 +102,7 @@ class Meetings(Cog):
         await ctx.channel.trigger_typing()
 
         async def send_channel_message(_):
-            return await ctx.channel.send(
+            return await ctx.reply(
                 embed=discord.Embed(
                     color=discord.Color.blue(),
                     title="✋ Stand By",
@@ -273,6 +273,13 @@ class Meetings(Cog):
 
         await add_stop_sign(message)
 
+    async def edit_meeting_moved(self, message: discord.Message) -> None:
+        await message.edit(
+            content=f"{REPOST_EMOJI} *Meeting details moved below.*",
+            embed=None,
+        )
+        await maybe_clear_reaction(message, REPOST_EMOJI)
+
     @Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> None:
         if should_handle_reaction(self.bot, payload, {REPOST_EMOJI}):
@@ -282,11 +289,26 @@ class Meetings(Cog):
             zoom_message = await store.get_zoom_message(message.id)
             if not zoom_message:
                 return
-            await message.edit(
-                content=f"{REPOST_EMOJI} *Meeting details moved below.*", embed=None
-            )
+            original_message = None
+            if message.reference:
+                if message.reference.cached_message:
+                    original_message = message.reference.cached_message
+                else:
+                    channel = self.bot.get_channel(message.channel.id)
+                    original_message = await channel.fetch_message(
+                        message.reference.message_id
+                    )
+            # Try to remove the old message and reply with a new message
+            if original_message:
+                try:
+                    await message.delete()
+                except Exception:
+                    await self.edit_meeting_moved(message)
+            else:
+                await self.edit_meeting_moved(message)
 
-            new_message = await message.reply(
+            send_method = original_message.reply if original_message else message.reply
+            new_message = await send_method(
                 content="👐 **This meeting is still going**. Come on in!",
                 embed=await make_zoom_embed(zoom_message["meeting_id"]),
             )
@@ -300,7 +322,6 @@ class Meetings(Cog):
                 )
                 await store.remove_zoom_message(message_id=zoom_message["message_id"])
 
-            await maybe_clear_reaction(message, REPOST_EMOJI)
             return
 
         async def close_zoom_message(msg: discord.Message):
