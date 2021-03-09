@@ -5,8 +5,12 @@ from aiohttp import web
 from . import __version__, settings
 from .app import app
 
-logging.basicConfig(level=settings.LOG_LEVEL)
-
+log_format = "%(asctime)s - %(name)s %(levelname)s: %(message)s"
+logging.getLogger("discord").setLevel(logging.WARNING)
+logging.basicConfig(
+    format=log_format,
+    level=settings.LOG_LEVEL,
+)
 logger = logging.getLogger(__name__)
 
 logger.info(f"starting bot version {__version__}")
