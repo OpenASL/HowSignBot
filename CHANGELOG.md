@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.18.0 (2021-03-08)
+### Feature
+* **zoom:** Explain ⏬ ([#166](https://github.com/OpenASL/HowSignBot/issues/166)) ([`c129093`](https://github.com/OpenASL/HowSignBot/commit/c1290935b4771ff27f4dc10ff0563d78c99ec793))
+
 ## v21.17.0 (2021-03-08)
 ### Feature
 * **zoom:** Allow setting repost cooldown via envvar ([`fbd8157`](https://github.com/OpenASL/HowSignBot/commit/fbd81571ebe2395728b5add962eadcd10a4ffd39))
