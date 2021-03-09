@@ -2,11 +2,16 @@ import logging
 from urllib.parse import quote_plus
 
 import discord
-from discord.ext.commands import Cog, Bot, Context, command, errors
+from discord.ext.commands import Bot
+from discord.ext.commands import Cog
+from discord.ext.commands import command
+from discord.ext.commands import Context
+from discord.ext.commands import errors
 
 import handshapes
 from bot import settings
-from bot.utils import get_spoiler_text, did_you_mean
+from bot.utils import did_you_mean
+from bot.utils import get_spoiler_text
 
 logger = logging.getLogger(__name__)
 

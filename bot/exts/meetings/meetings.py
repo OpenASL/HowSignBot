@@ -1,29 +1,33 @@
 import logging
-from typing import List, Optional, cast
+from typing import cast
+from typing import List
+from typing import Optional
 
 import discord
-from discord.ext.commands import Bot, Context, Cog, errors, group, check, command
+from discord.ext.commands import Bot
+from discord.ext.commands import check
+from discord.ext.commands import Cog
+from discord.ext.commands import command
+from discord.ext.commands import Context
+from discord.ext.commands import errors
+from discord.ext.commands import group
 
 import meetings
+from ._zoom import add_repost_after_delay
+from ._zoom import is_allowed_zoom_access
+from ._zoom import make_zoom_embed
+from ._zoom import REPOST_EMOJI
+from ._zoom import ZOOM_CLOSED_MESSAGE
+from ._zoom import zoom_impl
+from ._zoom import ZoomCreateError
 from bot import settings
 from bot.database import store
-from bot.utils.reactions import (
-    handle_close_reaction,
-    add_stop_sign,
-    STOP_SIGN,
-    get_reaction_message,
-    maybe_clear_reaction,
-    should_handle_reaction,
-)
-from ._zoom import (
-    make_zoom_embed,
-    add_repost_after_delay,
-    zoom_impl,
-    is_allowed_zoom_access,
-    ZOOM_CLOSED_MESSAGE,
-    REPOST_EMOJI,
-    ZoomCreateError,
-)
+from bot.utils.reactions import add_stop_sign
+from bot.utils.reactions import get_reaction_message
+from bot.utils.reactions import handle_close_reaction
+from bot.utils.reactions import maybe_clear_reaction
+from bot.utils.reactions import should_handle_reaction
+from bot.utils.reactions import STOP_SIGN
 
 logger = logging.getLogger(__name__)
 

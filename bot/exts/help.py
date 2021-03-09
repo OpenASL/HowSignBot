@@ -1,10 +1,13 @@
 # https://github.com/MusicOnline/Botto/blob/master/botto/modules/help.py
 import inspect
-from typing import Any, Dict, List, Optional
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
 
 import discord
-from discord.ext import commands
 import yaml
+from discord.ext import commands
 
 BotMapping = Dict[Optional[commands.Cog], List[commands.Command]]
 

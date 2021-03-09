@@ -1,6 +1,7 @@
-import re
 import difflib
-from typing import Optional, Tuple
+import re
+from typing import Optional
+from typing import Tuple
 
 _spoiler_pattern = re.compile(r"\s*\|\|\s*(.*)\s*\|\|\s*")
 _quotes_pattern = re.compile(r"[\"“](.*?)[\"”]")

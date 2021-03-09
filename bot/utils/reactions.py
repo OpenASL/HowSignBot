@@ -1,7 +1,12 @@
 import logging
 import re
 from contextlib import suppress
-from typing import Awaitable, Mapping, Optional, Iterable, Union, Callable
+from typing import Awaitable
+from typing import Callable
+from typing import Iterable
+from typing import Mapping
+from typing import Optional
+from typing import Union
 
 import discord
 from discord.ext.commands import Bot

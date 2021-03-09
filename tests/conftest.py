@@ -2,9 +2,10 @@ import os
 from contextlib import suppress
 
 import pytest
-from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import create_engine
-from sqlalchemy_utils import create_database, drop_database
+from sqlalchemy.exc import ProgrammingError
+from sqlalchemy_utils import create_database
+from sqlalchemy_utils import drop_database
 
 # Must be before bot import
 os.environ["TESTING"] = "true"

@@ -1,9 +1,12 @@
 import datetime as dt
-from typing import NamedTuple, Optional
+from typing import NamedTuple
+from typing import Optional
 
 import holidays
 from dateutil.easter import easter
-from dateutil.relativedelta import relativedelta as rd, FR, SU
+from dateutil.relativedelta import FR
+from dateutil.relativedelta import relativedelta as rd
+from dateutil.relativedelta import SU
 
 
 class Holiday(NamedTuple):

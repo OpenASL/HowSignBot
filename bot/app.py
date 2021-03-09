@@ -1,11 +1,12 @@
 import asyncio
 import logging
+
 from aiohttp import web
 
 from . import settings
 from .bot import bot
-from bot.utils.extensions import walk_extensions
 from .database import store
+from .utils.extensions import walk_extensions
 
 logger = logging.getLogger(__name__)
 

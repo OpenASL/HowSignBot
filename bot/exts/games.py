@@ -1,16 +1,22 @@
 import logging
 import random
 from contextlib import suppress
-from typing import Optional, Union, Sequence
+from typing import Optional
+from typing import Sequence
+from typing import Union
 
 import discord
-from discord.ext.commands import Context, Bot, Cog, command
+from discord.ext.commands import Bot
+from discord.ext.commands import Cog
+from discord.ext.commands import command
+from discord.ext.commands import Context
 
-import cuteid
 import catchphrase
+import cuteid
 from bot import settings
 from bot.utils import did_you_mean
-from bot.utils.reactions import should_handle_reaction, get_reaction_message
+from bot.utils.reactions import get_reaction_message
+from bot.utils.reactions import should_handle_reaction
 
 logger = logging.getLogger(__name__)
 
