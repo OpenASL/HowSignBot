@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.19.0 (2021-03-08)
+### Feature
+* **zoom:** Delete reposted zoom messages ([#167](https://github.com/OpenASL/HowSignBot/issues/167)) ([`ec4f68c`](https://github.com/OpenASL/HowSignBot/commit/ec4f68c1f605f9458d9b6313b175ac3c15dba649))
+
 ## v21.18.1 (2021-03-08)
 ### Fix
 * Rearrange ([`f3b2f1b`](https://github.com/OpenASL/HowSignBot/commit/f3b2f1b0d4dbee19967d81fa3f745781d1483f62))
