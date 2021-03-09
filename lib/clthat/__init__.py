@@ -1,7 +1,7 @@
 import itertools
 import json
-from pathlib import Path
 import random as _random
+from pathlib import Path
 
 
 HERE = Path(__file__).parent

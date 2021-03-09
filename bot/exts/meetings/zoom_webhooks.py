@@ -4,14 +4,15 @@ import logging
 from typing import cast
 
 import dateparser
-from aiohttp import web
-
 import discord
+from aiohttp import web
 from discord.ext.commands import Bot
-from bot.database import store
+
+from ._zoom import make_zoom_embed
+from ._zoom import REPOST_EMOJI
 from bot import settings
+from bot.database import store
 from bot.utils.reactions import maybe_clear_reaction
-from ._zoom import make_zoom_embed, REPOST_EMOJI
 
 logger = logging.getLogger(__name__)
 

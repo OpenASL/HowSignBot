@@ -1,10 +1,13 @@
 import base64
-import hmac
 import hashlib
-from typing import NamedTuple, Optional, Callable
+import hmac
+from typing import Callable
+from typing import NamedTuple
+from typing import Optional
 
 import aiohttp
 from slugify import slugify
+
 import cuteid
 
 

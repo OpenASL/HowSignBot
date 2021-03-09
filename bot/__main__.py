@@ -2,7 +2,8 @@ import logging
 
 from aiohttp import web
 
-from . import __version__, settings
+from . import __version__
+from . import settings
 from .app import app
 
 log_format = "%(asctime)s - %(name)s %(levelname)s: %(message)s"

@@ -3,12 +3,17 @@ from typing import Optional
 
 import discord
 from discord.ext import commands
-from discord.ext.commands import Bot, Cog, Context, command, is_owner
+from discord.ext.commands import Bot
+from discord.ext.commands import Cog
+from discord.ext.commands import command
+from discord.ext.commands import Context
+from discord.ext.commands import is_owner
 
-from bot import settings, __version__
+from bot import __version__
+from bot import settings
 from bot.bot import set_default_presence
-from bot.utils.gsheets import get_gsheet_client
 from bot.utils.datetimes import utcnow
+from bot.utils.gsheets import get_gsheet_client
 
 logger = logging.getLogger(__name__)
 

@@ -1,10 +1,11 @@
 import datetime as dt
 
-from freezegun import freeze_time
 import pytest
 import pytz
+from freezegun import freeze_time
 
-from bot.utils.datetimes import parse_human_readable_datetime, display_timezone
+from bot.utils.datetimes import display_timezone
+from bot.utils.datetimes import parse_human_readable_datetime
 
 
 @pytest.mark.parametrize(

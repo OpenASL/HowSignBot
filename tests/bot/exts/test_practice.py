@@ -2,9 +2,9 @@ import os
 import random
 from unittest import mock
 
+import gspread
 import pytest
 import pytz
-import gspread
 from asynctest import patch
 from discord.ext import commands
 from freezegun import freeze_time

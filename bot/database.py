@@ -1,13 +1,19 @@
 import datetime as dt
 import logging
-from typing import Optional, Union, Iterator, Mapping, List
+from typing import Iterator
+from typing import List
+from typing import Mapping
+from typing import Optional
+from typing import Union
 
 import databases
 import pytz
-from databases.backends.postgres import Record
 import sqlalchemy as sa
+from databases.backends.postgres import Record
 from sqlalchemy import sql
-from sqlalchemy.dialects.postgresql import insert, BIGINT, TIMESTAMP as _TIMESTAMP
+from sqlalchemy.dialects.postgresql import BIGINT
+from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.dialects.postgresql import TIMESTAMP as _TIMESTAMP
 from sqlalchemy.sql.schema import ForeignKey
 
 from . import settings

@@ -1,20 +1,28 @@
 import asyncio
 import logging
 import random
-from typing import Sequence, List, Optional, Callable, Awaitable, Tuple
+from typing import Awaitable
+from typing import Callable
+from typing import List
+from typing import Optional
+from typing import Sequence
+from typing import Tuple
 
 import discord
 from aiohttp import client
 from databases.backends.postgres import Record
-from discord.ext.commands import Context, errors, Bot
+from discord.ext.commands import Bot
+from discord.ext.commands import Context
+from discord.ext.commands import errors
 from nameparser import HumanName
 
 import holiday_emojis
 import meetings
 from bot import settings
-from bot.utils.datetimes import utcnow, PACIFIC
-from bot.utils.reactions import maybe_add_reaction
 from bot.database import store
+from bot.utils.datetimes import PACIFIC
+from bot.utils.datetimes import utcnow
+from bot.utils.reactions import maybe_add_reaction
 
 logger = logging.getLogger(__name__)
 

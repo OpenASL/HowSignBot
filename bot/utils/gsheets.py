@@ -2,13 +2,11 @@ import gspread
 from google.auth.crypt._python_rsa import RSASigner
 from google.oauth2.service_account import Credentials
 
-from bot.settings import (
-    GOOGLE_PRIVATE_KEY,
-    GOOGLE_PRIVATE_KEY_ID,
-    GOOGLE_CLIENT_EMAIL,
-    GOOGLE_TOKEN_URI,
-    GOOGLE_PROJECT_ID,
-)
+from bot.settings import GOOGLE_CLIENT_EMAIL
+from bot.settings import GOOGLE_PRIVATE_KEY
+from bot.settings import GOOGLE_PRIVATE_KEY_ID
+from bot.settings import GOOGLE_PROJECT_ID
+from bot.settings import GOOGLE_TOKEN_URI
 
 
 def get_gsheet_client():
