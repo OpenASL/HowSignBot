@@ -159,7 +159,7 @@ async def make_zoom_embed(
     )
     if include_instructions:
         embed.set_footer(
-            text=f"{REPOST_EMOJI} = Move to bottom of channel | This message will be cleared when the meeting ends."
+            text=f"This message will be cleared when the meeting ends. | {REPOST_EMOJI} Move to bottom of channel"
         )
 
     participants = tuple(await store.get_zoom_participants(meeting_id))
