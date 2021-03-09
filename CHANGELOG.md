@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.17.0 (2021-03-08)
+### Feature
+* **zoom:** Allow setting repost cooldown via envvar ([`fbd8157`](https://github.com/OpenASL/HowSignBot/commit/fbd81571ebe2395728b5add962eadcd10a4ffd39))
+
 ## v21.16.0 (2021-03-08)
 ### Feature
 * **zoom:** Change repost emoji; clear after clicking; bit o refactoring ([#162](https://github.com/OpenASL/HowSignBot/issues/162)) ([`205b883`](https://github.com/OpenASL/HowSignBot/commit/205b883587447b98c37243571fabbfbe1c16584a))
