@@ -4,13 +4,13 @@ import random
 from typing import Awaitable
 from typing import Callable
 from typing import List
+from typing import Mapping
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
 
 import discord
 from aiohttp import client
-from databases.backends.postgres import Record
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
 from discord.ext.commands import errors
@@ -90,7 +90,7 @@ FACES = (
 
 
 def display_participant_names(
-    participants: Sequence[Record], meeting: Record, max_to_display: int = 15
+    participants: Sequence[Mapping], meeting: Mapping, max_to_display: int = 15
 ) -> str:
     names: List[str] = []
     for participant in participants:
@@ -135,8 +135,10 @@ async def make_zoom_embed(
     meeting_id: int,
     *,
     include_instructions: bool = True,
-) -> discord.Embed:
+) -> Optional[discord.Embed]:
     meeting = await store.get_zoom_meeting(meeting_id)
+    if not meeting:
+        return None
     title = f"<{meeting['join_url']}>"
     description = f"**Meeting ID:**: {meeting_id}\n**Passcode**: {meeting['passcode']}"
     if meeting["topic"]:

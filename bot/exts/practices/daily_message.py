@@ -116,6 +116,8 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
         file_ = None
 
         settings = await store.get_guild_settings(guild.id)
+        if not settings:
+            return
 
         holiday = holiday_emojis.get(dtime.date())
         if holiday and holiday.term is not None:
