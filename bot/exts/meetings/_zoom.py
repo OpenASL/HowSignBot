@@ -144,7 +144,10 @@ async def make_zoom_embed(
     if meeting["topic"]:
         description = f"{description}\n**Topic**: {meeting['topic']}"
     if include_instructions:
-        description += "\n🚀 This meeting is happening now. Go practice!\n**If you're in the waiting room for more than 10 seconds, @-mention the host below with your Zoom display name.**"
+        description += (
+            "\n🚀 This meeting is happening now. Go practice!\n"
+            "**If you're in the waiting room for more than 10 seconds, @-mention the host below with your Zoom display name.**"
+        )
     embed = discord.Embed(
         color=discord.Color.blue(),
     )
@@ -155,7 +158,9 @@ async def make_zoom_embed(
         icon_url="https://user-images.githubusercontent.com/2379650/109329673-df945f80-7828-11eb-9e35-1b60b6e7bb93.png",
     )
     if include_instructions:
-        embed.set_footer(text="This message will be cleared when the meeting ends.")
+        embed.set_footer(
+            text=f"{REPOST_EMOJI} = Move to bottom of channel | This message will be cleared when the meeting ends."
+        )
 
     participants = tuple(await store.get_zoom_participants(meeting_id))
     if participants:
