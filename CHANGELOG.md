@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.20.0 (2021-03-09)
+### Feature
+* **asl:** Reply to messages to ensure correct ordering; help formatting ([#170](https://github.com/OpenASL/HowSignBot/issues/170)) ([`a8395cc`](https://github.com/OpenASL/HowSignBot/commit/a8395cc27405bb337af6d375bb4c98df79f1b453))
+
 ## v21.19.0 (2021-03-08)
 ### Feature
 * **zoom:** Delete reposted zoom messages ([#167](https://github.com/OpenASL/HowSignBot/issues/167)) ([`ec4f68c`](https://github.com/OpenASL/HowSignBot/commit/ec4f68c1f605f9458d9b6313b175ac3c15dba649))
