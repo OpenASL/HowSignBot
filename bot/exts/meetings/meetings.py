@@ -40,8 +40,10 @@ WATCH2GETHER_HELP = """Start a watch2gether session
 You can optionally pass a URL to use for the first video.
 
 Examples:
+```
 {COMMAND_PREFIX}w2g
 {COMMAND_PREFIX}w2g https://www.youtube.com/watch?v=DaMjr4AfYA0
+```
 """.format(
     COMMAND_PREFIX=COMMAND_PREFIX
 )

@@ -39,10 +39,12 @@ If the word or phrase is sent in spoiler text, i.e. enclosed in `||`, the word w
 To search multiple words/phrases, separate the values with a comma.
 
 Examples:
+```
 {COMMAND_PREFIX}sign tiger
 {COMMAND_PREFIX}sign ||tiger||
 {COMMAND_PREFIX}sign what's up
 {COMMAND_PREFIX}sign church, chocolate, computer
+```
 """.format(
     COMMAND_PREFIX=COMMAND_PREFIX
 )
@@ -89,10 +91,11 @@ def sign_impl(word: str):
 HANDSHAPE_HELP = """Show a random or specific handshape
 
 Examples:
+```
 {COMMAND_PREFIX}handshape
 {COMMAND_PREFIX}handshape claw5
-
-Enter {COMMAND_PREFIX}handshapes to show a list of handshapes.
+```
+Enter `{COMMAND_PREFIX}handshapes` to show a list of handshapes.
 """.format(
     COMMAND_PREFIX=COMMAND_PREFIX
 )
@@ -155,7 +158,7 @@ class ASL(Cog):
 
     @command(name="sign", aliases=("howsign", COMMAND_PREFIX), help=SIGN_HELP)
     async def sign_command(self, ctx: Context, *, word: str):
-        await ctx.send(**sign_impl(word))
+        await ctx.reply(**sign_impl(word))
 
     @sign_command.error
     async def sign_error(self, ctx: Context, error: Exception):
@@ -172,12 +175,12 @@ class ASL(Cog):
 
     @command(name="handshape", aliases=("shape",), help=HANDSHAPE_HELP)
     async def handshape_command(self, ctx: Context, name="random"):
-        await ctx.send(**handshape_impl(name))
+        await ctx.reply(**handshape_impl(name))
 
     @command(name="handshapes", aliases=("shapes",), help=HANDSHAPES_HELP)
     async def handshapes_command(self, ctx: Context):
         logger.info("sending handshapes list")
-        await ctx.send(**handshapes_impl())
+        await ctx.reply(**handshapes_impl())
 
 
 def setup(bot: Bot) -> None:

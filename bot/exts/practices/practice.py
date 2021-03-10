@@ -56,11 +56,13 @@ Defaults to sending today's schedule.
 Must be used within a server (not a DM).
 
 Examples:
+```
 {COMMAND_PREFIX}schedule
 {COMMAND_PREFIX}schedule tomorrow
 {COMMAND_PREFIX}schedule friday
 {COMMAND_PREFIX}schedule Sept 29
 {COMMAND_PREFIX}schedule 10/3
+```
 """.format(
     COMMAND_PREFIX=COMMAND_PREFIX
 )
@@ -98,11 +100,13 @@ Tips:
 * You may optionally add notes within double quotes.
 
 Examples:
+```
 {COMMAND_PREFIX}practice today 2pm {pacific}
 {COMMAND_PREFIX}practice tomorrow 5pm {eastern} "chat for ~1 hour"
 {COMMAND_PREFIX}practice saturday 6pm {pacific} "Game night 🎉"
 {COMMAND_PREFIX}practice 9/24 6pm {eastern} "watch2gether session"
 {COMMAND_PREFIX}practice "classifiers" at 6pm {pacific}
+```
 """.format(
     COMMAND_PREFIX=COMMAND_PREFIX,
     pacific=PACIFIC_CURRENT_NAME.lower(),
