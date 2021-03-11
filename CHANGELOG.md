@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.20.1 (2021-03-10)
+### Fix
+* **meta:** Fix stats ([`5739952`](https://github.com/OpenASL/HowSignBot/commit/5739952eaa0d290cecd0f3cea64b590b5267d440))
+
 ## v21.20.0 (2021-03-09)
 ### Feature
 * **asl:** Reply to messages to ensure correct ordering; help formatting ([#170](https://github.com/OpenASL/HowSignBot/issues/170)) ([`a8395cc`](https://github.com/OpenASL/HowSignBot/commit/a8395cc27405bb337af6d375bb4c98df79f1b453))
