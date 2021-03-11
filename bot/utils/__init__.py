@@ -25,6 +25,12 @@ def get_and_strip_quoted_text(val: str) -> Tuple[str, Optional[str]]:
     return val, None
 
 
+def truncate(s: str, max_len: int):
+    if len(s) > max_len:
+        return f"{s[:max_len]}..."
+    return s
+
+
 def did_you_mean(word, possibilities):
     try:
         return difflib.get_close_matches(word, possibilities, n=1, cutoff=0.5)[0]

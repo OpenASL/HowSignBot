@@ -12,6 +12,7 @@ from discord.ext.commands import is_owner
 from bot import __version__
 from bot import settings
 from bot.bot import set_default_presence
+from bot.utils import truncate
 from bot.utils.datetimes import utcnow
 from bot.utils.gsheets import get_gsheet_client
 
@@ -89,7 +90,8 @@ class Meta(Cog):
         )
         max_to_display = 50
         servers_display = "\n".join(
-            f"{guild.name} `{guild.member_count}`" for guild in self.bot.guilds
+            f"{truncate(guild.name, 20)} `{guild.member_count}`"
+            for guild in self.bot.guilds
         )
         remaining = max(n_guilds - max_to_display, 0)
         if remaining:
