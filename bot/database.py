@@ -4,6 +4,7 @@ from typing import Iterator
 from typing import List
 from typing import Mapping
 from typing import Optional
+from typing import Sequence
 from typing import Union
 
 import databases
@@ -132,6 +133,13 @@ zoom_participants = sa.Table(
         doc="Join time from webhook payload. Unlike created_at, this will be updated when a participant is moved to and from a breakout room.",
     ),
     created_at_column(),
+)
+
+topics = sa.Table(
+    "topics",
+    metadata,
+    sa.Column("content", sa.Text, primary_key=True),
+    sa.Column("last_synced_at", TIMESTAMP),
 )
 
 # -----------------------------------------------------------------------------
@@ -375,6 +383,24 @@ class Store:
                 & (zoom_participants.c.name == name)
             )
         )
+
+    # Topics
+
+    async def save_topics(self, all_topics: Sequence[str]) -> None:
+        last_synced_at = now()
+        await self.db.execute(topics.delete())
+        stmt = insert(topics).values(
+            [{"content": topic, "last_synced_at": last_synced_at} for topic in all_topics]
+        )
+        stmt = stmt.on_conflict_do_update(
+            index_elements=(topics.c.content,),
+            set_=dict(last_synced_at=stmt.excluded.last_synced_at),
+        )
+        await self.db.execute(stmt)
+
+    async def get_all_topics(self) -> Sequence[str]:
+        all_topics = await self.db.fetch_all(topics.select())
+        return [record["content"] for record in all_topics]
 
 
 store = Store(

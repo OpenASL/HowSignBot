@@ -2,6 +2,7 @@ import asyncio
 import logging
 
 from aiohttp import web
+import aiohttp_cors
 
 from . import settings
 from .bot import bot
@@ -12,6 +13,17 @@ logger = logging.getLogger(__name__)
 
 # Assign app to bot so that extensions can add routes
 bot.app = app = web.Application()
+
+app.cors = aiohttp_cors.setup(
+    app,
+    defaults={
+        "*": aiohttp_cors.ResourceOptions(
+            allow_credentials=False,
+            expose_headers="*",
+            allow_headers="*",
+        )
+    },
+)
 
 
 async def ping(_):
