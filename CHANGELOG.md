@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.20.2 (2021-03-13)
+### Fix
+* **practice:** Handle DST transition ([#173](https://github.com/OpenASL/HowSignBot/issues/173)) ([`b3e1247`](https://github.com/OpenASL/HowSignBot/commit/b3e1247f6a232f76c376a2bd6f8cd5d2f68976e8))
+
 ## v21.20.1 (2021-03-10)
 ### Fix
 * **meta:** Fix stats ([`5739952`](https://github.com/OpenASL/HowSignBot/commit/5739952eaa0d290cecd0f3cea64b590b5267d440))
