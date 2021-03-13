@@ -111,7 +111,15 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
         logger.info(f'sending daily message for guild: "{guild.name}" in #{channel.name}')
         guild_id = guild.id
         dtime = dtime or utcnow()
-        sessions = await get_practice_sessions(guild_id, dtime=dtime)
+        prefer_dates_from = (
+            "current_period" if dtime.date() <= dt.date.today() else "future"
+        )
+        parse_settings = {"PREFER_DATES_FROM": prefer_dates_from}
+        sessions = await get_practice_sessions(
+            guild_id,
+            dtime=dtime,
+            parse_settings=parse_settings,
+        )
         embed = await make_practice_session_embed(guild_id, sessions, dtime=dtime)
         file_ = None
 
