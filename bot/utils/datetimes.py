@@ -4,6 +4,7 @@ from typing import Tuple
 
 import dateparser
 import pytz
+from pytz.tzinfo import StaticTzInfo
 
 import pytz_informal
 
@@ -66,8 +67,10 @@ def parse_human_readable_datetime(
     return parsed.astimezone(dt.timezone.utc), used_timezone
 
 
-def display_timezone(tzinfo: dt.tzinfo, dtime: dt.datetime) -> str:
-    ret = tzinfo.tzname(dtime.replace(tzinfo=None))
+def display_timezone(tzinfo: StaticTzInfo, dtime: dt.datetime) -> str:
+    # Pass is_dst False to handle ambiguous datetimes
+    # NOTE: America/Los_Angeles will still display correctly as PDT after DST ends
+    ret = tzinfo.tzname(dtime.replace(tzinfo=None), is_dst=False)
     assert ret is not None
     return ret
 
