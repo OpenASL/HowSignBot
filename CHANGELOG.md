@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.22.0 (2021-03-14)
+### Feature
+* Sync topics to DB daily ([#176](https://github.com/OpenASL/HowSignBot/issues/176)) ([`f975335`](https://github.com/OpenASL/HowSignBot/commit/f9753359e238d79ae98275c029bbdec0b69d28d8))
+
 ## v21.21.0 (2021-03-13)
 ### Feature
 * Store topics in DB ([#174](https://github.com/OpenASL/HowSignBot/issues/174)) ([`d55af6e`](https://github.com/OpenASL/HowSignBot/commit/d55af6e8df543832c66f9fe33188493befe13ef8))
