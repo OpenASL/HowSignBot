@@ -2,6 +2,7 @@ import datetime as dt
 import logging
 import random
 
+import discord
 from aiohttp import web
 from discord.ext.commands import Bot
 from discord.ext.commands import Cog
@@ -11,6 +12,7 @@ from discord.ext.commands import is_owner
 
 from bot import settings
 from bot.database import store
+from bot.utils.datetimes import EASTERN
 from bot.utils.datetimes import utcnow
 from bot.utils.gsheets import get_gsheet_client
 
@@ -18,10 +20,16 @@ logger = logging.getLogger(__name__)
 
 # -----------------------------------------------------------------------------
 
+DAILY_SYNC_TIME = dt.time(7, 0)  # Eastern time
+
 
 class Topics(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
+
+    @Cog.listener()
+    async def on_ready(self):
+        self.bot.loop.create_task(self.daily_sync())
 
     @command(
         name="synctopics",
@@ -33,6 +41,18 @@ class Topics(Cog):
         await ctx.channel.trigger_typing()
         topics = await sync_topics()
         await ctx.reply(f"✅ Synced {len(topics)} topics.")
+
+    async def daily_sync(self):
+        while True:
+            now_eastern = dt.datetime.now(EASTERN)
+            date = now_eastern.date()
+            if now_eastern.time() > DAILY_SYNC_TIME:
+                date = now_eastern.date() + dt.timedelta(days=1)
+            then = EASTERN.localize(dt.datetime.combine(date, DAILY_SYNC_TIME))
+            logger.info(f"topics will be synced at at {then.isoformat()}")
+            await discord.utils.sleep_until(then.astimezone(dt.timezone.utc))
+            topics = await sync_topics()
+            logger.info(f"synced {len(topics)} topics")
 
 
 # -----------------------------------------------------------------------------
