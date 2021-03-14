@@ -1,8 +1,8 @@
 import asyncio
 import logging
 
-from aiohttp import web
 import aiohttp_cors
+from aiohttp import web
 
 from . import settings
 from .bot import bot
