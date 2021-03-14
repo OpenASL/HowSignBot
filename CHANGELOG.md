@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v21.21.0 (2021-03-13)
+### Feature
+* Store topics in DB ([#174](https://github.com/OpenASL/HowSignBot/issues/174)) ([`d55af6e`](https://github.com/OpenASL/HowSignBot/commit/d55af6e8df543832c66f9fe33188493befe13ef8))
+
+### Fix
+* Add missing dependency ([#175](https://github.com/OpenASL/HowSignBot/issues/175)) ([`97da66f`](https://github.com/OpenASL/HowSignBot/commit/97da66f9e991eeb0e8ecb5b0c9f73b751937a593))
+
 ## v21.20.2 (2021-03-13)
 ### Fix
 * **practice:** Handle DST transition ([#173](https://github.com/OpenASL/HowSignBot/issues/173)) ([`b3e1247`](https://github.com/OpenASL/HowSignBot/commit/b3e1247f6a232f76c376a2bd6f8cd5d2f68976e8))
