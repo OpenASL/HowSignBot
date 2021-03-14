@@ -23,7 +23,6 @@ from bot.exts.asl import word_display
 from bot.utils.datetimes import EASTERN
 from bot.utils.datetimes import parse_human_readable_datetime
 from bot.utils.datetimes import utcnow
-from bot.utils.gsheets import get_gsheet_client
 
 logger = logging.getLogger(__name__)
 
@@ -40,15 +39,10 @@ def get_daily_handshape(dtime: Optional[dt.datetime] = None) -> handshapes.Hands
     return handshapes.get_random_handshape(get_today_random(dtime))
 
 
-def get_daily_topics(dtime: Optional[dt.datetime] = None) -> Tuple[str, str]:
-    client = get_gsheet_client()
-    sheet = client.open_by_key(settings.TOPICS_SHEET_KEY)
-    worksheet = sheet.get_worksheet(0)
-    rows = worksheet.get_all_records()
-
+async def get_daily_topics(dtime: Optional[dt.datetime] = None) -> Tuple[str, str]:
+    topics = await store.get_all_topics()
     rand = get_today_random(dtime)
-
-    return (rand.choice(rows)["content"], rand.choice(rows)["content"])
+    return (rand.choice(topics), rand.choice(topics))
 
 
 def get_daily_clthat(dtime: Optional[dt.datetime] = None) -> str:
@@ -148,7 +142,7 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
             # Topics of the Day
             weekday = dtime.weekday()
             if settings.get("include_topics_of_the_day") and weekday in TOPIC_DAYS:
-                topic, topic2 = get_daily_topics(dtime)
+                topic, topic2 = await get_daily_topics(dtime)
                 embed.add_field(
                     name="Discuss...", value=f'"{topic}"\n\n"{topic2}"', inline=False
                 )
