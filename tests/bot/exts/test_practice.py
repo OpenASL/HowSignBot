@@ -39,6 +39,7 @@ async def mock_worksheet(monkeypatch, db):
             ["Wed 6pm edt", "", "another recurring", ""],
             ["9/26 2pm PDT 2020", "Steve", "one time", ""],
             ["Sunday, September 27 02:00 PM EDT 2020", "", "another 1️⃣", ""],
+            ["Nov 26 02:00 PM EDT 2020", "", "Turkey day PRACTICE", ""],
         ]
         mock_get_worksheet.return_value = mock_get_worksheet2.return_value = WorksheetMock
         yield WorksheetMock
