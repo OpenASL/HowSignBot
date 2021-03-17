@@ -139,22 +139,32 @@ async def make_zoom_embed(
     meeting = await store.get_zoom_meeting(meeting_id)
     if not meeting:
         return None
-    title = f"<{meeting['join_url']}>"
-    description = f"**Meeting ID:**: {meeting_id}\n**Passcode**: {meeting['passcode']}"
+    zzzzoom_meeting = await store.get_zzzzoom_meeting_for_zoom_meeting(
+        meeting_id=meeting_id
+    )
+    has_zzzzoom = bool(zzzzoom_meeting)
+    join_url = (
+        f"{settings.ZZZZOOM_URL}/asl/{zzzzoom_meeting['id']}"
+        if has_zzzzoom
+        else meeting["join_url"]
+    )
+    title = f"<{join_url}>"
+    description = f"**Meeting ID:**: {meeting_id}"
+    if not has_zzzzoom:
+        description += f"\n**Passcode**: {meeting['passcode']}"
     if meeting["topic"]:
         description = f"{description}\n**Topic**: {meeting['topic']}"
     if include_instructions:
-        description += (
-            "\n🚀 This meeting is happening now. Go practice!\n"
-            "**If you're in the waiting room for more than 10 seconds, @-mention the host below with your Zoom display name.**"
-        )
+        description += "\n🚀 This meeting is happening now. Go practice!"
+        if not has_zzzzoom:
+            description += "\n**If you're in the waiting room for more than 10 seconds, @-mention the host below with your Zoom display name.**"
     embed = discord.Embed(
         color=discord.Color.blue(),
     )
     embed.add_field(name=title, value=description)
     embed.set_author(
         name="Join Meeting",
-        url=meeting["join_url"],
+        url=join_url,
         icon_url="https://user-images.githubusercontent.com/2379650/109329673-df945f80-7828-11eb-9e35-1b60b6e7bb93.png",
     )
     if include_instructions:
@@ -180,7 +190,9 @@ def is_allowed_zoom_access(ctx: Context):
     return True
 
 
-async def maybe_create_zoom_meeting(zoom_user: str, meeting_id: int, set_up: bool):
+async def maybe_create_zoom_meeting(
+    zoom_user: str, meeting_id: int, set_up: bool, with_zzzzoom: bool
+):
     meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
     if not meeting_exists:
         try:
@@ -201,6 +213,8 @@ async def maybe_create_zoom_meeting(zoom_user: str, meeting_id: int, set_up: boo
                 topic=meeting.topic,
                 set_up=set_up,
             )
+            if with_zzzzoom:
+                await store.create_zzzzoom_meeting(meeting_id=meeting.id)
 
 
 class ZoomCreateError(errors.CommandError):
@@ -225,13 +239,16 @@ async def zoom_impl(
     meeting_id: Optional[int],
     send_channel_message: Callable[[int], Awaitable],
     set_up: bool,
+    with_zzzzoom: bool = False,
 ) -> Tuple[int, discord.Message]:
     zoom_user = settings.ZOOM_USERS[ctx.author.id]
     logger.info(f"creating zoom meeting for zoom user: {zoom_user}")
     message = None
     if meeting_id:
         async with store.transaction():
-            await maybe_create_zoom_meeting(zoom_user, meeting_id, set_up=set_up)
+            await maybe_create_zoom_meeting(
+                zoom_user, meeting_id, set_up=set_up, with_zzzzoom=with_zzzzoom
+            )
             message = await send_channel_message(meeting_id)
             if set_up:
                 add_repost_after_delay(ctx.bot, message)
@@ -252,7 +269,7 @@ async def zoom_impl(
                     "host_video": False,
                     "participant_video": False,
                     "mute_upon_entry": True,
-                    "waiting_room": True,
+                    "waiting_room": not with_zzzzoom,
                 },
             )
         except Exception as error:
@@ -270,6 +287,8 @@ async def zoom_impl(
                     topic=meeting.topic,
                     set_up=set_up,
                 )
+                if with_zzzzoom:
+                    await store.create_zzzzoom_meeting(meeting_id=meeting.id)
                 message = await send_channel_message(meeting.id)
                 if set_up:
                     add_repost_after_delay(ctx.bot, message)

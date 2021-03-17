@@ -83,17 +83,7 @@ class Meetings(Cog):
     @check(is_allowed_zoom_access)
     async def zoom_group(self, ctx: Context, meeting_id: Optional[int] = None):
         """AUTHORIZED USERS ONLY: Start a Zoom meeting"""
-        await ctx.channel.trigger_typing()
-
-        async def send_channel_message(mid: int):
-            return await ctx.reply(embed=await make_zoom_embed(mid))
-
-        await zoom_impl(
-            ctx,
-            meeting_id=meeting_id,
-            send_channel_message=send_channel_message,
-            set_up=True,
-        )
+        await self.zoom_group_impl(ctx, meeting_id=meeting_id, with_zzzzoom=False)
 
     @zoom_group.command(
         name="setup",
@@ -101,37 +91,7 @@ class Meetings(Cog):
     )
     @check(is_allowed_zoom_access)
     async def zoom_setup(self, ctx: Context, meeting_id: Optional[int] = None):
-        await ctx.channel.trigger_typing()
-
-        async def send_channel_message(_):
-            return await ctx.reply(
-                embed=discord.Embed(
-                    color=discord.Color.blue(),
-                    title="✋ Stand By",
-                    description="Zoom details will be posted here when the meeting is ready to start.",
-                )
-            )
-
-        meeting_id, _ = await zoom_impl(
-            ctx,
-            meeting_id=meeting_id,
-            send_channel_message=send_channel_message,
-            set_up=False,
-        )
-
-        zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
-        # DM zoom link and instructions once
-        if len(zoom_messages) <= 1:
-            await ctx.author.send(
-                content="🔨 Set up your meeting below",
-                embed=await make_zoom_embed(meeting_id, include_instructions=False),
-            )
-            await ctx.author.send(
-                "To post in another channel, send the following command in that channel:\n"
-                f"```{COMMAND_PREFIX}zoom setup {meeting_id}```\n"
-                "When you're ready for people to join, reply with:\n"
-                f"```{COMMAND_PREFIX}zoom start {meeting_id}```"
-            )
+        await self.zoom_setup_impl(ctx, meeting_id=meeting_id, with_zzzzoom=False)
 
     @zoom_group.error
     @zoom_setup.error
@@ -238,6 +198,76 @@ class Meetings(Cog):
             )
         else:
             await ctx.channel.send("🛑 Meeting details removed.")
+
+    @group(
+        name="zzzzoom",
+        aliases=("zzzoom", "zzzzzoom"),
+        invoke_without_command=True,
+    )
+    @check(is_allowed_zoom_access)
+    async def zzzzoom_group(self, ctx: Context, meeting_id: Optional[int] = None):
+        """AUTHORIZED USERS ONLY: Start a Zoom meeting and display the zzzzoom.us join URL instead of the normal join URL."""
+        await self.zoom_group_impl(ctx, meeting_id=meeting_id, with_zzzzoom=True)
+
+    @zzzzoom_group.command(
+        name="setup",
+        help="Set up a Zoom before revealing its details to other users. Useful for meetings that have breakout rooms.",
+    )
+    @check(is_allowed_zoom_access)
+    async def zzzzoom_setup(self, ctx: Context, meeting_id: Optional[int] = None):
+        await self.zoom_setup_impl(ctx, meeting_id=meeting_id, with_zzzzoom=True)
+
+    async def zoom_group_impl(
+        self, ctx: Context, *, meeting_id: Optional[int], with_zzzzoom: bool
+    ):
+        await ctx.channel.trigger_typing()
+
+        async def send_channel_message(mid: int):
+            return await ctx.reply(embed=await make_zoom_embed(mid))
+
+        await zoom_impl(
+            ctx,
+            meeting_id=meeting_id,
+            send_channel_message=send_channel_message,
+            set_up=True,
+            with_zzzzoom=with_zzzzoom,
+        )
+
+    async def zoom_setup_impl(
+        self, ctx: Context, meeting_id: Optional[int], with_zzzzoom: bool
+    ):
+        await ctx.channel.trigger_typing()
+
+        async def send_channel_message(_):
+            return await ctx.reply(
+                embed=discord.Embed(
+                    color=discord.Color.blue(),
+                    title="✋ Stand By",
+                    description="Zoom details will be posted here when the meeting is ready to start.",
+                )
+            )
+
+        meeting_id, _ = await zoom_impl(
+            ctx,
+            meeting_id=meeting_id,
+            send_channel_message=send_channel_message,
+            set_up=False,
+            with_zzzzoom=with_zzzzoom,
+        )
+
+        zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
+        # DM zoom link and instructions once
+        if len(zoom_messages) <= 1:
+            await ctx.author.send(
+                content="🔨 Set up your meeting below",
+                embed=await make_zoom_embed(meeting_id, include_instructions=False),
+            )
+            await ctx.author.send(
+                "To post in another channel, send the following command in that channel:\n"
+                f"```{COMMAND_PREFIX}zoom setup {meeting_id}```\n"
+                "When you're ready for people to join, reply with:\n"
+                f"```{COMMAND_PREFIX}zoom start {meeting_id}```"
+            )
 
     @command(name="meet", aliases=("jitsi",), help="Start a Jitsi Meet meeting")
     async def meet_command(self, ctx: Context, *, name: Optional[str]):

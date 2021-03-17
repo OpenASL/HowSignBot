@@ -6,6 +6,7 @@ from environs import Env
 env = Env(eager=False)
 env.read_env()
 
+DEBUG = env.bool("DEBUG", False)
 DATABASE_URL = DatabaseURL(env.str("DATABASE_URL", required=True))
 TEST_DATABASE_URL = DATABASE_URL.replace(database="test_" + DATABASE_URL.database)
 TESTING = env.bool("TESTING", cast=bool, default=False)
@@ -32,6 +33,7 @@ ZOOM_EMAILS = {email: zoom_id for zoom_id, email in ZOOM_USERS.items()}
 ZOOM_JWT = env.str("ZOOM_JWT", required=True)
 ZOOM_HOOK_TOKEN = env.str("ZOOM_HOOK_TOKEN", required=True)
 ZOOM_REPOST_COOLDOWN = env.int("ZOOM_REPOST_COOLDOWN", 30)
+ZZZZOOM_URL = env.str("ZZZZOOM_URL", "https://zzzzoom.us")
 
 WATCH2GETHER_API_KEY = env.str("WATCH2GETHER_API_KEY", required=True)
 # When to send practice schedules (in Eastern time)
