@@ -8,6 +8,7 @@ from typing import Sequence
 from typing import Union
 
 import databases
+import nanoid
 import pytz
 import sqlalchemy as sa
 from sqlalchemy import sql
@@ -48,6 +49,13 @@ class TIMESTAMP(sa.TypeDecorator):
 
 def created_at_column(name="created_at", **kwargs):
     return sa.Column(name, TIMESTAMP, nullable=False, default=now, **kwargs)
+
+
+ALPHABET = "0123456789ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+
+
+def generate_nanoid() -> str:
+    return nanoid.generate(alphabet=ALPHABET)
 
 
 # -----------------------------------------------------------------------------
@@ -104,6 +112,18 @@ zoom_meetings = sa.Table(
     sa.Column("topic", sa.Text, nullable=False),
     sa.Column("host_id", sa.Text, doc="Last cached zoom ID of the host"),
     sa.Column("setup_at", TIMESTAMP),
+    created_at_column(),
+)
+
+zzzzoom_meetings = sa.Table(
+    "zzzzoom_meetings",
+    metadata,
+    sa.Column("id", sa.String(32), primary_key=True),
+    sa.Column(
+        "meeting_id",
+        ForeignKey(zoom_meetings.c.meeting_id, ondelete="CASCADE"),
+        index=True,
+    ),
     created_at_column(),
 )
 
@@ -285,6 +305,9 @@ class Store:
         await self.db.execute(
             zoom_messages.delete().where(zoom_messages.c.meeting_id == meeting_id)
         )
+        await self.db.execute(
+            zzzzoom_meetings.delete().where(zzzzoom_meetings.c.meeting_id == meeting_id)
+        )
 
     async def set_zoom_meeting_host_id(self, meeting_id: int, *, host_id: str):
         await self.db.execute(
@@ -383,6 +406,40 @@ class Store:
                 & (zoom_participants.c.name == name)
             )
         )
+
+    # zzzzoom
+
+    async def create_zzzzoom_meeting(self, *, meeting_id: int):
+        created_at = now()
+        stmt = insert(zzzzoom_meetings).values(
+            id=generate_nanoid(),
+            created_at=created_at,
+            meeting_id=meeting_id,
+        )
+        await self.db.execute(stmt)
+
+    async def get_zzzzoom_meeting(self, id: str):
+        query = zzzzoom_meetings.select().where(zzzzoom_meetings.c.id == id)
+        return await self.db.fetch_one(query=query)
+
+    async def get_zzzzoom_meeting_for_zoom_meeting(self, meeting_id: int):
+        query = zzzzoom_meetings.select().where(
+            zzzzoom_meetings.c.meeting_id == meeting_id
+        )
+        return await self.db.fetch_one(query=query)
+
+    async def zoom_meeting_has_zzzzoom(self, meeting_id: int) -> bool:
+        select = sa.select(
+            (
+                sa.exists()
+                .where(zzzzoom_meetings.c.meeting_id == meeting_id)
+                .label("result"),
+            )
+        )
+        record = await self.db.fetch_one(select)
+        if not record:
+            return False
+        return record["result"]
 
     # Topics
 

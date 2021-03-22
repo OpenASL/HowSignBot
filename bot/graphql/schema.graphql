@@ -1,0 +1,7 @@
+type Query {
+  meeting(id: String!): Meeting!
+}
+
+type Meeting {
+  url: String!
+}

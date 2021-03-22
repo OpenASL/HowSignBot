@@ -3,10 +3,13 @@ import logging
 
 import aiohttp_cors
 from aiohttp import web
+from ariadne import graphql
+from ariadne.constants import PLAYGROUND_HTML
 
 from . import settings
 from .bot import bot
 from .database import store
+from .graphql.schema import schema
 from .utils.extensions import walk_extensions
 
 logger = logging.getLogger(__name__)
@@ -14,7 +17,7 @@ logger = logging.getLogger(__name__)
 # Assign app to bot so that extensions can add routes
 bot.app = app = web.Application()
 
-app.cors = aiohttp_cors.setup(
+app.cors = cors = aiohttp_cors.setup(
     app,
     defaults={
         "*": aiohttp_cors.ResourceOptions(
@@ -30,7 +33,25 @@ async def ping(_):
     return web.Response(body="", status=200)
 
 
+def graphql_playground(_):
+    return web.Response(text=PLAYGROUND_HTML, status=200, content_type="text/html")
+
+
+async def graphql_server(request):
+    data = await request.json()
+
+    success, result = await graphql(
+        schema, data, context_value=request, debug=settings.DEBUG
+    )
+
+    status = 200 if success else 400
+    return web.json_response(result, status=status)
+
+
 app.add_routes([web.get("/ping", ping)])
+resource = bot.app.router.add_resource("/graphql")
+resource.add_route("GET", graphql_playground)
+cors.add(resource.add_route("POST", graphql_server))
 
 
 async def start_bot():
