@@ -2,6 +2,7 @@
   <class 'tuple'> (
     'Friday, September 25 06:00 PM PDT 2020',
     'Steve',
+    '<@!12345>',
     'classifiers',
   )
 ---
@@ -9,6 +10,7 @@
   <class 'tuple'> (
     'Sunday, September 27 10:00 AM EDT 2020',
     'Steve',
+    '<@!12345>',
     'games',
   )
 ---
@@ -16,6 +18,7 @@
   <class 'tuple'> (
     'Sunday, September 27 10:00 AM EDT 2020',
     'Steve',
+    '<@!12345>',
     'games',
   )
 ---
@@ -23,6 +26,7 @@
   <class 'tuple'> (
     'Sunday, September 27 10:00 AM EDT 2020',
     'Steve',
+    '<@!12345>',
     'games',
   )
 ---
@@ -30,6 +34,7 @@
   <class 'tuple'> (
     'Sunday, September 27 10:00 AM EDT 2020',
     'Steve',
+    '<@!12345>',
     'games',
   )
 ---
@@ -37,6 +42,7 @@
   <class 'tuple'> (
     'Friday, September 25 02:00 PM EDT 2020',
     'Steve',
+    '<@!12345>',
     'chat and games! 🎉',
   )
 ---
@@ -44,6 +50,7 @@
   <class 'tuple'> (
     'Friday, September 25 02:00 PM EDT 2020',
     'Steve',
+    '<@!12345>',
     '',
   )
 ---
@@ -51,6 +58,7 @@
   <class 'tuple'> (
     'Friday, September 24 01:45 PM EDT 2021',
     'Steve',
+    '<@!12345>',
     'around 45 min.-1 hour',
   )
 ---
@@ -58,6 +66,7 @@
   <class 'tuple'> (
     'Sunday, September 27 09:00 AM CDT 2020',
     'Steve',
+    '<@!12345>',
     '',
   )
 ---
@@ -65,6 +74,7 @@
   <class 'tuple'> (
     'Friday, September 25 02:00 PM EDT 2020',
     'Steve',
+    '<@!12345>',
     '',
   )
 ---
@@ -72,6 +82,7 @@
   <class 'tuple'> (
     'Sunday, September 27 10:30 PM PDT 2020',
     'Steve',
+    '<@!12345>',
     '',
   )
 ---
@@ -79,6 +90,7 @@
   <class 'tuple'> (
     'Saturday, September 26 02:00 PM PDT 2020',
     'Steve',
+    '<@!12345>',
     '',
   )
 ---
@@ -115,7 +127,7 @@
       colour=<Colour value=15105570>,
       description='Today - Friday, September 25',
       fields=<class 'list'> [
-        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[Add to Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+recurring&dates=20200925T210000Z%2F20200925T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: Steve\n> Notes: recurring'),
+        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[Add to Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+recurring&dates=20200925T210000Z%2F20200925T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: <@!12345>\n> Notes: recurring'),
         EmbedProxy(inline=True, name='🗓 View or edit the schedule using the link below.', value='[Full schedule](https://docs.google.com/spreadsheets/d/abc/edit)'),
       ],
       footer=EmbedProxy(),
@@ -139,7 +151,7 @@
       colour=<Colour value=15105570>,
       description='Tomorrow - Saturday, September 26',
       fields=<class 'list'> [
-        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[Add to Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+one+time&dates=20200926T210000Z%2F20200926T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: Steve\n> Notes: one time'),
+        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[Add to Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+one+time&dates=20200926T210000Z%2F20200926T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: <@!12345>\n> Notes: one time'),
         EmbedProxy(inline=True, name='🗓 View or edit the schedule using the link below.', value='[Full schedule](https://docs.google.com/spreadsheets/d/abc/edit)'),
       ],
       footer=EmbedProxy(),
@@ -163,7 +175,7 @@
       colour=<Colour value=15105570>,
       description='Today - Friday, September 25',
       fields=<class 'list'> [
-        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[Add to Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+recurring&dates=20200925T210000Z%2F20200925T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: Steve\n> Notes: recurring'),
+        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[Add to Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+recurring&dates=20200925T210000Z%2F20200925T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: <@!12345>\n> Notes: recurring'),
         EmbedProxy(inline=True, name='🗓 View or edit the schedule using the link below.', value='[Full schedule](https://docs.google.com/spreadsheets/d/abc/edit)'),
       ],
       footer=EmbedProxy(),
@@ -187,7 +199,7 @@
       colour=<Colour value=15105570>,
       description='Tomorrow - Saturday, September 26',
       fields=<class 'list'> [
-        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[Add to Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+one+time&dates=20200926T210000Z%2F20200926T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: Steve\n> Notes: one time'),
+        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[Add to Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+one+time&dates=20200926T210000Z%2F20200926T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: <@!12345>\n> Notes: one time'),
         EmbedProxy(inline=True, name='🗓 View or edit the schedule using the link below.', value='[Full schedule](https://docs.google.com/spreadsheets/d/abc/edit)'),
       ],
       footer=EmbedProxy(),
