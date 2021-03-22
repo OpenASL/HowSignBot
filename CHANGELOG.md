@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.23.1 (2021-03-21)
+### Fix
+* Add missing dependency ([`c556769`](https://github.com/OpenASL/HowSignBot/commit/c5567697db327167fd3f97e8da443f2ec590cd8b))
+
 ## v21.23.0 (2021-03-21)
 ### Feature
 * Add support for zzzzoom.us ([#183](https://github.com/OpenASL/HowSignBot/issues/183)) ([`e1d0af1`](https://github.com/OpenASL/HowSignBot/commit/e1d0af1f38afe2b0fae5e585382eb32796f6a34a))
