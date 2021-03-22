@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v21.24.0 (2021-03-22)
+### Feature
+* **practice:** Add mentions ([#184](https://github.com/OpenASL/HowSignBot/issues/184)) ([`7c13cac`](https://github.com/OpenASL/HowSignBot/commit/7c13cac99fd9dc7e603fc5fde0db1421e482c3a0))
+* **zzzzoom:** Add alias ([`7c121dd`](https://github.com/OpenASL/HowSignBot/commit/7c121ddb3e53bdfc106d086cdb583d78654027df))
+
 ## v21.23.1 (2021-03-21)
 ### Fix
 * Add missing dependency ([`c556769`](https://github.com/OpenASL/HowSignBot/commit/c5567697db327167fd3f97e8da443f2ec590cd8b))
