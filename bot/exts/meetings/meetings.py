@@ -201,7 +201,7 @@ class Meetings(Cog):
 
     @group(
         name="zzzzoom",
-        aliases=("zzzoom", "zzzzzoom"),
+        aliases=("zzoom", "zzzoom", "zzzzzoom"),
         invoke_without_command=True,
     )
     @check(is_allowed_zoom_access)
