@@ -25,6 +25,7 @@ COMMAND_PREFIX = settings.COMMAND_PREFIX
 class PracticeSession(NamedTuple):
     dtime: dt.datetime
     host: str
+    mention: str
     notes: str
 
 
@@ -51,7 +52,8 @@ async def get_practice_sessions(
             PracticeSession(
                 dtime=session_dtime,
                 host=row[1],
-                notes=row[2],
+                mention=row[2],
+                notes=row[3],
             )
             for row in all_values[2:]  # First two rows are documentation and headers
             if row
@@ -66,7 +68,7 @@ async def get_practice_sessions(
                 == dtime.astimezone(PACIFIC).date()
             )
             # Filter out paused sessions
-            and not bool(row[3])
+            and not bool(row[4])
         ],
         key=lambda s: s.dtime,
     )
@@ -118,7 +120,7 @@ async def make_practice_session_embed(
             )
             value = f"[Add to Google Calendar]({gcal_url})"
             if session.host:
-                value += f"\n> Host: {session.host}"
+                value += f"\n> Host: {session.mention or session.host}"
             if session.notes:
                 value += f"\n> Notes: {session.notes}"
             embed.add_field(name=title, value=value, inline=False)

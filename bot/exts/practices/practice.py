@@ -145,7 +145,9 @@ def parse_practice_time(
     return dtime, used_timezone
 
 
-async def practice_impl(*, guild_id: int, host: str, start_time: str, user_id: int):
+async def practice_impl(
+    *, guild_id: int, host: str, mention: str, start_time: str, user_id: int
+):
     if start_time.lower() in {
         # Common mistakes: don't try to parse these into a datetime
         "today",
@@ -194,7 +196,7 @@ async def practice_impl(*, guild_id: int, host: str, start_time: str, user_id: i
             dtime_local.strftime("%Y"),
         )
     )
-    row = (display_dtime, host, notes)
+    row = (display_dtime, host, mention, notes)
     logger.info(f"adding new practice session to sheet: {row}")
     worksheet = await get_practice_worksheet_for_guild(guild_id)
     worksheet.append_row(row)
@@ -262,6 +264,7 @@ class Practice(commands.Cog):
             ret = await practice_impl(
                 guild_id=guild_id,
                 host=display_name(member),
+                mention=member.mention,
                 start_time=start_time,
                 user_id=ctx.author.id,
             )
