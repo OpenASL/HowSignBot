@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.23.0 (2021-03-21)
+### Feature
+* Add support for zzzzoom.us ([#183](https://github.com/OpenASL/HowSignBot/issues/183)) ([`e1d0af1`](https://github.com/OpenASL/HowSignBot/commit/e1d0af1f38afe2b0fae5e585382eb32796f6a34a))
+
 ## v21.22.0 (2021-03-14)
 ### Feature
 * Sync topics to DB daily ([#176](https://github.com/OpenASL/HowSignBot/issues/176)) ([`f975335`](https://github.com/OpenASL/HowSignBot/commit/f9753359e238d79ae98275c029bbdec0b69d28d8))
