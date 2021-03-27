@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.25.0 (2021-03-26)
+### Feature
+* **zzzzoom:** Shorter IDs ([`6c44097`](https://github.com/OpenASL/HowSignBot/commit/6c4409734373bb91b793417000ab3c460e30e35b))
+
 ## v21.24.0 (2021-03-22)
 ### Feature
 * **practice:** Add mentions ([#184](https://github.com/OpenASL/HowSignBot/issues/184)) ([`7c13cac`](https://github.com/OpenASL/HowSignBot/commit/7c13cac99fd9dc7e603fc5fde0db1421e482c3a0))
