@@ -51,11 +51,12 @@ def created_at_column(name="created_at", **kwargs):
     return sa.Column(name, TIMESTAMP, nullable=False, default=now, **kwargs)
 
 
-ALPHABET = "0123456789ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+NANOID_ALPHABET = "23456789abcdefghijkmnopqrstuvwxyz"
+NANOID_SIZE = 5
 
 
 def generate_nanoid() -> str:
-    return nanoid.generate(alphabet=ALPHABET)
+    return nanoid.generate(alphabet=NANOID_ALPHABET, size=NANOID_SIZE)
 
 
 # -----------------------------------------------------------------------------
@@ -411,6 +412,7 @@ class Store:
 
     async def create_zzzzoom_meeting(self, *, meeting_id: int):
         created_at = now()
+        # TODO: handle id collisions
         stmt = insert(zzzzoom_meetings).values(
             id=generate_nanoid(),
             created_at=created_at,
