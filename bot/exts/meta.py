@@ -88,7 +88,7 @@ class Meta(Cog):
         avg_members = round(
             sum(guild.member_count for guild in self.bot.guilds) / n_guilds
         )
-        max_to_display = 30
+        max_to_display = 10
         servers_display = "\n".join(
             f"{truncate(guild.name, 20)} `{guild.member_count}`"
             for guild in sorted(self.bot.guilds, key=lambda g: g.member_count)
