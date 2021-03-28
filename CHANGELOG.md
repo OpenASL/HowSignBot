@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.26.0 (2021-03-28)
+### Feature
+* **zzzzoom:** Display zzzzoom IDs; allow passing zzzzoom IDs to ?zoom commands ([#189](https://github.com/OpenASL/HowSignBot/issues/189)) ([`8a04c7a`](https://github.com/OpenASL/HowSignBot/commit/8a04c7a1a54f44166e5319b3a0866bb737ed623d))
+
 ## v21.25.2 (2021-03-28)
 ### Fix
 * **stats:** Try again ([`e3a691c`](https://github.com/OpenASL/HowSignBot/commit/e3a691c861924f8b0767d52f0cf0098b1481f84e))
