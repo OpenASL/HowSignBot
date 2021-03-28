@@ -3,11 +3,13 @@ import logging
 import random
 from typing import Awaitable
 from typing import Callable
+from typing import cast
 from typing import List
 from typing import Mapping
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
+from typing import Union
 
 import discord
 from aiohttp import client
@@ -149,9 +151,11 @@ async def make_zoom_embed(
         else meeting["join_url"]
     )
     title = f"<{join_url}>"
-    description = f"**Meeting ID:**: {meeting_id}"
-    if not has_zzzzoom:
-        description += f"\n**Passcode**: {meeting['passcode']}"
+    if has_zzzzoom:
+        description = f"**Meeting ID (for FS precheck page):**: `{zzzzoom_meeting['id']}`"
+    else:
+        description = f"**Meeting ID:**: `{meeting_id}`"
+        description += f"\n**Passcode**: `{meeting['passcode']}`"
     if meeting["topic"]:
         description = f"{description}\n**Topic**: {meeting['topic']}"
     if include_instructions:
@@ -233,10 +237,21 @@ def add_repost_after_delay(
     bot.loop.create_task(add_repost_after_delay_impl(message, delay))
 
 
+async def get_zoom_meeting_id(meeting_id: Union[int, str]) -> int:
+    zzzzoom_meeting = (
+        await store.get_zzzzoom_meeting(meeting_id)
+        if isinstance(meeting_id, str)
+        else None
+    )
+    if zzzzoom_meeting:
+        return zzzzoom_meeting["meeting_id"]
+    return cast(int, meeting_id)
+
+
 async def zoom_impl(
     ctx: Context,
     *,
-    meeting_id: Optional[int],
+    meeting_id: Optional[Union[int, str]],  # Either a Zoom meeting ID or zzzzoom ID
     send_channel_message: Callable[[int], Awaitable],
     set_up: bool,
     with_zzzzoom: bool = False,
@@ -245,20 +260,23 @@ async def zoom_impl(
     logger.info(f"creating zoom meeting for zoom user: {zoom_user}")
     message = None
     if meeting_id:
+        zoom_meeting_id = await get_zoom_meeting_id(meeting_id)
         async with store.transaction():
             await maybe_create_zoom_meeting(
-                zoom_user, meeting_id, set_up=set_up, with_zzzzoom=with_zzzzoom
+                zoom_user, zoom_meeting_id, set_up=set_up, with_zzzzoom=with_zzzzoom
             )
-            message = await send_channel_message(meeting_id)
+            message = await send_channel_message(zoom_meeting_id)
             if set_up:
                 add_repost_after_delay(ctx.bot, message)
             logger.info(
                 f"creating zoom meeting message for message {message.id} in channel {ctx.channel.id}"
             )
             await store.create_zoom_message(
-                meeting_id=meeting_id, message_id=message.id, channel_id=ctx.channel.id
+                meeting_id=zoom_meeting_id,
+                message_id=message.id,
+                channel_id=ctx.channel.id,
             )
-        return meeting_id, message
+        return zoom_meeting_id, message
     else:
         try:
             meeting = await meetings.create_zoom(

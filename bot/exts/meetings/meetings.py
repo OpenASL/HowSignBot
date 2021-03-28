@@ -2,6 +2,7 @@ import logging
 from typing import cast
 from typing import List
 from typing import Optional
+from typing import Union
 
 import discord
 from discord.ext.commands import Bot
@@ -14,6 +15,7 @@ from discord.ext.commands import group
 
 import meetings
 from ._zoom import add_repost_after_delay
+from ._zoom import get_zoom_meeting_id
 from ._zoom import is_allowed_zoom_access
 from ._zoom import make_zoom_embed
 from ._zoom import REPOST_EMOJI
@@ -81,7 +83,9 @@ class Meetings(Cog):
 
     @group(name="zoom", invoke_without_command=True)
     @check(is_allowed_zoom_access)
-    async def zoom_group(self, ctx: Context, meeting_id: Optional[int] = None):
+    async def zoom_group(
+        self, ctx: Context, meeting_id: Optional[Union[int, str]] = None
+    ):
         """AUTHORIZED USERS ONLY: Start a Zoom meeting"""
         await self.zoom_group_impl(ctx, meeting_id=meeting_id, with_zzzzoom=False)
 
@@ -90,7 +94,9 @@ class Meetings(Cog):
         help="Set up a Zoom before revealing its details to other users. Useful for meetings that have breakout rooms.",
     )
     @check(is_allowed_zoom_access)
-    async def zoom_setup(self, ctx: Context, meeting_id: Optional[int] = None):
+    async def zoom_setup(
+        self, ctx: Context, meeting_id: Optional[Union[int, str]] = None
+    ):
         await self.zoom_setup_impl(ctx, meeting_id=meeting_id, with_zzzzoom=False)
 
     @zoom_group.error
@@ -105,9 +111,12 @@ class Meetings(Cog):
         help="Reveal meeting details for a meeting started with the setup command",
     )
     @check(is_allowed_zoom_access)
-    async def zoom_start(self, ctx: Context, meeting_id: Optional[int] = None):
+    async def zoom_start(
+        self, ctx: Context, meeting_id: Optional[Union[int, str]] = None
+    ):
         await ctx.channel.trigger_typing()
         if meeting_id:
+            meeting_id = await get_zoom_meeting_id(meeting_id)
             meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
             if not meeting_exists:
                 raise errors.CheckFailure(
@@ -165,8 +174,9 @@ class Meetings(Cog):
         help="Remove meeting details for a meeting",
     )
     @check(is_allowed_zoom_access)
-    async def zoom_stop(self, ctx: Context, meeting_id: int):
+    async def zoom_stop(self, ctx: Context, meeting_id: Union[int, str]):
         await ctx.channel.trigger_typing()
+        meeting_id = await get_zoom_meeting_id(meeting_id)
         meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
         if not meeting_exists:
             raise errors.CheckFailure(
@@ -205,7 +215,9 @@ class Meetings(Cog):
         invoke_without_command=True,
     )
     @check(is_allowed_zoom_access)
-    async def zzzzoom_group(self, ctx: Context, meeting_id: Optional[int] = None):
+    async def zzzzoom_group(
+        self, ctx: Context, meeting_id: Optional[Union[str, int]] = None
+    ):
         """AUTHORIZED USERS ONLY: Start a Zoom meeting and display the zzzzoom.us join URL instead of the normal join URL."""
         await self.zoom_group_impl(ctx, meeting_id=meeting_id, with_zzzzoom=True)
 
@@ -214,11 +226,13 @@ class Meetings(Cog):
         help="Set up a Zoom before revealing its details to other users. Useful for meetings that have breakout rooms.",
     )
     @check(is_allowed_zoom_access)
-    async def zzzzoom_setup(self, ctx: Context, meeting_id: Optional[int] = None):
+    async def zzzzoom_setup(
+        self, ctx: Context, meeting_id: Optional[Union[int, str]] = None
+    ):
         await self.zoom_setup_impl(ctx, meeting_id=meeting_id, with_zzzzoom=True)
 
     async def zoom_group_impl(
-        self, ctx: Context, *, meeting_id: Optional[int], with_zzzzoom: bool
+        self, ctx: Context, *, meeting_id: Optional[Union[int, str]], with_zzzzoom: bool
     ):
         await ctx.channel.trigger_typing()
 
@@ -234,7 +248,7 @@ class Meetings(Cog):
         )
 
     async def zoom_setup_impl(
-        self, ctx: Context, meeting_id: Optional[int], with_zzzzoom: bool
+        self, ctx: Context, meeting_id: Optional[Union[int, str]], with_zzzzoom: bool
     ):
         await ctx.channel.trigger_typing()
 
