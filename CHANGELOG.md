@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v21.25.1 (2021-03-28)
+### Fix
+* Attempt to fix stats ([`3f22a5e`](https://github.com/OpenASL/HowSignBot/commit/3f22a5e9a15d24066d91744eccac361929a26e38))
+* Fix zzzzoom links ([`47b1fa7`](https://github.com/OpenASL/HowSignBot/commit/47b1fa74d6cddbb270511bc441678cba61749842))
+
 ## v21.25.0 (2021-03-26)
 ### Feature
 * **zzzzoom:** Shorter IDs ([`6c44097`](https://github.com/OpenASL/HowSignBot/commit/6c4409734373bb91b793417000ab3c460e30e35b))
