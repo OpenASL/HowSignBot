@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.25.2 (2021-03-28)
+### Fix
+* **stats:** Try again ([`e3a691c`](https://github.com/OpenASL/HowSignBot/commit/e3a691c861924f8b0767d52f0cf0098b1481f84e))
+
 ## v21.25.1 (2021-03-28)
 ### Fix
 * Attempt to fix stats ([`3f22a5e`](https://github.com/OpenASL/HowSignBot/commit/3f22a5e9a15d24066d91744eccac361929a26e38))
