@@ -144,7 +144,7 @@ async def make_zoom_embed(
     )
     has_zzzzoom = bool(zzzzoom_meeting)
     join_url = (
-        f"{settings.ZZZZOOM_URL}/asl/{zzzzoom_meeting['id']}"
+        f"{settings.ZZZZOOM_URL}/{zzzzoom_meeting['id']}"
         if has_zzzzoom
         else meeting["join_url"]
     )
