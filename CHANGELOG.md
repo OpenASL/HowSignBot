@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.26.3 (2021-04-03)
+### Fix
+* Reverse sort ([`5c4f47d`](https://github.com/OpenASL/HowSignBot/commit/5c4f47d45e3d9a9f11cc9642038e574a53b01224))
+
 ## v21.26.2 (2021-04-03)
 ### Fix
 * Star wars day ([`2c1f105`](https://github.com/OpenASL/HowSignBot/commit/2c1f105d9562c884ad9e80e4bb5d9bfb47e6d5dc))
