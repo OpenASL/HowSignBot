@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.26.1 (2021-04-03)
+### Fix
+* **zoom:** Don't ping zoom creator when reposting ([#194](https://github.com/OpenASL/HowSignBot/issues/194)) ([`84f3c15`](https://github.com/OpenASL/HowSignBot/commit/84f3c156417245f201620aa59ce3036f37bc2633))
+
 ## v21.26.0 (2021-03-28)
 ### Feature
 * **zzzzoom:** Display zzzzoom IDs; allow passing zzzzoom IDs to ?zoom commands ([#189](https://github.com/OpenASL/HowSignBot/issues/189)) ([`8a04c7a`](https://github.com/OpenASL/HowSignBot/commit/8a04c7a1a54f44166e5319b3a0866bb737ed623d))
