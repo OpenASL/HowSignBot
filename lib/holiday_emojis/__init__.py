@@ -137,7 +137,7 @@ _HOLIDAY_EMOJI_MAP = {
     "Canada Day": Holiday("🇨🇦", "canada"),
     "Independence Day": Holiday("🇺🇸", "independence day"),
     "Space Day": Holiday("🔭", "outer space"),
-    "Star Wars": Holiday("☝", "star wars"),
+    "Star Wars Day": Holiday("☝", "star wars"),
     "Mother's Day": Holiday("👩‍👧", "mother's day"),
     "World Turtle Day": Holiday("🐢", "turtle"),
     "National Hamburger Day": Holiday("🍔", "hamburger"),
