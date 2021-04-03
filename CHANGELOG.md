@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v21.26.2 (2021-04-03)
+### Fix
+* Star wars day ([`2c1f105`](https://github.com/OpenASL/HowSignBot/commit/2c1f105d9562c884ad9e80e4bb5d9bfb47e6d5dc))
+* **stats:** Try to fix stats again ([#195](https://github.com/OpenASL/HowSignBot/issues/195)) ([`e7c203d`](https://github.com/OpenASL/HowSignBot/commit/e7c203d907d6b71af90b913564a1ee6d94873078))
+
 ## v21.26.1 (2021-04-03)
 ### Fix
 * **zoom:** Don't ping zoom creator when reposting ([#194](https://github.com/OpenASL/HowSignBot/issues/194)) ([`84f3c15`](https://github.com/OpenASL/HowSignBot/commit/84f3c156417245f201620aa59ce3036f37bc2633))
