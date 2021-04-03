@@ -357,6 +357,7 @@ class Meetings(Cog):
             new_message = await send_method(
                 content="👐 **This meeting is still going**. Come on in!",
                 embed=await make_zoom_embed(zoom_message["meeting_id"]),
+                mention_author=False,
             )
             add_repost_after_delay(self.bot, new_message)
 
