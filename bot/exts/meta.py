@@ -88,10 +88,12 @@ class Meta(Cog):
         avg_members = round(
             sum(guild.member_count for guild in self.bot.guilds) / n_guilds
         )
-        max_to_display = 10
+        max_to_display = 40
         servers_display = "\n".join(
             f"{truncate(guild.name, 20)} `{guild.member_count}`"
-            for guild in sorted(self.bot.guilds, key=lambda g: g.member_count)
+            for guild in sorted(self.bot.guilds, key=lambda g: g.member_count)[
+                :max_to_display
+            ]
         )
         remaining = max(n_guilds - max_to_display, 0)
         if remaining:
