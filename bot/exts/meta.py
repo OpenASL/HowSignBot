@@ -91,9 +91,9 @@ class Meta(Cog):
         max_to_display = 40
         servers_display = "\n".join(
             f"{truncate(guild.name, 20)} `{guild.member_count}`"
-            for guild in sorted(self.bot.guilds, key=lambda g: g.member_count)[
-                :max_to_display
-            ]
+            for guild in sorted(
+                self.bot.guilds, key=lambda g: g.member_count, reverse=True
+            )[:max_to_display]
         )
         remaining = max(n_guilds - max_to_display, 0)
         if remaining:
