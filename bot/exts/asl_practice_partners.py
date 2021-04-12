@@ -59,6 +59,16 @@ class AslPracticePartners(Cog):
             await asyncio.sleep(1)
         await ctx.reply("🙌 Rules posted")
 
+    @aslpp_group.command(name="welcome", hidden=True)
+    @is_owner()
+    async def welcome_command(self, ctx: Context, channel: TextChannel):
+        await ctx.channel.trigger_typing()
+        for content in get_sheet_content("welcome"):
+            await channel.send(content)
+            # Sleep to ensure messages are always displayed in the correct order
+            await asyncio.sleep(1)
+        await ctx.reply("🙌 Welcome message posted")
+
 
 def setup(bot: Bot) -> None:
     bot.add_cog(AslPracticePartners(bot))
