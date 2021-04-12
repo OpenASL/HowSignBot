@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v21.28.0 (2021-04-12)
+### Feature
+* **aslpp:** Add welcome command ([`fc8faf9`](https://github.com/OpenASL/HowSignBot/commit/fc8faf9418518c26c559360f40ba50f9c726dade))
+
+### Fix
+* **aslpp:** Sleep to ensure message order is correct ([#201](https://github.com/OpenASL/HowSignBot/issues/201)) ([`a5335ca`](https://github.com/OpenASL/HowSignBot/commit/a5335ca3dfce4fa53b6f3f2bbe23f939970fc9f8))
+
 ## v21.27.0 (2021-04-12)
 ### Feature
 * Add aslpp commands ([#200](https://github.com/OpenASL/HowSignBot/issues/200)) ([`a07fe30`](https://github.com/OpenASL/HowSignBot/commit/a07fe30d7a9fd8d9386ee4002a330770af1d8a1e))
