@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.27.0 (2021-04-12)
+### Feature
+* Add aslpp commands ([#200](https://github.com/OpenASL/HowSignBot/issues/200)) ([`a07fe30`](https://github.com/OpenASL/HowSignBot/commit/a07fe30d7a9fd8d9386ee4002a330770af1d8a1e))
+
 ## v21.26.3 (2021-04-03)
 ### Fix
 * Reverse sort ([`5c4f47d`](https://github.com/OpenASL/HowSignBot/commit/5c4f47d45e3d9a9f11cc9642038e574a53b01224))
