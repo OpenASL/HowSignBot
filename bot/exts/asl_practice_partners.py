@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import List
 
@@ -44,6 +45,8 @@ class AslPracticePartners(Cog):
         await ctx.channel.trigger_typing()
         for content in get_sheet_content("faq"):
             await channel.send(content)
+            # Sleep to ensure messages are always displayed in the correct order
+            await asyncio.sleep(1)
         await ctx.reply("🙌 FAQ posted")
 
     @aslpp_group.command(name="rules", hidden=True)
@@ -52,6 +55,8 @@ class AslPracticePartners(Cog):
         await ctx.channel.trigger_typing()
         for content in get_sheet_content("rules"):
             await channel.send(content)
+            # Sleep to ensure messages are always displayed in the correct order
+            await asyncio.sleep(1)
         await ctx.reply("🙌 Rules posted")
 
 
