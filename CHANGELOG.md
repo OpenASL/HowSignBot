@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.29.0 (2021-04-12)
+### Feature
+* **aslpp:** Add video command ([`ae55261`](https://github.com/OpenASL/HowSignBot/commit/ae552619618c7ac0d7710bbc8eef7aab933884bb))
+
 ## v21.28.0 (2021-04-12)
 ### Feature
 * **aslpp:** Add welcome command ([`fc8faf9`](https://github.com/OpenASL/HowSignBot/commit/fc8faf9418518c26c559360f40ba50f9c726dade))
