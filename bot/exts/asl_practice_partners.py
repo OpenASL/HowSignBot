@@ -69,6 +69,16 @@ class AslPracticePartners(Cog):
             await asyncio.sleep(1)
         await ctx.reply("🙌 Welcome message posted")
 
+    @aslpp_group.command(name="video", hidden=True)
+    @is_owner()
+    async def video_command(self, ctx: Context, channel: TextChannel):
+        await ctx.channel.trigger_typing()
+        for content in get_sheet_content("video-etiquette"):
+            await channel.send(content)
+            # Sleep to ensure messages are always displayed in the correct order
+            await asyncio.sleep(1)
+        await ctx.reply("🙌 Video etiquette message posted")
+
 
 def setup(bot: Bot) -> None:
     bot.add_cog(AslPracticePartners(bot))
