@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.30.0 (2021-04-15)
+### Feature
+* **aslpp:** Add commands for getting members with no intro ([#203](https://github.com/OpenASL/HowSignBot/issues/203)) ([`1839f38`](https://github.com/OpenASL/HowSignBot/commit/1839f38aa4e1cf972029f69684f7d460131bb5d7))
+
 ## v21.29.0 (2021-04-12)
 ### Feature
 * **aslpp:** Add video command ([`ae55261`](https://github.com/OpenASL/HowSignBot/commit/ae552619618c7ac0d7710bbc8eef7aab933884bb))
