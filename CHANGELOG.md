@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.30.2 (2021-04-15)
+### Fix
+* **aslpp:** Skip bots when syncing; show count ([`e26b748`](https://github.com/OpenASL/HowSignBot/commit/e26b748cbddd3bbef146dd682b9cb805e788a5aa))
+
 ## v21.30.1 (2021-04-15)
 ### Fix
 * **aslpp:** Fix syncing ([`f17c028`](https://github.com/OpenASL/HowSignBot/commit/f17c028f15d91a6c1fdd854cc31898ca596fc605))
