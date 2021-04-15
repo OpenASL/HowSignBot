@@ -72,7 +72,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 sentences.json and phrases.json came from https://randomwordgenerator.com/ with permission from the website's maintainers.
 
-bot/utils/extensions.py License
+bot/utils/extensions.py and bot/utils/pagination.py License
 
 MIT License
 

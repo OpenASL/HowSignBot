@@ -103,6 +103,24 @@ user_settings = sa.Table(
     sa.Column("timezone", TimeZone),
 )
 
+aslpp_intros = sa.Table(
+    "aslpp_intros",
+    metadata,
+    sa.Column("message_id", BIGINT, primary_key=True, doc="Discord message ID"),
+    sa.Column("user_id", BIGINT, index=True, nullable=False, doc="Discord user ID"),
+    sa.Column("posted_at", TIMESTAMP, nullable=False),
+    created_at_column(),
+)
+
+aslpp_members = sa.Table(
+    "aslpp_members",
+    metadata,
+    sa.Column("user_id", BIGINT, primary_key=True, doc="Discord user ID"),
+    sa.Column("joined_at", TIMESTAMP, nullable=False),
+    sa.Column("last_message_at", TIMESTAMP, nullable=True),
+    created_at_column(),
+)
+
 zoom_meetings = sa.Table(
     "zoom_meetings",
     metadata,
@@ -460,6 +478,79 @@ class Store:
     async def get_all_topics(self) -> Sequence[str]:
         all_topics = await self.db.fetch_all(topics.select())
         return [record["content"] for record in all_topics]
+
+    # ASLPP
+
+    async def add_aslpp_intro(
+        self,
+        *,
+        message_id: int,
+        user_id: int,
+        posted_at: dt.datetime,
+    ):
+        stmt = insert(aslpp_intros).values(
+            message_id=message_id,
+            user_id=user_id,
+            posted_at=posted_at,
+            # NOTE: need to pass created_at because `default` doesn't execute
+            #  when using postgres's insert
+            created_at=now(),
+        )
+        stmt = stmt.on_conflict_do_update(
+            index_elements=(aslpp_intros.c.message_id,),
+            set_=dict(
+                user_id=stmt.excluded.user_id,
+                posted_at=stmt.excluded.posted_at,
+                created_at=stmt.excluded.created_at,
+            ),
+        )
+        await self.db.execute(stmt)
+
+    async def add_aslpp_member(
+        self,
+        *,
+        user_id: int,
+        joined_at: dt.datetime,
+    ):
+        stmt = insert(aslpp_members).values(
+            user_id=user_id,
+            joined_at=joined_at,
+            created_at=now(),
+        )
+        stmt = stmt.on_conflict_do_update(
+            index_elements=(aslpp_members.c.user_id,),
+            set_=dict(
+                joined_at=stmt.excluded.joined_at,
+            ),
+        )
+        await self.db.execute(stmt)
+
+    async def remove_aslpp_member(self, *, user_id: int):
+        await self.db.execute(
+            aslpp_members.delete().where(aslpp_members.c.user_id == user_id)
+        )
+
+    async def get_aslpp_members_without_intro(self) -> List[Mapping]:
+        return await self.db.fetch_all(
+            aslpp_members.select()
+            .select_from(
+                aslpp_members.outerjoin(
+                    aslpp_intros, aslpp_members.c.user_id == aslpp_intros.c.user_id
+                )
+            )
+            .group_by(aslpp_members.c.user_id)
+            .having(sa.func.count(aslpp_intros.c.user_id) < 1)
+            .order_by(aslpp_members.c.joined_at)
+        )
+
+    async def has_aslpp_intro(self, user_id: int) -> bool:
+        select = sa.select(
+            (sa.exists().where(aslpp_intros.c.user_id == user_id).label("result"),)
+        )
+        record = await self.db.fetch_one(select)
+        if not record:
+            return False
+        return record["result"]
 
 
 store = Store(
