@@ -101,6 +101,8 @@ class AslPracticePartners(Cog):
 
         role = ctx.guild.get_role(settings.ASLPP_ACKNOWLEDGED_RULES_ROLE_ID)
         for member in role.members:
+            if member.bot:
+                continue
             logger.info(f"storing member {member.id}")
             await store.add_aslpp_member(user_id=member.id, joined_at=member.joined_at)
         await ctx.reply("🙌 Synced data")
@@ -112,7 +114,7 @@ class AslPracticePartners(Cog):
         members_without_intro = await store.get_aslpp_members_without_intro()
 
         embed = Embed(
-            title="These users have acknowledged the rules but haven't posted an intro:",
+            title=f"{len(members_without_intro)} users have acknowledged the rules but haven't posted an intro:",
             color=Color.orange(),
         )
         lines = [
@@ -154,6 +156,8 @@ class AslPracticePartners(Cog):
                 f"aslpp member acknowledged rules role removed. removing member {after.id}"
             )
             await store.remove_aslpp_member(user_id=after.id)
+
+    # TODO: Send daily message with members with no intros
 
 
 def setup(bot: Bot) -> None:
