@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.30.1 (2021-04-15)
+### Fix
+* **aslpp:** Fix syncing ([`f17c028`](https://github.com/OpenASL/HowSignBot/commit/f17c028f15d91a6c1fdd854cc31898ca596fc605))
+
 ## v21.30.0 (2021-04-15)
 ### Feature
 * **aslpp:** Add commands for getting members with no intro ([#203](https://github.com/OpenASL/HowSignBot/issues/203)) ([`1839f38`](https://github.com/OpenASL/HowSignBot/commit/1839f38aa4e1cf972029f69684f7d460131bb5d7))
