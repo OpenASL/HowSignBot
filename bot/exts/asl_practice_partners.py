@@ -91,7 +91,7 @@ class AslPracticePartners(Cog):
     async def sync_data_command(self, ctx: Context):
         await ctx.channel.trigger_typing()
         channel = self.bot.get_channel(settings.ASLPP_INTRODUCTIONS_CHANNEL_ID)
-        async for message in channel.history(limit=20):
+        async for message in channel.history(limit=None):
             logger.info(f"storing intro record {message.id}")
             await store.add_aslpp_intro(
                 message_id=message.id,
