@@ -27,6 +27,11 @@ GOOGLE_TOKEN_URI = env.str("GOOGLE_TOKEN_URI", "https://oauth2.googleapis.com/to
 TOPICS_SHEET_KEY = env.str("TOPICS_SHEET_KEY", required=True)
 FEEDBACK_SHEET_KEY = env.str("FEEDBACK_SHEET_KEY", required=True)
 ASLPP_SHEET_KEY = env.str("ASLPP_SHEET_KEY", required=True)
+ASLPP_GUILD_ID = env.int("ASLPP_GUILD_ID", default=729838318963130449)
+ASLPP_INTRODUCTIONS_CHANNEL_ID = env.int("ASLPP_INTRODUCTIONS_CHANNEL_ID", required=False)
+ASLPP_ACKNOWLEDGED_RULES_ROLE_ID = env.int(
+    "ASLPP_ACKNOWLEDGED_RULES_ROLE_ID", required=False
+)
 
 # Mapping of Discord user IDs => emails
 ZOOM_USERS = env.dict("ZOOM_USERS", subcast_keys=int, required=True)
