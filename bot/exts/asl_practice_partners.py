@@ -1,6 +1,7 @@
 import asyncio
 import datetime as dt
 import logging
+from contextlib import suppress
 from typing import List
 from typing import Union
 
@@ -179,7 +180,8 @@ class AslPracticePartners(Cog):
     ):
         num_kicked = 0
         for target in targets:
-            await target.send(KICK_MESSAGE)
+            with suppress(discord.errors.Forbidden):  # user may not allow DMs from bot
+                await target.send(KICK_MESSAGE)
             if isinstance(target, Member):
                 logger.info(f"kicking member {target.id}")
                 await ctx.guild.kick(target, reason="Inactivity")
