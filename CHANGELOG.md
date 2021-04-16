@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.31.2 (2021-04-16)
+### Fix
+* **aslpp:** Fix footer; don't reset is_active when syncing ([`3d16e25`](https://github.com/OpenASL/HowSignBot/commit/3d16e25e4f73c221837325b488ddc4e8a3a497bf))
+
 ## v21.31.1 (2021-04-16)
 ### Fix
 * **aslpp:** When kicking, skip DM if user won't allow it ([`55b4323`](https://github.com/OpenASL/HowSignBot/commit/55b4323686fe3e31eeb592286e620f09f98fedb9))
