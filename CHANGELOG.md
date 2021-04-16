@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.32.0 (2021-04-16)
+### Feature
+* **aslpp:** Filter out newer members ([`693429c`](https://github.com/OpenASL/HowSignBot/commit/693429ca61f7bf42a3fea9c5638370368e949717))
+
 ## v21.31.2 (2021-04-16)
 ### Fix
 * **aslpp:** Fix footer; don't reset is_active when syncing ([`3d16e25`](https://github.com/OpenASL/HowSignBot/commit/3d16e25e4f73c221837325b488ddc4e8a3a497bf))
