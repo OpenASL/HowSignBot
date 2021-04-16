@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.31.1 (2021-04-16)
+### Fix
+* **aslpp:** When kicking, skip DM if user won't allow it ([`55b4323`](https://github.com/OpenASL/HowSignBot/commit/55b4323686fe3e31eeb592286e620f09f98fedb9))
+
 ## v21.31.0 (2021-04-15)
 ### Feature
 * **aslpp:** Send daily message with inactive users; add kick command; allow marking [in]active ([`5e07314`](https://github.com/OpenASL/HowSignBot/commit/5e0731459543e22d4f8060f4b0bedf98d09c11af))
