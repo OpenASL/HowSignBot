@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 COMMAND_PREFIX = settings.COMMAND_PREFIX
 KICK_MESSAGE = """You've been removed from ASL Practice Partners server due to inactivity from your account.
-**Don't worry, you can re-join (and we'd love to have you back)**. You can find the invite link here:
+Don't worry, you can re-join (and we'd love to have you back). You can find the invite link here:
 <https://aslpractice.partners>
 If you decide to re-join, make sure to post an intro so you don't get kicked again.
 """
@@ -58,18 +58,13 @@ async def make_no_intros_embed():
             for member in members_without_intro[:max_to_display]
         )
     )
-    # description += "\n".join(
-    #     tuple(
-    #         f"<@!747622344591147018> - Member for 233 days" for _ in range(max_to_display)
-    #     )
-    # )
     embed = Embed(
         title=f"{len(members_without_intro)} users have acknowledged the rules but haven't posted an intro:",
         description=description,
         color=Color.orange(),
     )
     embed.set_footer(
-        text=f"Use {COMMAND_PREFIX}kick <members> to kick. Use {COMMAND_PREFIX}active <members> to mark members as active so they won't show up in this list."
+        text=f"Use {COMMAND_PREFIX}aslpp kick <members> to kick. Use {COMMAND_PREFIX}aslpp active <members> to mark members as active so they won't show up in this list."
     )
     return embed
 

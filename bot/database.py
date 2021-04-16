@@ -508,7 +508,9 @@ class Store:
         await self.db.execute(stmt)
 
     async def clear_aslpp_members(self):
-        await self.db.execute(aslpp_members.delete())
+        await self.db.execute(
+            aslpp_members.delete().where(aslpp_members.c.is_active == sql.false())
+        )
 
     async def clear_aslpp_intros(self):
         await self.db.execute(aslpp_intros.delete())
