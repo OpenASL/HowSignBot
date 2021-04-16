@@ -118,6 +118,7 @@ aslpp_members = sa.Table(
     sa.Column("user_id", BIGINT, primary_key=True, doc="Discord user ID"),
     sa.Column("joined_at", TIMESTAMP, nullable=False),
     sa.Column("last_message_at", TIMESTAMP, nullable=True),
+    sa.Column("is_active", sa.Boolean, nullable=False, server_default=sql.false()),
     created_at_column(),
 )
 
@@ -506,6 +507,12 @@ class Store:
         )
         await self.db.execute(stmt)
 
+    async def clear_aslpp_members(self):
+        await self.db.execute(aslpp_members.delete())
+
+    async def clear_aslpp_intros(self):
+        await self.db.execute(aslpp_intros.delete())
+
     async def add_aslpp_member(
         self,
         *,
@@ -533,6 +540,7 @@ class Store:
     async def get_aslpp_members_without_intro(self) -> List[Mapping]:
         return await self.db.fetch_all(
             aslpp_members.select()
+            .where(aslpp_members.c.is_active == sql.false())
             .select_from(
                 aslpp_members.outerjoin(
                     aslpp_intros, aslpp_members.c.user_id == aslpp_intros.c.user_id
@@ -551,6 +559,20 @@ class Store:
         if not record:
             return False
         return record["result"]
+
+    async def mark_aslpp_members_active(self, user_ids: List[int]):
+        await self.db.execute(
+            aslpp_members.update()
+            .where(aslpp_members.c.user_id.in_(user_ids))
+            .values(is_active=True)
+        )
+
+    async def mark_aslpp_members_inactive(self, user_ids: List[int]):
+        await self.db.execute(
+            aslpp_members.update()
+            .where(aslpp_members.c.user_id.in_(user_ids))
+            .values(is_active=False)
+        )
 
 
 store = Store(

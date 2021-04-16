@@ -1,7 +1,10 @@
 import asyncio
+import datetime as dt
 import logging
 from typing import List
+from typing import Union
 
+import discord
 from discord import Color
 from discord import Embed
 from discord import Member
@@ -16,11 +19,19 @@ from discord.ext.commands import is_owner
 
 from bot import settings
 from bot.database import store
+from bot.utils.datetimes import EASTERN
 from bot.utils.datetimes import utcnow
 from bot.utils.gsheets import get_gsheet_client
-from bot.utils.pagination import LinePaginator
 
 logger = logging.getLogger(__name__)
+
+COMMAND_PREFIX = settings.COMMAND_PREFIX
+KICK_MESSAGE = """You've been removed from ASL Practice Partners server due to inactivity from your account.
+**Don't worry, you can re-join (and we'd love to have you back)**. You can find the invite link here:
+<https://aslpractice.partners>
+If you decide to re-join, make sure to post an intro so you don't get kicked again.
+"""
+DAILY_MESSAGE_TIME = dt.time(8, 0)  # Eastern time
 
 
 def get_gsheet():
@@ -35,17 +46,49 @@ def get_sheet_content(worksheet_name: str) -> List[str]:
     return worksheet.col_values(1)
 
 
+async def make_no_intros_embed():
+    max_to_display = 30
+    members_without_intro = await store.get_aslpp_members_without_intro()
+
+    description = f"Here are the {max_to_display} oldest memberships:\n"
+    description += "\n".join(
+        tuple(
+            f"<@!{member['user_id']}> - Member for {(utcnow() - member['joined_at']).days} days"
+            for member in members_without_intro[:max_to_display]
+        )
+    )
+    # description += "\n".join(
+    #     tuple(
+    #         f"<@!747622344591147018> - Member for 233 days" for _ in range(max_to_display)
+    #     )
+    # )
+    embed = Embed(
+        title=f"{len(members_without_intro)} users have acknowledged the rules but haven't posted an intro:",
+        description=description,
+        color=Color.orange(),
+    )
+    embed.set_footer(
+        text=f"Use {COMMAND_PREFIX}kick <members> to kick. Use {COMMAND_PREFIX}active <members> to mark members as active so they won't show up in this list."
+    )
+    return embed
+
+
 class AslPracticePartners(Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # TODO: Allow mods/admins to use these commands
+    def cog_check(self, ctx: Context):
+        if not bool(ctx.guild) or ctx.guild.id != settings.ASLPP_GUILD_ID:
+            raise commands.errors.CheckFailure(
+                f"⚠️ `{COMMAND_PREFIX}{ctx.invoked_with}` must be run within the ASL Practice Partners server (not a DM)."
+            )
+        return True
 
     @group(name="aslpp", hidden=True)
-    @is_owner()
     async def aslpp_group(self, ctx: Context):
         pass
 
+    # TODO: Allow mods/admins to use these commands
     @aslpp_group.command(name="faq", hidden=True)
     @is_owner()
     async def faq_command(self, ctx: Context, channel: TextChannel):
@@ -91,6 +134,7 @@ class AslPracticePartners(Cog):
     async def sync_data_command(self, ctx: Context):
         await ctx.channel.trigger_typing()
         channel = self.bot.get_channel(settings.ASLPP_INTRODUCTIONS_CHANNEL_ID)
+        await store.clear_aslpp_intros()
         async for message in channel.history(limit=None):
             logger.info(f"storing intro record {message.id}")
             await store.add_aslpp_intro(
@@ -100,30 +144,48 @@ class AslPracticePartners(Cog):
             )
 
         role = ctx.guild.get_role(settings.ASLPP_ACKNOWLEDGED_RULES_ROLE_ID)
+        await store.clear_aslpp_members()
         for member in role.members:
             if member.bot:
                 continue
             logger.info(f"storing member {member.id}")
             await store.add_aslpp_member(user_id=member.id, joined_at=member.joined_at)
+        logger.info("finished syncing data")
         await ctx.reply("🙌 Synced data")
 
-    @aslpp_group.command(name="nointros", hidden=True)
-    @is_owner()
+    @aslpp_group.command(name="nointros", aliases=("nointro",), hidden=True)
+    @commands.has_permissions(kick_members=True)
     async def no_intros_command(self, ctx: Context):
         await ctx.channel.trigger_typing()
-        members_without_intro = await store.get_aslpp_members_without_intro()
+        embed = await make_no_intros_embed()
+        await ctx.send(embed=embed)
 
-        embed = Embed(
-            title=f"{len(members_without_intro)} users have acknowledged the rules but haven't posted an intro:",
-            color=Color.orange(),
-        )
-        lines = [
-            f"<@!{member['user_id']}> - Member for {(utcnow() - member['joined_at']).days} days"
-            for member in members_without_intro
-        ]
-        await LinePaginator.paginate(
-            lines, ctx=ctx, embed=embed, empty=True, max_lines=20, max_size=1000
-        )
+    @aslpp_group.command(name="active", hidden=True)
+    @commands.has_permissions(kick_members=True)
+    async def active_command(self, ctx: Context, members: commands.Greedy[Member]):
+        await store.mark_aslpp_members_active(user_ids=[m.id for m in members])
+        await ctx.reply(f"Marked {len(members)} member(s) active.")
+
+    @aslpp_group.command(name="inactive", hidden=True)
+    @commands.has_permissions(kick_members=True)
+    async def inactive_command(self, ctx: Context, members: commands.Greedy[Member]):
+        await store.mark_aslpp_members_inactive(user_ids=[m.id for m in members])
+        await ctx.reply(f"Marked {len(members)} member(s) inactive.")
+
+    @aslpp_group.command(name="kick", hidden=True)
+    @commands.has_permissions(kick_members=True)
+    async def kick_command(
+        self, ctx: Context, targets: commands.Greedy[Union[TextChannel, Member]]
+    ):
+        num_kicked = 0
+        for target in targets:
+            await target.send(KICK_MESSAGE)
+            if isinstance(target, Member):
+                logger.info(f"kicking member {target.id}")
+                await ctx.guild.kick(target, reason="Inactivity")
+                num_kicked += 1
+
+        await ctx.reply(f"Kicked {num_kicked} members.")
 
     @Cog.listener()
     async def on_message(self, message: Message) -> None:
@@ -139,6 +201,13 @@ class AslPracticePartners(Cog):
                     user_id=message.author.id,
                     posted_at=message.created_at,
                 )
+
+    @Cog.listener()
+    async def on_member_remove(self, member: Member) -> None:
+        if member.guild.id != settings.ASLPP_GUILD_ID:
+            return
+        logger.info(f"removing data for aslpp member {member.id}")
+        await store.remove_aslpp_member(user_id=member.id)
 
     @Cog.listener()
     async def on_member_update(self, before: Member, after: Member) -> None:
@@ -157,7 +226,25 @@ class AslPracticePartners(Cog):
             )
             await store.remove_aslpp_member(user_id=after.id)
 
-    # TODO: Send daily message with members with no intros
+    @Cog.listener()
+    async def on_ready(self):
+        self.bot.loop.create_task(self.daily_message())
+
+    async def daily_message(self):
+        while True:
+            now_eastern = dt.datetime.now(EASTERN)
+            date = now_eastern.date()
+            if now_eastern.time() > DAILY_MESSAGE_TIME:
+                date = now_eastern.date() + dt.timedelta(days=1)
+            then = EASTERN.localize(dt.datetime.combine(date, DAILY_MESSAGE_TIME))
+            logger.info(
+                f"aslpp inactive members message will be sent at at {then.isoformat()}"
+            )
+            await discord.utils.sleep_until(then.astimezone(dt.timezone.utc))
+            channel = self.bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
+            embed = await make_no_intros_embed()
+            await channel.send(embed=embed)
+            logger.info("sent aslpp inactive members message")
 
 
 def setup(bot: Bot) -> None:
