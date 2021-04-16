@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.31.0 (2021-04-15)
+### Feature
+* **aslpp:** Send daily message with inactive users; add kick command; allow marking [in]active ([`5e07314`](https://github.com/OpenASL/HowSignBot/commit/5e0731459543e22d4f8060f4b0bedf98d09c11af))
+
 ## v21.30.2 (2021-04-15)
 ### Fix
 * **aslpp:** Skip bots when syncing; show count ([`e26b748`](https://github.com/OpenASL/HowSignBot/commit/e26b748cbddd3bbef146dd682b9cb805e788a5aa))
