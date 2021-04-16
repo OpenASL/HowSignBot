@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.33.0 (2021-04-16)
+### Feature
+* **aslpp:** Filter out members who joined 30 days ago ([`131c0c6`](https://github.com/OpenASL/HowSignBot/commit/131c0c61f61860f66c541e9fe1bb5a6eb3b38c04))
+
 ## v21.32.0 (2021-04-16)
 ### Feature
 * **aslpp:** Filter out newer members ([`693429c`](https://github.com/OpenASL/HowSignBot/commit/693429ca61f7bf42a3fea9c5638370368e949717))
