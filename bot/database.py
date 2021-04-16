@@ -544,7 +544,7 @@ class Store:
             aslpp_members.select()
             .where(
                 (aslpp_members.c.is_active == sql.false())
-                & (aslpp_members.c.joined_at < (now() - dt.timedelta(days=30)))
+                & (aslpp_members.c.joined_at < (now() - dt.timedelta(days=31)))
             )
             .select_from(
                 aslpp_members.outerjoin(
