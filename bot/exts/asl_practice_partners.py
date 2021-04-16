@@ -51,15 +51,19 @@ async def make_no_intros_embed():
     max_to_display = 30
     members_without_intro = await store.get_aslpp_members_without_intro()
 
-    description = f"Here are the {max_to_display} oldest memberships:\n"
-    description += "\n".join(
-        tuple(
-            f"<@!{member['user_id']}> - Member for {(utcnow() - member['joined_at']).days} days"
-            for member in members_without_intro[:max_to_display]
+    if len(members_without_intro):
+        description = f"Here are the {max_to_display} oldest memberships:\n"
+        description += "\n".join(
+            tuple(
+                f"<@!{member['user_id']}> - Member for {(utcnow() - member['joined_at']).days} days"
+                for member in members_without_intro[:max_to_display]
+            )
         )
-    )
+    else:
+        description = "✨ _No members to review_"
+
     embed = Embed(
-        title=f"{len(members_without_intro)} users have acknowledged the rules but haven't posted an intro:",
+        title=f"{len(members_without_intro)} members joined > 30 days ago, acknowledged the rules, and have not posted an intro",
         description=description,
         color=Color.orange(),
     )

@@ -542,7 +542,10 @@ class Store:
     async def get_aslpp_members_without_intro(self) -> List[Mapping]:
         return await self.db.fetch_all(
             aslpp_members.select()
-            .where(aslpp_members.c.is_active == sql.false())
+            .where(
+                (aslpp_members.c.is_active == sql.false())
+                & (aslpp_members.c.joined_at < (now() - dt.timedelta(days=30)))
+            )
             .select_from(
                 aslpp_members.outerjoin(
                     aslpp_intros, aslpp_members.c.user_id == aslpp_intros.c.user_id
