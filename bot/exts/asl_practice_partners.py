@@ -52,7 +52,7 @@ async def make_no_intros_embed():
     members_without_intro = await store.get_aslpp_members_without_intro()
 
     if len(members_without_intro):
-        description = f"Here are the {max_to_display} oldest memberships:\n"
+        description = "Here are the oldest memberships:\n"
         description += "\n".join(
             tuple(
                 f"<@!{member['user_id']}> - Member for {(utcnow() - member['joined_at']).days} days"

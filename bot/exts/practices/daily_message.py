@@ -69,10 +69,13 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
     )
     @is_owner()
     async def send_daily_message_command(
-        self, ctx: Context, channel_id: Optional[int] = None, when: Optional[str] = None
+        self,
+        ctx: Context,
+        channel: Optional[discord.TextChannel] = None,
+        when: Optional[str] = None,
     ):
         await ctx.channel.trigger_typing()
-        channel_id = channel_id or ctx.channel.id
+        channel_id = channel.id if channel else ctx.channel.id
         channel_ids = set(await store.get_daily_message_channel_ids())
         if channel_id not in channel_ids:
             await ctx.send(
