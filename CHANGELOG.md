@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.33.1 (2021-04-17)
+### Fix
+* **aslpp:** Fix copy; improve sdm ([`d099a57`](https://github.com/OpenASL/HowSignBot/commit/d099a579b87ef8d0df5ae6c0a2f891971db29c94))
+
 ## v21.33.0 (2021-04-16)
 ### Feature
 * **aslpp:** Filter out members who joined 30 days ago ([`131c0c6`](https://github.com/OpenASL/HowSignBot/commit/131c0c61f61860f66c541e9fe1bb5a6eb3b38c04))
