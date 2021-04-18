@@ -20,6 +20,7 @@
     },
     'file': <class 'File'> {
       filename='Open8.png',
+      spoiler=False,
     },
   }
 ---
@@ -50,6 +51,7 @@
     },
     'file': <class 'File'> {
       filename='8.png',
+      spoiler=False,
     },
   }
 ---
