@@ -15,7 +15,7 @@ def create_gcal_url(
     params = {
         "action": "TEMPLATE",
         "text": text,
-        "dates": "{}/{}".format(start.strftime(dt_format), end.strftime(dt_format)),
+        "dates": f"{start.strftime(dt_format)}/{end.strftime(dt_format)}",
     }
     if description:
         params["details"] = description
