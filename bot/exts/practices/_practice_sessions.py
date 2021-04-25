@@ -9,6 +9,7 @@ import discord
 import holiday_emojis
 from bot import settings
 from bot.database import store
+from bot.utils import truncate
 from bot.utils.datetimes import format_multi_time
 from bot.utils.datetimes import PACIFIC
 from bot.utils.datetimes import PACIFIC_CURRENT_NAME
@@ -108,6 +109,7 @@ async def make_practice_session_embed(
     if not sessions:
         embed.description += NO_PRACTICES
     else:
+        num_sessions = len(sessions)
         for session in sessions:
             title = format_multi_time(session.dtime)
             gcal_event_title = (
@@ -122,7 +124,9 @@ async def make_practice_session_embed(
             if session.host:
                 value += f"\n> Host: {session.mention or session.host}"
             if session.notes:
-                value += f"\n> Notes: {session.notes}"
+                limit = 400 // num_sessions
+                trailing = f"…[More]({schedule_url})"
+                value += f"\n> Notes: {truncate(session.notes, limit, trailing=trailing)}"
             embed.add_field(name=title, value=value, inline=False)
     embed.add_field(
         name="🗓 View or edit the schedule using the link below.",

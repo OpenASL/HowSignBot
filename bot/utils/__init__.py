@@ -25,9 +25,9 @@ def get_and_strip_quoted_text(val: str) -> Tuple[str, Optional[str]]:
     return val, None
 
 
-def truncate(s: str, max_len: int):
+def truncate(s: str, max_len: int, *, trailing: str = "…"):
     if len(s) > max_len:
-        return f"{s[:max_len]}..."
+        return f"{s[:max_len]}{trailing}"
     return s
 
 
