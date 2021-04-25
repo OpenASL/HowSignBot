@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.33.2 (2021-04-25)
+### Fix
+* **practice:** Truncate notes to fit message limits ([#211](https://github.com/OpenASL/HowSignBot/issues/211)) ([`5454208`](https://github.com/OpenASL/HowSignBot/commit/54542084d1b92b14f0a42a4262a5e83f0d7d003a))
+
 ## v21.33.1 (2021-04-17)
 ### Fix
 * **aslpp:** Fix copy; improve sdm ([`d099a57`](https://github.com/OpenASL/HowSignBot/commit/d099a579b87ef8d0df5ae6c0a2f891971db29c94))
