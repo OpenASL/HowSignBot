@@ -335,6 +335,12 @@ class Meetings(Cog):
             zoom_message = await store.get_zoom_message(message.id)
             if not zoom_message:
                 return
+            zoom_meeting = await store.get_zoom_meeting(zoom_message["meeting_id"])
+            if not zoom_meeting:
+                return
+            # Meeting isn't set up, don't reveal it yet
+            if not zoom_meeting["setup_at"]:
+                return
             original_message = None
             if message.reference:
                 if message.reference.cached_message:
