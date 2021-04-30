@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v21.34.0 (2021-04-30)
+### Feature
+* **aslpp:** Add tags ([#215](https://github.com/OpenASL/HowSignBot/issues/215)) ([`8d12156`](https://github.com/OpenASL/HowSignBot/commit/8d121569237c1a460a18c5d174e723ae80abe0d3))
+
+### Fix
+* **zoom:** Don't reveal hidden zoom details on reaction ([#213](https://github.com/OpenASL/HowSignBot/issues/213)) ([`7ee12d9`](https://github.com/OpenASL/HowSignBot/commit/7ee12d982f504e0c1b60467243c1e9ef404059f4))
+
 ## v21.33.2 (2021-04-25)
 ### Fix
 * **practice:** Truncate notes to fit message limits ([#211](https://github.com/OpenASL/HowSignBot/issues/211)) ([`5454208`](https://github.com/OpenASL/HowSignBot/commit/54542084d1b92b14f0a42a4262a5e83f0d7d003a))
