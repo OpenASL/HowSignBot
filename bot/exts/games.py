@@ -109,6 +109,8 @@ class Games(Cog):
         message = await get_reaction_message(self.bot, payload)
         if not message:
             return
+        if "🕵️ **Codenames** 🕵" not in message.content:
+            return
         # Was the message sent by the bot?
         if message.author.id != self.bot.user.id:
             return
