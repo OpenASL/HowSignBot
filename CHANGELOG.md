@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.34.1 (2021-04-30)
+### Fix
+* Fix errant handling of thumbs up ([`1007b32`](https://github.com/OpenASL/HowSignBot/commit/1007b32948879deb05e16debdb597b2969a52cab))
+
 ## v21.34.0 (2021-04-30)
 ### Feature
 * **aslpp:** Add tags ([#215](https://github.com/OpenASL/HowSignBot/issues/215)) ([`8d12156`](https://github.com/OpenASL/HowSignBot/commit/8d121569237c1a460a18c5d174e723ae80abe0d3))
