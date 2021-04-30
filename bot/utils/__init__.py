@@ -31,7 +31,7 @@ def truncate(s: str, max_len: int, *, trailing: str = "…"):
     return s
 
 
-def did_you_mean(word, possibilities):
+def did_you_mean(word, possibilities) -> Optional[str]:
     try:
         return difflib.get_close_matches(word, possibilities, n=1, cutoff=0.5)[0]
     except IndexError:

@@ -2,7 +2,9 @@ import asyncio
 import datetime as dt
 import logging
 from contextlib import suppress
+from typing import Dict
 from typing import List
+from typing import Optional
 from typing import Union
 
 import discord
@@ -20,6 +22,7 @@ from discord.ext.commands import is_owner
 
 from bot import settings
 from bot.database import store
+from bot.utils import did_you_mean
 from bot.utils.datetimes import EASTERN
 from bot.utils.datetimes import utcnow
 from bot.utils.gsheets import get_gsheet_client
@@ -73,9 +76,21 @@ async def make_no_intros_embed():
     return embed
 
 
+def get_tags():
+    logger.info("fetching tags")
+    sheet = get_gsheet()
+    worksheet = sheet.worksheet("tags")
+    ret = {}
+    for tags, title, content in worksheet.get_all_values()[1:]:  # first row is header
+        for tag in tags.split():
+            ret[tag] = {"title": title, "description": content}
+    return ret
+
+
 class AslPracticePartners(Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.tags: Dict[str, Dict[str, str]] = {}
 
     def cog_check(self, ctx: Context):
         if not bool(ctx.guild) or ctx.guild.id != settings.ASLPP_GUILD_ID:
@@ -83,6 +98,46 @@ class AslPracticePartners(Cog):
                 f"⚠️ `{COMMAND_PREFIX}{ctx.invoked_with}` must be run within the ASL Practice Partners server (not a DM)."
             )
         return True
+
+    @group(
+        name="tag",
+        aliases=("tags",),
+        invoke_without_command=True,
+        hidden=True,
+        help="Display a tag or the list of available tags",
+    )
+    async def tag_group(self, ctx: Context, *, tag_name: Optional[str]):
+        if not tag_name:
+            await self.display_tags(ctx)
+            return
+        if tag_name not in self.tags:
+            suggestion: Optional[str] = did_you_mean(tag_name, tuple(self.tags.keys()))
+            if not suggestion:
+                await ctx.reply(f'⚠️ No tag matching "{tag_name}"')
+                return
+            else:
+                tag_name = suggestion
+        await ctx.reply(embed=Embed.from_dict(self.tags[tag_name]))
+
+    @tag_group.command(
+        "update",
+        aliases=("sync",),
+        hidden=True,
+        help="Sync the tags with the spreadsheet",
+    )
+    @commands.has_permissions(kick_members=True)  # Staff
+    async def update_tags(self, ctx: Context):
+        await ctx.channel.trigger_typing()
+        self.tags = get_tags()
+        await ctx.reply("✅ Updated tags.")
+
+    async def display_tags(self, ctx: Context):
+        embed = Embed(
+            title="Tags",
+            description="\n".join(sorted(f"**»** {tag}" for tag in self.tags)),
+        )
+        embed.set_footer(text=f"To show a tag, type {COMMAND_PREFIX}tag <tagname>.")
+        await ctx.reply(embed=embed)
 
     @group(name="aslpp", hidden=True)
     async def aslpp_group(self, ctx: Context):
@@ -230,6 +285,7 @@ class AslPracticePartners(Cog):
     @Cog.listener()
     async def on_ready(self):
         self.bot.loop.create_task(self.daily_message())
+        self.tags = get_tags()
 
     async def daily_message(self):
         while True:
