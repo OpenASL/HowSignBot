@@ -5,7 +5,7 @@ gspread==3.7.0
 aiohttp==3.7.4.post0
 aiohttp-cors==0.7.0
 pyyaml==5.4.1
-python-slugify==4.0.1
+python-slugify==5.0.0
 emoji==1.2.0
 dateparser==1.0.0
 nameparser==1.0.6
@@ -17,7 +17,7 @@ python-dateutil==2.8.1
 # catchphrase
 PyYAML==5.4.1
 # meetings
-python-slugify==4.0.1
+python-slugify==5.0.0
 # cuteid
 emoji==1.2.0
 # database
