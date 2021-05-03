@@ -272,13 +272,14 @@ class Meetings(Cog):
         zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
         # DM zoom link and instructions once
         if len(zoom_messages) <= 1:
+            command_name = "zzzzoom" if with_zzzzoom else "zoom"
             await ctx.author.send(
                 content="🔨 Set up your meeting below",
                 embed=await make_zoom_embed(meeting_id, include_instructions=False),
             )
             await ctx.author.send(
                 "To post in another channel, send the following command in that channel:\n"
-                f"```{COMMAND_PREFIX}zoom setup {meeting_id}```\n"
+                f"```{COMMAND_PREFIX}{command_name} setup {meeting_id}```\n"
                 "When you're ready for people to join, reply with:\n"
                 f"```{COMMAND_PREFIX}zoom start {meeting_id}```"
             )

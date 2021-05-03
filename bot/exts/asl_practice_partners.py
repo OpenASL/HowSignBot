@@ -80,11 +80,11 @@ def get_tags():
     logger.info("fetching tags")
     sheet = get_gsheet()
     worksheet = sheet.worksheet("tags")
-    ret = {}
-    for tags, title, content in worksheet.get_all_values()[1:]:  # first row is header
-        for tag in tags.split():
-            ret[tag] = {"title": title, "description": content}
-    return ret
+    return {
+        tag: {"title": title, "description": content}
+        for tags, title, content in worksheet.get_all_values()[1:]  # first row is header
+        for tag in tags.split()
+    }
 
 
 class AslPracticePartners(Cog):
