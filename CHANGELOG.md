@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v21.35.0 (2021-05-02)
+### Feature
+* **meta:** Add edit command ([#218](https://github.com/OpenASL/HowSignBot/issues/218)) ([`757fe08`](https://github.com/OpenASL/HowSignBot/commit/757fe080ef9a6d845ba5b3ded359fc2e4c36d324))
+* **zzzzoom:** Show 'zzzzoom' when setting up ([`2eda249`](https://github.com/OpenASL/HowSignBot/commit/2eda249bafaf5ee82e4c4b0997b48d02c42e7e85))
+
 ## v21.34.1 (2021-04-30)
 ### Fix
 * Fix errant handling of thumbs up ([`1007b32`](https://github.com/OpenASL/HowSignBot/commit/1007b32948879deb05e16debdb597b2969a52cab))
