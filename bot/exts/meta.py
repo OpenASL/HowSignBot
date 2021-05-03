@@ -104,6 +104,27 @@ class Meta(Cog):
         )
         await ctx.send(embed=embed)
 
+    @command(name="edit", hidden=True, help="BOT OWNER ONLY: Edit a bot message")
+    @is_owner()
+    async def edit_command(self, ctx: Context, message: discord.Message):
+        if message.author != self.bot.user:
+            await ctx.send("⚠️ I didn't send that message.")
+            return
+        response = await ctx.reply(
+            content=f"Reply to this message with the new message content for {message.jump_url}"
+        )
+
+        def check(m: discord.Message):
+            return (
+                m.author == ctx.author
+                and m.reference
+                and m.reference.message_id == response.id
+            )
+
+        reply_message = await self.bot.wait_for("message", check=check)
+        await message.edit(content=reply_message.content)
+        await reply_message.reply(f"✅ Edited {message.jump_url}")
+
 
 def setup(bot: Bot) -> None:
     bot.add_cog(Meta(bot))
