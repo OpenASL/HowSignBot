@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.36.0 (2021-05-08)
+### Feature
+* **codenames:** Use different join emoji ([#228](https://github.com/OpenASL/HowSignBot/issues/228)) ([`e35c808`](https://github.com/OpenASL/HowSignBot/commit/e35c80816db573f884f9ead4180d9e2f95599ae3))
+
 ## v21.35.0 (2021-05-02)
 ### Feature
 * **meta:** Add edit command ([#218](https://github.com/OpenASL/HowSignBot/issues/218)) ([`757fe08`](https://github.com/OpenASL/HowSignBot/commit/757fe080ef9a6d845ba5b3ded359fc2e4c36d324))
