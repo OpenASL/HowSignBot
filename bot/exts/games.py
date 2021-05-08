@@ -26,6 +26,9 @@ NUM_CATCHPHRASE_WORDS = 8
 
 CATEGORIES_FORMATTED = ", ".join(catchphrase.CATEGORIES)
 
+JOIN_EMOJI = "✅"
+SHUFFLE_EMOJI = "🔀"
+
 
 def catchphrase_impl(category: Optional[str] = None):
     category = category.lower() if category else None
@@ -85,13 +88,13 @@ class Games(Cog):
     async def codenames_command(self, ctx: Context, name: Optional[str] = None):
         name = name or cuteid.cuteid()
         url = f"https://horsepaste.com/{name}"
-        base_message = f"🕵️ **Codenames** 🕵️\n{url}\nClick 👍 to join a team. Click 🔀 to shuffle the teams."
+        base_message = f"🕵️ **Codenames** 🕵️\n{url}\nClick {JOIN_EMOJI} to join a team. Click {SHUFFLE_EMOJI} to shuffle the teams."
         logger.info("starting codenames game")
         message = await ctx.send(base_message)
 
         with suppress(Exception):
-            await message.add_reaction("👍")
-            await message.add_reaction("🔀")
+            await message.add_reaction(JOIN_EMOJI)
+            await message.add_reaction(SHUFFLE_EMOJI)
 
     @Cog.listener()
     async def on_raw_reaction_remove(
@@ -104,7 +107,7 @@ class Games(Cog):
         await self.handle_reaction(payload)
 
     async def handle_reaction(self, payload: discord.RawReactionActionEvent) -> None:
-        if not should_handle_reaction(self.bot, payload, {"👍", "🔀"}):
+        if not should_handle_reaction(self.bot, payload, {JOIN_EMOJI, SHUFFLE_EMOJI}):
             return
         message = await get_reaction_message(self.bot, payload)
         if not message:
@@ -115,7 +118,9 @@ class Games(Cog):
         if message.author.id != self.bot.user.id:
             return
 
-        reaction = next((r for r in message.reactions if str(r.emoji) == "👍"), None)
+        reaction = next(
+            (r for r in message.reactions if str(r.emoji) == JOIN_EMOJI), None
+        )
         if not reaction:
             return
         players = [
