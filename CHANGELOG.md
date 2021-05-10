@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.37.0 (2021-05-09)
+### Feature
+* **sign:** Add ASL Signbank ([#232](https://github.com/OpenASL/HowSignBot/issues/232)) ([`9d4248b`](https://github.com/OpenASL/HowSignBot/commit/9d4248bcc79307a30a247248be1473f7f04e2223))
+
 ## v21.36.0 (2021-05-08)
 ### Feature
 * **codenames:** Use different join emoji ([#228](https://github.com/OpenASL/HowSignBot/issues/228)) ([`e35c808`](https://github.com/OpenASL/HowSignBot/commit/e35c80816db573f884f9ead4180d9e2f95599ae3))
