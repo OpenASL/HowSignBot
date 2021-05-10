@@ -21,6 +21,7 @@ SIGN_TEMPLATE = """[🤲 **Handspeak** - Search results]({handspeak})
 [🧬 **Lifeprint** - Search results]({lifeprint})
 [🤝 **SigningSavvy** - Sign for {word_uppercased}]({signingsavvy})
 [🌐 **Spread The Sign** - {word_uppercased}]({spread_the_sign})
+[📜 **ASL Signbank** - {word_uppercased}]({asl_signbank})
 [📹 **YouGlish** - ASL videos with {word_uppercased}]({youglish})
 Share: {howsign}
 """
@@ -29,6 +30,7 @@ SIGN_SPOILER_TEMPLATE = """[🤲 **Handspeak** - Search results]({handspeak})
 [🧬 **Lifeprint** - Search results]({lifeprint})
 [🤝 **SigningSavvy** - Sign for ||{word_uppercased}||]({signingsavvy})
 [🌐 **Spread The Sign** - ||{word_uppercased}||]({spread_the_sign})
+[📜 **ASL Signbank** - ||{word_uppercased}||]({asl_signbank})
 [📹 **YouGlish** - ASL videos with ||{word_uppercased}||]({youglish})
 Share: ||{howsign}||
 """
@@ -61,6 +63,7 @@ def word_display(word: str, *, template: str = SIGN_TEMPLATE, max_length: int = 
         handspeak=f"https://www.google.com/search?&q=site%3Ahandspeak.com+{quoted_word}",
         signingsavvy=f"https://www.signingsavvy.com/search/{quoted_word}",
         spread_the_sign=f"https://www.spreadthesign.com/en.us/search/?q={quoted_word}",
+        asl_signbank=f"https://aslsignbank.haskins.yale.edu/signs/search/?keyword={quoted_word}",
         youglish=f"https://youglish.com/pronounce/{quoted_word}/signlanguage/asl",
     )
 
