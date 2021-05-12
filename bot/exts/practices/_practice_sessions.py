@@ -124,7 +124,7 @@ async def make_practice_session_embed(
             if session.host:
                 value += f"\n> Host: {session.mention or session.host}"
             if session.notes:
-                limit = 400 // num_sessions
+                limit = 600 // num_sessions
                 trailing = f"…[More]({schedule_url})"
                 value += f"\n> Notes: {truncate(session.notes, limit, trailing=trailing)}"
             embed.add_field(name=title, value=value, inline=False)
