@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.37.1 (2021-05-12)
+### Fix
+* Increase notes limit ([`ef4a0d2`](https://github.com/OpenASL/HowSignBot/commit/ef4a0d2309384e9190f51554700979b8ea232ea6))
+
 ## v21.37.0 (2021-05-09)
 ### Feature
 * **sign:** Add ASL Signbank ([#232](https://github.com/OpenASL/HowSignBot/issues/232)) ([`9d4248b`](https://github.com/OpenASL/HowSignBot/commit/9d4248bcc79307a30a247248be1473f7f04e2223))
