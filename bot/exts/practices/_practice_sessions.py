@@ -113,18 +113,20 @@ async def make_practice_session_embed(
         for session in sessions:
             title = format_multi_time(session.dtime)
             gcal_event_title = (
-                f"ASL Practice: {session.notes}" if session.notes else "ASL Practice"
+                f"ASL Practice: {truncate(session.notes, 50)}"
+                if session.notes
+                else "ASL Practice"
             )
             gcal_url = create_gcal_url(
                 gcal_event_title,
                 start=session.dtime,
                 description=f"See the full schedule here: {schedule_url}",
             )
-            value = f"[Add to Google Calendar]({gcal_url})"
+            value = f"[+Google Calendar]({gcal_url})"
             if session.host:
                 value += f"\n> Host: {session.mention or session.host}"
             if session.notes:
-                limit = 600 // num_sessions
+                limit = 800 // num_sessions
                 trailing = f"…[More]({schedule_url})"
                 value += f"\n> Notes: {truncate(session.notes, limit, trailing=trailing)}"
             embed.add_field(name=title, value=value, inline=False)
