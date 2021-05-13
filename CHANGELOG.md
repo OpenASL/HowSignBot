@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.38.0 (2021-05-12)
+### Feature
+* Shorten Gcal links so descriptions can be longer ([#235](https://github.com/OpenASL/HowSignBot/issues/235)) ([`b25876b`](https://github.com/OpenASL/HowSignBot/commit/b25876b28211de91a859e234e0b906d2f290a81b))
+
 ## v21.37.1 (2021-05-12)
 ### Fix
 * Increase notes limit ([`ef4a0d2`](https://github.com/OpenASL/HowSignBot/commit/ef4a0d2309384e9190f51554700979b8ea232ea6))
