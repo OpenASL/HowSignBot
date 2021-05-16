@@ -81,7 +81,7 @@ class Meetings(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
 
-    @group(name="zoom", invoke_without_command=True)
+    @group(name="zoom", aliases=("z",), invoke_without_command=True)
     @check(is_allowed_zoom_access)
     async def zoom_group(
         self, ctx: Context, meeting_id: Optional[Union[int, str]] = None
@@ -211,7 +211,7 @@ class Meetings(Cog):
 
     @group(
         name="zzzzoom",
-        aliases=("zzoom", "zzzoom", "zzzzzoom"),
+        aliases=("zzoom", "zzzoom", "zzzzzoom", "zz", "zzz", "zzzz", "zzzzz"),
         invoke_without_command=True,
     )
     @check(is_allowed_zoom_access)
