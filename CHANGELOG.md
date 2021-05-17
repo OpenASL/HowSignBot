@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.39.0 (2021-05-17)
+### Feature
+* **zoom:** Add aliases ([#237](https://github.com/OpenASL/HowSignBot/issues/237)) ([`7bfc5a7`](https://github.com/OpenASL/HowSignBot/commit/7bfc5a77b624aec83f86f483c8eb64b8d033cc70))
+
 ## v21.38.0 (2021-05-12)
 ### Feature
 * Shorten Gcal links so descriptions can be longer ([#235](https://github.com/OpenASL/HowSignBot/issues/235)) ([`b25876b`](https://github.com/OpenASL/HowSignBot/commit/b25876b28211de91a859e234e0b906d2f290a81b))
