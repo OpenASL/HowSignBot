@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.40.0 (2021-05-17)
+### Feature
+* **aslpp:** Add role graphs ([#239](https://github.com/OpenASL/HowSignBot/issues/239)) ([`94eff9c`](https://github.com/OpenASL/HowSignBot/commit/94eff9cd695f0b5d3e0df85026a872854043112a))
+
 ## v21.39.0 (2021-05-17)
 ### Feature
 * **zoom:** Add aliases ([#237](https://github.com/OpenASL/HowSignBot/issues/237)) ([`7bfc5a7`](https://github.com/OpenASL/HowSignBot/commit/7bfc5a77b624aec83f86f483c8eb64b8d033cc70))
