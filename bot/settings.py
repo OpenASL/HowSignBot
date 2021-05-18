@@ -33,6 +33,9 @@ ASLPP_ACKNOWLEDGED_RULES_ROLE_ID = env.int(
     "ASLPP_ACKNOWLEDGED_RULES_ROLE_ID", required=False
 )
 ASLPP_BOT_CHANNEL_ID = env.int("ASLPP_BOT_CHANNEL_ID", required=False)
+ASLPP_SKILL_ROLE_IDS = env.list("ASLPP_SKILL_ROLE_IDS", subcast=int)
+ASLPP_HEARING_SPECTRUM_ROLE_IDS = env.list("ASLPP_HEARING_SPECTRUM_ROLE_IDS", subcast=int)
+ASLPP_AGE_ROLE_IDS = env.list("ASLPP_AGE_ROLE_IDS", subcast=int)
 
 # Mapping of Discord user IDs => emails
 ZOOM_USERS = env.dict("ZOOM_USERS", subcast_keys=int, required=True)
