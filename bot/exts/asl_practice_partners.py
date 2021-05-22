@@ -15,6 +15,7 @@ from discord import Guild
 from discord import Member
 from discord import Message
 from discord import Role
+from discord import VoiceState
 from discord.channel import TextChannel
 from discord.ext import commands
 from discord.ext.commands import Bot
@@ -38,6 +39,11 @@ Don't worry, you can re-join (and we'd love to have you back). You can find the 
 <https://aslpractice.partners>
 If you decide to re-join, make sure to post an intro so you don't get kicked again.
 """
+UNMUTE_WARNING = (
+    "⚠️ You're unmuted in a practice room VC. To maximize inclusivity and learning for all members, "
+    "we encourage you to keep your voice off during practice. "
+    "🤐 You can use the text channels to type responses when needed."
+)
 DAILY_MESSAGE_TIME = dt.time(8, 0)  # Eastern time
 
 
@@ -133,6 +139,7 @@ class AslPracticePartners(Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.tags: Dict[str, Dict[str, str]] = {}
+        self.unmute_warnings: Dict[int, dt.datetime] = {}
 
     def cog_check(self, ctx: Context):
         if not bool(ctx.guild) or ctx.guild.id != settings.ASLPP_GUILD_ID:
@@ -366,6 +373,33 @@ class AslPracticePartners(Cog):
                 f"aslpp member acknowledged rules role removed. removing member {after.id}"
             )
             await store.remove_aslpp_member(user_id=after.id)
+
+    @Cog.listener()
+    async def on_voice_state_update(
+        self, member: Member, before: VoiceState, after: VoiceState
+    ) -> None:
+        if member.guild.id != settings.ASLPP_GUILD_ID:
+            return
+        if not settings.ASLPP_ENABLE_UNMUTE_WARNING:
+            return
+        if after.channel is None:  # member left VC
+            return
+        if not after.self_mute:  # member unmuted
+            # Send warning iff it hasn't been sent to the member in the past hour
+            if member.id in self.unmute_warnings:
+                last_sent = self.unmute_warnings[member.id]
+                if (utcnow() - last_sent) > dt.timedelta(hours=1):
+                    await self._send_unmute_warning(member)
+            else:
+                await self._send_unmute_warning(member)
+
+    async def _send_unmute_warning(self, member: Member):
+        try:
+            logger.info(f"sending unmute warning to member {member.id}")
+            await member.send(content=UNMUTE_WARNING)
+            self.unmute_warnings[member.id] = utcnow()
+        except Exception:
+            logger.exception(f"could not send unmute warning to member {member.id}")
 
     @Cog.listener()
     async def on_ready(self):

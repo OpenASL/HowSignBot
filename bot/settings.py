@@ -26,6 +26,7 @@ GOOGLE_CLIENT_EMAIL = env.str("GOOGLE_CLIENT_EMAIL", required=True)
 GOOGLE_TOKEN_URI = env.str("GOOGLE_TOKEN_URI", "https://oauth2.googleapis.com/token")
 TOPICS_SHEET_KEY = env.str("TOPICS_SHEET_KEY", required=True)
 FEEDBACK_SHEET_KEY = env.str("FEEDBACK_SHEET_KEY", required=True)
+
 ASLPP_SHEET_KEY = env.str("ASLPP_SHEET_KEY", required=True)
 ASLPP_GUILD_ID = env.int("ASLPP_GUILD_ID", default=729838318963130449)
 ASLPP_INTRODUCTIONS_CHANNEL_ID = env.int("ASLPP_INTRODUCTIONS_CHANNEL_ID", required=False)
@@ -36,6 +37,7 @@ ASLPP_BOT_CHANNEL_ID = env.int("ASLPP_BOT_CHANNEL_ID", required=False)
 ASLPP_SKILL_ROLE_IDS = env.list("ASLPP_SKILL_ROLE_IDS", subcast=int)
 ASLPP_HEARING_SPECTRUM_ROLE_IDS = env.list("ASLPP_HEARING_SPECTRUM_ROLE_IDS", subcast=int)
 ASLPP_AGE_ROLE_IDS = env.list("ASLPP_AGE_ROLE_IDS", subcast=int)
+ASLPP_ENABLE_UNMUTE_WARNING = env.bool("ASLPP_ENABLE_UNMUTE_WARNING", True)
 
 # Mapping of Discord user IDs => emails
 ZOOM_USERS = env.dict("ZOOM_USERS", subcast_keys=int, required=True)
