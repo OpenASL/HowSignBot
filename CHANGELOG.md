@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.41.0 (2021-05-21)
+### Feature
+* **aslpp:** Warn when member is unmuted in VC ([#243](https://github.com/OpenASL/HowSignBot/issues/243)) ([`75bd4bf`](https://github.com/OpenASL/HowSignBot/commit/75bd4bf3d59b44dcd76b81b35b4323de0a3ec6b3))
+
 ## v21.40.0 (2021-05-17)
 ### Feature
 * **aslpp:** Add role graphs ([#239](https://github.com/OpenASL/HowSignBot/issues/239)) ([`94eff9c`](https://github.com/OpenASL/HowSignBot/commit/94eff9cd695f0b5d3e0df85026a872854043112a))
