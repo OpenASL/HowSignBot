@@ -49,7 +49,7 @@ async def get_practice_sessions(
     worksheet = worksheet or await get_practice_worksheet_for_guild(guild_id)
     all_values = worksheet.get_all_values()
     return sorted(
-        [
+        (
             PracticeSession(
                 dtime=session_dtime,
                 host=row[1],
@@ -70,7 +70,7 @@ async def get_practice_sessions(
             )
             # Filter out paused sessions
             and not bool(row[4])
-        ],
+        ),
         key=lambda s: s.dtime,
     )
 
