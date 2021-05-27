@@ -150,7 +150,7 @@ class AslPracticePartners(Cog):
 
     @group(
         name="tag",
-        aliases=("tags",),
+        aliases=("tags", "t"),
         invoke_without_command=True,
         hidden=True,
         help="Display a tag or the list of available tags",
