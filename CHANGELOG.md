@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.42.0 (2021-05-26)
+### Feature
+* **tags:** Add t alias ([`6d2b448`](https://github.com/OpenASL/HowSignBot/commit/6d2b448059451cb82dcddc2a9557ed40f324c6fd))
+
 ## v21.41.0 (2021-05-21)
 ### Feature
 * **aslpp:** Warn when member is unmuted in VC ([#243](https://github.com/OpenASL/HowSignBot/issues/243)) ([`75bd4bf`](https://github.com/OpenASL/HowSignBot/commit/75bd4bf3d59b44dcd76b81b35b4323de0a3ec6b3))
