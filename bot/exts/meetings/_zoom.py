@@ -152,7 +152,7 @@ async def make_zoom_embed(
     )
     title = f"<{join_url}>"
     if has_zzzzoom:
-        description = f"**Meeting ID (for FS precheck page):**: `{zzzzoom_meeting['id']}`"
+        description = f"**Meeting ID (for FS captcha page):**: `{zzzzoom_meeting['id']}`"
     else:
         description = f"**Meeting ID:**: `{meeting_id}`"
         description += f"\n**Passcode**: `{meeting['passcode']}`"
