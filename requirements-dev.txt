@@ -4,7 +4,7 @@ flake8-bugbear==21.4.3
 flake8==3.9.2
 freezegun==1.1.0
 python-semantic-release==7.15.5
-syrupy==1.2.3
+syrupy==1.2.4
 SQLAlchemy-Utils==0.37.5
 pytest-asyncio==0.15.1
 asynctest==0.13.0
