@@ -9,4 +9,4 @@ SQLAlchemy-Utils==0.37.6
 pytest-asyncio==0.15.1
 asynctest==0.13.0
 pre-commit==2.13.0
-mypy==0.901
+mypy==0.902
