@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v21.43.0 (2021-07-07)
+### Feature
+* **aslpp:** Allow configuring inactive period ([#270](https://github.com/OpenASL/HowSignBot/issues/270)) ([`dd1e76c`](https://github.com/OpenASL/HowSignBot/commit/dd1e76c7f8e25c8e3f88d50746d34ad63be3708a))
+* S/precheck/captcha ([`b3e2fd2`](https://github.com/OpenASL/HowSignBot/commit/b3e2fd290bdd916cd1664f25d1b6f595a88e61bf))
+
 ## v21.42.0 (2021-05-26)
 ### Feature
 * **tags:** Add t alias ([`6d2b448`](https://github.com/OpenASL/HowSignBot/commit/6d2b448059451cb82dcddc2a9557ed40f324c6fd))
