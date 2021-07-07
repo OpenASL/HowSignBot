@@ -539,7 +539,7 @@ class Store:
             aslpp_members.delete().where(aslpp_members.c.user_id == user_id)
         )
 
-    async def get_aslpp_members_without_intro(self) -> List[Mapping]:
+    async def get_aslpp_members_without_intro(self, since: dt.timedelta) -> List[Mapping]:
         return await self.db.fetch_all(
             aslpp_members.select()
             .where(

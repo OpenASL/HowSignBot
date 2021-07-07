@@ -61,7 +61,9 @@ def get_sheet_content(worksheet_name: str) -> List[str]:
 
 async def make_no_intros_embed():
     max_to_display = 30
-    members_without_intro = await store.get_aslpp_members_without_intro()
+    members_without_intro = await store.get_aslpp_members_without_intro(
+        since=dt.timedelta(days=settings.ASLPP_INACTIVE_DAYS + 1)
+    )
 
     if len(members_without_intro):
         description = "Here are the oldest memberships:\n"
@@ -75,7 +77,7 @@ async def make_no_intros_embed():
         description = "✨ _No members to review_"
 
     embed = Embed(
-        title=f"{len(members_without_intro)} members joined > 30 days ago, acknowledged the rules, and have not posted an intro",
+        title=f"{len(members_without_intro)} members joined > {settings.ASLPP_INACTIVE_DAYS} days ago, acknowledged the rules, and have not posted an intro",
         description=description,
         color=Color.orange(),
     )
