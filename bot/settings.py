@@ -38,6 +38,7 @@ ASLPP_SKILL_ROLE_IDS = env.list("ASLPP_SKILL_ROLE_IDS", subcast=int)
 ASLPP_HEARING_SPECTRUM_ROLE_IDS = env.list("ASLPP_HEARING_SPECTRUM_ROLE_IDS", subcast=int)
 ASLPP_AGE_ROLE_IDS = env.list("ASLPP_AGE_ROLE_IDS", subcast=int)
 ASLPP_ENABLE_UNMUTE_WARNING = env.bool("ASLPP_ENABLE_UNMUTE_WARNING", True)
+ASLPP_INACTIVE_DAYS = env.int("ASLPP_INACTIVE_DAYS", 30)
 
 # Mapping of Discord user IDs => emails
 ZOOM_USERS = env.dict("ZOOM_USERS", subcast_keys=int, required=True)
