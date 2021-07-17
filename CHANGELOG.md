@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.43.1 (2021-07-17)
+### Fix
+* **aslpp:** Fix nointro ([#272](https://github.com/OpenASL/HowSignBot/issues/272)) ([`6516247`](https://github.com/OpenASL/HowSignBot/commit/651624737710133f538da4a50e0dd0b6441ad3dd))
+
 ## v21.43.0 (2021-07-07)
 ### Feature
 * **aslpp:** Allow configuring inactive period ([#270](https://github.com/OpenASL/HowSignBot/issues/270)) ([`dd1e76c`](https://github.com/OpenASL/HowSignBot/commit/dd1e76c7f8e25c8e3f88d50746d34ad63be3708a))
