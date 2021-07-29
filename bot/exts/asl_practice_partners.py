@@ -302,8 +302,11 @@ class AslPracticePartners(Cog):
         members_without_intro = await store.get_aslpp_members_without_intro(
             since=dt.timedelta(days=settings.ASLPP_INACTIVE_DAYS + 1)
         )
+        if not len(members_without_intro):
+            ctx.send("✨ _No members to kick")
+            return
         num_kicked = 0
-        for member_record in members_without_intro[MAX_NO_INTRO_USERS_TO_DISPLAY]:
+        for member_record in members_without_intro[:MAX_NO_INTRO_USERS_TO_DISPLAY]:
             user_id = member_record["user_id"]
             member = ctx.guild.get_member(user_id)
             with suppress(discord.errors.Forbidden):  # user may not allow DMs from bot
