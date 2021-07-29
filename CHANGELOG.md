@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.44.1 (2021-07-29)
+### Fix
+* **aslpp:** Fix kickall ([`63b2c17`](https://github.com/OpenASL/HowSignBot/commit/63b2c176378b9492a839847f7881607c37176b65))
+
 ## v21.44.0 (2021-07-29)
 ### Feature
 * **aslpp:** Add kickall ([`fc81976`](https://github.com/OpenASL/HowSignBot/commit/fc8197643b68eb8333840627b7c1396e9f743c12))
