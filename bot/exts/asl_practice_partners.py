@@ -59,8 +59,10 @@ def get_sheet_content(worksheet_name: str) -> List[str]:
     return worksheet.col_values(1)
 
 
+MAX_NO_INTRO_USERS_TO_DISPLAY = 30
+
+
 async def make_no_intros_embed():
-    max_to_display = 30
     members_without_intro = await store.get_aslpp_members_without_intro(
         since=dt.timedelta(days=settings.ASLPP_INACTIVE_DAYS + 1)
     )
@@ -70,7 +72,7 @@ async def make_no_intros_embed():
         description += "\n".join(
             tuple(
                 f"<@!{member['user_id']}> - Member for {(utcnow() - member['joined_at']).days} days"
-                for member in members_without_intro[:max_to_display]
+                for member in members_without_intro[:MAX_NO_INTRO_USERS_TO_DISPLAY]
             )
         )
     else:
@@ -291,6 +293,24 @@ class AslPracticePartners(Cog):
                 logger.info(f"kicking member {target.id}")
                 await ctx.guild.kick(target, reason="Inactivity")
                 num_kicked += 1
+
+        await ctx.reply(f"Kicked {num_kicked} members.")
+
+    @aslpp_group.command(name="kickall", hidden=True)
+    @commands.has_permissions(kick_members=True)
+    async def kickall_command(self, ctx: Context):
+        members_without_intro = await store.get_aslpp_members_without_intro(
+            since=dt.timedelta(days=settings.ASLPP_INACTIVE_DAYS + 1)
+        )
+        num_kicked = 0
+        for member_record in members_without_intro:
+            user_id = member_record["user_id"]
+            member = ctx.guild.get_member(user_id)
+            with suppress(discord.errors.Forbidden):  # user may not allow DMs from bot
+                await member.send(KICK_MESSAGE)
+            logger.info(f"kicking member {member.id}")
+            # await ctx.guild.kick(member, reason="Inactivity")
+            num_kicked += 1
 
         await ctx.reply(f"Kicked {num_kicked} members.")
 
