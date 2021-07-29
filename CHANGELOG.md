@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.45.0 (2021-07-29)
+### Feature
+* **aslpp:** Add Zoom watch list ([#283](https://github.com/OpenASL/HowSignBot/issues/283)) ([`687a602`](https://github.com/OpenASL/HowSignBot/commit/687a602a98dcceb21d89cfaf40f2d14e69e76054))
+
 ## v21.44.1 (2021-07-29)
 ### Fix
 * **aslpp:** Fix kickall ([`63b2c17`](https://github.com/OpenASL/HowSignBot/commit/63b2c176378b9492a839847f7881607c37176b65))
