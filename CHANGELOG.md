@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v21.44.0 (2021-07-29)
+### Feature
+* **aslpp:** Add kickall ([`fc81976`](https://github.com/OpenASL/HowSignBot/commit/fc8197643b68eb8333840627b7c1396e9f743c12))
+
+### Fix
+* **aslpp:** Actually kick the users ([`dc22004`](https://github.com/OpenASL/HowSignBot/commit/dc22004d840b1890b8eb85ad897479b4a6d41f23))
+
 ## v21.43.1 (2021-07-17)
 ### Fix
 * **aslpp:** Fix nointro ([#272](https://github.com/OpenASL/HowSignBot/issues/272)) ([`6516247`](https://github.com/OpenASL/HowSignBot/commit/651624737710133f538da4a50e0dd0b6441ad3dd))
