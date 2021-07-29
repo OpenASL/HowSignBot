@@ -303,13 +303,13 @@ class AslPracticePartners(Cog):
             since=dt.timedelta(days=settings.ASLPP_INACTIVE_DAYS + 1)
         )
         num_kicked = 0
-        for member_record in members_without_intro:
+        for member_record in members_without_intro[MAX_NO_INTRO_USERS_TO_DISPLAY]:
             user_id = member_record["user_id"]
             member = ctx.guild.get_member(user_id)
             with suppress(discord.errors.Forbidden):  # user may not allow DMs from bot
                 await member.send(KICK_MESSAGE)
             logger.info(f"kicking member {member.id}")
-            # await ctx.guild.kick(member, reason="Inactivity")
+            await ctx.guild.kick(member, reason="Inactivity")
             num_kicked += 1
 
         await ctx.reply(f"Kicked {num_kicked} members.")
