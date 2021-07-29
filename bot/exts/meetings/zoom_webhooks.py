@@ -48,6 +48,7 @@ async def handle_zoom_event(bot: Bot, data: dict):
         )
 
     edit_kwargs = None
+    banned_user_joined = False
     if event == "meeting.ended":
         logger.info(f"automatically ending zoom meeting {meeting_id}")
         await store.end_zoom_meeting(meeting_id=meeting_id)
@@ -61,15 +62,17 @@ async def handle_zoom_event(bot: Bot, data: dict):
             dt.datetime, dateparser.parse(participant_data["join_time"])
         ).astimezone(dt.timezone.utc)
         logger.info(f"adding new participant for meeting id {meeting_id}")
+        email = participant_data["email"]
         await store.add_zoom_participant(
             meeting_id=meeting_id,
             name=participant_name,
             zoom_id=participant_data["id"],
-            email=participant_data["email"],
+            email=email,
             joined_at=joined_at,
         )
         embed = await make_zoom_embed(meeting_id=meeting_id)
         edit_kwargs = {"embed": embed}
+        banned_user_joined = email in settings.ASLPP_ZOOM_WATCH_LIST
     elif event == "meeting.participant_left":
         # XXX Sleep to reduce the likelihood that particpants will be removed
         #   after leaving breakout rooms.
@@ -100,6 +103,7 @@ async def handle_zoom_event(bot: Bot, data: dict):
         embed = await make_zoom_embed(meeting_id=meeting_id)
         edit_kwargs = {"embed": embed}
 
+    discord_messages = []
     if zoom_meeting["setup_at"]:
         for message in messages:
             channel_id = message["channel_id"]
@@ -108,9 +112,17 @@ async def handle_zoom_event(bot: Bot, data: dict):
             if edit_kwargs:
                 logger.info(f"editing zoom message {message_id} for event {event}")
                 discord_message: discord.Message = await channel.fetch_message(message_id)
+                discord_messages.append(discord_message)
                 await discord_message.edit(**edit_kwargs)
                 if event == "meeting.ended":
                     await maybe_clear_reaction(discord_message, REPOST_EMOJI)
+    # If a banned user joins, notify @Mod in ASLPP
+    if banned_user_joined:
+        if discord_messages:
+            content = f"🚨 <@&{settings.ASLPP_MOD_ROLE_ID}> Banned user **{participant_name}** (email: **{email}**) entered a Zoom meeting: {discord_messages[0].jump_url}"
+        else:
+            content = f"🚨 <@&{settings.ASLPP_MOD_ROLE_ID}> Banned user **{participant_name}** (email: **{email}**) entered a Zoom meeting."
+        await bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID).send(content=content)
 
 
 def setup(bot: Bot) -> None:
