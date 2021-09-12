@@ -33,7 +33,7 @@ async def mock_worksheet(monkeypatch, db):
         WorksheetMock = mock.Mock(spec=gspread.Worksheet)
         WorksheetMock.get_all_values.return_value = [
             ["docs", "more docs", ""],
-            ["Start time", "Host (optional)", "Notes (optional)", ""],
+            ["Start time", "Host (optional)", "Details (optional)", ""],
             ["Friday 5pm EDT", "Steve", "<@!12345>", "recurring", ""],
             ["Friday 6pm EDT", "Steve", "<@!12345>", "paused", "x"],
             ["Wed 6pm edt", "", "", "another recurring", ""],

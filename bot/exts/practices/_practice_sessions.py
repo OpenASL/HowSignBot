@@ -128,7 +128,9 @@ async def make_practice_session_embed(
             if session.notes:
                 limit = 800 // num_sessions
                 trailing = f"…[More]({schedule_url})"
-                value += f"\n> Notes: {truncate(session.notes, limit, trailing=trailing)}"
+                value += (
+                    f"\n> Details: {truncate(session.notes, limit, trailing=trailing)}"
+                )
             embed.add_field(name=title, value=value, inline=False)
     embed.add_field(
         name="🗓 View or edit the schedule using the link below.",

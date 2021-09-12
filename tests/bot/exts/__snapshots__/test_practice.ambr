@@ -103,7 +103,7 @@
       colour=<Colour value=15105570>,
       description='Sunday, September 27',
       fields=<class 'list'> [
-        EmbedProxy(inline=False, name='11 AM PDT / 12 PM MDT / 1 PM CDT / 2 PM EDT', value='[+Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+another+1%EF%B8%8F%E2%83%A3&dates=20200927T180000Z%2F20200927T190000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Notes: another 1️⃣'),
+        EmbedProxy(inline=False, name='11 AM PDT / 12 PM MDT / 1 PM CDT / 2 PM EDT', value='[+Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+another+1%EF%B8%8F%E2%83%A3&dates=20200927T180000Z%2F20200927T190000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Details: another 1️⃣'),
         EmbedProxy(inline=True, name='🗓 View or edit the schedule using the link below.', value='[Full schedule](https://docs.google.com/spreadsheets/d/abc/edit)'),
       ],
       footer=EmbedProxy(),
@@ -127,7 +127,7 @@
       colour=<Colour value=15105570>,
       description='Today - Friday, September 25',
       fields=<class 'list'> [
-        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[+Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+recurring&dates=20200925T210000Z%2F20200925T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: <@!12345>\n> Notes: recurring'),
+        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[+Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+recurring&dates=20200925T210000Z%2F20200925T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: <@!12345>\n> Details: recurring'),
         EmbedProxy(inline=True, name='🗓 View or edit the schedule using the link below.', value='[Full schedule](https://docs.google.com/spreadsheets/d/abc/edit)'),
       ],
       footer=EmbedProxy(),
@@ -151,7 +151,7 @@
       colour=<Colour value=15105570>,
       description='Tomorrow - Saturday, September 26',
       fields=<class 'list'> [
-        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[+Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+one+time&dates=20200926T210000Z%2F20200926T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: <@!12345>\n> Notes: one time'),
+        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[+Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+one+time&dates=20200926T210000Z%2F20200926T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: <@!12345>\n> Details: one time'),
         EmbedProxy(inline=True, name='🗓 View or edit the schedule using the link below.', value='[Full schedule](https://docs.google.com/spreadsheets/d/abc/edit)'),
       ],
       footer=EmbedProxy(),
@@ -175,7 +175,7 @@
       colour=<Colour value=15105570>,
       description='Today - Friday, September 25',
       fields=<class 'list'> [
-        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[+Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+recurring&dates=20200925T210000Z%2F20200925T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: <@!12345>\n> Notes: recurring'),
+        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[+Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+recurring&dates=20200925T210000Z%2F20200925T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: <@!12345>\n> Details: recurring'),
         EmbedProxy(inline=True, name='🗓 View or edit the schedule using the link below.', value='[Full schedule](https://docs.google.com/spreadsheets/d/abc/edit)'),
       ],
       footer=EmbedProxy(),
@@ -199,7 +199,7 @@
       colour=<Colour value=15105570>,
       description='Tomorrow - Saturday, September 26',
       fields=<class 'list'> [
-        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[+Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+one+time&dates=20200926T210000Z%2F20200926T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: <@!12345>\n> Notes: one time'),
+        EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[+Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+one+time&dates=20200926T210000Z%2F20200926T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: <@!12345>\n> Details: one time'),
         EmbedProxy(inline=True, name='🗓 View or edit the schedule using the link below.', value='[Full schedule](https://docs.google.com/spreadsheets/d/abc/edit)'),
       ],
       footer=EmbedProxy(),
@@ -223,7 +223,7 @@
       colour=<Colour value=15105570>,
       description='Today - Thursday, November 26 🦃',
       fields=<class 'list'> [
-        EmbedProxy(inline=False, name='11 AM PST / 12 PM MST / 1 PM CST / 2 PM EST', value='[+Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+Turkey+day+PRACTICE&dates=20201126T190000Z%2F20201126T200000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Notes: Turkey day PRACTICE'),
+        EmbedProxy(inline=False, name='11 AM PST / 12 PM MST / 1 PM CST / 2 PM EST', value='[+Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+Turkey+day+PRACTICE&dates=20201126T190000Z%2F20201126T200000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Details: Turkey day PRACTICE'),
         EmbedProxy(inline=True, name='🗓 View or edit the schedule using the link below.', value='[Full schedule](https://docs.google.com/spreadsheets/d/abc/edit)'),
       ],
       footer=EmbedProxy(),
