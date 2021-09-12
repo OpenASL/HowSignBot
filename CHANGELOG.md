@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.46.0 (2021-09-12)
+### Feature
+* Rename Notes to Details ([#310](https://github.com/OpenASL/HowSignBot/issues/310)) ([`6e1e9c2`](https://github.com/OpenASL/HowSignBot/commit/6e1e9c27ea1e07b008c2a1c787ebf4a693d05e7a))
+
 ## v21.45.0 (2021-07-29)
 ### Feature
 * **aslpp:** Add Zoom watch list ([#283](https://github.com/OpenASL/HowSignBot/issues/283)) ([`687a602`](https://github.com/OpenASL/HowSignBot/commit/687a602a98dcceb21d89cfaf40f2d14e69e76054))
