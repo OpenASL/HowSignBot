@@ -9,7 +9,11 @@ import discord
 import yaml
 from discord.ext import commands
 
+from bot import settings
+
 BotMapping = Dict[Optional[commands.Cog], List[commands.Command]]
+
+COMMAND_PREFIX = settings.COMMAND_PREFIX
 
 
 class HelpCommand(commands.HelpCommand):
@@ -42,12 +46,12 @@ class HelpCommand(commands.HelpCommand):
                 last_cog = None
                 last_content = None
             content = "\n".join(
-                f"`{self.clean_prefix}{cmd}` — {cmd.short_doc}" for cmd in cmds
+                f"`{COMMAND_PREFIX}{cmd}` — {cmd.short_doc}" for cmd in cmds
             )
             if len(content) > 1024:
                 content = (
                     f"There are {len(cmds)} commands available. Type "
-                    f"`{self.clean_prefix}{self.invoked_with} {cog.qualified_name}` "
+                    f"`{COMMAND_PREFIX}{self.invoked_with} {cog.qualified_name}` "
                     f"to learn more."
                 )
             before = embed.copy()
@@ -146,7 +150,7 @@ class HelpCommand(commands.HelpCommand):
         last_start_index = 0
         last_content: List[str] = []
         for i, cmd in enumerate(cmds):
-            content = f"`{self.clean_prefix}{cmd}` — {cmd.short_doc}"
+            content = f"`{COMMAND_PREFIX}{cmd}` — {cmd.short_doc}"
             if len("\n".join(last_content + [content])) <= 1024:
                 last_content.append(content)
             else:
@@ -181,7 +185,7 @@ class HelpCommand(commands.HelpCommand):
         docstring = inspect.getdoc(command.callback)
         if not docstring:
             embed = discord.Embed(color=self.color, description=command.help)
-            embed.set_author(name=f"{self.clean_prefix}{command} {command.signature}")
+            embed.set_author(name=f"{COMMAND_PREFIX}{command} {command.signature}")
             if command.aliases:
                 embed.add_field(
                     name="Aliases", value=" // ".join(command.aliases), inline=False
@@ -191,7 +195,7 @@ class HelpCommand(commands.HelpCommand):
         if not isinstance(items, dict):
             # For docstrings without format (eg. third party commands like jishaku)
             embed = discord.Embed(color=self.color, description=docstring)
-            embed.set_author(name=f"{self.clean_prefix}{command} {command.signature}")
+            embed.set_author(name=f"{COMMAND_PREFIX}{command} {command.signature}")
             if command.aliases:
                 embed.add_field(
                     name="Aliases", value=" // ".join(command.aliases), inline=False
@@ -201,9 +205,7 @@ class HelpCommand(commands.HelpCommand):
                 color=items.pop("color", self.color),
             )
             embed.set_author(
-                name=items.pop(
-                    "name", f"{self.clean_prefix}{command} {command.signature}"
-                )
+                name=items.pop("name", f"{COMMAND_PREFIX}{command} {command.signature}")
             )
             embed.set_footer(text=items.pop("footer", discord.Embed.Empty))
             embed.set_thumbnail(url=items.pop("thumbnail", ""))
@@ -237,7 +239,7 @@ class HelpCommand(commands.HelpCommand):
         last_start_index = 0
         last_content: List[str] = []
         for i, cmd in enumerate(cmds):
-            content = f"`{self.clean_prefix}{cmd}` — {cmd.short_doc}"
+            content = f"`{COMMAND_PREFIX}{cmd}` — {cmd.short_doc}"
             if len("\n".join(last_content + [content])) <= 1024:
                 last_content.append(content)
             else:
