@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.46.1 (2021-09-22)
+### Fix
+* Fix help command ([#314](https://github.com/OpenASL/HowSignBot/issues/314)) ([`cf7d1c2`](https://github.com/OpenASL/HowSignBot/commit/cf7d1c248fb80cfe845ea322019414408f843f7c))
+
 ## v21.46.0 (2021-09-12)
 ### Feature
 * Rename Notes to Details ([#310](https://github.com/OpenASL/HowSignBot/issues/310)) ([`6e1e9c2`](https://github.com/OpenASL/HowSignBot/commit/6e1e9c27ea1e07b008c2a1c787ebf4a693d05e7a))
