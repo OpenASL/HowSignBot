@@ -99,13 +99,6 @@ class Meetings(Cog):
     ):
         await self.zoom_setup_impl(ctx, meeting_id=meeting_id, with_zzzzoom=False)
 
-    @zoom_group.error
-    @zoom_setup.error
-    async def zoom_error(self, ctx, error):
-        if isinstance(error, ZoomCreateError):
-            logger.error("could not create zoom due to unexpected error", exc_info=error)
-            await ctx.send(error)
-
     @zoom_group.command(
         name="start",
         help="Reveal meeting details for a meeting started with the setup command",
@@ -230,6 +223,15 @@ class Meetings(Cog):
         self, ctx: Context, meeting_id: Optional[Union[int, str]] = None
     ):
         await self.zoom_setup_impl(ctx, meeting_id=meeting_id, with_zzzzoom=True)
+
+    @zzzzoom_group.error
+    @zzzzoom_setup.error
+    @zoom_group.error
+    @zoom_setup.error
+    async def zoom_error(self, ctx, error):
+        if isinstance(error, ZoomCreateError):
+            logger.error("could not create zoom due to unexpected error", exc_info=error)
+            await ctx.send(error)
 
     async def zoom_group_impl(
         self, ctx: Context, *, meeting_id: Optional[Union[int, str]], with_zzzzoom: bool
