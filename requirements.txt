@@ -7,7 +7,7 @@ aiohttp==3.7.4.post0
 aiohttp-cors==0.7.0
 pyyaml==5.4.1
 python-slugify==5.0.2
-emoji==1.6.0
+emoji==1.6.1
 dateparser==1.1.0
 nameparser==1.0.6
 nanoid==2.0.0
@@ -20,7 +20,7 @@ PyYAML==5.4.1
 # meetings
 python-slugify==5.0.2
 # cuteid
-emoji==1.6.0
+emoji==1.6.1
 # database
 databases[postgresql]==0.4.3
 SQLAlchemy==1.3.23
