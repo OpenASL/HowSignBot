@@ -49,12 +49,15 @@ DAILY_MEMBER_KICK_TIME = dt.time(12, 0)  # Eastern time
 
 
 def get_next_task_execution_datetime(time_in_eastern: dt.time) -> dt.datetime:
+    """Get next execution time for a daily task.
+
+    Returns an eastern-localized datetime.
+    """
     now_eastern = dt.datetime.now(EASTERN)
     date = now_eastern.date()
     if now_eastern.time() > time_in_eastern:
         date = now_eastern.date() + dt.timedelta(days=1)
-    then = EASTERN.localize(dt.datetime.combine(date, time_in_eastern))
-    return then.astimezone(dt.timezone.utc)
+    return EASTERN.localize(dt.datetime.combine(date, time_in_eastern))
 
 
 def get_gsheet():
