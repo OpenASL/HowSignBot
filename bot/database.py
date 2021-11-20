@@ -77,6 +77,12 @@ guild_settings = sa.Table(
         doc="Discord channel ID where to post daily schedule message.",
     ),
     sa.Column(
+        "include_practice_schedule",
+        sa.Boolean,
+        server_default=sql.true(),
+        nullable=False,
+    ),
+    sa.Column(
         "include_handshape_of_the_day",
         sa.Boolean,
         server_default=sql.false(),

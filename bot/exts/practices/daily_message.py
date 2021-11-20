@@ -16,6 +16,7 @@ import clthat
 import handshapes
 import holiday_emojis
 from ._practice_sessions import get_practice_sessions
+from ._practice_sessions import make_base_embed
 from ._practice_sessions import make_practice_session_embed
 from bot import settings
 from bot.database import store
@@ -112,17 +113,20 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
             "current_period" if dtime.date() <= dt.date.today() else "future"
         )
         parse_settings = {"PREFER_DATES_FROM": prefer_dates_from}
-        sessions = await get_practice_sessions(
-            guild_id,
-            dtime=dtime,
-            parse_settings=parse_settings,
-        )
-        embed = await make_practice_session_embed(guild_id, sessions, dtime=dtime)
-        file_ = None
-
         settings = await store.get_guild_settings(guild.id)
         if not settings:
             return
+        embed: discord.Embed
+        if settings.get("include_practice_schedule"):
+            sessions = await get_practice_sessions(
+                guild_id,
+                dtime=dtime,
+                parse_settings=parse_settings,
+            )
+            embed = await make_practice_session_embed(guild_id, sessions, dtime=dtime)
+        else:
+            embed = make_base_embed(dtime=dtime)
+        file_ = None
 
         holiday = holiday_emojis.get(dtime.date())
         if holiday and holiday.term is not None:
