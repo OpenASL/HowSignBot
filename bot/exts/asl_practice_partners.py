@@ -45,6 +45,19 @@ UNMUTE_WARNING = (
     "🤐 You can use the text channels to type responses when needed."
 )
 DAILY_MESSAGE_TIME = dt.time(8, 0)  # Eastern time
+DAILY_MEMBER_KICK_TIME = dt.time(12, 0)  # Eastern time
+
+
+def get_next_task_execution_datetime(time_in_eastern: dt.time) -> dt.datetime:
+    """Get next execution time for a daily task.
+
+    Returns an eastern-localized datetime.
+    """
+    now_eastern = dt.datetime.now(EASTERN)
+    date = now_eastern.date()
+    if now_eastern.time() > time_in_eastern:
+        date = now_eastern.date() + dt.timedelta(days=1)
+    return EASTERN.localize(dt.datetime.combine(date, time_in_eastern))
 
 
 def get_gsheet():
@@ -84,7 +97,7 @@ async def make_no_intros_embed():
         color=Color.orange(),
     )
     embed.set_footer(
-        text=f"Use {COMMAND_PREFIX}aslpp kick <members> to kick. Use {COMMAND_PREFIX}aslpp active <members> to mark members as active so they won't show up in this list."
+        text=f"These members will automatically be kicked at noon Eastern time. Use {COMMAND_PREFIX}aslpp active <members> to prevent members from getting kicked."
     )
     return embed
 
@@ -429,19 +442,18 @@ class AslPracticePartners(Cog):
     @Cog.listener()
     async def on_ready(self):
         self.bot.loop.create_task(self.daily_message())
+        self.bot.loop.create_task(self.daily_member_kick())
         self.tags = get_tags()
 
     async def daily_message(self):
         while True:
-            now_eastern = dt.datetime.now(EASTERN)
-            date = now_eastern.date()
-            if now_eastern.time() > DAILY_MESSAGE_TIME:
-                date = now_eastern.date() + dt.timedelta(days=1)
-            then = EASTERN.localize(dt.datetime.combine(date, DAILY_MESSAGE_TIME))
+            next_execution_time = get_next_task_execution_datetime(DAILY_MESSAGE_TIME)
             logger.info(
-                f"aslpp staff daily message will be sent at at {then.isoformat()}"
+                f"aslpp staff daily message will be sent at at {next_execution_time.isoformat()}"
             )
-            await discord.utils.sleep_until(then.astimezone(dt.timezone.utc))
+            await discord.utils.sleep_until(
+                next_execution_time.astimezone(dt.timezone.utc)
+            )
             channel = self.bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
             await channel.send(content=self.make_rolegraph_skill(channel.guild))
             await channel.send(
@@ -451,6 +463,39 @@ class AslPracticePartners(Cog):
             embed = await make_no_intros_embed()
             await channel.send(embed=embed)
             logger.info("sent aslpp staff daily message")
+
+    async def daily_member_kick(self):
+        while True:
+            next_execution_time = get_next_task_execution_datetime(DAILY_MEMBER_KICK_TIME)
+            logger.info(
+                f"aslpp inactive members will be kicked at {next_execution_time.isoformat()}"
+            )
+            await discord.utils.sleep_until(
+                next_execution_time.astimezone(dt.timezone.utc)
+            )
+            members_without_intro = await store.get_aslpp_members_without_intro(
+                since=dt.timedelta(days=settings.ASLPP_INACTIVE_DAYS + 1)
+            )
+            if not len(members_without_intro):
+                logger.info("no inactive aslpp members to kick")
+                continue
+            channel = self.bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
+            guild = channel.guild
+            await channel.send(content="🥾 Kicking inactive members...")
+            num_kicked = 0
+            for member_record in members_without_intro[:MAX_NO_INTRO_USERS_TO_DISPLAY]:
+                user_id = member_record["user_id"]
+                member = guild.get_member(user_id)
+                with suppress(
+                    discord.errors.Forbidden
+                ):  # user may not allow DMs from bot
+                    await member.send(KICK_MESSAGE)
+                logger.info(f"kicking member {member.id}")
+                await guild.kick(member, reason="Inactivity")
+                num_kicked += 1
+
+            await channel.send(content=f"Kicked {num_kicked} members.")
+            logger.info("cleared aslpp inactive members")
 
 
 def setup(bot: Bot) -> None:
