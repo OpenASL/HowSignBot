@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v21.47.0 (2021-11-20)
+### Feature
+* Add setting to configure practice schedule visibility ([#337](https://github.com/OpenASL/HowSignBot/issues/337)) ([`34b3728`](https://github.com/OpenASL/HowSignBot/commit/34b3728eabef233174e8a8f170762ce97e1a332a))
+
+### Fix
+* **zoom:** Fix error handling for ?zz ([#315](https://github.com/OpenASL/HowSignBot/issues/315)) ([`8bd69a9`](https://github.com/OpenASL/HowSignBot/commit/8bd69a9eba531371440a08bb64d0b5c85153229d))
+
 ## v21.46.1 (2021-09-22)
 ### Fix
 * Fix help command ([#314](https://github.com/OpenASL/HowSignBot/issues/314)) ([`cf7d1c2`](https://github.com/OpenASL/HowSignBot/commit/cf7d1c248fb80cfe845ea322019414408f843f7c))
