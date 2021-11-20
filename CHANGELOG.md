@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.48.0 (2021-11-20)
+### Feature
+* **aslpp:** Automatically kick inactive users ([#338](https://github.com/OpenASL/HowSignBot/issues/338)) ([`e87fa26`](https://github.com/OpenASL/HowSignBot/commit/e87fa26d2b3b712b06a3871a0064eef18de2da58))
+
 ## v21.47.0 (2021-11-20)
 ### Feature
 * Add setting to configure practice schedule visibility ([#337](https://github.com/OpenASL/HowSignBot/issues/337)) ([`34b3728`](https://github.com/OpenASL/HowSignBot/commit/34b3728eabef233174e8a8f170762ce97e1a332a))
