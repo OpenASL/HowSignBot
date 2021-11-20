@@ -87,9 +87,7 @@ Example: `{COMMAND_PREFIX}practice today 2pm {pacific}`
 )
 
 
-async def make_practice_session_embed(
-    guild_id: int, sessions: List[PracticeSession], *, dtime: dt.datetime
-) -> discord.Embed:
+def make_base_embed(dtime: dt.datetime) -> discord.Embed:
     now_pacific = utcnow().astimezone(PACIFIC)
     dtime_pacific = dtime.astimezone(PACIFIC)
     description = dtime_pacific.strftime("%A, %B %-d")
@@ -100,12 +98,18 @@ async def make_practice_session_embed(
     holiday = holiday_emojis.get(dtime_pacific.date())
     if holiday and holiday.emoji:
         description += f" {holiday.emoji}"
-    sheet_key = await store.get_guild_schedule_sheet_key(guild_id)
-    schedule_url = f"https://docs.google.com/spreadsheets/d/{sheet_key}/edit"
-    embed = discord.Embed(
+    return discord.Embed(
         description=description,
         color=discord.Color.orange(),
     )
+
+
+async def make_practice_session_embed(
+    guild_id: int, sessions: List[PracticeSession], *, dtime: dt.datetime
+) -> discord.Embed:
+    embed = make_base_embed(dtime)
+    sheet_key = await store.get_guild_schedule_sheet_key(guild_id)
+    schedule_url = f"https://docs.google.com/spreadsheets/d/{sheet_key}/edit"
     if not sessions:
         embed.description += NO_PRACTICES
     else:
