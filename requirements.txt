@@ -1,4 +1,4 @@
-ariadne==0.13.0
+ariadne==0.14.0
 # Latest development version of discord.py has support for threads
 git+https://github.com/Rapptz/discord.py.git@45d498c1b76deaf3b394d17ccf56112fa691d160
 environs==9.3.5
