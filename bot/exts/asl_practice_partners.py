@@ -107,7 +107,7 @@ def get_tags():
     sheet = get_gsheet()
     worksheet = sheet.worksheet("tags")
     return {
-        tag: {"title": title, "description": content}
+        tag.lower(): {"title": title, "description": content}
         for tags, title, content in worksheet.get_all_values()[1:]  # first row is header
         for tag in tags.split()
     }
@@ -176,6 +176,7 @@ class AslPracticePartners(Cog):
         if not tag_name:
             await self.display_tags(ctx)
             return
+        tag_name = tag_name.lower()
         if tag_name not in self.tags:
             suggestion: Optional[str] = did_you_mean(tag_name, tuple(self.tags.keys()))
             if not suggestion:
