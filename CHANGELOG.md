@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.49.0 (2021-11-27)
+### Feature
+* **aslpp:** Make tags case-insensitive ([#342](https://github.com/OpenASL/HowSignBot/issues/342)) ([`4699d5f`](https://github.com/OpenASL/HowSignBot/commit/4699d5f9a5ac43c221c7fe1d3507f25ade0b231f))
+
 ## v21.48.0 (2021-11-20)
 ### Feature
 * **aslpp:** Automatically kick inactive users ([#338](https://github.com/OpenASL/HowSignBot/issues/338)) ([`e87fa26`](https://github.com/OpenASL/HowSignBot/commit/e87fa26d2b3b712b06a3871a0064eef18de2da58))
