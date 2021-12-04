@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.50.0 (2021-12-04)
+### Feature
+* **aslpp:** Format role stats as tables ([#347](https://github.com/OpenASL/HowSignBot/issues/347)) ([`eb5dbbb`](https://github.com/OpenASL/HowSignBot/commit/eb5dbbbea6d1ff1a25688fe26cc92453f5ff4835))
+
 ## v21.49.0 (2021-11-27)
 ### Feature
 * **aslpp:** Make tags case-insensitive ([#342](https://github.com/OpenASL/HowSignBot/issues/342)) ([`4699d5f`](https://github.com/OpenASL/HowSignBot/commit/4699d5f9a5ac43c221c7fe1d3507f25ade0b231f))
