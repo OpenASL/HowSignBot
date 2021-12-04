@@ -6,6 +6,7 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Tuple
 from typing import Union
 
 import discord
@@ -14,7 +15,6 @@ from discord import Embed
 from discord import Guild
 from discord import Member
 from discord import Message
-from discord import Role
 from discord import VoiceState
 from discord.channel import TextChannel
 from discord.ext import commands
@@ -113,43 +113,25 @@ def get_tags():
     }
 
 
-# From https://alexwlchan.net/2018/05/ascii-bar-charts/
-# MIT Licensed: https://github.com/alexwlchan/alexwlchan.net/blob/9a80d17de47b130772bb5433592e8fffd1d18118/LICENSE
-def asciigraph(data):
-    max_value = max(count for _, count in data)
-    increment = max_value / 25
-
+def format_role_table(data: Sequence[Tuple[str, int]], member_count: int) -> str:
     longest_label_length = max(len(label) for label, _ in data)
-
-    lines = []
-    for label, count in data:
-        # The ASCII block elements come in chunks of 8, so we work out how
-        # many fractions of 8 we need.
-        # https://en.wikipedia.org/wiki/Block_Elements
-        bar_chunks, remainder = divmod(int(count * 8 / increment), 8)
-
-        # First draw the full width chunks
-        bar = "█" * bar_chunks
-
-        # Then add the fractional part.  The Unicode code points for
-        # block elements are (8/8), (7/8), (6/8), ... , so we need to
-        # work backwards.
-        if remainder > 0:
-            bar += chr(ord("█") + (8 - remainder))
-
-        # If the bar is empty, add a left one-eighth block
-        bar = bar or "▏"
-        lines.append(f"{label.rjust(longest_label_length)} ▏ {count:#2d} {bar}")
-    return lines
+    return "\n".join(
+        [
+            f"{label.rjust(longest_label_length)} ▏ {count:#2d} | {round(count / member_count * 100)}%"
+            for label, count in data
+        ]
+    )
 
 
-def make_rolegraph(guild: Guild, label: str, role_ids: Sequence[int]) -> str:
+def make_role_table(guild: Guild, label: str, role_ids: Sequence[int]) -> str:
     data = []
     for role_id in role_ids:
-        role: Role = guild.get_role(role_id)
+        role = guild.get_role(role_id)
+        if not role:
+            continue
         data.append((role.name, len(role.members)))
-    graph = "\n".join(asciigraph(data))
-    return f"```\n{label.upper()}\n{graph}\n```"
+    table = format_role_table(data, guild.member_count)
+    return f"```\n{label.upper()}\n{table}\n```"
 
 
 class AslPracticePartners(Cog):
@@ -332,47 +314,47 @@ class AslPracticePartners(Cog):
         await ctx.reply(f"Kicked {num_kicked} members.")
 
     @group(
-        name="rolegraph",
-        aliases=("rolegraphs", "rg"),
+        name="rolestats",
+        aliases=("rs",),
         invoke_without_command=True,
         hidden=True,
         doc="Show graphs of role member counts",
     )
     @commands.has_permissions(kick_members=True)  # Staff
-    async def rolegraph_group(self, ctx: Context):
+    async def role_table_group(self, ctx: Context):
         await ctx.channel.trigger_typing()
-        await ctx.send(content=self.make_rolegraph_skill(ctx.guild))
-        await ctx.send(content=self.make_rolegraph_hearing_spectrum(ctx.guild))
-        await ctx.send(content=self.make_rolegraph_age(ctx.guild))
+        await ctx.send(content=self.make_role_table_skill(ctx.guild))
+        await ctx.send(content=self.make_role_table_hearing_spectrum(ctx.guild))
+        await ctx.send(content=self.make_role_table_age(ctx.guild))
 
-    def make_rolegraph_skill(self, guild: Guild):
-        return make_rolegraph(guild, "Skill", settings.ASLPP_SKILL_ROLE_IDS)
+    def make_role_table_skill(self, guild: Guild):
+        return make_role_table(guild, "Skill", settings.ASLPP_SKILL_ROLE_IDS)
 
-    @rolegraph_group.command("skill", hidden=True)
+    @role_table_group.command("skill", hidden=True)
     @commands.has_permissions(kick_members=True)  # Staff
-    async def rolegraph_skill(self, ctx: Context):
+    async def role_table_skill(self, ctx: Context):
         await ctx.channel.trigger_typing()
-        await ctx.reply(content=self.make_rolegraph_skill(ctx.guild))
+        await ctx.reply(content=self.make_role_table_skill(ctx.guild))
 
-    def make_rolegraph_hearing_spectrum(self, guild: Guild):
-        return make_rolegraph(
+    def make_role_table_hearing_spectrum(self, guild: Guild):
+        return make_role_table(
             guild, "Hearing Spectrum", settings.ASLPP_HEARING_SPECTRUM_ROLE_IDS
         )
 
-    @rolegraph_group.command("hearingspectrum", hidden=True)
+    @role_table_group.command("hearingspectrum", hidden=True)
     @commands.has_permissions(kick_members=True)  # Staff
-    async def rolegraph_hearing_spectrum(self, ctx: Context):
+    async def role_table_hearing_spectrum(self, ctx: Context):
         await ctx.channel.trigger_typing()
-        await ctx.reply(content=self.make_rolegraph_hearing_spectrum(ctx.build))
+        await ctx.reply(content=self.make_role_table_hearing_spectrum(ctx.build))
 
-    def make_rolegraph_age(self, guild: Guild):
-        return make_rolegraph(guild, "Age", settings.ASLPP_AGE_ROLE_IDS)
+    def make_role_table_age(self, guild: Guild):
+        return make_role_table(guild, "Age", settings.ASLPP_AGE_ROLE_IDS)
 
-    @rolegraph_group.command("age", hidden=True)
+    @role_table_group.command("age", hidden=True)
     @commands.has_permissions(kick_members=True)  # Staff
-    async def rolegraph_age(self, ctx: Context):
+    async def role_table_age(self, ctx: Context):
         await ctx.channel.trigger_typing()
-        await ctx.reply(content=self.make_rolegraph_age(ctx.guild))
+        await ctx.reply(content=self.make_role_table_age(ctx.guild))
 
     @Cog.listener()
     async def on_message(self, message: Message) -> None:
@@ -456,11 +438,11 @@ class AslPracticePartners(Cog):
                 next_execution_time.astimezone(dt.timezone.utc)
             )
             channel = self.bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
-            await channel.send(content=self.make_rolegraph_skill(channel.guild))
+            await channel.send(content=self.make_role_table_skill(channel.guild))
             await channel.send(
-                content=self.make_rolegraph_hearing_spectrum(channel.guild)
+                content=self.make_role_table_hearing_spectrum(channel.guild)
             )
-            await channel.send(content=self.make_rolegraph_age(channel.guild))
+            await channel.send(content=self.make_role_table_age(channel.guild))
             embed = await make_no_intros_embed()
             await channel.send(embed=embed)
             logger.info("sent aslpp staff daily message")
