@@ -4,6 +4,7 @@ import logging
 from contextlib import suppress
 from typing import Dict
 from typing import List
+from typing import Mapping
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
@@ -46,6 +47,7 @@ UNMUTE_WARNING = (
 )
 DAILY_MESSAGE_TIME = dt.time(8, 0)  # Eastern time
 DAILY_MEMBER_KICK_TIME = dt.time(12, 0)  # Eastern time
+PRUNE_DAYS = 7
 
 
 def get_next_task_execution_datetime(time_in_eastern: dt.time) -> dt.datetime:
@@ -97,7 +99,8 @@ async def make_no_intros_embed():
         color=Color.orange(),
     )
     embed.set_footer(
-        text=f"These members will automatically be kicked at noon Eastern time. Use {COMMAND_PREFIX}aslpp active <members> to prevent members from getting kicked."
+        text=f"These members will automatically be kicked at noon Eastern time. Use {COMMAND_PREFIX}aslpp active <members> to prevent members from getting kicked.\n"
+        f"Members who have not logged on in {PRUNE_DAYS} days and have no roles will also be pruned."
     )
     return embed
 
@@ -292,25 +295,44 @@ class AslPracticePartners(Cog):
 
         await ctx.reply(f"Kicked {num_kicked} members.")
 
+    async def _kick_inactive(
+        self,
+        ctx: Union[Context, TextChannel],
+        *,
+        members_without_intro: List[Mapping],
+    ):
+        num_kicked = 0
+        guild = ctx.guild
+        for member_record in members_without_intro[:MAX_NO_INTRO_USERS_TO_DISPLAY]:
+            user_id = member_record["user_id"]
+            member = guild.get_member(user_id)
+            if not member:
+                continue
+            with suppress(discord.errors.Forbidden):  # user may not allow DMs from bot
+                await member.send(KICK_MESSAGE)
+            logger.info(f"kicking member {member.id}")
+            await guild.kick(member, reason="Inactivity")
+            num_kicked += 1
+        logger.info(
+            f"pruning members who have not logged on in {PRUNE_DAYS} days and have no roles"
+        )
+        num_pruned = await guild.prune_members(days=PRUNE_DAYS)
+        total_kicked = num_kicked + num_pruned
+        return total_kicked
+
     @aslpp_group.command(name="kickall", hidden=True)
     @commands.has_permissions(kick_members=True)
     async def kickall_command(self, ctx: Context):
         members_without_intro = await store.get_aslpp_members_without_intro(
             since=dt.timedelta(days=settings.ASLPP_INACTIVE_DAYS + 1)
         )
-        if not len(members_without_intro):
-            ctx.send("✨ _No members to kick")
+        n_members_to_prune = await ctx.guild.estimate_pruned_members(days=PRUNE_DAYS)
+        if not len(members_without_intro) and not n_members_to_prune:
+            await ctx.send("✨ _No members to kick_")
             return
-        num_kicked = 0
-        for member_record in members_without_intro[:MAX_NO_INTRO_USERS_TO_DISPLAY]:
-            user_id = member_record["user_id"]
-            member = ctx.guild.get_member(user_id)
-            with suppress(discord.errors.Forbidden):  # user may not allow DMs from bot
-                await member.send(KICK_MESSAGE)
-            logger.info(f"kicking member {member.id}")
-            await ctx.guild.kick(member, reason="Inactivity")
-            num_kicked += 1
-
+        num_kicked = await self._kick_inactive(
+            ctx, members_without_intro=members_without_intro
+        )
         await ctx.reply(f"Kicked {num_kicked} members.")
 
     @group(
@@ -459,25 +481,16 @@ class AslPracticePartners(Cog):
             members_without_intro = await store.get_aslpp_members_without_intro(
                 since=dt.timedelta(days=settings.ASLPP_INACTIVE_DAYS + 1)
             )
-            if not len(members_without_intro):
+            channel = self.bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
+            guild: Guild = channel.guild
+            n_members_to_prune = await guild.estimate_pruned_members(days=PRUNE_DAYS)
+            if not len(members_without_intro) and not bool(n_members_to_prune):
                 logger.info("no inactive aslpp members to kick")
                 continue
-            channel = self.bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
-            guild = channel.guild
-            await channel.send(content="🥾 Kicking inactive members...")
-            num_kicked = 0
-            for member_record in members_without_intro[:MAX_NO_INTRO_USERS_TO_DISPLAY]:
-                user_id = member_record["user_id"]
-                member = guild.get_member(user_id)
-                with suppress(
-                    discord.errors.Forbidden
-                ):  # user may not allow DMs from bot
-                    await member.send(KICK_MESSAGE)
-                logger.info(f"kicking member {member.id}")
-                await guild.kick(member, reason="Inactivity")
-                num_kicked += 1
-
-            await channel.send(content=f"Kicked {num_kicked} members.")
+            await channel.send(content="🥾 _Kicking inactive members_...")
+            await self._kick_inactive(
+                channel, members_without_intro=members_without_intro
+            )
             logger.info("cleared aslpp inactive members")
 
 
