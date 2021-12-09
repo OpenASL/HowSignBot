@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.51.0 (2021-12-08)
+### Feature
+* **aslpp:** Automatically prune users ([#349](https://github.com/OpenASL/HowSignBot/issues/349)) ([`7c98529`](https://github.com/OpenASL/HowSignBot/commit/7c985293b7ca13dd9fdbaef00547b7669932aa9f))
+
 ## v21.50.0 (2021-12-04)
 ### Feature
 * **aslpp:** Format role stats as tables ([#347](https://github.com/OpenASL/HowSignBot/issues/347)) ([`eb5dbbb`](https://github.com/OpenASL/HowSignBot/commit/eb5dbbbea6d1ff1a25688fe26cc92453f5ff4835))
