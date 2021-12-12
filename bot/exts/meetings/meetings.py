@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import cast
 from typing import List
@@ -12,6 +13,7 @@ from discord.ext.commands import command
 from discord.ext.commands import Context
 from discord.ext.commands import errors
 from discord.ext.commands import group
+from discord.ext.commands import is_owner
 
 import meetings
 from ._zoom import add_repost_after_delay
@@ -232,6 +234,41 @@ class Meetings(Cog):
         if isinstance(error, ZoomCreateError):
             logger.error("could not create zoom due to unexpected error", exc_info=error)
             await ctx.send(error)
+
+    # Zoom user commands
+
+    @zoom_group.command(
+        name="users",
+        hidden=True,
+        help="List users who have access to the zoom commands.",
+    )
+    @is_owner()
+    async def zoom_users(self, ctx: Context):
+        await ctx.channel.trigger_typing()
+        try:
+            users = await meetings.list_zoom_users(token=settings.ZOOM_JWT)
+        except asyncio.exceptions.TimeoutError:
+            logger.exception("zoom request timed out")
+            await ctx.send(
+                "🚨 _Request to Zoom API timed out. This may be due to rate limiting. Try again later._"
+            )
+            return
+        licensed_user_emails = {
+            user.email for user in users if user.type == meetings.ZoomPlanType.LICENSED
+        }
+        description = "\n".join(
+            tuple(
+                ("👑 " if email.lower() in licensed_user_emails else "") + f"<@!{user_id}>"
+                for user_id, email in settings.ZOOM_USERS.items()
+            )
+        )
+        embed = discord.Embed(
+            title=f"Fancy Zoom Users ({len(settings.ZOOM_USERS)})",
+            description=description,
+            color=discord.Color.blue(),
+        )
+        embed.set_footer(text="👑 = Licensed")
+        await ctx.send(embed=embed)
 
     async def zoom_group_impl(
         self, ctx: Context, *, meeting_id: Optional[Union[int, str]], with_zzzzoom: bool

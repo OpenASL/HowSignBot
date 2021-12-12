@@ -288,10 +288,9 @@ class AslPracticePartners(Cog):
         for target in targets:
             with suppress(discord.errors.Forbidden):  # user may not allow DMs from bot
                 await target.send(KICK_MESSAGE)
-            if isinstance(target, Member):
-                logger.info(f"kicking member {target.id}")
-                await ctx.guild.kick(target, reason="Inactivity")
-                num_kicked += 1
+            logger.info(f"kicking member {target.id}")
+            await ctx.guild.kick(target, reason="Inactivity")
+            num_kicked += 1
 
         await ctx.reply(f"Kicked {num_kicked} members.")
 
@@ -448,7 +447,8 @@ class AslPracticePartners(Cog):
     async def on_ready(self):
         self.bot.loop.create_task(self.daily_message())
         self.bot.loop.create_task(self.daily_member_kick())
-        self.tags = get_tags()
+        # self.tags = get_tags()
+        self.tags = {}
 
     async def daily_message(self):
         while True:

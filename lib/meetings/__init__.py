@@ -1,14 +1,32 @@
+from __future__ import annotations
+
 import base64
 import hashlib
 import hmac
+from enum import IntEnum
 from typing import Callable
 from typing import NamedTuple
-from typing import Optional
 
 import aiohttp
 from slugify import slugify
 
 import cuteid
+
+
+async def zoom_request(
+    method: str, path: str, *, token: str, timeout: int = 10, **kwargs
+):
+    timeout = aiohttp.ClientTimeout(total=timeout)
+    async with aiohttp.request(
+        method,
+        f"https://api.zoom.us/v2/{path.lstrip('/')}",
+        timeout=timeout,
+        headers={"Authorization": f"Bearer {token}"},
+        **kwargs,
+    ) as resp:
+        resp.raise_for_status()
+        data = await resp.json()
+    return data
 
 
 class ZoomMeeting(NamedTuple):
@@ -22,18 +40,16 @@ async def create_zoom(
     *, token: str, user_id: str, topic: str, settings: dict
 ) -> ZoomMeeting:
     """Create and return a Zoom meeting via the Zoom API."""
-    async with aiohttp.ClientSession() as client:
-        resp = await client.post(
-            f"https://api.zoom.us/v2/users/{user_id}/meetings",
-            json={
-                "type": 1,
-                "topic": topic,
-                "settings": settings,
-            },
-            headers={"Authorization": f"Bearer {token}"},
-        )
-    resp.raise_for_status()
-    data = await resp.json()
+    data = await zoom_request(
+        "POST",
+        f"/users/{user_id}/meetings",
+        token=token,
+        json={
+            "type": 1,
+            "topic": topic,
+            "settings": settings,
+        },
+    )
     return ZoomMeeting(
         id=data["id"],
         join_url=data["join_url"],
@@ -41,6 +57,22 @@ async def create_zoom(
         # Pass topic directly so we don't get the default 'Zoom Meeting' topic
         topic=topic,
     )
+
+
+class ZoomPlanType(IntEnum):
+    BASIC = 1
+    LICENSED = 2
+
+
+class ZoomUser(NamedTuple):
+    id: str
+    email: str
+    type: ZoomPlanType
+
+
+async def list_zoom_users(*, token: str) -> list[ZoomUser]:
+    data = await zoom_request("GET", "/users", token=token)
+    return [ZoomUser(id=u["id"], email=u["email"], type=u["type"]) for u in data["users"]]
 
 
 async def get_zoom(
@@ -64,7 +96,7 @@ async def get_zoom(
     )
 
 
-async def create_watch2gether(api_key: str, video_url: Optional[str] = None) -> str:
+async def create_watch2gether(api_key: str, video_url: str | None = None) -> str:
     """Create and return a watch2gether URL via the watch2gether API."""
     async with aiohttp.ClientSession() as client:
         payload = {"w2g_api_key": api_key, "share": video_url}
@@ -88,7 +120,7 @@ def _slug_with_signature(s: str, *, secret: str, signature_length=16):
 
 
 def _get_secret_slug(
-    name: Optional[str], secret: str, fallback: Callable = cuteid.cuteid
+    name: str | None, secret: str, fallback: Callable = cuteid.cuteid
 ) -> str:
     """Return a hard-to-guess slug to use for meeting URLs.
 
@@ -101,10 +133,10 @@ def _get_secret_slug(
 class JitsiMeet(NamedTuple):
     join_url: str
     deeplink: str
-    name: Optional[str]
+    name: str | None
 
 
-def create_jitsi_meet(name: Optional[str], *, secret: str) -> JitsiMeet:
+def create_jitsi_meet(name: str | None, *, secret: str) -> JitsiMeet:
     """Return a Jitsi Meet URL."""
     slug = _get_secret_slug(name, secret)
     return JitsiMeet(
@@ -112,7 +144,7 @@ def create_jitsi_meet(name: Optional[str], *, secret: str) -> JitsiMeet:
     )
 
 
-def create_speakeasy(name: Optional[str], *, secret: str) -> str:
+def create_speakeasy(name: str | None, *, secret: str) -> str:
     """Return a Speakeasy URL."""
     slug = _get_secret_slug(name, secret, fallback=cuteid.emojid)
     return f"https://speakeasy.co/{slug}"
