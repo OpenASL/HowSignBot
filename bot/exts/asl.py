@@ -64,7 +64,7 @@ def word_display(word: str, *, template: str = SIGN_TEMPLATE, max_length: int = 
         signingsavvy=f"https://www.signingsavvy.com/search/{quoted_word}",
         spread_the_sign=f"https://www.spreadthesign.com/en.us/search/?q={quoted_word}",
         asl_signbank=f"https://aslsignbank.haskins.yale.edu/signs/search/?keyword={quoted_word}",
-        youglish=f"https://youglish.com/pronounce/{quoted_word}/signlanguage/asl",
+        youglish=f"https://youglish.com/pronounce/{quoted_word}/signlanguage/us",
     )
 
 
