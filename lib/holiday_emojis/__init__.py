@@ -1,5 +1,6 @@
 import datetime as dt
 from typing import NamedTuple
+from typing import Optional
 
 import holidays
 from dateutil.easter import easter
@@ -9,8 +10,8 @@ from dateutil.relativedelta import SU
 
 
 class Holiday(NamedTuple):
-    emoji: str | None
-    term: str | None = None  # search term to display on holidays
+    emoji: Optional[str]
+    term: Optional[str] = None  # search term to display on holidays
 
 
 class USPlus(holidays.US):
@@ -181,14 +182,14 @@ _HOLIDAY_EMOJI_MAP = {
 HOLIDAYS = make_holidays()
 
 
-def get(date: dt.date) -> Holiday | None:
+def get(date: dt.date) -> Optional[Holiday]:
     holiday_names = HOLIDAYS.get_list(date)
     if holiday_names:
         return _HOLIDAY_EMOJI_MAP.get(holiday_names[0], None)
     return None
 
 
-def get_holiday_name(date: dt.date) -> Holiday | None:
+def get_holiday_name(date: dt.date) -> Optional[Holiday]:
     holiday_names = HOLIDAYS.get_list(date)
     if holiday_names:
         return holiday_names[0]

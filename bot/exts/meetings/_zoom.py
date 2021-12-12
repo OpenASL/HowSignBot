@@ -4,8 +4,12 @@ import random
 from typing import Awaitable
 from typing import Callable
 from typing import cast
+from typing import List
 from typing import Mapping
+from typing import Optional
 from typing import Sequence
+from typing import Tuple
+from typing import Union
 
 import discord
 from aiohttp import client
@@ -90,7 +94,7 @@ FACES = (
 def display_participant_names(
     participants: Sequence[Mapping], meeting: Mapping, max_to_display: int = 15
 ) -> str:
-    names: list[str] = []
+    names: List[str] = []
     for participant in participants:
         if participant["email"] in settings.ZOOM_EMAILS:
             # Display authorized zoom users as mentions
@@ -133,7 +137,7 @@ async def make_zoom_embed(
     meeting_id: int,
     *,
     include_instructions: bool = True,
-) -> discord.Embed | None:
+) -> Optional[discord.Embed]:
     meeting = await store.get_zoom_meeting(meeting_id)
     if not meeting:
         return None
@@ -233,7 +237,7 @@ def add_repost_after_delay(
     bot.loop.create_task(add_repost_after_delay_impl(message, delay))
 
 
-async def get_zoom_meeting_id(meeting_id: int | str) -> int:
+async def get_zoom_meeting_id(meeting_id: Union[int, str]) -> int:
     zzzzoom_meeting = (
         await store.get_zzzzoom_meeting(meeting_id)
         if isinstance(meeting_id, str)
@@ -247,11 +251,11 @@ async def get_zoom_meeting_id(meeting_id: int | str) -> int:
 async def zoom_impl(
     ctx: Context,
     *,
-    meeting_id: int | str | None,  # Either a Zoom meeting ID or zzzzoom ID
+    meeting_id: Optional[Union[int, str]],  # Either a Zoom meeting ID or zzzzoom ID
     send_channel_message: Callable[[int], Awaitable],
     set_up: bool,
     with_zzzzoom: bool = False,
-) -> tuple[int, discord.Message]:
+) -> Tuple[int, discord.Message]:
     zoom_user = settings.ZOOM_USERS[ctx.author.id]
     logger.info(f"creating zoom meeting for zoom user: {zoom_user}")
     message = None

@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 import discord
 from discord.ext import commands
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 COMMAND_PREFIX = settings.COMMAND_PREFIX
 
 
-def post_feedback(feedback: str, guild: str | None):
+def post_feedback(feedback: str, guild: Optional[str]):
     client = get_gsheet_client()
     # Assumes rows are in the format (date, feedback, guild, version)
     sheet = client.open_by_key(settings.FEEDBACK_SHEET_KEY)
@@ -66,7 +67,7 @@ class Meta(Cog):
 
     @command(name="presence", hidden=True, help="BOT OWNER ONLY: Change bot presense")
     @is_owner()
-    async def presence_command(self, ctx: Context, activity_type: ActivityTypeConverter | None = None, name: str = ""):  # type: ignore[valid-type]
+    async def presence_command(self, ctx: Context, activity_type: Optional[ActivityTypeConverter] = None, name: str = ""):  # type: ignore[valid-type]
         if not activity_type:
             await set_default_presence()
             await ctx.send("Presence reset.")

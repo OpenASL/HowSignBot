@@ -5,6 +5,8 @@ from typing import Awaitable
 from typing import Callable
 from typing import Iterable
 from typing import Mapping
+from typing import Optional
+from typing import Union
 
 import discord
 from discord.ext.commands import Bot
@@ -37,7 +39,7 @@ async def add_stop_sign(message: discord.Message):
 async def get_reaction_message(
     bot: Bot,
     payload: discord.RawReactionActionEvent,
-) -> discord.Message | None:
+) -> Optional[discord.Message]:
     with suppress(discord.NotFound):
         channel = bot.get_channel(payload.channel_id)
         if not channel:
@@ -70,7 +72,7 @@ async def handle_close_reaction(
     bot: Bot,
     payload: discord.RawReactionActionEvent,
     *,
-    close_messages: Mapping[str, str | Callable[[discord.Message], Awaitable]],
+    close_messages: Mapping[str, Union[str, Callable[[discord.Message], Awaitable]]],
     emoji: str = STOP_SIGN,
 ) -> None:
     if not should_handle_reaction(bot, payload, {emoji}):

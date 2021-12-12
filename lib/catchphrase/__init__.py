@@ -2,6 +2,7 @@ import itertools
 import json
 import random
 from pathlib import Path
+from typing import Optional
 
 import yaml
 
@@ -19,7 +20,7 @@ CATEGORIES = list(CATCHPHRASE.keys())
 ALL_WORDS = list(itertools.chain(*CATCHPHRASE.values()))
 
 
-def catchphrase(category: str | None = None):
+def catchphrase(category: Optional[str] = None):
     word_list = CATCHPHRASE[category] if category else ALL_WORDS
     return random.choice(word_list)
 
