@@ -1,13 +1,12 @@
 import datetime as dt
-from typing import Optional
 from urllib.parse import urlencode
 
 
 def create_gcal_url(
     text,
     start: dt.datetime,
-    end: Optional[dt.datetime] = None,
-    description: Optional[str] = None,
+    end: dt.datetime | None = None,
+    description: str | None = None,
 ):
     dt_format = "%Y%m%dT%H%M%SZ"
     base_url = "http://www.google.com/calendar/event"

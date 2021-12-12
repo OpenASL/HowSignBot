@@ -1,6 +1,4 @@
 import datetime as dt
-from typing import Optional
-from typing import Tuple
 
 import dateparser
 import pytz
@@ -47,11 +45,11 @@ class NoTimeZoneError(ValueError):
 
 def parse_human_readable_datetime(
     dstr: str,
-    settings: Optional[dict] = None,
-    user_timezone: Optional[pytz.BaseTzInfo] = None,
+    settings: dict | None = None,
+    user_timezone: pytz.BaseTzInfo | None = None,
     # By default, use Pacific time if timezone can't be parsed
-    fallback_timezone: Optional[pytz.BaseTzInfo] = PACIFIC,
-) -> Tuple[Optional[dt.datetime], Optional[dt.tzinfo]]:
+    fallback_timezone: pytz.BaseTzInfo | None = PACIFIC,
+) -> tuple[dt.datetime | None, dt.tzinfo | None]:
     parsed = dateparser.parse(dstr, settings=settings)
     if parsed is None:
         return None, None

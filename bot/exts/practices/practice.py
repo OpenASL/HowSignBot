@@ -2,9 +2,6 @@ import datetime as dt
 import logging
 from contextlib import suppress
 from typing import Any
-from typing import Dict
-from typing import Optional
-from typing import Tuple
 
 import discord
 import pytz
@@ -68,8 +65,8 @@ Examples:
 )
 
 
-async def schedule_impl(guild_id: int, when: Optional[str]):
-    settings: Optional[Dict[str, Any]]
+async def schedule_impl(guild_id: int, when: str | None):
+    settings: dict[str, Any] | None
     if when and when.strip().lower() != "today":
         now_pacific = utcnow().astimezone(PACIFIC)
         settings = {
@@ -122,8 +119,8 @@ Enter `{COMMAND_PREFIX}schedule` to see today's schedule.
 
 
 def parse_practice_time(
-    human_readable_datetime: str, user_timezone: Optional[pytz.BaseTzInfo] = None
-) -> Tuple[Optional[dt.datetime], Optional[dt.tzinfo]]:
+    human_readable_datetime: str, user_timezone: pytz.BaseTzInfo | None = None
+) -> tuple[dt.datetime | None, dt.tzinfo | None]:
     # First try current_period to capture dates in the near future
     dtime, used_timezone = parse_human_readable_datetime(
         human_readable_datetime,
@@ -304,7 +301,7 @@ class Practice(commands.Cog):
 
     @commands.command(name="schedule", aliases=("sched", "practices"), help=SCHEDULE_HELP)
     @commands.check(has_practice_schedule)
-    async def schedule_command(self, ctx: Context, *, when: Optional[str]):
+    async def schedule_command(self, ctx: Context, *, when: str | None):
         await ctx.channel.trigger_typing()
         ret = await schedule_impl(guild_id=ctx.guild.id, when=when)
         await ctx.send(**ret)

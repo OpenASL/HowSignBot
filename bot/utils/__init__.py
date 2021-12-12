@@ -1,13 +1,11 @@
 import difflib
 import re
-from typing import Optional
-from typing import Tuple
 
 _spoiler_pattern = re.compile(r"\s*\|\|\s*(.*)\s*\|\|\s*")
 _quotes_pattern = re.compile(r"[\"“](.*?)[\"”]")
 
 
-def get_spoiler_text(val: str) -> Optional[str]:
+def get_spoiler_text(val: str) -> str | None:
     """Return value within spoiler text if it exists, else return `None`."""
     match = _spoiler_pattern.match(val)
     if match:
@@ -15,7 +13,7 @@ def get_spoiler_text(val: str) -> Optional[str]:
     return None
 
 
-def get_and_strip_quoted_text(val: str) -> Tuple[str, Optional[str]]:
+def get_and_strip_quoted_text(val: str) -> tuple[str, str | None]:
     """Return `val` with quoted text removed as well as as the quoted text."""
     match = _quotes_pattern.search(val)
     if match:
@@ -31,7 +29,7 @@ def truncate(s: str, max_len: int, *, trailing: str = "…"):
     return s
 
 
-def did_you_mean(word, possibilities) -> Optional[str]:
+def did_you_mean(word, possibilities) -> str | None:
     try:
         return difflib.get_close_matches(word, possibilities, n=1, cutoff=0.5)[0]
     except IndexError:
