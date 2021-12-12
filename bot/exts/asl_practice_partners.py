@@ -447,8 +447,7 @@ class AslPracticePartners(Cog):
     async def on_ready(self):
         self.bot.loop.create_task(self.daily_message())
         self.bot.loop.create_task(self.daily_member_kick())
-        # self.tags = get_tags()
-        self.tags = {}
+        self.tags = get_tags()
 
     async def daily_message(self):
         while True:
