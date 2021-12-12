@@ -1,11 +1,8 @@
 import datetime as dt
 import logging
 from typing import Iterator
-from typing import List
 from typing import Mapping
-from typing import Optional
 from typing import Sequence
-from typing import Union
 
 import databases
 import nanoid
@@ -196,7 +193,7 @@ class Store:
 
     def __init__(
         self,
-        database_url: Union[str, databases.DatabaseURL],
+        database_url: str | databases.DatabaseURL,
         *,
         force_rollback: bool = False,
     ):
@@ -211,7 +208,7 @@ class Store:
     def transaction(self):
         return self.db.transaction()
 
-    async def set_user_timezone(self, user_id: int, timezone: Optional[dt.tzinfo]):
+    async def set_user_timezone(self, user_id: int, timezone: dt.tzinfo | None):
         logger.info(f"setting timezone for user_id {user_id}")
         stmt = insert(user_settings).values(user_id=user_id, timezone=timezone)
         stmt = stmt.on_conflict_do_update(
@@ -220,23 +217,23 @@ class Store:
         )
         await self.db.execute(stmt)
 
-    async def get_user_timezone(self, user_id: int) -> Optional[pytz.BaseTzInfo]:
+    async def get_user_timezone(self, user_id: int) -> pytz.BaseTzInfo | None:
         logger.info(f"retrieving timezone for user_id {user_id}")
         query = user_settings.select().where(user_settings.c.user_id == user_id)
         return await self.db.fetch_val(query=query, column=user_settings.c.timezone)
 
-    async def get_guild_settings(self, guild_id: int) -> Optional[Mapping]:
+    async def get_guild_settings(self, guild_id: int) -> Mapping | None:
         logger.info(f"retrieving guild settings sheet key for guild_id {guild_id}")
         query = guild_settings.select().where(guild_settings.c.guild_id == guild_id)
         return await self.db.fetch_one(query=query)
 
-    async def get_guild_schedule_sheet_key(self, guild_id: int) -> Optional[str]:
+    async def get_guild_schedule_sheet_key(self, guild_id: int) -> str | None:
         query = guild_settings.select().where(guild_settings.c.guild_id == guild_id)
         return await self.db.fetch_val(
             query=query, column=guild_settings.c.schedule_sheet_key
         )
 
-    async def get_guild_daily_message_channel_id(self, guild_id: int) -> Optional[int]:
+    async def get_guild_daily_message_channel_id(self, guild_id: int) -> int | None:
         query = guild_settings.select().where(guild_settings.c.guild_id == guild_id)
         return await self.db.fetch_val(
             query=query, column=guild_settings.c.daily_message_channel_id
@@ -300,13 +297,13 @@ class Store:
         )
         await self.db.execute(stmt)
 
-    async def get_zoom_meeting(self, meeting_id: int) -> Optional[Mapping]:
+    async def get_zoom_meeting(self, meeting_id: int) -> Mapping | None:
         query = zoom_meetings.select().where(zoom_meetings.c.meeting_id == meeting_id)
         return await self.db.fetch_one(query=query)
 
     async def get_latest_pending_zoom_meeting_for_user(
         self, zoom_user: str
-    ) -> Optional[Mapping]:
+    ) -> Mapping | None:
         query = (
             zoom_meetings.select()
             .where(
@@ -370,12 +367,12 @@ class Store:
             zoom_messages.delete().where(zoom_messages.c.message_id == message_id)
         )
 
-    async def get_zoom_message(self, message_id: int) -> Optional[Mapping]:
+    async def get_zoom_message(self, message_id: int) -> Mapping | None:
         return await self.db.fetch_one(
             zoom_messages.select().where(zoom_messages.c.message_id == message_id)
         )
 
-    async def get_zoom_messages(self, meeting_id: int) -> List[Mapping]:
+    async def get_zoom_messages(self, meeting_id: int) -> list[Mapping]:
         return await self.db.fetch_all(
             zoom_messages.select().where(zoom_messages.c.meeting_id == meeting_id)
         )
@@ -385,8 +382,8 @@ class Store:
         *,
         meeting_id: int,
         name: str,
-        zoom_id: Optional[str],
-        email: Optional[str],
+        zoom_id: str | None,
+        email: str | None,
         joined_at: dt.datetime,
     ):
         stmt = insert(zoom_participants).values(
@@ -409,16 +406,14 @@ class Store:
         )
         await self.db.execute(stmt)
 
-    async def get_zoom_participant(
-        self, *, meeting_id: int, name: str
-    ) -> Optional[Mapping]:
+    async def get_zoom_participant(self, *, meeting_id: int, name: str) -> Mapping | None:
         query = zoom_participants.select().where(
             (zoom_participants.c.meeting_id == meeting_id)
             & (zoom_participants.c.name == name)
         )
         return await self.db.fetch_one(query=query)
 
-    async def get_zoom_participants(self, meeting_id: int) -> List[Mapping]:
+    async def get_zoom_participants(self, meeting_id: int) -> list[Mapping]:
         return await self.db.fetch_all(
             zoom_participants.select()
             .where(zoom_participants.c.meeting_id == meeting_id)
@@ -545,7 +540,7 @@ class Store:
             aslpp_members.delete().where(aslpp_members.c.user_id == user_id)
         )
 
-    async def get_aslpp_members_without_intro(self, since: dt.timedelta) -> List[Mapping]:
+    async def get_aslpp_members_without_intro(self, since: dt.timedelta) -> list[Mapping]:
         return await self.db.fetch_all(
             aslpp_members.select()
             .where(
@@ -571,14 +566,14 @@ class Store:
             return False
         return record["result"]
 
-    async def mark_aslpp_members_active(self, user_ids: List[int]):
+    async def mark_aslpp_members_active(self, user_ids: list[int]):
         await self.db.execute(
             aslpp_members.update()
             .where(aslpp_members.c.user_id.in_(user_ids))
             .values(is_active=True)
         )
 
-    async def mark_aslpp_members_inactive(self, user_ids: List[int]):
+    async def mark_aslpp_members_inactive(self, user_ids: list[int]):
         await self.db.execute(
             aslpp_members.update()
             .where(aslpp_members.c.user_id.in_(user_ids))

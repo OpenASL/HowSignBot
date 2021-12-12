@@ -2,8 +2,6 @@ import asyncio
 import datetime as dt
 import logging
 import random
-from typing import Optional
-from typing import Tuple
 
 import discord
 from discord.ext.commands import Bot
@@ -30,23 +28,23 @@ logger = logging.getLogger(__name__)
 COMMAND_PREFIX = settings.COMMAND_PREFIX
 
 
-def get_today_random(dtime: Optional[dt.datetime] = None) -> random.Random:
+def get_today_random(dtime: dt.datetime | None = None) -> random.Random:
     dtime = dtime or utcnow()
     seed = settings.DAILY_MESSAGE_RANDOM_SEED or dtime.date().toordinal()
     return random.Random(seed)
 
 
-def get_daily_handshape(dtime: Optional[dt.datetime] = None) -> handshapes.Handshape:
+def get_daily_handshape(dtime: dt.datetime | None = None) -> handshapes.Handshape:
     return handshapes.get_random_handshape(get_today_random(dtime))
 
 
-async def get_daily_topics(dtime: Optional[dt.datetime] = None) -> Tuple[str, str]:
+async def get_daily_topics(dtime: dt.datetime | None = None) -> tuple[str, str]:
     topics = await store.get_all_topics()
     rand = get_today_random(dtime)
     return (rand.choice(topics), rand.choice(topics))
 
 
-def get_daily_clthat(dtime: Optional[dt.datetime] = None) -> str:
+def get_daily_clthat(dtime: dt.datetime | None = None) -> str:
     return clthat.text(get_today_random(dtime))
 
 
@@ -72,8 +70,8 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
     async def send_daily_message_command(
         self,
         ctx: Context,
-        channel: Optional[discord.TextChannel] = None,
-        when: Optional[str] = None,
+        channel: discord.TextChannel | None = None,
+        when: str | None = None,
     ):
         await ctx.channel.trigger_typing()
         channel_id = channel.id if channel else ctx.channel.id
@@ -101,9 +99,7 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
             guild = channel.guild
             await ctx.send(f'🗓 Daily message sent to "{guild.name}", #{channel.name}')
 
-    async def send_daily_message(
-        self, channel_id: int, dtime: Optional[dt.datetime] = None
-    ):
+    async def send_daily_message(self, channel_id: int, dtime: dt.datetime | None = None):
         channel = self.bot.get_channel(channel_id)
         guild = channel.guild
         logger.info(f'sending daily message for guild: "{guild.name}" in #{channel.name}')

@@ -3,7 +3,6 @@ import hashlib
 import hmac
 from typing import Callable
 from typing import NamedTuple
-from typing import Optional
 
 import aiohttp
 from slugify import slugify
@@ -64,7 +63,7 @@ async def get_zoom(
     )
 
 
-async def create_watch2gether(api_key: str, video_url: Optional[str] = None) -> str:
+async def create_watch2gether(api_key: str, video_url: str | None = None) -> str:
     """Create and return a watch2gether URL via the watch2gether API."""
     async with aiohttp.ClientSession() as client:
         payload = {"w2g_api_key": api_key, "share": video_url}
@@ -88,7 +87,7 @@ def _slug_with_signature(s: str, *, secret: str, signature_length=16):
 
 
 def _get_secret_slug(
-    name: Optional[str], secret: str, fallback: Callable = cuteid.cuteid
+    name: str | None, secret: str, fallback: Callable = cuteid.cuteid
 ) -> str:
     """Return a hard-to-guess slug to use for meeting URLs.
 
@@ -101,10 +100,10 @@ def _get_secret_slug(
 class JitsiMeet(NamedTuple):
     join_url: str
     deeplink: str
-    name: Optional[str]
+    name: str | None
 
 
-def create_jitsi_meet(name: Optional[str], *, secret: str) -> JitsiMeet:
+def create_jitsi_meet(name: str | None, *, secret: str) -> JitsiMeet:
     """Return a Jitsi Meet URL."""
     slug = _get_secret_slug(name, secret)
     return JitsiMeet(
@@ -112,7 +111,7 @@ def create_jitsi_meet(name: Optional[str], *, secret: str) -> JitsiMeet:
     )
 
 
-def create_speakeasy(name: Optional[str], *, secret: str) -> str:
+def create_speakeasy(name: str | None, *, secret: str) -> str:
     """Return a Speakeasy URL."""
     slug = _get_secret_slug(name, secret, fallback=cuteid.emojid)
     return f"https://speakeasy.co/{slug}"

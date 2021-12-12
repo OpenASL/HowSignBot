@@ -1,8 +1,6 @@
 import datetime as dt
 import logging
-from typing import List
 from typing import NamedTuple
-from typing import Optional
 
 import discord
 
@@ -44,8 +42,8 @@ async def get_practice_sessions(
     dtime: dt.datetime,
     *,
     worksheet=None,
-    parse_settings: Optional[dict] = None,
-) -> List[PracticeSession]:
+    parse_settings: dict | None = None,
+) -> list[PracticeSession]:
     worksheet = worksheet or await get_practice_worksheet_for_guild(guild_id)
     all_values = worksheet.get_all_values()
     return sorted(
@@ -105,7 +103,7 @@ def make_base_embed(dtime: dt.datetime) -> discord.Embed:
 
 
 async def make_practice_session_embed(
-    guild_id: int, sessions: List[PracticeSession], *, dtime: dt.datetime
+    guild_id: int, sessions: list[PracticeSession], *, dtime: dt.datetime
 ) -> discord.Embed:
     embed = make_base_embed(dtime)
     sheet_key = await store.get_guild_schedule_sheet_key(guild_id)

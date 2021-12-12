@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from discord.ext import commands
 from discord.ext.commands import Context
@@ -19,7 +18,7 @@ Enter {COMMAND_PREFIX}sentence || to display the sentence in spoiler text.
 )
 
 
-def sentence_impl(spoiler: Optional[str]):
+def sentence_impl(spoiler: str | None):
     sentence = catchphrase.sentence()
     should_spoil = spoiler and spoiler.startswith("||")
     if should_spoil:
@@ -49,7 +48,7 @@ Meaning: ||{meaning}||
 """
 
 
-def idiom_impl(spoiler: Optional[str]):
+def idiom_impl(spoiler: str | None):
     data = catchphrase.idiom()
     should_spoil = spoiler and spoiler.startswith("||")
     log = (
@@ -70,11 +69,11 @@ class English(commands.Cog):
         self.bot = bot
 
     @commands.command(name="sentence", help=SENTENCE_HELP)
-    async def sentence_command(self, ctx: Context, spoiler: Optional[str]):
+    async def sentence_command(self, ctx: Context, spoiler: str | None):
         await ctx.send(**sentence_impl(spoiler=spoiler))
 
     @commands.command(name="idiom", help=IDIOM_HELP)
-    async def idiom_command(self, ctx: Context, spoiler: Optional[str]):
+    async def idiom_command(self, ctx: Context, spoiler: str | None):
         await ctx.send(**idiom_impl(spoiler))
 
 

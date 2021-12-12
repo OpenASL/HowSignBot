@@ -1,9 +1,7 @@
 import logging
 import random
 from contextlib import suppress
-from typing import Optional
 from typing import Sequence
-from typing import Union
 
 import discord
 from discord.ext.commands import Bot
@@ -30,7 +28,7 @@ JOIN_EMOJI = "✅"
 SHUFFLE_EMOJI = "🔀"
 
 
-def catchphrase_impl(category: Optional[str] = None):
+def catchphrase_impl(category: str | None = None):
     category = category.lower() if category else None
     if category == "categories":
         return {
@@ -67,7 +65,7 @@ def make_teams(players):
     return red, blue
 
 
-def format_team(players: Sequence[Union[discord.User, discord.Member]]):
+def format_team(players: Sequence[discord.User | discord.Member]):
     names = [each.mention for each in players]
     return ", ".join(names)
 
@@ -81,11 +79,11 @@ class Games(Cog):
         aliases=("cp",),
         help="Generate a list of random words and phrases",
     )
-    async def catchphrase_command(self, ctx: Context, category: Optional[str] = None):
+    async def catchphrase_command(self, ctx: Context, category: str | None = None):
         await ctx.send(**catchphrase_impl(category))
 
     @command(name="codenames", aliases=("cn",), help="Start a Codenames game")
-    async def codenames_command(self, ctx: Context, name: Optional[str] = None):
+    async def codenames_command(self, ctx: Context, name: str | None = None):
         name = name or cuteid.cuteid()
         url = f"https://horsepaste.com/{name}"
         base_message = f"🕵️ **Codenames** 🕵️\n{url}\nClick {JOIN_EMOJI} to join a team. Click {SHUFFLE_EMOJI} to shuffle the teams."
