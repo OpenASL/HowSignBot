@@ -26,7 +26,7 @@ def generate_token():
 def main():
     token = generate_token()
     print("==> Setting ZOOM_JWT in Heroku")
-    subprocess.call(("heroku", "config:set", f"ZOOM_JWT={token}", "-a", HEROKU_APP))
+    subprocess.check_call(("heroku", "config:set", f"ZOOM_JWT={token}", "-a", HEROKU_APP))
     print("==> Finished.")
 
 
