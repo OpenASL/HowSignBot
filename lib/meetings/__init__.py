@@ -3,6 +3,8 @@ from __future__ import annotations
 import base64
 import hashlib
 import hmac
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from enum import IntEnum
 from typing import Callable
 from typing import NamedTuple
@@ -13,9 +15,28 @@ from slugify import slugify
 import cuteid
 
 
+class ZoomClientError(Exception):
+    pass
+
+
+class MaxZoomLicensesError(ZoomClientError):
+    pass
+
+
+class BasicUserLimitReachedError(ZoomClientError):
+    pass
+
+
+@asynccontextmanager
 async def zoom_request(
-    method: str, path: str, *, token: str, timeout: int = 10, **kwargs
-):
+    method: str,
+    path: str,
+    *,
+    token: str,
+    raise_for_status: bool = True,
+    timeout: int = 10,
+    **kwargs,
+) -> AsyncIterator[aiohttp.ClientResponse]:
     timeout = aiohttp.ClientTimeout(total=timeout)
     async with aiohttp.request(
         method,
@@ -24,9 +45,9 @@ async def zoom_request(
         headers={"Authorization": f"Bearer {token}"},
         **kwargs,
     ) as resp:
-        resp.raise_for_status()
-        data = await resp.json()
-    return data
+        if raise_for_status:
+            resp.raise_for_status()
+        yield resp
 
 
 class ZoomMeeting(NamedTuple):
@@ -40,7 +61,7 @@ async def create_zoom(
     *, token: str, user_id: str, topic: str, settings: dict
 ) -> ZoomMeeting:
     """Create and return a Zoom meeting via the Zoom API."""
-    data = await zoom_request(
+    async with zoom_request(
         "POST",
         f"/users/{user_id}/meetings",
         token=token,
@@ -49,7 +70,8 @@ async def create_zoom(
             "topic": topic,
             "settings": settings,
         },
-    )
+    ) as resp:
+        data = await resp.json()
     return ZoomMeeting(
         id=data["id"],
         join_url=data["join_url"],
@@ -71,8 +93,33 @@ class ZoomUser(NamedTuple):
 
 
 async def list_zoom_users(*, token: str) -> list[ZoomUser]:
-    data = await zoom_request("GET", "/users", token=token)
+    async with zoom_request("GET", "/users", token=token) as resp:
+        data = await resp.json()
     return [ZoomUser(id=u["id"], email=u["email"], type=u["type"]) for u in data["users"]]
+
+
+async def update_zoom_user(*, token: str, user_id: str, data: dict):
+    async with zoom_request(
+        "PATCH",
+        f"/users/{user_id}",
+        token=token,
+        json=data,
+        raise_for_status=False,
+    ) as resp:
+        if resp.status >= 400:
+            resp_data = await resp.json()
+            error_code = int(resp_data["code"])
+            message = resp_data["message"]
+            # NOTE: Contrary to Zoom's docs, 3412 is used for max licenses exceeded
+            if error_code in {2034, 3412}:
+                raise MaxZoomLicensesError(message)
+            elif error_code == 2033:
+                raise BasicUserLimitReachedError(message)
+            else:
+                resp.raise_for_status()
+        else:
+            resp.raise_for_status()
+    return None
 
 
 async def get_zoom(
