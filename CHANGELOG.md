@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v21.51.1 (2021-12-12)
+### Fix
+* Fix youglish links to correctly filter by ASL ([#353](https://github.com/OpenASL/HowSignBot/issues/353)) ([`862e91c`](https://github.com/OpenASL/HowSignBot/commit/862e91ca73e67c65926412f6a878013c62d12187))
+* Revert "build: upgrade to Python 3.10 (#351)" ([#352](https://github.com/OpenASL/HowSignBot/issues/352)) ([`59ed076`](https://github.com/OpenASL/HowSignBot/commit/59ed0769281275792cd7147346d00b238f09667e))
+
 ## v21.51.0 (2021-12-08)
 ### Feature
 * **aslpp:** Automatically prune users ([#349](https://github.com/OpenASL/HowSignBot/issues/349)) ([`7c98529`](https://github.com/OpenASL/HowSignBot/commit/7c985293b7ca13dd9fdbaef00547b7669932aa9f))
