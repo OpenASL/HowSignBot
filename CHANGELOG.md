@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.52.0 (2021-12-12)
+### Feature
+* **zoom:** Add owner-only commands for Zoom user management ([#354](https://github.com/OpenASL/HowSignBot/issues/354)) ([`6ce3244`](https://github.com/OpenASL/HowSignBot/commit/6ce3244094cf13a7cb92b8830ece0a5299409c90))
+
 ## v21.51.1 (2021-12-12)
 ### Fix
 * Fix youglish links to correctly filter by ASL ([#353](https://github.com/OpenASL/HowSignBot/issues/353)) ([`862e91c`](https://github.com/OpenASL/HowSignBot/commit/862e91ca73e67c65926412f6a878013c62d12187))
