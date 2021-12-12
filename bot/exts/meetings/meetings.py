@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import cast
 from typing import List
@@ -12,6 +13,7 @@ from discord.ext.commands import command
 from discord.ext.commands import Context
 from discord.ext.commands import errors
 from discord.ext.commands import group
+from discord.ext.commands import is_owner
 
 import meetings
 from ._zoom import add_repost_after_delay
@@ -24,6 +26,7 @@ from ._zoom import zoom_impl
 from ._zoom import ZoomCreateError
 from bot import settings
 from bot.database import store
+from bot.utils.prompts import prompt_for_choice
 from bot.utils.reactions import add_stop_sign
 from bot.utils.reactions import get_reaction_message
 from bot.utils.reactions import handle_close_reaction
@@ -232,6 +235,139 @@ class Meetings(Cog):
         if isinstance(error, ZoomCreateError):
             logger.error("could not create zoom due to unexpected error", exc_info=error)
             await ctx.send(error)
+
+    # Zoom user management commands
+
+    @zoom_group.command(
+        name="users", hidden=True, help="List users who have access to the zoom commands."
+    )
+    @is_owner()
+    async def zoom_users(self, ctx: Context):
+        await ctx.channel.trigger_typing()
+        try:
+            users = await meetings.list_zoom_users(token=settings.ZOOM_JWT)
+        except asyncio.exceptions.TimeoutError:
+            logger.exception("zoom request timed out")
+            await ctx.send(
+                "🚨 _Request to Zoom API timed out. This may be due to rate limiting. Try again later._"
+            )
+            return
+        licensed_user_emails = {
+            user.email for user in users if user.type == meetings.ZoomPlanType.LICENSED
+        }
+        description = "\n".join(
+            tuple(
+                ("👑 " if email.lower() in licensed_user_emails else "") + f"<@!{user_id}>"
+                for user_id, email in settings.ZOOM_USERS.items()
+            )
+        )
+        embed = discord.Embed(
+            title=f"Fancy Zoom Users ({len(settings.ZOOM_USERS)})",
+            description=description,
+            color=discord.Color.blue(),
+        )
+        embed.set_footer(text="👑 = Licensed")
+        await ctx.send(embed=embed)
+
+    @zoom_group.command(
+        name="license", hidden=True, help="Upgrade a user to the Licensed plan type."
+    )
+    @is_owner()
+    async def zoom_license(self, ctx: Context, user: discord.User):
+        if user.id not in settings.ZOOM_USERS:
+            await ctx.send(f"🚨 _{user.mention} is not a configured Zoom user._")
+            return
+
+        await ctx.channel.trigger_typing()
+        zoom_user_id = settings.ZOOM_USERS[user.id]
+        try:
+            logger.info(f"attempting to upgrade user {user.id} to licensed plan")
+            await meetings.update_zoom_user(
+                token=settings.ZOOM_JWT,
+                user_id=zoom_user_id,
+                data={"type": meetings.ZoomPlanType.LICENSED},
+            )
+        except meetings.MaxZoomLicensesError:
+            try:
+                users = await meetings.list_zoom_users(token=settings.ZOOM_JWT)
+            except asyncio.exceptions.TimeoutError:
+                logger.exception("zoom request timed out")
+                await ctx.send(
+                    "🚨 _Request to Zoom API timed out. This may be due to rate limiting. Try again later._"
+                )
+                return
+            zoom_to_discord_user_mapping = {
+                email.lower(): discord_id
+                for discord_id, email in settings.ZOOM_USERS.items()
+            }
+            # Discord user IDs for Licensed users
+            licensed_user_discord_ids = tuple(
+                zoom_to_discord_user_mapping[user.email.lower()]
+                for user in users
+                if user.email.lower() in zoom_to_discord_user_mapping
+                and user.type == meetings.ZoomPlanType.LICENSED
+                # Don't allow de-licensing the bot owner, of course
+                and zoom_to_discord_user_mapping[user.email.lower()] != settings.OWNER_ID
+            )
+            if len(licensed_user_discord_ids) == 1:
+                downgraded_user_id = licensed_user_discord_ids[0]
+            elif len(licensed_user_discord_ids) > 1:
+                downgraded_user_id = await prompt_for_choice(
+                    ctx,
+                    prompt=(
+                        f"✋ **{user.mention} will be upgraded to a Licensed plan**.\nChoose a user to downgrade to Basic."
+                    ),
+                    choices={
+                        discord_user_id: f"<@!{discord_user_id}>"
+                        for discord_user_id in licensed_user_discord_ids
+                    },
+                )
+            else:
+                await ctx.send(
+                    "🚨 _No available users to downgrade on Discord. Go to the Zoom account settings to manage licenses_."
+                )
+                return
+            try:
+                logger.info(
+                    f"attempting to downgrade user {downgraded_user_id} to basic plan"
+                )
+                await meetings.update_zoom_user(
+                    token=settings.ZOOM_JWT,
+                    user_id=settings.ZOOM_USERS[downgraded_user_id],
+                    data={"type": meetings.ZoomPlanType.BASIC},
+                )
+            except meetings.ZoomClientError:
+                logger.exception(f"failed to downgrade user {downgraded_user_id}")
+                await ctx.send(
+                    f"🚨 _Failed to downgrade <@!{downgraded_user_id}>. Check the logs for details._"
+                )
+            try:
+                logger.info(f"re-attempting to upgrade user {user.id} to licensed plan")
+                await meetings.update_zoom_user(
+                    token=settings.ZOOM_JWT,
+                    user_id=zoom_user_id,
+                    data={"type": meetings.ZoomPlanType.LICENSED},
+                )
+            except meetings.ZoomClientError:
+                logger.exception(f"failed to upgrade user {user.id}")
+                await ctx.send(
+                    f"🚨 _Failed to upgrade {user.mention}. Check the logs for details._"
+                )
+            await ctx.send(
+                f"👑 **{user.mention} successfully upgraded to Licensed plan.**\n<@!{downgraded_user_id}> downgraded to Basic."
+            )
+            return
+        except meetings.ZoomClientError as error:
+            await ctx.send(f"🚨 _{error.args[0]}_")
+            return
+        except Exception:
+            logger.exception(f"failed to license user {user}")
+            await ctx.send(
+                f"🚨 _Failed to license user {user.mention}. Check the logs for details._"
+            )
+            return
+        else:
+            await ctx.send(f"👑 **{user.mention} upgraded to a Licensed plan**.")
 
     async def zoom_group_impl(
         self, ctx: Context, *, meeting_id: Optional[Union[int, str]], with_zzzzoom: bool

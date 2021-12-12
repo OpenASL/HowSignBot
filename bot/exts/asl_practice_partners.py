@@ -288,10 +288,9 @@ class AslPracticePartners(Cog):
         for target in targets:
             with suppress(discord.errors.Forbidden):  # user may not allow DMs from bot
                 await target.send(KICK_MESSAGE)
-            if isinstance(target, Member):
-                logger.info(f"kicking member {target.id}")
-                await ctx.guild.kick(target, reason="Inactivity")
-                num_kicked += 1
+            logger.info(f"kicking member {target.id}")
+            await ctx.guild.kick(target, reason="Inactivity")
+            num_kicked += 1
 
         await ctx.reply(f"Kicked {num_kicked} members.")
 
