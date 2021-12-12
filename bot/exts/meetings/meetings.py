@@ -1,5 +1,8 @@
 import logging
 from typing import cast
+from typing import List
+from typing import Optional
+from typing import Union
 
 import discord
 from discord.ext.commands import Bot
@@ -66,7 +69,7 @@ def make_jitsi_embed(meeting: meetings.JitsiMeet):
     )
 
 
-def make_watch2gether_embed(url: str, video_url: str | None) -> discord.Embed:
+def make_watch2gether_embed(url: str, video_url: Optional[str]) -> discord.Embed:
     description = "🚀 Watch videos together!"
     if video_url:
         description += f"\nQueued video: <{video_url}>"
@@ -80,7 +83,9 @@ class Meetings(Cog):
 
     @group(name="zoom", aliases=("z",), invoke_without_command=True)
     @check(is_allowed_zoom_access)
-    async def zoom_group(self, ctx: Context, meeting_id: int | str | None = None):
+    async def zoom_group(
+        self, ctx: Context, meeting_id: Optional[Union[int, str]] = None
+    ):
         """AUTHORIZED USERS ONLY: Start a Zoom meeting"""
         await self.zoom_group_impl(ctx, meeting_id=meeting_id, with_zzzzoom=False)
 
@@ -89,7 +94,9 @@ class Meetings(Cog):
         help="Set up a Zoom before revealing its details to other users. Useful for meetings that have breakout rooms.",
     )
     @check(is_allowed_zoom_access)
-    async def zoom_setup(self, ctx: Context, meeting_id: int | str | None = None):
+    async def zoom_setup(
+        self, ctx: Context, meeting_id: Optional[Union[int, str]] = None
+    ):
         await self.zoom_setup_impl(ctx, meeting_id=meeting_id, with_zzzzoom=False)
 
     @zoom_group.command(
@@ -97,7 +104,9 @@ class Meetings(Cog):
         help="Reveal meeting details for a meeting started with the setup command",
     )
     @check(is_allowed_zoom_access)
-    async def zoom_start(self, ctx: Context, meeting_id: int | str | None = None):
+    async def zoom_start(
+        self, ctx: Context, meeting_id: Optional[Union[int, str]] = None
+    ):
         await ctx.channel.trigger_typing()
         if meeting_id:
             meeting_id = await get_zoom_meeting_id(meeting_id)
@@ -121,7 +130,7 @@ class Meetings(Cog):
         if not zoom_messages:
             raise errors.CheckFailure(f"⚠️ No meeting messages for meeting {meeting_id}.")
         embed = await make_zoom_embed(meeting_id=meeting_id)
-        messages: list[discord.Message] = []
+        messages: List[discord.Message] = []
         for message_info in zoom_messages:
             channel_id = message_info["channel_id"]
             message_id = message_info["message_id"]
@@ -158,7 +167,7 @@ class Meetings(Cog):
         help="Remove meeting details for a meeting",
     )
     @check(is_allowed_zoom_access)
-    async def zoom_stop(self, ctx: Context, meeting_id: int | str):
+    async def zoom_stop(self, ctx: Context, meeting_id: Union[int, str]):
         await ctx.channel.trigger_typing()
         meeting_id = await get_zoom_meeting_id(meeting_id)
         meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
@@ -199,7 +208,9 @@ class Meetings(Cog):
         invoke_without_command=True,
     )
     @check(is_allowed_zoom_access)
-    async def zzzzoom_group(self, ctx: Context, meeting_id: str | int | None = None):
+    async def zzzzoom_group(
+        self, ctx: Context, meeting_id: Optional[Union[str, int]] = None
+    ):
         """AUTHORIZED USERS ONLY: Start a Zoom meeting and display the zzzzoom.us join URL instead of the normal join URL."""
         await self.zoom_group_impl(ctx, meeting_id=meeting_id, with_zzzzoom=True)
 
@@ -208,7 +219,9 @@ class Meetings(Cog):
         help="Set up a Zoom before revealing its details to other users. Useful for meetings that have breakout rooms.",
     )
     @check(is_allowed_zoom_access)
-    async def zzzzoom_setup(self, ctx: Context, meeting_id: int | str | None = None):
+    async def zzzzoom_setup(
+        self, ctx: Context, meeting_id: Optional[Union[int, str]] = None
+    ):
         await self.zoom_setup_impl(ctx, meeting_id=meeting_id, with_zzzzoom=True)
 
     @zzzzoom_group.error
@@ -221,7 +234,7 @@ class Meetings(Cog):
             await ctx.send(error)
 
     async def zoom_group_impl(
-        self, ctx: Context, *, meeting_id: int | str | None, with_zzzzoom: bool
+        self, ctx: Context, *, meeting_id: Optional[Union[int, str]], with_zzzzoom: bool
     ):
         await ctx.channel.trigger_typing()
 
@@ -237,7 +250,7 @@ class Meetings(Cog):
         )
 
     async def zoom_setup_impl(
-        self, ctx: Context, meeting_id: int | str | None, with_zzzzoom: bool
+        self, ctx: Context, meeting_id: Optional[Union[int, str]], with_zzzzoom: bool
     ):
         await ctx.channel.trigger_typing()
 
@@ -274,7 +287,7 @@ class Meetings(Cog):
             )
 
     @command(name="meet", aliases=("jitsi",), help="Start a Jitsi Meet meeting")
-    async def meet_command(self, ctx: Context, *, name: str | None):
+    async def meet_command(self, ctx: Context, *, name: Optional[str]):
         meeting = meetings.create_jitsi_meet(name, secret=settings.SECRET_KEY)
         logger.info("sending jitsi meet info")
         message = await ctx.send(embed=make_jitsi_embed(meeting))
@@ -282,7 +295,7 @@ class Meetings(Cog):
         await add_stop_sign(message)
 
     @command(name="speakeasy", help="Start a Speakeasy (https://speakeasy.co/) event")
-    async def speakeasy_command(self, ctx: Context, *, name: str | None):
+    async def speakeasy_command(self, ctx: Context, *, name: Optional[str]):
         join_url = meetings.create_speakeasy(name, secret=settings.SECRET_KEY)
         content = f"️🍻 **Speakeasy**\nJoin URL: <{join_url}>"
         if name:
@@ -293,7 +306,7 @@ class Meetings(Cog):
         await add_stop_sign(message)
 
     @command(name="w2g", aliases=("wtg", "watch2gether"), help=WATCH2GETHER_HELP)
-    async def watch2gether_command(self, ctx: Context, video_url: str | None = None):
+    async def watch2gether_command(self, ctx: Context, video_url: Optional[str] = None):
         logger.info("creating watch2gether meeting")
         try:
             url = await meetings.create_watch2gether(

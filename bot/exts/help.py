@@ -1,6 +1,8 @@
 # https://github.com/MusicOnline/Botto/blob/master/botto/modules/help.py
 import inspect
 from typing import Any
+from typing import Dict
+from typing import List
 from typing import Optional
 
 import discord
@@ -9,7 +11,7 @@ from discord.ext import commands
 
 from bot import settings
 
-BotMapping = dict[Optional[commands.Cog], list[commands.Command]]
+BotMapping = Dict[Optional[commands.Cog], List[commands.Command]]
 
 COMMAND_PREFIX = settings.COMMAND_PREFIX
 
@@ -26,8 +28,8 @@ class HelpCommand(commands.HelpCommand):
         cmds = await super().filter_commands(cmds, sort=sort, key=key)
         return [command for command in cmds if command.enabled]
 
-    async def get_bot_help(self, mapping: BotMapping) -> list[discord.Embed]:
-        embeds: list[discord.Embed] = []
+    async def get_bot_help(self, mapping: BotMapping) -> List[discord.Embed]:
+        embeds: List[discord.Embed] = []
         last_embed = None
         last_cog = None
         last_content = None
@@ -64,7 +66,7 @@ class HelpCommand(commands.HelpCommand):
         embeds.append(last_embed)
         return embeds
 
-    async def send_bot_help(self, mapping: BotMapping) -> list[discord.Message]:
+    async def send_bot_help(self, mapping: BotMapping) -> List[discord.Message]:
         messages = []
         embeds = await self.get_bot_help(mapping)
         for embed in embeds:
@@ -72,7 +74,7 @@ class HelpCommand(commands.HelpCommand):
             messages.append(msg)
         return messages
 
-    async def make_cog_embed(self, cog: commands.Cog) -> discord.Embed | None:
+    async def make_cog_embed(self, cog: commands.Cog) -> Optional[discord.Embed]:
         docstring = inspect.getdoc(cog)
         if not docstring:
             return None
@@ -96,7 +98,7 @@ class HelpCommand(commands.HelpCommand):
             embed.add_field(name=key, value=value, inline=inline)
         return embed
 
-    async def get_cog_help(self, cog: commands.Cog) -> list[discord.Embed]:
+    async def get_cog_help(self, cog: commands.Cog) -> List[discord.Embed]:
         """Return one or two embeds for cog help in a list.
 
         First embed is the cog's help embed (or formatted docstring) if any.
@@ -108,7 +110,7 @@ class HelpCommand(commands.HelpCommand):
 
         Assumption: Second or only embed's total character count does not exceed 6000.
         """
-        embeds: list[discord.Embed] = []
+        embeds: List[discord.Embed] = []
         if hasattr(cog, "_help_embed_func"):
             embed = await cog.get_help_embed(self)
             embeds.append(embed)
@@ -143,10 +145,10 @@ class HelpCommand(commands.HelpCommand):
         return embeds
 
     def add_command_fields(
-        self, cmds: list[commands.Command], embed: discord.Embed
+        self, cmds: List[commands.Command], embed: discord.Embed
     ) -> None:
         last_start_index = 0
-        last_content: list[str] = []
+        last_content: List[str] = []
         for i, cmd in enumerate(cmds):
             content = f"`{COMMAND_PREFIX}{cmd}` — {cmd.short_doc}"
             if len("\n".join(last_content + [content])) <= 1024:
@@ -170,7 +172,7 @@ class HelpCommand(commands.HelpCommand):
                     inline=False,
                 )
 
-    async def send_cog_help(self, cog: commands.Cog) -> list[discord.Message]:
+    async def send_cog_help(self, cog: commands.Cog) -> List[discord.Message]:
         # cog cannot be None apparently
         messages = []
         embeds = await self.get_cog_help(cog)
@@ -235,7 +237,7 @@ class HelpCommand(commands.HelpCommand):
         # Subcommand list handling
         cmds = await self.filter_commands(command.commands)
         last_start_index = 0
-        last_content: list[str] = []
+        last_content: List[str] = []
         for i, cmd in enumerate(cmds):
             content = f"`{COMMAND_PREFIX}{cmd}` — {cmd.short_doc}"
             if len("\n".join(last_content + [content])) <= 1024:
