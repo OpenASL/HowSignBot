@@ -158,7 +158,8 @@ class AslPracticePartners(Cog):
         hidden=True,
         help="Display a tag or the list of available tags",
     )
-    async def tag_group(self, ctx: Context, *, tag_name: str | None):
+    # XXX: The `tag_name` typing should be str | None, but discord.py doesn't support unions in arguments
+    async def tag_group(self, ctx: Context, *, tag_name: str = None):
         if not tag_name:
             await self.display_tags(ctx)
             return
@@ -282,9 +283,7 @@ class AslPracticePartners(Cog):
 
     @aslpp_group.command(name="kick", hidden=True)
     @commands.has_permissions(kick_members=True)
-    async def kick_command(
-        self, ctx: Context, targets: commands.Greedy[TextChannel | Member]
-    ):
+    async def kick_command(self, ctx: Context, targets: commands.Greedy[Member]):
         num_kicked = 0
         for target in targets:
             with suppress(discord.errors.Forbidden):  # user may not allow DMs from bot
