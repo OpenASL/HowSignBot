@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.53.0 (2021-12-18)
+### Feature
+* **aslpp:** More aggressive pruning ([#356](https://github.com/OpenASL/HowSignBot/issues/356)) ([`5610b53`](https://github.com/OpenASL/HowSignBot/commit/5610b531bc8b031010aa0d6b8144c3d5b16ac882))
+
 ## v21.52.0 (2021-12-12)
 ### Feature
 * **zoom:** Add owner-only commands for Zoom user management ([#354](https://github.com/OpenASL/HowSignBot/issues/354)) ([`6ce3244`](https://github.com/OpenASL/HowSignBot/commit/6ce3244094cf13a7cb92b8830ece0a5299409c90))
