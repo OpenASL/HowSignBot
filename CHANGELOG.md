@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.53.1 (2021-12-18)
+### Fix
+* Fix typing for discord.py ([#357](https://github.com/OpenASL/HowSignBot/issues/357)) ([`0b8507a`](https://github.com/OpenASL/HowSignBot/commit/0b8507a41d8ef53779b819678fff33edc3a25def))
+
 ## v21.53.0 (2021-12-18)
 ### Feature
 * **aslpp:** More aggressive pruning ([#356](https://github.com/OpenASL/HowSignBot/issues/356)) ([`5610b53`](https://github.com/OpenASL/HowSignBot/commit/5610b531bc8b031010aa0d6b8144c3d5b16ac882))
