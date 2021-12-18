@@ -1,14 +1,11 @@
+from __future__ import annotations
+
 import asyncio
 import datetime as dt
 import logging
 from contextlib import suppress
-from typing import Dict
-from typing import List
 from typing import Mapping
-from typing import Optional
 from typing import Sequence
-from typing import Tuple
-from typing import Union
 
 import discord
 from discord import Color
@@ -67,11 +64,15 @@ def get_gsheet():
     return client.open_by_key(settings.ASLPP_SHEET_KEY)
 
 
-def get_sheet_content(worksheet_name: str) -> List[str]:
+def get_sheet_content(worksheet_name: str) -> list[str]:
     sheet = get_gsheet()
     worksheet = sheet.worksheet(worksheet_name)
     # Get all content from first column
     return worksheet.col_values(1)
+
+
+def get_skill_roles() -> list[discord.Object]:
+    return [discord.Object(id=role_id) for role_id in settings.ASLPP_SKILL_ROLE_IDS]
 
 
 MAX_NO_INTRO_USERS_TO_DISPLAY = 30
@@ -116,7 +117,7 @@ def get_tags():
     }
 
 
-def format_role_table(data: Sequence[Tuple[str, int]], member_count: int) -> str:
+def format_role_table(data: Sequence[tuple[str, int]], member_count: int) -> str:
     longest_label_length = max(len(label) for label, _ in data)
     return "\n".join(
         [
@@ -140,8 +141,8 @@ def make_role_table(guild: Guild, label: str, role_ids: Sequence[int]) -> str:
 class AslPracticePartners(Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.tags: Dict[str, Dict[str, str]] = {}
-        self.unmute_warnings: Dict[int, dt.datetime] = {}
+        self.tags: dict[str, dict[str, str]] = {}
+        self.unmute_warnings: dict[int, dt.datetime] = {}
 
     def cog_check(self, ctx: Context):
         if not bool(ctx.guild) or ctx.guild.id != settings.ASLPP_GUILD_ID:
@@ -157,13 +158,13 @@ class AslPracticePartners(Cog):
         hidden=True,
         help="Display a tag or the list of available tags",
     )
-    async def tag_group(self, ctx: Context, *, tag_name: Optional[str]):
+    async def tag_group(self, ctx: Context, *, tag_name: str | None):
         if not tag_name:
             await self.display_tags(ctx)
             return
         tag_name = tag_name.lower()
         if tag_name not in self.tags:
-            suggestion: Optional[str] = did_you_mean(tag_name, tuple(self.tags.keys()))
+            suggestion: str | None = did_you_mean(tag_name, tuple(self.tags.keys()))
             if not suggestion:
                 await ctx.reply(f'⚠️ No tag matching "{tag_name}"')
                 return
@@ -282,7 +283,7 @@ class AslPracticePartners(Cog):
     @aslpp_group.command(name="kick", hidden=True)
     @commands.has_permissions(kick_members=True)
     async def kick_command(
-        self, ctx: Context, targets: commands.Greedy[Union[TextChannel, Member]]
+        self, ctx: Context, targets: commands.Greedy[TextChannel | Member]
     ):
         num_kicked = 0
         for target in targets:
@@ -296,9 +297,9 @@ class AslPracticePartners(Cog):
 
     async def _kick_inactive(
         self,
-        ctx: Union[Context, TextChannel],
+        ctx: Context | TextChannel,
         *,
-        members_without_intro: List[Mapping],
+        members_without_intro: list[Mapping],
     ):
         num_kicked = 0
         guild = ctx.guild
@@ -315,7 +316,7 @@ class AslPracticePartners(Cog):
         logger.info(
             f"pruning members who have not logged on in {PRUNE_DAYS} days and have no roles"
         )
-        num_pruned = await guild.prune_members(days=PRUNE_DAYS)
+        num_pruned = await guild.prune_members(days=PRUNE_DAYS, roles=get_skill_roles())
         total_kicked = num_kicked + num_pruned
         return total_kicked
 
@@ -325,7 +326,9 @@ class AslPracticePartners(Cog):
         members_without_intro = await store.get_aslpp_members_without_intro(
             since=dt.timedelta(days=settings.ASLPP_INACTIVE_DAYS + 1)
         )
-        n_members_to_prune = await ctx.guild.estimate_pruned_members(days=PRUNE_DAYS)
+        n_members_to_prune = await ctx.guild.estimate_pruned_members(
+            days=PRUNE_DAYS, roles=get_skill_roles()
+        )
         if not len(members_without_intro) and not n_members_to_prune:
             await ctx.send("✨ _No members to kick_")
             return
@@ -482,7 +485,9 @@ class AslPracticePartners(Cog):
             )
             channel = self.bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
             guild: Guild = channel.guild
-            n_members_to_prune = await guild.estimate_pruned_members(days=PRUNE_DAYS)
+            n_members_to_prune = await guild.estimate_pruned_members(
+                days=PRUNE_DAYS, roles=get_skill_roles()
+            )
             if not len(members_without_intro) and not bool(n_members_to_prune):
                 logger.info("no inactive aslpp members to kick")
                 continue
