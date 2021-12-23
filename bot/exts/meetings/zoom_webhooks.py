@@ -4,9 +4,9 @@ import logging
 from typing import cast
 
 import dateparser
-import discord
+import disnake
 from aiohttp import web
-from discord.ext.commands import Bot
+from disnake.ext.commands import Bot
 
 from ._zoom import make_zoom_embed
 from ._zoom import REPOST_EMOJI
@@ -103,7 +103,7 @@ async def handle_zoom_event(bot: Bot, data: dict):
         embed = await make_zoom_embed(meeting_id=meeting_id)
         edit_kwargs = {"embed": embed}
 
-    discord_messages = []
+    disnake_messages = []
     if zoom_meeting["setup_at"]:
         for message in messages:
             channel_id = message["channel_id"]
@@ -111,15 +111,15 @@ async def handle_zoom_event(bot: Bot, data: dict):
             channel = bot.get_channel(channel_id)
             if edit_kwargs:
                 logger.info(f"editing zoom message {message_id} for event {event}")
-                discord_message: discord.Message = await channel.fetch_message(message_id)
-                discord_messages.append(discord_message)
-                await discord_message.edit(**edit_kwargs)
+                disnake_message: disnake.Message = await channel.fetch_message(message_id)
+                disnake_messages.append(disnake_message)
+                await disnake_message.edit(**edit_kwargs)
                 if event == "meeting.ended":
-                    await maybe_clear_reaction(discord_message, REPOST_EMOJI)
+                    await maybe_clear_reaction(disnake_message, REPOST_EMOJI)
     # If a banned user joins, notify @Mod in ASLPP
     if banned_user_joined:
-        if discord_messages:
-            content = f"🚨 <@&{settings.ASLPP_MOD_ROLE_ID}> Banned user **{participant_name}** (email: **{email}**) entered a Zoom meeting: {discord_messages[0].jump_url}"
+        if disnake_messages:
+            content = f"🚨 <@&{settings.ASLPP_MOD_ROLE_ID}> Banned user **{participant_name}** (email: **{email}**) entered a Zoom meeting: {disnake_messages[0].jump_url}"
         else:
             content = f"🚨 <@&{settings.ASLPP_MOD_ROLE_ID}> Banned user **{participant_name}** (email: **{email}**) entered a Zoom meeting."
         await bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID).send(content=content)

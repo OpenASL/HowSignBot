@@ -11,11 +11,11 @@ from typing import Sequence
 from typing import Tuple
 from typing import Union
 
-import discord
+import disnake
 from aiohttp import client
-from discord.ext.commands import Bot
-from discord.ext.commands import Context
-from discord.ext.commands import errors
+from disnake.ext.commands import Bot
+from disnake.ext.commands import Context
+from disnake.ext.commands import errors
 from nameparser import HumanName
 
 import holiday_emojis
@@ -98,8 +98,8 @@ def display_participant_names(
     for participant in participants:
         if participant["email"] in settings.ZOOM_EMAILS:
             # Display authorized zoom users as mentions
-            discord_id = settings.ZOOM_EMAILS[participant["email"]]
-            display_name = f"<@{discord_id}>"
+            disnake_id = settings.ZOOM_EMAILS[participant["email"]]
+            display_name = f"<@{disnake_id}>"
         else:
             # Only display first name to save real estate, fall back to full name
             display_name = HumanName(participant["name"]).first or participant["name"]
@@ -137,7 +137,7 @@ async def make_zoom_embed(
     meeting_id: int,
     *,
     include_instructions: bool = True,
-) -> Optional[discord.Embed]:
+) -> Optional[disnake.Embed]:
     meeting = await store.get_zoom_meeting(meeting_id)
     if not meeting:
         return None
@@ -162,8 +162,8 @@ async def make_zoom_embed(
         description += "\n🚀 This meeting is happening now. Go practice!"
         if not has_zzzzoom:
             description += "\n**If you're in the waiting room for more than 10 seconds, @-mention the host below with your Zoom display name.**"
-    embed = discord.Embed(
-        color=discord.Color.blue(),
+    embed = disnake.Embed(
+        color=disnake.Color.blue(),
     )
     embed.add_field(name=title, value=description)
     embed.set_author(
@@ -225,14 +225,14 @@ class ZoomCreateError(errors.CommandError):
     pass
 
 
-async def add_repost_after_delay_impl(message: discord.Message, delay: int):
+async def add_repost_after_delay_impl(message: disnake.Message, delay: int):
     await asyncio.sleep(delay)
     if await store.get_zoom_message(message.id):
         await maybe_add_reaction(message, REPOST_EMOJI)
 
 
 def add_repost_after_delay(
-    bot: Bot, message: discord.Message, delay: int = settings.ZOOM_REPOST_COOLDOWN
+    bot: Bot, message: disnake.Message, delay: int = settings.ZOOM_REPOST_COOLDOWN
 ):
     bot.loop.create_task(add_repost_after_delay_impl(message, delay))
 
@@ -255,7 +255,7 @@ async def zoom_impl(
     send_channel_message: Callable[[int], Awaitable],
     set_up: bool,
     with_zzzzoom: bool = False,
-) -> Tuple[int, discord.Message]:
+) -> Tuple[int, disnake.Message]:
     zoom_user = settings.ZOOM_USERS[ctx.author.id]
     logger.info(f"creating zoom meeting for zoom user: {zoom_user}")
     message = None

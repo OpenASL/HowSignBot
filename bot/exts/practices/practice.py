@@ -6,10 +6,10 @@ from typing import Dict
 from typing import Optional
 from typing import Tuple
 
-import discord
+import disnake
 import pytz
-from discord.ext import commands
-from discord.ext.commands import Context
+from disnake.ext import commands
+from disnake.ext.commands import Context
 
 from ._practice_sessions import get_practice_sessions
 from ._practice_sessions import get_practice_worksheet_for_guild
@@ -299,7 +299,7 @@ class Practice(commands.Cog):
         if dm_response:
             try:
                 await ctx.author.send(dm_response)
-            except discord.errors.Forbidden:
+            except disnake.errors.Forbidden:
                 logger.warn("cannot send DM to user. skipping...")
 
     @commands.command(name="schedule", aliases=("sched", "practices"), help=SCHEDULE_HELP)

@@ -7,20 +7,20 @@ from contextlib import suppress
 from typing import Mapping
 from typing import Sequence
 
-import discord
-from discord import Color
-from discord import Embed
-from discord import Guild
-from discord import Member
-from discord import Message
-from discord import VoiceState
-from discord.channel import TextChannel
-from discord.ext import commands
-from discord.ext.commands import Bot
-from discord.ext.commands import Cog
-from discord.ext.commands import Context
-from discord.ext.commands import group
-from discord.ext.commands import is_owner
+import disnake
+from disnake import Color
+from disnake import Embed
+from disnake import Guild
+from disnake import Member
+from disnake import Message
+from disnake import VoiceState
+from disnake.channel import TextChannel
+from disnake.ext import commands
+from disnake.ext.commands import Bot
+from disnake.ext.commands import Cog
+from disnake.ext.commands import Context
+from disnake.ext.commands import group
+from disnake.ext.commands import is_owner
 
 from bot import settings
 from bot.database import store
@@ -71,8 +71,8 @@ def get_sheet_content(worksheet_name: str) -> list[str]:
     return worksheet.col_values(1)
 
 
-def get_skill_roles() -> list[discord.Object]:
-    return [discord.Object(id=role_id) for role_id in settings.ASLPP_SKILL_ROLE_IDS]
+def get_skill_roles() -> list[disnake.Object]:
+    return [disnake.Object(id=role_id) for role_id in settings.ASLPP_SKILL_ROLE_IDS]
 
 
 MAX_NO_INTRO_USERS_TO_DISPLAY = 30
@@ -158,7 +158,7 @@ class AslPracticePartners(Cog):
         hidden=True,
         help="Display a tag or the list of available tags",
     )
-    # XXX: The `tag_name` typing should be str | None, but discord.py doesn't support unions in arguments
+    # XXX: The `tag_name` typing should be str | None, but disnake.py doesn't support unions in arguments
     async def tag_group(self, ctx: Context, *, tag_name: str = None):
         if not tag_name:
             await self.display_tags(ctx)
@@ -286,7 +286,7 @@ class AslPracticePartners(Cog):
     async def kick_command(self, ctx: Context, targets: commands.Greedy[Member]):
         num_kicked = 0
         for target in targets:
-            with suppress(discord.errors.Forbidden):  # user may not allow DMs from bot
+            with suppress(disnake.errors.Forbidden):  # user may not allow DMs from bot
                 await target.send(KICK_MESSAGE)
             logger.info(f"kicking member {target.id}")
             await ctx.guild.kick(target, reason="Inactivity")
@@ -307,7 +307,7 @@ class AslPracticePartners(Cog):
             member = guild.get_member(user_id)
             if not member:
                 continue
-            with suppress(discord.errors.Forbidden):  # user may not allow DMs from bot
+            with suppress(disnake.errors.Forbidden):  # user may not allow DMs from bot
                 await member.send(KICK_MESSAGE)
             logger.info(f"kicking member {member.id}")
             await guild.kick(member, reason="Inactivity")
@@ -457,7 +457,7 @@ class AslPracticePartners(Cog):
             logger.info(
                 f"aslpp staff daily message will be sent at at {next_execution_time.isoformat()}"
             )
-            await discord.utils.sleep_until(
+            await disnake.utils.sleep_until(
                 next_execution_time.astimezone(dt.timezone.utc)
             )
             channel = self.bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
@@ -476,7 +476,7 @@ class AslPracticePartners(Cog):
             logger.info(
                 f"aslpp inactive members will be kicked at {next_execution_time.isoformat()}"
             )
-            await discord.utils.sleep_until(
+            await disnake.utils.sleep_until(
                 next_execution_time.astimezone(dt.timezone.utc)
             )
             members_without_intro = await store.get_aslpp_members_without_intro(

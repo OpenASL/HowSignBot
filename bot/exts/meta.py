@@ -1,13 +1,13 @@
 import logging
 from typing import Optional
 
-import discord
-from discord.ext import commands
-from discord.ext.commands import Bot
-from discord.ext.commands import Cog
-from discord.ext.commands import command
-from discord.ext.commands import Context
-from discord.ext.commands import is_owner
+import disnake
+from disnake.ext import commands
+from disnake.ext.commands import Bot
+from disnake.ext.commands import Cog
+from disnake.ext.commands import command
+from disnake.ext.commands import Context
+from disnake.ext.commands import is_owner
 
 from bot import __version__
 from bot import settings
@@ -32,10 +32,10 @@ def post_feedback(feedback: str, guild: Optional[str]):
     return worksheet.append_row(row)
 
 
-def ActivityTypeConverter(argument) -> discord.ActivityType:
-    if argument not in discord.ActivityType._enum_member_names_:
+def ActivityTypeConverter(argument) -> disnake.ActivityType:
+    if argument not in disnake.ActivityType._enum_member_names_:
         raise commands.CommandError(f'⚠️"{argument}" is not a valid activity type.')
-    return getattr(discord.ActivityType, argument)
+    return getattr(disnake.ActivityType, argument)
 
 
 class Meta(Cog):
@@ -44,9 +44,9 @@ class Meta(Cog):
 
     @command(name="invite", help="Invite HowSignBot to another Discord server")
     async def invite_command(self, ctx: Context):
-        url = discord.utils.oauth_url(
+        url = disnake.utils.oauth_url(
             self.bot.user.id,
-            permissions=discord.Permissions(permissions=59456),
+            permissions=disnake.Permissions(permissions=59456),
         )
         await ctx.send(f"Add HowSignBot to another server here:\n<{url}>")
 
@@ -72,7 +72,7 @@ class Meta(Cog):
             await set_default_presence()
             await ctx.send("Presence reset.")
             return
-        activity = discord.Activity(
+        activity = disnake.Activity(
             name=name.format(p=COMMAND_PREFIX),
             type=activity_type,
         )
@@ -83,7 +83,7 @@ class Meta(Cog):
     @command(name="stats", hidden=True, help="BOT OWNER ONLY: Get bot stats")
     @is_owner()
     async def stats_command(self, ctx: Context):
-        embed = discord.Embed(title="HowSignBot Stats", color=discord.Color.blue())
+        embed = disnake.Embed(title="HowSignBot Stats", color=disnake.Color.blue())
         n_guilds = len(self.bot.guilds)
         avg_members = round(
             sum(guild.member_count for guild in self.bot.guilds) / n_guilds
@@ -106,7 +106,7 @@ class Meta(Cog):
 
     @command(name="edit", hidden=True, help="BOT OWNER ONLY: Edit a bot message")
     @is_owner()
-    async def edit_command(self, ctx: Context, message: discord.Message):
+    async def edit_command(self, ctx: Context, message: disnake.Message):
         if message.author != self.bot.user:
             await ctx.send("⚠️ I didn't send that message.")
             return
@@ -114,7 +114,7 @@ class Meta(Cog):
             content=f"Reply to this message with the new message content for {message.jump_url}"
         )
 
-        def check(m: discord.Message):
+        def check(m: disnake.Message):
             return (
                 m.author == ctx.author
                 and m.reference

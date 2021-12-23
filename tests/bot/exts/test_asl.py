@@ -1,7 +1,7 @@
 import random
 
 import pytest
-from discord.ext import commands
+from disnake.ext import commands
 from syrupy.filters import props
 
 from bot.exts import asl

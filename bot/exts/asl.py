@@ -1,12 +1,12 @@
 import logging
 from urllib.parse import quote_plus
 
-import discord
-from discord.ext.commands import Bot
-from discord.ext.commands import Cog
-from discord.ext.commands import command
-from discord.ext.commands import Context
-from discord.ext.commands import errors
+import disnake
+from disnake.ext.commands import Bot
+from disnake.ext.commands import Cog
+from disnake.ext.commands import command
+from disnake.ext.commands import Context
+from disnake.ext.commands import errors
 
 import handshapes
 from bot import settings
@@ -76,14 +76,14 @@ def sign_impl(word: str):
     template = SIGN_SPOILER_TEMPLATE if spoiler else SIGN_TEMPLATE
     if has_multiple:
         words = word.split(",")
-        embed = discord.Embed()
+        embed = disnake.Embed()
         for word in words:
             word = word.strip()
             title = f"||{word.upper()}||" if spoiler else word.upper()
             embed.add_field(name=title, value=word_display(word, template=template))
     else:
         title = f"||{word.upper()}||" if spoiler else word.upper()
-        embed = discord.Embed(
+        embed = disnake.Embed(
             title=title,
             description=word_display(word, template=template),
         )
@@ -124,8 +124,8 @@ def handshape_impl(name: str):
             }
 
     filename = f"{handshape.name}.png"
-    file_ = discord.File(handshape.path, filename=filename)
-    embed = discord.Embed(title=handshape.name)
+    file_ = disnake.File(handshape.path, filename=filename)
+    embed = disnake.Embed(title=handshape.name)
     embed.set_image(url=f"attachment://{filename}")
     return {
         "file": file_,

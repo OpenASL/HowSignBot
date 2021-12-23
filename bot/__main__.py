@@ -7,7 +7,7 @@ from . import settings
 from .app import app
 
 log_format = "%(asctime)s - %(name)s %(levelname)s: %(message)s"
-logging.getLogger("discord").setLevel(logging.WARNING)
+logging.getLogger("disnake").setLevel(logging.WARNING)
 logging.basicConfig(
     format=log_format,
     level=settings.LOG_LEVEL,

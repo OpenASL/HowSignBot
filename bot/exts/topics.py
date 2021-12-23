@@ -2,13 +2,13 @@ import datetime as dt
 import logging
 import random
 
-import discord
+import disnake
 from aiohttp import web
-from discord.ext.commands import Bot
-from discord.ext.commands import Cog
-from discord.ext.commands import command
-from discord.ext.commands import Context
-from discord.ext.commands import is_owner
+from disnake.ext.commands import Bot
+from disnake.ext.commands import Cog
+from disnake.ext.commands import command
+from disnake.ext.commands import Context
+from disnake.ext.commands import is_owner
 
 from bot import settings
 from bot.database import store
@@ -50,7 +50,7 @@ class Topics(Cog):
                 date = now_eastern.date() + dt.timedelta(days=1)
             then = EASTERN.localize(dt.datetime.combine(date, DAILY_SYNC_TIME))
             logger.info(f"topics will be synced at at {then.isoformat()}")
-            await discord.utils.sleep_until(then.astimezone(dt.timezone.utc))
+            await disnake.utils.sleep_until(then.astimezone(dt.timezone.utc))
             topics = await sync_topics()
             logger.info(f"synced {len(topics)} topics")
 

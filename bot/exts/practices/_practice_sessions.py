@@ -4,7 +4,7 @@ from typing import List
 from typing import NamedTuple
 from typing import Optional
 
-import discord
+import disnake
 
 import holiday_emojis
 from bot import settings
@@ -87,7 +87,7 @@ Example: `{COMMAND_PREFIX}practice today 2pm {pacific}`
 )
 
 
-def make_base_embed(dtime: dt.datetime) -> discord.Embed:
+def make_base_embed(dtime: dt.datetime) -> disnake.Embed:
     now_pacific = utcnow().astimezone(PACIFIC)
     dtime_pacific = dtime.astimezone(PACIFIC)
     description = dtime_pacific.strftime("%A, %B %-d")
@@ -98,15 +98,15 @@ def make_base_embed(dtime: dt.datetime) -> discord.Embed:
     holiday = holiday_emojis.get(dtime_pacific.date())
     if holiday and holiday.emoji:
         description += f" {holiday.emoji}"
-    return discord.Embed(
+    return disnake.Embed(
         description=description,
-        color=discord.Color.orange(),
+        color=disnake.Color.orange(),
     )
 
 
 async def make_practice_session_embed(
     guild_id: int, sessions: List[PracticeSession], *, dtime: dt.datetime
-) -> discord.Embed:
+) -> disnake.Embed:
     embed = make_base_embed(dtime)
     sheet_key = await store.get_guild_schedule_sheet_key(guild_id)
     schedule_url = f"https://docs.google.com/spreadsheets/d/{sheet_key}/edit"
@@ -143,7 +143,7 @@ async def make_practice_session_embed(
     return embed
 
 
-async def make_practice_sessions_today_embed(guild_id: int) -> discord.Embed:
+async def make_practice_sessions_today_embed(guild_id: int) -> disnake.Embed:
     now = utcnow()
     sessions = await get_practice_sessions(guild_id, dtime=now)
     return await make_practice_session_embed(guild_id, sessions, dtime=now)
