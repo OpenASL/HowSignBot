@@ -18,6 +18,7 @@ COMMAND_PREFIX = env.str("COMMAND_PREFIX", "?")
 PARTICIPANT_EMOJI = env.str("PARTICIPANT_EMOJI", default=None)
 DAILY_MESSAGE_RANDOM_SEED = env.str("DAILY_MESSAGE_RANDOM_SEED", default=None)
 PORT = env.int("PORT", 5000)
+TEST_GUILDS = env.list("TEST_GUILDS", default=[], subcast=int)
 
 GOOGLE_PROJECT_ID = env.str("GOOGLE_PROJECT_ID", required=True)
 GOOGLE_PRIVATE_KEY = env.str("GOOGLE_PRIVATE_KEY", required=True)

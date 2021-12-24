@@ -1,6 +1,7 @@
 import difflib
 import re
 from typing import Optional
+from typing import Sequence
 from typing import Tuple
 
 _spoiler_pattern = re.compile(r"\s*\|\|\s*(.*)\s*\|\|\s*")
@@ -31,8 +32,12 @@ def truncate(s: str, max_len: int, *, trailing: str = "…"):
     return s
 
 
-def did_you_mean(word, possibilities) -> Optional[str]:
+def get_close_matches(word: str, possibilities: Sequence[str]) -> Sequence[str]:
+    return difflib.get_close_matches(word, possibilities, n=1, cutoff=0.5)
+
+
+def did_you_mean(word: str, possibilities: Sequence[str]) -> Optional[str]:
     try:
-        return difflib.get_close_matches(word, possibilities, n=1, cutoff=0.5)[0]
+        return get_close_matches(word, possibilities)[0]
     except IndexError:
         return None
