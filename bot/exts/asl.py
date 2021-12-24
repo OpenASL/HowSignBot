@@ -8,7 +8,6 @@ from disnake.ext.commands import Cog
 from disnake.ext.commands import command
 from disnake.ext.commands import Context
 from disnake.ext.commands import errors
-from disnake.ext.commands import Param
 from disnake.ext.commands import slash_command
 
 import handshapes
@@ -137,15 +136,6 @@ def handshape_impl(name: str):
     }
 
 
-def autocomplete_handshapes(inter: ApplicationCommandInteraction, user_input: str):
-    return get_close_matches(user_input, handshapes.HANDSHAPE_NAMES)
-
-
-HANDSHAPES_TEMPLATE = """{handshapes}
-
-Enter `{COMMAND_PREFIX}handshape` to display a random handshape or `{COMMAND_PREFIX}handshape [name]` to display a specific handshape.
-"""
-
 HANDSHAPES_HELP = """List handshapes
 
 Enter {COMMAND_PREFIX}handshape to display a random handshape or {COMMAND_PREFIX}handshape [name] to display a specific handshape.
@@ -155,12 +145,7 @@ Enter {COMMAND_PREFIX}handshape to display a random handshape or {COMMAND_PREFIX
 
 
 def handshapes_impl(prefix: str) -> dict[str, str]:
-    return {
-        "content": HANDSHAPES_TEMPLATE.format(
-            handshapes=", ".join(handshapes.HANDSHAPE_NAMES),
-            COMMAND_PREFIX=prefix,
-        )
-    }
+    return {"content": ", ".join(handshapes.HANDSHAPE_NAMES)}
 
 
 class ASL(Cog):
@@ -195,21 +180,35 @@ class ASL(Cog):
                 )
 
     @slash_command(name="handshape")
-    async def handshape_command(
-        self,
-        inter: ApplicationCommandInteraction,
-        name: str = Param(autocomplete=autocomplete_handshapes),
-    ):
-        """Show a random or specific handshape
+    async def handshape_command(self, inter: ApplicationCommandInteraction):
+        pass
+
+    @handshape_command.sub_command(name="show")
+    async def handshape_show(self, inter: ApplicationCommandInteraction, name: str):
+        """Display a handshape
 
         Parameters
         ----------
-        name: The name of the handshape to look up
+        name: The handshape to show
         """
         await inter.response.send_message(**handshape_impl(name))
 
-    @slash_command(name="handshapes")
-    async def handshapes_command(self, inter: ApplicationCommandInteraction):
+    @handshape_command.sub_command(name="random")
+    async def handshape_random(self, inter: ApplicationCommandInteraction):
+        """Show a random handshape"""
+        await inter.response.send_message(**handshape_impl("random"))
+
+    @handshape_show.autocomplete("name")
+    async def handshape_autocomplete(
+        self, inter: ApplicationCommandInteraction, name: str
+    ):
+        name = name.strip()
+        if not name:
+            return handshapes.HANDSHAPE_NAMES[:25]
+        return get_close_matches(name, handshapes.HANDSHAPE_NAMES)
+
+    @handshape_command.sub_command(name="list")
+    async def handshape_list(self, inter: ApplicationCommandInteraction):
         """List handshapes"""
         await inter.response.send_message(**handshapes_impl(prefix="/"))
 
@@ -217,7 +216,7 @@ class ASL(Cog):
     async def handshape_prefix_command(self, ctx: Context, name="random"):
         await ctx.reply(**handshape_impl(name))
 
-    @command(name="handshapes", aliases=("shapes",), help=HANDSHAPES_HELP)
+    @command(name="handshapes", aliases=("shapes",), help="List handshapes")
     async def handshapes_prefix_command(self, ctx: Context):
         logger.info("sending handshapes list")
         await ctx.reply(**handshapes_impl(prefix=settings.COMMAND_PREFIX))
