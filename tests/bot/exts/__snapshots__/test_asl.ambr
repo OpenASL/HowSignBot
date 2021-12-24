@@ -59,12 +59,7 @@
 ---
 # name: test_handshapes
   <class 'dict'> {
-    'content': '
-      1, 3, Bent3, 4, 5, Claw5, 6, 7, 8, Open8, 9, Flat9, A, OpenA, B, BentB, FlatB, OpenB, C, FlatC, SmallC, D, E, G, H, I, K, L, M, OpenM, N, OpenN, O, FlatO, SmallO, R, S, T, V, BentV, X, OpenX, Y, ILY, Corna
-      
-      Enter `!handshape` to display a random handshape or `!handshape [name]` to display a specific handshape.
-  
-    ',
+    'content': '1, 3, Bent3, 4, 5, Claw5, 6, 7, 8, Open8, 9, Flat9, A, OpenA, B, BentB, FlatB, OpenB, C, FlatC, SmallC, D, E, G, H, I, K, L, M, OpenM, N, OpenN, O, FlatO, SmallO, R, S, T, V, BentV, X, OpenX, Y, ILY, Corna',
   }
 ---
 # name: test_sign[need, ask]
