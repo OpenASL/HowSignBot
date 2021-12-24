@@ -41,5 +41,5 @@ def test_handshape(snapshot, name):
 
 
 def test_handshapes(snapshot):
-    result = asl.handshapes_impl()
+    result = asl.handshapes_impl(prefix="!")
     assert result == snapshot
