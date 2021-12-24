@@ -11,6 +11,7 @@ import disnake
 from disnake import Color
 from disnake import Embed
 from disnake import Guild
+from disnake import GuildCommandInteraction
 from disnake import Member
 from disnake import Message
 from disnake import VoiceState
@@ -21,10 +22,12 @@ from disnake.ext.commands import Cog
 from disnake.ext.commands import Context
 from disnake.ext.commands import group
 from disnake.ext.commands import is_owner
+from disnake.ext.commands import slash_command
 
 from bot import settings
 from bot.database import store
 from bot.utils import did_you_mean
+from bot.utils import get_close_matches
 from bot.utils.datetimes import EASTERN
 from bot.utils.datetimes import utcnow
 from bot.utils.gsheets import get_gsheet_client
@@ -106,7 +109,7 @@ async def make_no_intros_embed():
     return embed
 
 
-def get_tags():
+def get_tags() -> dict[str, dict[str, str]]:
     logger.info("fetching tags")
     sheet = get_gsheet()
     worksheet = sheet.worksheet("tags")
@@ -151,6 +154,41 @@ class AslPracticePartners(Cog):
             )
         return True
 
+    @slash_command(name="tag", guild_ids=(settings.ASLPP_GUILD_ID,))
+    async def tag_command(self, inter: GuildCommandInteraction):
+        pass
+
+    @tag_command.sub_command(name="show")
+    async def tag_show(self, inter: GuildCommandInteraction, name: str):
+        """Display a tag (response to common question)
+
+        Parameters
+        ----------
+        name: The tag to show
+        """
+        await inter.response.send_message(**self._tag_impl(name))
+
+    @tag_show.autocomplete("name")
+    async def tag_autocomplete(self, inter: GuildCommandInteraction, tag: str):
+        tag = tag.strip().lower()
+        options = tuple(self.tags.keys())
+        if not tag:
+            return sorted(options)[:25]
+        return get_close_matches(tag, options)
+
+    @tag_command.sub_command(name="sync")
+    @commands.has_permissions(kick_members=True)  # Staff
+    async def tag_sync(self, inter: GuildCommandInteraction):
+        """Get tags list up to date"""
+        await inter.response.send_message(**self._tag_sync_impl())
+
+    @tag_command.sub_command(name="list")
+    async def tag_list(self, inter: GuildCommandInteraction):
+        """List available tags"""
+        await inter.response.send_message(**self._tag_list_impl())
+
+    # DEPRECATED TAG COMMANDS
+
     @group(
         name="tag",
         aliases=("tags", "t"),
@@ -161,17 +199,9 @@ class AslPracticePartners(Cog):
     # XXX: The `tag_name` typing should be str | None, but disnake.py doesn't support unions in arguments
     async def tag_group(self, ctx: Context, *, tag_name: str = None):
         if not tag_name:
-            await self.display_tags(ctx)
+            await ctx.reply(**self._tag_list_impl())
             return
-        tag_name = tag_name.lower()
-        if tag_name not in self.tags:
-            suggestion: str | None = did_you_mean(tag_name, tuple(self.tags.keys()))
-            if not suggestion:
-                await ctx.reply(f'⚠️ No tag matching "{tag_name}"')
-                return
-            else:
-                tag_name = suggestion
-        await ctx.reply(embed=Embed.from_dict(self.tags[tag_name]))
+        await ctx.reply(self._tag_impl(tag_name))
 
     @tag_group.command(
         "update",
@@ -182,16 +212,31 @@ class AslPracticePartners(Cog):
     @commands.has_permissions(kick_members=True)  # Staff
     async def update_tags(self, ctx: Context):
         await ctx.channel.trigger_typing()
-        self.tags = get_tags()
-        await ctx.reply("✅ Updated tags.")
+        await ctx.reply(self._tag_sync_impl())
 
-    async def display_tags(self, ctx: Context):
+    # END DEPRECATED TAG COMMANDS
+
+    def _tag_impl(self, name: str) -> dict:
+        name = name.lower()
+        if name not in self.tags:
+            suggestion: str | None = did_you_mean(name, tuple(self.tags.keys()))
+            if not suggestion:
+                return {"content": f'⚠️ No tag matching "{name}"'}
+            else:
+                name = suggestion
+        return {"embed": Embed.from_dict(self.tags[name])}
+
+    def _tag_sync_impl(self) -> dict:
+        self.tags = get_tags()
+        return {"content": "✅ Updated tags."}
+
+    def _tag_list_impl(self) -> dict:
         embed = Embed(
             title="Tags",
             description="\n".join(sorted(f"**»** {tag}" for tag in self.tags)),
         )
-        embed.set_footer(text=f"To show a tag, type {COMMAND_PREFIX}tag <tagname>.")
-        await ctx.reply(embed=embed)
+        embed.set_footer(text="To show a tag, type /tag show <name>.")
+        return {"embed": embed}
 
     @group(name="aslpp", hidden=True)
     async def aslpp_group(self, ctx: Context):
