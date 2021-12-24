@@ -1,7 +1,7 @@
 import random
 
 import pytest
-from discord.ext import commands
+from disnake.ext import commands
 from syrupy.filters import props
 
 from bot.exts import asl
@@ -41,5 +41,5 @@ def test_handshape(snapshot, name):
 
 
 def test_handshapes(snapshot):
-    result = asl.handshapes_impl()
+    result = asl.handshapes_impl(prefix="!")
     assert result == snapshot

@@ -1,16 +1,20 @@
 import logging
 from urllib.parse import quote_plus
 
-import discord
-from discord.ext.commands import Bot
-from discord.ext.commands import Cog
-from discord.ext.commands import command
-from discord.ext.commands import Context
-from discord.ext.commands import errors
+import disnake
+from disnake import ApplicationCommandInteraction
+from disnake.ext.commands import Bot
+from disnake.ext.commands import Cog
+from disnake.ext.commands import command
+from disnake.ext.commands import Context
+from disnake.ext.commands import errors
+from disnake.ext.commands import Param
+from disnake.ext.commands import slash_command
 
 import handshapes
 from bot import settings
 from bot.utils import did_you_mean
+from bot.utils import get_close_matches
 from bot.utils import get_spoiler_text
 
 logger = logging.getLogger(__name__)
@@ -76,14 +80,14 @@ def sign_impl(word: str):
     template = SIGN_SPOILER_TEMPLATE if spoiler else SIGN_TEMPLATE
     if has_multiple:
         words = word.split(",")
-        embed = discord.Embed()
+        embed = disnake.Embed()
         for word in words:
             word = word.strip()
             title = f"||{word.upper()}||" if spoiler else word.upper()
             embed.add_field(name=title, value=word_display(word, template=template))
     else:
         title = f"||{word.upper()}||" if spoiler else word.upper()
-        embed = discord.Embed(
+        embed = disnake.Embed(
             title=title,
             description=word_display(word, template=template),
         )
@@ -113,7 +117,7 @@ def handshape_impl(name: str):
             handshape = handshapes.get_handshape(name)
     except handshapes.HandshapeNotFoundError:
         logger.info(f"handshape '{name}' not found")
-        suggestion = did_you_mean(name, tuple(handshapes.HANDSHAPES.keys()))
+        suggestion = did_you_mean(name, handshapes.HANDSHAPE_NAMES)
         if suggestion:
             return {
                 "content": f'"{name}" not found. Did you mean "{suggestion}"? Enter `{COMMAND_PREFIX}handshapes` to see a list of handshapes.'
@@ -124,13 +128,17 @@ def handshape_impl(name: str):
             }
 
     filename = f"{handshape.name}.png"
-    file_ = discord.File(handshape.path, filename=filename)
-    embed = discord.Embed(title=handshape.name)
+    file_ = disnake.File(handshape.path, filename=filename)
+    embed = disnake.Embed(title=handshape.name)
     embed.set_image(url=f"attachment://{filename}")
     return {
         "file": file_,
         "embed": embed,
     }
+
+
+def autocomplete_handshapes(inter: ApplicationCommandInteraction, user_input: str):
+    return get_close_matches(user_input, handshapes.HANDSHAPE_NAMES)
 
 
 HANDSHAPES_TEMPLATE = """{handshapes}
@@ -146,11 +154,11 @@ Enter {COMMAND_PREFIX}handshape to display a random handshape or {COMMAND_PREFIX
 )
 
 
-def handshapes_impl():
+def handshapes_impl(prefix: str) -> dict[str, str]:
     return {
         "content": HANDSHAPES_TEMPLATE.format(
-            handshapes=", ".join(handshapes.HANDSHAPES.keys()),
-            COMMAND_PREFIX=COMMAND_PREFIX,
+            handshapes=", ".join(handshapes.HANDSHAPE_NAMES),
+            COMMAND_PREFIX=prefix,
         )
     }
 
@@ -159,9 +167,19 @@ class ASL(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
 
+    @slash_command(name="sign")
+    async def sign_command(self, inter: ApplicationCommandInteraction, term: str):
+        """Look up a word or phrase in multiple ASL dictionaries
+
+        Parameters
+        ----------
+        term: The word or phrase to look up
+        """
+        await inter.response.send_message(**sign_impl(term))
+
     @command(name="sign", aliases=("howsign", COMMAND_PREFIX), help=SIGN_HELP)
-    async def sign_command(self, ctx: Context, *, word: str):
-        await ctx.reply(**sign_impl(word))
+    async def sign_prefix_command(self, ctx: Context, *, term: str):
+        await ctx.reply(**sign_impl(term))
 
     @sign_command.error
     async def sign_error(self, ctx: Context, error: Exception):
@@ -176,14 +194,33 @@ class ASL(Cog):
                     f"⚠️ Enter a word or phrase to search for after `{COMMAND_PREFIX}{ctx.invoked_with}`."
                 )
 
+    @slash_command(name="handshape")
+    async def handshape_command(
+        self,
+        inter: ApplicationCommandInteraction,
+        name: str = Param(autocomplete=autocomplete_handshapes),
+    ):
+        """Show a random or specific handshape
+
+        Parameters
+        ----------
+        name: The name of the handshape to look up
+        """
+        await inter.response.send_message(**handshape_impl(name))
+
+    @slash_command(name="handshapes")
+    async def handshapes_command(self, inter: ApplicationCommandInteraction):
+        """List handshapes"""
+        await inter.response.send_message(**handshapes_impl(prefix="/"))
+
     @command(name="handshape", aliases=("shape",), help=HANDSHAPE_HELP)
-    async def handshape_command(self, ctx: Context, name="random"):
+    async def handshape_prefix_command(self, ctx: Context, name="random"):
         await ctx.reply(**handshape_impl(name))
 
     @command(name="handshapes", aliases=("shapes",), help=HANDSHAPES_HELP)
-    async def handshapes_command(self, ctx: Context):
+    async def handshapes_prefix_command(self, ctx: Context):
         logger.info("sending handshapes list")
-        await ctx.reply(**handshapes_impl())
+        await ctx.reply(**handshapes_impl(prefix=settings.COMMAND_PREFIX))
 
 
 def setup(bot: Bot) -> None:

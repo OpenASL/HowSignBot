@@ -1,7 +1,7 @@
 from typing import Union
 
-import discord
+import disnake
 
 
-def display_name(user: Union[discord.User, discord.Member]) -> str:
+def display_name(user: Union[disnake.User, disnake.Member]) -> str:
     return getattr(user, "nick", None) or user.name

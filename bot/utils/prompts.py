@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TypeVar
 
-import discord
-from discord.ext.commands import Context
+import disnake
+from disnake.ext.commands import Context
 
 T = TypeVar("T")
 
@@ -21,7 +21,7 @@ async def prompt_for_choice(ctx: Context, prompt: str, choices: dict[T, str]) ->
 
     valid_entries = {str(i + 1) for i in range(len(choices))}
 
-    def check(m: discord.Message):
+    def check(m: disnake.Message):
         return (
             m.author == ctx.author
             and m.channel.id == prompt_message.channel.id

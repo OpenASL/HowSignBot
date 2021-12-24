@@ -1,6 +1,5 @@
 ariadne==0.14.0
-# Latest development version of discord.py has support for threads
-git+https://github.com/Rapptz/discord.py.git@45d498c1b76deaf3b394d17ccf56112fa691d160
+disnake==2.3.0
 environs==9.3.5
 gspread==5.1.1
 aiohttp==3.7.4.post0

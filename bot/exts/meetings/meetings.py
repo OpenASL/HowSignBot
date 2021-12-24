@@ -5,15 +5,15 @@ from typing import List
 from typing import Optional
 from typing import Union
 
-import discord
-from discord.ext.commands import Bot
-from discord.ext.commands import check
-from discord.ext.commands import Cog
-from discord.ext.commands import command
-from discord.ext.commands import Context
-from discord.ext.commands import errors
-from discord.ext.commands import group
-from discord.ext.commands import is_owner
+import disnake
+from disnake.ext.commands import Bot
+from disnake.ext.commands import check
+from disnake.ext.commands import Cog
+from disnake.ext.commands import command
+from disnake.ext.commands import Context
+from disnake.ext.commands import errors
+from disnake.ext.commands import group
+from disnake.ext.commands import is_owner
 
 import meetings
 from ._zoom import add_repost_after_delay
@@ -65,19 +65,19 @@ def make_jitsi_embed(meeting: meetings.JitsiMeet):
         content = f"{content}\n**Name**: {meeting.name}"
     content = f"{content}\n\n🚀 This meeting is happening now. Go practice!\n*Desktop App Link requires <https://github.com/jitsi/jitsi-meet-electron>\n*After the meeting ends, click {STOP_SIGN} to remove this message.*"
     logger.info("sending jitsi meet info")
-    return discord.Embed(
+    return disnake.Embed(
         title=title,
         description=content,
-        color=discord.Color.blue(),
+        color=disnake.Color.blue(),
     )
 
 
-def make_watch2gether_embed(url: str, video_url: Optional[str]) -> discord.Embed:
+def make_watch2gether_embed(url: str, video_url: Optional[str]) -> disnake.Embed:
     description = "🚀 Watch videos together!"
     if video_url:
         description += f"\nQueued video: <{video_url}>"
     description += "\n*When finished, click 🛑 to remove this message.*"
-    return discord.Embed(title=url, description=description, color=discord.Color.gold())
+    return disnake.Embed(title=url, description=description, color=disnake.Color.gold())
 
 
 class Meetings(Cog):
@@ -133,12 +133,12 @@ class Meetings(Cog):
         if not zoom_messages:
             raise errors.CheckFailure(f"⚠️ No meeting messages for meeting {meeting_id}.")
         embed = await make_zoom_embed(meeting_id=meeting_id)
-        messages: List[discord.Message] = []
+        messages: List[disnake.Message] = []
         for message_info in zoom_messages:
             channel_id = message_info["channel_id"]
             message_id = message_info["message_id"]
             channel = self.bot.get_channel(channel_id)
-            message: discord.Message = await channel.fetch_message(message_id)
+            message: disnake.Message = await channel.fetch_message(message_id)
             messages.append(message)
             logger.info(
                 f"revealing meeting details for meeting {meeting_id} in channel {channel_id}, message {message_id}"
@@ -151,7 +151,7 @@ class Meetings(Cog):
                 for message in messages
             )
             await ctx.send(
-                embed=discord.Embed(title="🚀 Meeting Details Revealed", description=links)
+                embed=disnake.Embed(title="🚀 Meeting Details Revealed", description=links)
             )
         else:
             channel_message = next(
@@ -186,7 +186,7 @@ class Meetings(Cog):
             channel_id = message_info["channel_id"]
             message_id = message_info["message_id"]
             channel = self.bot.get_channel(channel_id)
-            message: discord.Message = await channel.fetch_message(message_id)
+            message: disnake.Message = await channel.fetch_message(message_id)
             messages.append(message)
             logger.info(
                 f"scrubbing meeting details for meeting {meeting_id} in channel {channel_id}, message {message_id}"
@@ -200,7 +200,7 @@ class Meetings(Cog):
                 for message in messages
             )
             await ctx.send(
-                embed=discord.Embed(title="🛑 Meeting Ended", description=links)
+                embed=disnake.Embed(title="🛑 Meeting Ended", description=links)
             )
         else:
             await ctx.channel.send("🛑 Meeting details removed.")
@@ -261,10 +261,10 @@ class Meetings(Cog):
                 for user_id, email in settings.ZOOM_USERS.items()
             )
         )
-        embed = discord.Embed(
+        embed = disnake.Embed(
             title=f"Fancy Zoom Users ({len(settings.ZOOM_USERS)})",
             description=description,
-            color=discord.Color.blue(),
+            color=disnake.Color.blue(),
         )
         embed.set_footer(text="👑 = Licensed")
         await ctx.send(embed=embed)
@@ -273,7 +273,7 @@ class Meetings(Cog):
         name="license", hidden=True, help="Upgrade a user to the Licensed plan type."
     )
     @is_owner()
-    async def zoom_license(self, ctx: Context, user: discord.User):
+    async def zoom_license(self, ctx: Context, user: disnake.User):
         if user.id not in settings.ZOOM_USERS:
             await ctx.send(f"🚨 _{user.mention} is not a configured Zoom user._")
             return
@@ -296,30 +296,30 @@ class Meetings(Cog):
                     "🚨 _Request to Zoom API timed out. This may be due to rate limiting. Try again later._"
                 )
                 return
-            zoom_to_discord_user_mapping = {
-                email.lower(): discord_id
-                for discord_id, email in settings.ZOOM_USERS.items()
+            zoom_to_disnake_user_mapping = {
+                email.lower(): disnake_id
+                for disnake_id, email in settings.ZOOM_USERS.items()
             }
             # Discord user IDs for Licensed users
-            licensed_user_discord_ids = tuple(
-                zoom_to_discord_user_mapping[user.email.lower()]
+            licensed_user_disnake_ids = tuple(
+                zoom_to_disnake_user_mapping[user.email.lower()]
                 for user in users
-                if user.email.lower() in zoom_to_discord_user_mapping
+                if user.email.lower() in zoom_to_disnake_user_mapping
                 and user.type == meetings.ZoomPlanType.LICENSED
                 # Don't allow de-licensing the bot owner, of course
-                and zoom_to_discord_user_mapping[user.email.lower()] != settings.OWNER_ID
+                and zoom_to_disnake_user_mapping[user.email.lower()] != settings.OWNER_ID
             )
-            if len(licensed_user_discord_ids) == 1:
-                downgraded_user_id = licensed_user_discord_ids[0]
-            elif len(licensed_user_discord_ids) > 1:
+            if len(licensed_user_disnake_ids) == 1:
+                downgraded_user_id = licensed_user_disnake_ids[0]
+            elif len(licensed_user_disnake_ids) > 1:
                 downgraded_user_id = await prompt_for_choice(
                     ctx,
                     prompt=(
                         f"✋ **{user.mention} will be upgraded to a Licensed plan**.\nChoose a user to downgrade to Basic."
                     ),
                     choices={
-                        discord_user_id: f"<@!{discord_user_id}>"
-                        for discord_user_id in licensed_user_discord_ids
+                        disnake_user_id: f"<@!{disnake_user_id}>"
+                        for disnake_user_id in licensed_user_disnake_ids
                     },
                 )
             else:
@@ -392,8 +392,8 @@ class Meetings(Cog):
 
         async def send_channel_message(_):
             return await ctx.reply(
-                embed=discord.Embed(
-                    color=discord.Color.blue(),
+                embed=disnake.Embed(
+                    color=disnake.Color.blue(),
                     title="✋ Stand By",
                     description="Zoom details will be posted here when the meeting is ready to start.",
                 )
@@ -458,7 +458,7 @@ class Meetings(Cog):
 
         await add_stop_sign(message)
 
-    async def edit_meeting_moved(self, message: discord.Message) -> None:
+    async def edit_meeting_moved(self, message: disnake.Message) -> None:
         await message.edit(
             content=f"{REPOST_EMOJI} *Meeting details moved below.*",
             embed=None,
@@ -466,7 +466,7 @@ class Meetings(Cog):
         await maybe_clear_reaction(message, REPOST_EMOJI)
 
     @Cog.listener()
-    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> None:
+    async def on_raw_reaction_add(self, payload: disnake.RawReactionActionEvent) -> None:
         if should_handle_reaction(self.bot, payload, {REPOST_EMOJI}):
             message = await get_reaction_message(self.bot, payload)
             if not message:
@@ -516,7 +516,7 @@ class Meetings(Cog):
 
             return
 
-        async def close_zoom_message(msg: discord.Message):
+        async def close_zoom_message(msg: disnake.Message):
             await store.remove_zoom_message(message_id=msg.id)
             await maybe_clear_reaction(msg, REPOST_EMOJI)
             return ZOOM_CLOSED_MESSAGE

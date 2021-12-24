@@ -19,6 +19,7 @@
       video=EmbedProxy(),
     },
     'file': <class 'File'> {
+      description=None,
       filename='Open8.png',
       spoiler=False,
     },
@@ -50,6 +51,7 @@
       video=EmbedProxy(),
     },
     'file': <class 'File'> {
+      description=None,
       filename='8.png',
       spoiler=False,
     },

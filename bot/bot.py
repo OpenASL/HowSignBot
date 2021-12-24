@@ -1,7 +1,7 @@
 import logging
 
-import discord
-from discord.ext import commands
+import disnake
+from disnake.ext import commands
 
 from . import settings
 
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 COMMAND_PREFIX = settings.COMMAND_PREFIX
 
 
-intents = discord.Intents.default()
+intents = disnake.Intents.default()
 intents.typing = False
 intents.presences = False
 intents.bans = False
@@ -24,6 +24,9 @@ bot = commands.Bot(
     case_insensitive=True,
     owner_id=settings.OWNER_ID,
     intents=intents,
+    sync_commands_debug=settings.DEBUG,
+    reload=settings.DEBUG,
+    test_guilds=settings.TEST_GUILDS or None,
 )
 
 
@@ -44,8 +47,8 @@ async def on_command_error(ctx, error):
 
 
 async def set_default_presence():
-    activity = discord.Activity(
+    activity = disnake.Activity(
         name=f"{COMMAND_PREFIX}sign | {COMMAND_PREFIX}{COMMAND_PREFIX}",
-        type=discord.ActivityType.watching,
+        type=disnake.ActivityType.watching,
     )
     await bot.change_presence(activity=activity)

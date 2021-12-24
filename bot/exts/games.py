@@ -5,11 +5,11 @@ from typing import Optional
 from typing import Sequence
 from typing import Union
 
-import discord
-from discord.ext.commands import Bot
-from discord.ext.commands import Cog
-from discord.ext.commands import command
-from discord.ext.commands import Context
+import disnake
+from disnake.ext.commands import Bot
+from disnake.ext.commands import Cog
+from disnake.ext.commands import command
+from disnake.ext.commands import Context
 
 import catchphrase
 import cuteid
@@ -67,7 +67,7 @@ def make_teams(players):
     return red, blue
 
 
-def format_team(players: Sequence[Union[discord.User, discord.Member]]):
+def format_team(players: Sequence[Union[disnake.User, disnake.Member]]):
     names = [each.mention for each in players]
     return ", ".join(names)
 
@@ -98,15 +98,15 @@ class Games(Cog):
 
     @Cog.listener()
     async def on_raw_reaction_remove(
-        self, payload: discord.RawReactionActionEvent
+        self, payload: disnake.RawReactionActionEvent
     ) -> None:
         await self.handle_reaction(payload)
 
     @Cog.listener()
-    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> None:
+    async def on_raw_reaction_add(self, payload: disnake.RawReactionActionEvent) -> None:
         await self.handle_reaction(payload)
 
-    async def handle_reaction(self, payload: discord.RawReactionActionEvent) -> None:
+    async def handle_reaction(self, payload: disnake.RawReactionActionEvent) -> None:
         if not should_handle_reaction(self.bot, payload, {JOIN_EMOJI, SHUFFLE_EMOJI}):
             return
         message = await get_reaction_message(self.bot, payload)
@@ -132,7 +132,7 @@ class Games(Cog):
             random.shuffle(players)
 
         red, blue = make_teams(players)
-        team_embed = discord.Embed(
+        team_embed = disnake.Embed(
             title="Teams",
             description=f"🔴 Red: {format_team(red)}\n🔵 Blue: {format_team(blue)}",
         )

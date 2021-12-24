@@ -6,7 +6,7 @@ import gspread
 import pytest
 import pytz
 from asynctest import patch
-from discord.ext import commands
+from disnake.ext import commands
 from freezegun import freeze_time
 
 # Must be before bot import

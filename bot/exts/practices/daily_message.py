@@ -5,12 +5,12 @@ import random
 from typing import Optional
 from typing import Tuple
 
-import discord
-from discord.ext.commands import Bot
-from discord.ext.commands import Cog
-from discord.ext.commands import command
-from discord.ext.commands import Context
-from discord.ext.commands import is_owner
+import disnake
+from disnake.ext.commands import Bot
+from disnake.ext.commands import Cog
+from disnake.ext.commands import command
+from disnake.ext.commands import Context
+from disnake.ext.commands import is_owner
 
 import clthat
 import handshapes
@@ -72,7 +72,7 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
     async def send_daily_message_command(
         self,
         ctx: Context,
-        channel: Optional[discord.TextChannel] = None,
+        channel: Optional[disnake.TextChannel] = None,
         when: Optional[str] = None,
     ):
         await ctx.channel.trigger_typing()
@@ -116,7 +116,7 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
         settings = await store.get_guild_settings(guild.id)
         if not settings:
             return
-        embed: discord.Embed
+        embed: disnake.Embed
         if settings.get("include_practice_schedule"):
             sessions = await get_practice_sessions(
                 guild_id,
@@ -139,7 +139,7 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
             # Handshape of the Day
             handshape = get_daily_handshape(dtime)
             filename = f"{handshape.name}.png"
-            file_ = discord.File(handshape.path, filename=filename)
+            file_ = disnake.File(handshape.path, filename=filename)
             embed.set_thumbnail(url=f"attachment://{filename}")
             embed.add_field(
                 name="Handshape of the Day", value=f'"{handshape.name}"', inline=False
@@ -178,7 +178,7 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
             logger.info(
                 f"practice schedules for {len(channel_ids)} channels will be sent at {then.isoformat()}"
             )
-            await discord.utils.sleep_until(then.astimezone(dt.timezone.utc))
+            await disnake.utils.sleep_until(then.astimezone(dt.timezone.utc))
             for channel_id in channel_ids:
                 try:
                     asyncio.create_task(self.send_daily_message(channel_id))

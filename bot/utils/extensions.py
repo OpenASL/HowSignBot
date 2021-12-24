@@ -1,4 +1,4 @@
-# From https://github.com/python-discord/bot/blob/master/bot/utils/extensions.py
+# From https://github.com/python-disnake/bot/blob/master/bot/utils/extensions.py
 import importlib
 import inspect
 import pkgutil

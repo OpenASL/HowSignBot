@@ -8,15 +8,15 @@ from typing import Mapping
 from typing import Optional
 from typing import Union
 
-import discord
-from discord.ext.commands import Bot
+import disnake
+from disnake.ext.commands import Bot
 
 logger = logging.getLogger(__name__)
 
 STOP_SIGN = "🛑"
 
 
-async def maybe_clear_reaction(message: discord.Message, emoji: str, *, log: bool = True):
+async def maybe_clear_reaction(message: disnake.Message, emoji: str, *, log: bool = True):
     try:
         await message.clear_reaction(emoji)
     except Exception:
@@ -24,7 +24,7 @@ async def maybe_clear_reaction(message: discord.Message, emoji: str, *, log: boo
             logger.exception("could not remove reaction")
 
 
-async def maybe_add_reaction(message: discord.Message, emoji: str, *, log: bool = False):
+async def maybe_add_reaction(message: disnake.Message, emoji: str, *, log: bool = False):
     try:
         await message.add_reaction(emoji)
     except Exception:
@@ -32,30 +32,30 @@ async def maybe_add_reaction(message: discord.Message, emoji: str, *, log: bool 
             logger.exception("could not add reaction")
 
 
-async def add_stop_sign(message: discord.Message):
+async def add_stop_sign(message: disnake.Message):
     await maybe_add_reaction(message, STOP_SIGN)
 
 
 async def get_reaction_message(
     bot: Bot,
-    payload: discord.RawReactionActionEvent,
-) -> Optional[discord.Message]:
-    with suppress(discord.NotFound):
+    payload: disnake.RawReactionActionEvent,
+) -> Optional[disnake.Message]:
+    with suppress(disnake.NotFound):
         channel = bot.get_channel(payload.channel_id)
         if not channel:
             return None
-        message: discord.Message = await channel.fetch_message(payload.message_id)
+        message: disnake.Message = await channel.fetch_message(payload.message_id)
     return message
 
 
-def reactor_is_human(bot: Bot, payload: discord.RawReactionActionEvent) -> bool:
-    with suppress(discord.NotFound):
+def reactor_is_human(bot: Bot, payload: disnake.RawReactionActionEvent) -> bool:
+    with suppress(disnake.NotFound):
         member = bot.get_user(payload.user_id)
     return not bool(getattr(member, "bot", None))
 
 
 def should_handle_reaction(
-    bot: Bot, payload: discord.RawReactionActionEvent, emojis: Iterable[str]
+    bot: Bot, payload: disnake.RawReactionActionEvent, emojis: Iterable[str]
 ) -> bool:
     # Is this a control emoji?
     if str(payload.emoji) not in emojis:
@@ -70,9 +70,9 @@ def should_handle_reaction(
 
 async def handle_close_reaction(
     bot: Bot,
-    payload: discord.RawReactionActionEvent,
+    payload: disnake.RawReactionActionEvent,
     *,
-    close_messages: Mapping[str, Union[str, Callable[[discord.Message], Awaitable]]],
+    close_messages: Mapping[str, Union[str, Callable[[disnake.Message], Awaitable]]],
     emoji: str = STOP_SIGN,
 ) -> None:
     if not should_handle_reaction(bot, payload, {emoji}):

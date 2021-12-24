@@ -5,9 +5,9 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
-import discord
+import disnake
 import yaml
-from discord.ext import commands
+from disnake.ext import commands
 
 from bot import settings
 
@@ -18,7 +18,7 @@ COMMAND_PREFIX = settings.COMMAND_PREFIX
 
 class HelpCommand(commands.HelpCommand):
     def __init__(self, **options: Any) -> None:
-        self.color = discord.Embed.Empty
+        self.color = disnake.Embed.Empty
         super().__init__(**options)
 
     async def filter_commands(
@@ -28,8 +28,8 @@ class HelpCommand(commands.HelpCommand):
         cmds = await super().filter_commands(cmds, sort=sort, key=key)
         return [command for command in cmds if command.enabled]
 
-    async def get_bot_help(self, mapping: BotMapping) -> List[discord.Embed]:
-        embeds: List[discord.Embed] = []
+    async def get_bot_help(self, mapping: BotMapping) -> List[disnake.Embed]:
+        embeds: List[disnake.Embed] = []
         last_embed = None
         last_cog = None
         last_content = None
@@ -38,7 +38,7 @@ class HelpCommand(commands.HelpCommand):
             if not cog or not cmds:
                 continue
             if last_embed is None:
-                embed = discord.Embed(color=self.color)
+                embed = disnake.Embed(color=self.color)
             else:
                 embed = last_embed  # type: ignore
             if last_content:
@@ -66,7 +66,7 @@ class HelpCommand(commands.HelpCommand):
         embeds.append(last_embed)
         return embeds
 
-    async def send_bot_help(self, mapping: BotMapping) -> List[discord.Message]:
+    async def send_bot_help(self, mapping: BotMapping) -> List[disnake.Message]:
         messages = []
         embeds = await self.get_bot_help(mapping)
         for embed in embeds:
@@ -74,7 +74,7 @@ class HelpCommand(commands.HelpCommand):
             messages.append(msg)
         return messages
 
-    async def make_cog_embed(self, cog: commands.Cog) -> Optional[discord.Embed]:
+    async def make_cog_embed(self, cog: commands.Cog) -> Optional[disnake.Embed]:
         docstring = inspect.getdoc(cog)
         if not docstring:
             return None
@@ -82,7 +82,7 @@ class HelpCommand(commands.HelpCommand):
         if not isinstance(items, dict):
             # For docstrings without format (eg. third party commands like jishaku)
             return None
-        embed = discord.Embed(
+        embed = disnake.Embed(
             color=items.pop("color", self.color),
             description=items.pop("description", "No description available."),
         )
@@ -98,7 +98,7 @@ class HelpCommand(commands.HelpCommand):
             embed.add_field(name=key, value=value, inline=inline)
         return embed
 
-    async def get_cog_help(self, cog: commands.Cog) -> List[discord.Embed]:
+    async def get_cog_help(self, cog: commands.Cog) -> List[disnake.Embed]:
         """Return one or two embeds for cog help in a list.
 
         First embed is the cog's help embed (or formatted docstring) if any.
@@ -110,7 +110,7 @@ class HelpCommand(commands.HelpCommand):
 
         Assumption: Second or only embed's total character count does not exceed 6000.
         """
-        embeds: List[discord.Embed] = []
+        embeds: List[disnake.Embed] = []
         if hasattr(cog, "_help_embed_func"):
             embed = await cog.get_help_embed(self)
             embeds.append(embed)
@@ -126,16 +126,16 @@ class HelpCommand(commands.HelpCommand):
         if embeds:
             before = embed.copy()
         else:
-            embed = discord.Embed(
-                color=self.color, description=cog.description or discord.Embed.Empty
+            embed = disnake.Embed(
+                color=self.color, description=cog.description or disnake.Embed.Empty
             )
             embed.set_author(name=cog.qualified_name)
 
         self.add_command_fields(cmds, embed)
         if len(embed) > 6000 and embeds:
             embeds[0] = before
-            embed = discord.Embed(
-                color=before.color, description=cog.description or discord.Embed.Empty
+            embed = disnake.Embed(
+                color=before.color, description=cog.description or disnake.Embed.Empty
             )
             embed.set_author(name=cog.qualified_name)
             self.add_command_fields(cmds, embed)
@@ -145,7 +145,7 @@ class HelpCommand(commands.HelpCommand):
         return embeds
 
     def add_command_fields(
-        self, cmds: List[commands.Command], embed: discord.Embed
+        self, cmds: List[commands.Command], embed: disnake.Embed
     ) -> None:
         last_start_index = 0
         last_content: List[str] = []
@@ -172,7 +172,7 @@ class HelpCommand(commands.HelpCommand):
                     inline=False,
                 )
 
-    async def send_cog_help(self, cog: commands.Cog) -> List[discord.Message]:
+    async def send_cog_help(self, cog: commands.Cog) -> List[disnake.Message]:
         # cog cannot be None apparently
         messages = []
         embeds = await self.get_cog_help(cog)
@@ -181,10 +181,10 @@ class HelpCommand(commands.HelpCommand):
             messages.append(msg)
         return messages
 
-    async def make_command_embed(self, command: commands.Command) -> discord.Embed:
+    async def make_command_embed(self, command: commands.Command) -> disnake.Embed:
         docstring = inspect.getdoc(command.callback)
         if not docstring:
-            embed = discord.Embed(color=self.color, description=command.help)
+            embed = disnake.Embed(color=self.color, description=command.help)
             embed.set_author(name=f"{COMMAND_PREFIX}{command} {command.signature}")
             if command.aliases:
                 embed.add_field(
@@ -194,20 +194,20 @@ class HelpCommand(commands.HelpCommand):
         items = yaml.full_load(docstring.format(command=command))  # value substitution
         if not isinstance(items, dict):
             # For docstrings without format (eg. third party commands like jishaku)
-            embed = discord.Embed(color=self.color, description=docstring)
+            embed = disnake.Embed(color=self.color, description=docstring)
             embed.set_author(name=f"{COMMAND_PREFIX}{command} {command.signature}")
             if command.aliases:
                 embed.add_field(
                     name="Aliases", value=" // ".join(command.aliases), inline=False
                 )
         else:
-            embed = discord.Embed(
+            embed = disnake.Embed(
                 color=items.pop("color", self.color),
             )
             embed.set_author(
                 name=items.pop("name", f"{COMMAND_PREFIX}{command} {command.signature}")
             )
-            embed.set_footer(text=items.pop("footer", discord.Embed.Empty))
+            embed.set_footer(text=items.pop("footer", disnake.Embed.Empty))
             embed.set_thumbnail(url=items.pop("thumbnail", ""))
             embed.set_image(url=items.pop("image", ""))
             items.pop("short", None)
@@ -222,7 +222,7 @@ class HelpCommand(commands.HelpCommand):
                 )
         return embed
 
-    async def get_command_help(self, command: commands.Command) -> discord.Embed:
+    async def get_command_help(self, command: commands.Command) -> disnake.Embed:
         """Return one embed for command help.
 
         Assumption: Embed's total character count does not exceed 6000.
@@ -262,11 +262,11 @@ class HelpCommand(commands.HelpCommand):
                 )
         return embed
 
-    async def send_command_help(self, command: commands.Command) -> discord.Message:
+    async def send_command_help(self, command: commands.Command) -> disnake.Message:
         embed = await self.get_command_help(command)
         return await self.context.reply(embed=embed)
 
-    async def send_group_help(self, group: commands.Group) -> discord.Message:
+    async def send_group_help(self, group: commands.Group) -> disnake.Message:
         return await self.send_command_help(group)
 
     def command_not_found(self, string: str) -> str:
@@ -279,7 +279,7 @@ class HelpCommand(commands.HelpCommand):
             )
         return f"Command `{command.qualified_name}` has no subcommands."
 
-    async def send_error_message(self, error: str) -> discord.Message:
+    async def send_error_message(self, error: str) -> disnake.Message:
         return await self.context.reply(error)
 
 

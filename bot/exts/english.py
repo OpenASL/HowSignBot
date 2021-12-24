@@ -1,8 +1,8 @@
 import logging
 from typing import Optional
 
-from discord.ext import commands
-from discord.ext.commands import Context
+from disnake.ext import commands
+from disnake.ext.commands import Context
 
 import catchphrase
 from bot import settings
