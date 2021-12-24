@@ -154,11 +154,11 @@ Enter {COMMAND_PREFIX}handshape to display a random handshape or {COMMAND_PREFIX
 )
 
 
-def handshapes_impl():
+def handshapes_impl(prefix: str) -> dict[str, str]:
     return {
         "content": HANDSHAPES_TEMPLATE.format(
             handshapes=", ".join(handshapes.HANDSHAPE_NAMES),
-            COMMAND_PREFIX=COMMAND_PREFIX,
+            COMMAND_PREFIX=prefix,
         )
     }
 
@@ -211,7 +211,7 @@ class ASL(Cog):
     @slash_command(name="handshapes")
     async def handshapes_command(self, inter: ApplicationCommandInteraction):
         """List handshapes"""
-        await inter.response.send_message(**handshapes_impl())
+        await inter.response.send_message(**handshapes_impl(prefix="/"))
 
     @command(name="handshape", aliases=("shape",), help=HANDSHAPE_HELP)
     async def handshape_prefix_command(self, ctx: Context, name="random"):
@@ -220,7 +220,7 @@ class ASL(Cog):
     @command(name="handshapes", aliases=("shapes",), help=HANDSHAPES_HELP)
     async def handshapes_prefix_command(self, ctx: Context):
         logger.info("sending handshapes list")
-        await ctx.reply(**handshapes_impl())
+        await ctx.reply(**handshapes_impl(prefix=settings.COMMAND_PREFIX))
 
 
 def setup(bot: Bot) -> None:
