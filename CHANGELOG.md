@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.54.0 (2021-12-23)
+### Feature
+* Switch to disnake and migrate `sign` and `handshape` to slash commands ([#362](https://github.com/OpenASL/HowSignBot/issues/362)) ([`6bb2d5d`](https://github.com/OpenASL/HowSignBot/commit/6bb2d5da47e45e1fe140e8fb71e3440f3cd19612))
+
 ## v21.53.1 (2021-12-18)
 ### Fix
 * Fix typing for discord.py ([#357](https://github.com/OpenASL/HowSignBot/issues/357)) ([`0b8507a`](https://github.com/OpenASL/HowSignBot/commit/0b8507a41d8ef53779b819678fff33edc3a25def))
