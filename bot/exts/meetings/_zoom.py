@@ -1,3 +1,4 @@
+from __future__ import annotations
 import asyncio
 import logging
 import random
@@ -186,10 +187,10 @@ async def make_zoom_embed(
     return embed
 
 
-def is_allowed_zoom_access(ctx: Context):
+def is_allowed_zoom_access(ctx: Context | disnake.ApplicationCommandInteraction):
     if ctx.author.id not in settings.ZOOM_USERS:
         raise errors.CheckFailure(
-            f"⚠️ `{COMMAND_PREFIX}{ctx.command}` can only be used by authorized users under the bot owner's Zoom account."
+            "⚠️ Zoom commands can only be used by authorized users under the bot owner's Zoom account."
         )
     return True
 
@@ -249,14 +250,15 @@ async def get_zoom_meeting_id(meeting_id: Union[int, str]) -> int:
 
 
 async def zoom_impl(
-    ctx: Context,
     *,
+    bot,
+    zoom_user: str,
+    channel_id: int,
     meeting_id: Optional[Union[int, str]],  # Either a Zoom meeting ID or zzzzoom ID
     send_channel_message: Callable[[int], Awaitable],
     set_up: bool,
     with_zzzzoom: bool = False,
 ) -> Tuple[int, disnake.Message]:
-    zoom_user = settings.ZOOM_USERS[ctx.author.id]
     logger.info(f"creating zoom meeting for zoom user: {zoom_user}")
     message = None
     if meeting_id:
@@ -267,14 +269,14 @@ async def zoom_impl(
             )
             message = await send_channel_message(zoom_meeting_id)
             if set_up:
-                add_repost_after_delay(ctx.bot, message)
+                add_repost_after_delay(bot, message)
             logger.info(
-                f"creating zoom meeting message for message {message.id} in channel {ctx.channel.id}"
+                f"creating zoom meeting message for message {message.id} in channel {channel_id}"
             )
             await store.create_zoom_message(
                 meeting_id=zoom_meeting_id,
                 message_id=message.id,
-                channel_id=ctx.channel.id,
+                channel_id=channel_id,
             )
         return zoom_meeting_id, message
     else:
@@ -309,13 +311,13 @@ async def zoom_impl(
                     await store.create_zzzzoom_meeting(meeting_id=meeting.id)
                 message = await send_channel_message(meeting.id)
                 if set_up:
-                    add_repost_after_delay(ctx.bot, message)
+                    add_repost_after_delay(bot, message)
                 logger.info(
-                    f"creating zoom meeting message for message {message.id} in channel {ctx.channel.id}"
+                    f"creating zoom meeting message for message {message.id} in channel {channel_id}"
                 )
                 await store.create_zoom_message(
                     meeting_id=meeting.id,
                     message_id=message.id,
-                    channel_id=ctx.channel.id,
+                    channel_id=channel_id,
                 )
             return meeting.id, message

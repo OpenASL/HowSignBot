@@ -1,11 +1,14 @@
 import asyncio
 import logging
+from enum import auto
+from enum import Enum
 from typing import cast
 from typing import List
 from typing import Optional
 from typing import Union
 
 import disnake
+from disnake import ApplicationCommandInteraction
 from disnake.ext.commands import Bot
 from disnake.ext.commands import check
 from disnake.ext.commands import Cog
@@ -14,6 +17,7 @@ from disnake.ext.commands import Context
 from disnake.ext.commands import errors
 from disnake.ext.commands import group
 from disnake.ext.commands import is_owner
+from disnake.ext.commands import slash_command
 
 import meetings
 from ._zoom import add_repost_after_delay
@@ -33,6 +37,7 @@ from bot.utils.reactions import handle_close_reaction
 from bot.utils.reactions import maybe_clear_reaction
 from bot.utils.reactions import should_handle_reaction
 from bot.utils.reactions import STOP_SIGN
+from bot.utils.ui import make_button_group_view
 
 logger = logging.getLogger(__name__)
 
@@ -80,9 +85,88 @@ def make_watch2gether_embed(url: str, video_url: Optional[str]) -> disnake.Embed
     return disnake.Embed(title=url, description=description, color=disnake.Color.gold())
 
 
+class ProtectionType(Enum):
+    WAITING_ROOM = auto()
+    FS_CAPTCHA = auto()
+
+
 class Meetings(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
+
+    @slash_command(name="zoom")
+    @check(is_allowed_zoom_access)
+    async def zoom_command(self, inter: ApplicationCommandInteraction):
+        pass
+
+    @zoom_command.sub_command(name="start")
+    async def zoom_start(self, inter: ApplicationCommandInteraction):
+        """Start a Zoom meeting"""
+        assert inter.user is not None
+
+        view = make_button_group_view(
+            creator_id=inter.user.id,
+            options={
+                "FS Captcha": {"value": ProtectionType.FS_CAPTCHA, "emoji": "👋"},
+                "Waiting Room": {"value": ProtectionType.WAITING_ROOM, "emoji": "🚪"},
+            },
+        )
+        await inter.send(
+            "🔐 **How do you want to protect the meeting?** Choose one.", view=view
+        )
+        value = await view.wait_for_value()
+        with_zzzzoom = value == ProtectionType.FS_CAPTCHA
+
+        async def send_channel_message(mid: int):
+            return await inter.channel.send(embed=await make_zoom_embed(mid))
+
+        await zoom_impl(
+            bot=self.bot,
+            zoom_user=settings.ZOOM_USERS[inter.user.id],
+            channel_id=inter.channel.id,
+            meeting_id=None,
+            send_channel_message=send_channel_message,
+            set_up=True,
+            with_zzzzoom=with_zzzzoom,
+        )
+
+    @zoom_command.sub_command(name="crosspost")
+    async def zoom_crosspost(self, inter: ApplicationCommandInteraction, meeting_id: str):
+        """Crosspost a previously-created Zoom meeting
+
+        Parameters
+        ----------
+        meeting_id: Zoom meeting ID or zzzzoom ID
+        """
+        assert inter.user is not None
+
+        zoom_or_zzzzoom_id: Union[int, str]
+        try:
+            zoom_or_zzzzoom_id = int(meeting_id)
+        except ValueError:
+            zoom_or_zzzzoom_id = meeting_id
+            with_zzzzoom = True
+        else:
+            with_zzzzoom = False
+
+        async def send_channel_message(mid: int):
+            return await inter.channel.send(embed=await make_zoom_embed(mid))
+
+        await zoom_impl(
+            bot=self.bot,
+            zoom_user=settings.ZOOM_USERS[inter.user.id],
+            channel_id=inter.channel.id,
+            meeting_id=zoom_or_zzzzoom_id,
+            send_channel_message=send_channel_message,
+            set_up=True,
+            with_zzzzoom=with_zzzzoom,
+        )
+        await inter.send("_Crossposted Zoom_")
+
+    # TODO: setup
+    # TODO: user management commands
+
+    # Deprecated prefix commands
 
     @group(name="zoom", aliases=("z",), invoke_without_command=True)
     @check(is_allowed_zoom_access)
@@ -107,7 +191,7 @@ class Meetings(Cog):
         help="Reveal meeting details for a meeting started with the setup command",
     )
     @check(is_allowed_zoom_access)
-    async def zoom_start(
+    async def zoom_setup_start(
         self, ctx: Context, meeting_id: Optional[Union[int, str]] = None
     ):
         await ctx.channel.trigger_typing()
@@ -227,6 +311,7 @@ class Meetings(Cog):
     ):
         await self.zoom_setup_impl(ctx, meeting_id=meeting_id, with_zzzzoom=True)
 
+    @zoom_command.error
     @zzzzoom_group.error
     @zzzzoom_setup.error
     @zoom_group.error
@@ -369,6 +454,8 @@ class Meetings(Cog):
         else:
             await ctx.send(f"👑 **{user.mention} upgraded to a Licensed plan**.")
 
+    # End deprecated prefix commands
+
     async def zoom_group_impl(
         self, ctx: Context, *, meeting_id: Optional[Union[int, str]], with_zzzzoom: bool
     ):
@@ -378,7 +465,9 @@ class Meetings(Cog):
             return await ctx.reply(embed=await make_zoom_embed(mid))
 
         await zoom_impl(
-            ctx,
+            bot=self.bot,
+            zoom_user=settings.ZOOM_USERS[ctx.author.id],
+            channel_id=ctx.channel.id,
             meeting_id=meeting_id,
             send_channel_message=send_channel_message,
             set_up=True,
@@ -400,7 +489,9 @@ class Meetings(Cog):
             )
 
         meeting_id, _ = await zoom_impl(
-            ctx,
+            bot=self.bot,
+            zoom_user=settings.ZOOM_USERS[ctx.author.id],
+            channel_id=ctx.channel.id,
             meeting_id=meeting_id,
             send_channel_message=send_channel_message,
             set_up=False,
