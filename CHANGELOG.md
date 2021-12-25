@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.55.0 (2021-12-25)
+### Feature
+* **aslpp:** Add /tag slash command; update /handshape to be more consistent with /tag ([#363](https://github.com/OpenASL/HowSignBot/issues/363)) ([`45ccdb2`](https://github.com/OpenASL/HowSignBot/commit/45ccdb267bf542a14654ff8253125e5d84d25e66))
+
 ## v21.54.0 (2021-12-23)
 ### Feature
 * Switch to disnake and migrate `sign` and `handshape` to slash commands ([#362](https://github.com/OpenASL/HowSignBot/issues/362)) ([`6bb2d5d`](https://github.com/OpenASL/HowSignBot/commit/6bb2d5da47e45e1fe140e8fb71e3440f3cd19612))
