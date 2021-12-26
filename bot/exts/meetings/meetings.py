@@ -30,6 +30,7 @@ from ._zoom import zoom_impl
 from ._zoom import ZoomCreateError
 from bot import settings
 from bot.database import store
+from bot.utils.deprecation import send_deprecation_notice
 from bot.utils.prompts import prompt_for_choice
 from bot.utils.reactions import add_stop_sign
 from bot.utils.reactions import get_reaction_message
@@ -454,8 +455,6 @@ class Meetings(Cog):
         else:
             await ctx.send(f"👑 **{user.mention} upgraded to a Licensed plan**.")
 
-    # End deprecated prefix commands
-
     async def zoom_group_impl(
         self, ctx: Context, *, meeting_id: Optional[Union[int, str]], with_zzzzoom: bool
     ):
@@ -472,6 +471,22 @@ class Meetings(Cog):
             send_channel_message=send_channel_message,
             set_up=True,
             with_zzzzoom=with_zzzzoom,
+        )
+
+        before_example = f"{COMMAND_PREFIX}{ctx.invoked_with}"
+        after_example = "/zoom"
+        if meeting_id:
+            substitute = "/zoom crosspost"
+            before_example += " <meeting id>"
+            after_example += " crosspost <meeting id>"
+        else:
+            substitute = "/zoom start"
+            after_example += " start"
+        await send_deprecation_notice(
+            ctx,
+            substitute=substitute,
+            before_example=before_example,
+            after_example=after_example,
         )
 
     async def zoom_setup_impl(
@@ -512,6 +527,8 @@ class Meetings(Cog):
                 "When you're ready for people to join, reply with:\n"
                 f"```{COMMAND_PREFIX}zoom start {meeting_id}```"
             )
+
+    # End deprecated prefix commands
 
     @command(name="meet", aliases=("jitsi",), help="Start a Jitsi Meet meeting")
     async def meet_command(self, ctx: Context, *, name: Optional[str]):
