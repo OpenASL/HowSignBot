@@ -1,3 +1,5 @@
+import asyncio
+import itertools
 import logging
 
 import disnake
@@ -30,10 +32,34 @@ bot = commands.Bot(
     test_guilds=settings.TEST_GUILDS or None,
 )
 
+PRESENCE_COMMANDS = (
+    "/sign",
+    "/handshape",
+    "/catchphrase",
+    "/codenames",
+    "/schedule",
+    "/watch2gether",
+    "/sentence",
+    "/idiom",
+    "/feedback",
+)
+CHANGE_PRESENCE_EVERY = 120  # seconds
+
+
+async def cycle_presence():
+    for command in itertools.cycle(PRESENCE_COMMANDS):
+        activity = disnake.Activity(
+            name=command,
+            type=disnake.ActivityType.watching,
+        )
+        logger.info(f"changing presence to show command: {command}")
+        await bot.change_presence(activity=activity)
+        await asyncio.sleep(CHANGE_PRESENCE_EVERY)
+
 
 @bot.event
 async def on_ready():
-    await set_default_presence()
+    bot.loop.create_task(cycle_presence())
 
 
 @bot.event

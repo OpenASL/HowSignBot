@@ -149,7 +149,7 @@ class Meetings(Cog):
 
     @zoom_command.sub_command(name="crosspost")
     async def zoom_crosspost(self, inter: ApplicationCommandInteraction, meeting_id: str):
-        """Crosspost a previously-created Zoom meeting
+        """(Authorized users only) Crosspost a previously-created Zoom meeting
 
         Parameters
         ----------
@@ -186,7 +186,7 @@ class Meetings(Cog):
         inter: ApplicationCommandInteraction,
         meeting_id_str: str = Param(name="meeting_id"),
     ):
-        """Remove meeting details for a Zoom meeting
+        """(Authorized users only) Remove meeting details for a Zoom meeting
 
         Parameters
         ----------
