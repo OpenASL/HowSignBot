@@ -116,11 +116,11 @@ class Games(Cog):
         aliases=("cp",),
         help="Generate a list of random words and phrases",
     )
-    async def catchphrase_prefix_command(self, ctx: Context, category: str | None = None):
+    async def catchphrase_prefix_command(self, ctx: Context, category: str = None):
         await ctx.send(**catchphrase_impl(category))
 
     @command(name="codenames", aliases=("cn",), help="Start a Codenames game")
-    async def codenames_prefix_command(self, ctx: Context, name: str | None = None):
+    async def codenames_prefix_command(self, ctx: Context, name: str = None):
         name = name or cuteid.cuteid()
         url = f"https://horsepaste.com/{name}"
         base_message = f"🕵️ **Codenames** 🕵️\n{url}\nClick {JOIN_EMOJI} to join a team. Click {SHUFFLE_EMOJI} to shuffle the teams."
