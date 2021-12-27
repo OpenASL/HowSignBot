@@ -63,7 +63,7 @@ async def on_slash_command_error(inter: ApplicationCommandInteraction, error: Ex
 
 async def set_default_presence():
     activity = disnake.Activity(
-        name=f"{COMMAND_PREFIX}sign | {COMMAND_PREFIX}{COMMAND_PREFIX}",
+        name="/sign",
         type=disnake.ActivityType.watching,
     )
     await bot.change_presence(activity=activity)
