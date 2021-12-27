@@ -18,6 +18,7 @@ from disnake.ext.commands import Context
 from disnake.ext.commands import errors
 from disnake.ext.commands import group
 from disnake.ext.commands import is_owner
+from disnake.ext.commands import Param
 from disnake.ext.commands import slash_command
 
 import meetings
@@ -38,8 +39,9 @@ from bot.utils.reactions import handle_close_reaction
 from bot.utils.reactions import maybe_clear_reaction
 from bot.utils.reactions import should_handle_reaction
 from bot.utils.reactions import STOP_SIGN
+from bot.utils.ui import ButtonGroupOption
+from bot.utils.ui import ButtonGroupView
 from bot.utils.ui import DropdownView
-from bot.utils.ui import make_button_group_view
 
 logger = logging.getLogger(__name__)
 
@@ -106,12 +108,16 @@ class Meetings(Cog):
         """Create a Zoom meeting"""
         assert inter.user is not None
 
-        view = make_button_group_view(
+        view = ButtonGroupView.from_options(
+            options=(
+                ButtonGroupOption(
+                    label="FS Captcha", value=ProtectionType.FS_CAPTCHA, emoji="👌"
+                ),
+                ButtonGroupOption(
+                    label="Waiting Room", value=ProtectionType.WAITING_ROOM, emoji="🚪"
+                ),
+            ),
             creator_id=inter.user.id,
-            options={
-                "FS Captcha": {"value": ProtectionType.FS_CAPTCHA, "emoji": "👋"},
-                "Waiting Room": {"value": ProtectionType.WAITING_ROOM, "emoji": "🚪"},
-            },
         )
         await inter.send(
             "🔐 **How do you want to protect the meeting?** Choose one.", view=view
@@ -165,7 +171,47 @@ class Meetings(Cog):
         )
         await inter.send("_Crossposted Zoom_")
 
-    # TODO: stop
+    @zoom_command.sub_command(name="stop")
+    async def zoom_stop(
+        self,
+        inter: ApplicationCommandInteraction,
+        meeting_id_str: str = Param(name="meeting_id"),
+    ):
+        """Remove meeting details for a Zoom meeting
+
+        Parameters
+        ----------
+        meeting_id: Zoom meeting ID or zzzzoom ID
+        """
+        zoom_or_zzzzoom_id: Union[int, str]
+        try:
+            zoom_or_zzzzoom_id = int(meeting_id_str)
+        except ValueError:
+            zoom_or_zzzzoom_id = meeting_id_str
+
+        meeting_id = await get_zoom_meeting_id(zoom_or_zzzzoom_id)
+        meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
+        if not meeting_exists:
+            raise errors.CheckFailure(
+                f"⚠️ Could not find Zoom meeting with ID {meeting_id}. Make sure to run `{COMMAND_PREFIX}zoom setup {meeting_id}` first."
+            )
+        zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
+        if not zoom_messages:
+            raise errors.CheckFailure(f"⚠️ No meeting messages for meeting {meeting_id}.")
+        messages = []
+        for message_info in zoom_messages:
+            channel_id = message_info["channel_id"]
+            message_id = message_info["message_id"]
+            channel = self.bot.get_channel(channel_id)
+            message: disnake.Message = await channel.fetch_message(message_id)
+            messages.append(message)
+            logger.info(
+                f"scrubbing meeting details for meeting {meeting_id} in channel {channel_id}, message {message_id}"
+            )
+            await message.edit(content=ZOOM_CLOSED_MESSAGE, embed=None)
+            await maybe_clear_reaction(message, REPOST_EMOJI)
+        await store.end_zoom_meeting(meeting_id=meeting_id)
+        await inter.send("🛑 Meeting details removed.")
 
     # XXX: Ideally we'd use slash command permissions intead of a check here,
     # but those can only be set per-guild at the moment.
@@ -396,46 +442,6 @@ class Meetings(Cog):
                 )
             else:
                 await ctx.channel.send("🚀 Meeting details revealed.")
-
-    @zoom_group.command(
-        name="stop",
-        help="Remove meeting details for a meeting",
-    )
-    @check(is_allowed_zoom_access)
-    async def zoom_stop(self, ctx: Context, meeting_id: Union[int, str]):
-        await ctx.channel.trigger_typing()
-        meeting_id = await get_zoom_meeting_id(meeting_id)
-        meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
-        if not meeting_exists:
-            raise errors.CheckFailure(
-                f"⚠️ Could not find Zoom meeting with ID {meeting_id}. Make sure to run `{COMMAND_PREFIX}zoom setup {meeting_id}` first."
-            )
-        zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
-        if not zoom_messages:
-            raise errors.CheckFailure(f"⚠️ No meeting messages for meeting {meeting_id}.")
-        messages = []
-        for message_info in zoom_messages:
-            channel_id = message_info["channel_id"]
-            message_id = message_info["message_id"]
-            channel = self.bot.get_channel(channel_id)
-            message: disnake.Message = await channel.fetch_message(message_id)
-            messages.append(message)
-            logger.info(
-                f"scrubbing meeting details for meeting {meeting_id} in channel {channel_id}, message {message_id}"
-            )
-            await message.edit(content=ZOOM_CLOSED_MESSAGE, embed=None)
-            await maybe_clear_reaction(message, REPOST_EMOJI)
-        await store.end_zoom_meeting(meeting_id=meeting_id)
-        if ctx.guild is None:
-            links = "\n".join(
-                f"[{message.guild} - #{message.channel}]({message.jump_url})"
-                for message in messages
-            )
-            await ctx.send(
-                embed=disnake.Embed(title="🛑 Meeting Ended", description=links)
-            )
-        else:
-            await ctx.channel.send("🛑 Meeting details removed.")
 
     @group(
         name="zzzzoom",
