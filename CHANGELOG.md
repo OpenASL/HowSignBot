@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.56.0 (2021-12-26)
+### Feature
+* Migrate zoom commands to slash commands ([#365](https://github.com/OpenASL/HowSignBot/issues/365)) ([`df019a9`](https://github.com/OpenASL/HowSignBot/commit/df019a91393a14ff1a2feb08fde8bec37364fd4b))
+
 ## v21.55.0 (2021-12-25)
 ### Feature
 * **aslpp:** Add /tag slash command; update /handshape to be more consistent with /tag ([#363](https://github.com/OpenASL/HowSignBot/issues/363)) ([`45ccdb2`](https://github.com/OpenASL/HowSignBot/commit/45ccdb267bf542a14654ff8253125e5d84d25e66))
