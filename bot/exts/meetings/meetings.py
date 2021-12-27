@@ -101,9 +101,9 @@ class Meetings(Cog):
     async def zoom_command(self, inter: ApplicationCommandInteraction):
         pass
 
-    @zoom_command.sub_command(name="start")
-    async def zoom_start(self, inter: ApplicationCommandInteraction):
-        """Start a Zoom meeting"""
+    @zoom_command.sub_command(name="create")
+    async def zoom_create(self, inter: ApplicationCommandInteraction):
+        """Create a Zoom meeting"""
         assert inter.user is not None
 
         view = make_button_group_view(
@@ -494,8 +494,8 @@ class Meetings(Cog):
             before_example += " <meeting id>"
             after_example += " crosspost <meeting id>"
         else:
-            substitute = "/zoom start"
-            after_example += " start"
+            substitute = "/zoom create"
+            after_example += " create"
         await send_deprecation_notice(
             ctx,
             substitute=substitute,
