@@ -1,15 +1,18 @@
+from __future__ import annotations
+
 import logging
 import random
 from contextlib import suppress
-from typing import Optional
 from typing import Sequence
-from typing import Union
 
 import disnake
+from disnake import ApplicationCommandInteraction
 from disnake.ext.commands import Bot
 from disnake.ext.commands import Cog
 from disnake.ext.commands import command
 from disnake.ext.commands import Context
+from disnake.ext.commands import Param
+from disnake.ext.commands import slash_command
 
 import catchphrase
 import cuteid
@@ -30,7 +33,7 @@ JOIN_EMOJI = "✅"
 SHUFFLE_EMOJI = "🔀"
 
 
-def catchphrase_impl(category: Optional[str] = None):
+def catchphrase_impl(category: str | None = None):
     category = category.lower() if category else None
     if category == "categories":
         return {
@@ -51,7 +54,7 @@ def catchphrase_impl(category: Optional[str] = None):
     words = "\n".join(
         f"||{catchphrase.catchphrase(category)}||" for _ in range(NUM_CATCHPHRASE_WORDS)
     )
-    message = f"{words}\nEnter `{COMMAND_PREFIX}cp` or `{COMMAND_PREFIX}cp [category]` for more.\nCategories: {CATEGORIES_FORMATTED}"
+    message = f"{words}\nCategories: {CATEGORIES_FORMATTED}"
     logger.info("sending catchphrase words/phrases")
     return {"content": message}
 
@@ -67,7 +70,7 @@ def make_teams(players):
     return red, blue
 
 
-def format_team(players: Sequence[Union[disnake.User, disnake.Member]]):
+def format_team(players: Sequence[disnake.User | disnake.Member]):
     names = [each.mention for each in players]
     return ", ".join(names)
 
@@ -76,25 +79,59 @@ class Games(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
 
+    @slash_command(name="catchphrase")
+    async def catchphrase_command(
+        self,
+        inter: ApplicationCommandInteraction,
+        category: str = Param(choices=catchphrase.CATEGORIES, default=None),
+    ):
+        """Generate a list of random words and phrases
+
+        Parameters
+        ----------
+        category: Category for the phrases
+        """
+        await inter.send(**catchphrase_impl(category))
+
+    @slash_command(name="codenames")
+    async def codenames_command(
+        self, inter: ApplicationCommandInteraction, name: str = None
+    ):
+        """Start a Codenames game"""
+        name = name or cuteid.cuteid()
+        url = f"https://horsepaste.com/{name}"
+        base_message = f"🕵️ **Codenames** 🕵️\n{url}\nClick {JOIN_EMOJI} to join a team. Click {SHUFFLE_EMOJI} to shuffle the teams."
+        logger.info("starting codenames game")
+        await inter.response.send_message(base_message)
+        message = await inter.original_message()
+
+        with suppress(disnake.errors.Forbidden):
+            await message.add_reaction(JOIN_EMOJI)
+            await message.add_reaction(SHUFFLE_EMOJI)
+
+    # Deprecated prefix commands
+
     @command(
         name="catchphrase",
         aliases=("cp",),
         help="Generate a list of random words and phrases",
     )
-    async def catchphrase_command(self, ctx: Context, category: Optional[str] = None):
+    async def catchphrase_prefix_command(self, ctx: Context, category: str | None = None):
         await ctx.send(**catchphrase_impl(category))
 
     @command(name="codenames", aliases=("cn",), help="Start a Codenames game")
-    async def codenames_command(self, ctx: Context, name: Optional[str] = None):
+    async def codenames_prefix_command(self, ctx: Context, name: str | None = None):
         name = name or cuteid.cuteid()
         url = f"https://horsepaste.com/{name}"
         base_message = f"🕵️ **Codenames** 🕵️\n{url}\nClick {JOIN_EMOJI} to join a team. Click {SHUFFLE_EMOJI} to shuffle the teams."
         logger.info("starting codenames game")
         message = await ctx.send(base_message)
 
-        with suppress(Exception):
+        with suppress(disnake.errors.Forbidden):
             await message.add_reaction(JOIN_EMOJI)
             await message.add_reaction(SHUFFLE_EMOJI)
+
+    # End deprecated prefix commands
 
     @Cog.listener()
     async def on_raw_reaction_remove(
