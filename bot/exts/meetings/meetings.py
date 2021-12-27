@@ -360,6 +360,48 @@ class Meetings(Cog):
         else:
             await inter.send(f"👑 **{user.mention} upgraded to a Licensed plan**.")
 
+    @slash_command(name="watch2gether")
+    async def watch2gether_command(
+        self, inter: ApplicationCommandInteraction, video_url: Optional[str] = None
+    ):
+        """Start a watch2gether session
+
+        Parameters
+        ----------
+        video_url: YouTube URL to queue as the first video
+        """
+        logger.info("creating watch2gether meeting")
+        try:
+            url = await meetings.create_watch2gether(
+                settings.WATCH2GETHER_API_KEY, video_url
+            )
+        except Exception:
+            logger.exception("could not create watch2gether room")
+            await inter.send(
+                content="🚨 _Could not create watch2gether room. That's embarrassing._"
+            )
+        else:
+            await inter.send(embed=make_watch2gether_embed(url, video_url))
+
+        message = await inter.original_message()
+        await add_stop_sign(message)
+
+    @slash_command(name="jitsi")
+    async def jitsi_command(
+        self, inter: ApplicationCommandInteraction, *, name: Optional[str] = None
+    ):
+        """Start a Jitsi Meet meeting
+
+        Parameters
+        ----------
+        name: Name of the meeting
+        """
+        meeting = meetings.create_jitsi_meet(name, secret=settings.SECRET_KEY)
+        logger.info("sending jitsi meet info")
+        await inter.send(embed=make_jitsi_embed(meeting))
+        message = await inter.original_message()
+        await add_stop_sign(message)
+
     # Deprecated prefix commands
 
     @group(name="zoom", aliases=("z",), invoke_without_command=True)
@@ -548,10 +590,29 @@ class Meetings(Cog):
                 f"```{COMMAND_PREFIX}zoom start {meeting_id}```"
             )
 
+    @command(name="w2g", aliases=("wtg", "watch2gether"), help=WATCH2GETHER_HELP)
+    async def watch2gether_prefix_command(
+        self, ctx: Context, video_url: Optional[str] = None
+    ):
+        logger.info("creating watch2gether meeting")
+        try:
+            url = await meetings.create_watch2gether(
+                settings.WATCH2GETHER_API_KEY, video_url
+            )
+        except Exception:
+            logger.exception("could not create watch2gether room")
+            message = await ctx.send(
+                content="🚨 _Could not create watch2gether room. That's embarrassing._"
+            )
+        else:
+            message = await ctx.send(embed=make_watch2gether_embed(url, video_url))
+
+        await add_stop_sign(message)
+
     # End deprecated prefix commands
 
     @command(name="meet", aliases=("jitsi",), help="Start a Jitsi Meet meeting")
-    async def meet_command(self, ctx: Context, *, name: Optional[str]):
+    async def meet_prefix_command(self, ctx: Context, *, name: Optional[str]):
         meeting = meetings.create_jitsi_meet(name, secret=settings.SECRET_KEY)
         logger.info("sending jitsi meet info")
         message = await ctx.send(embed=make_jitsi_embed(meeting))
@@ -567,23 +628,6 @@ class Meetings(Cog):
         content = f"{content}\n🚀 This event is happening now. Make a friend!"
         logger.info("sending speakeasy info")
         message = await ctx.send(content=content)
-        await add_stop_sign(message)
-
-    @command(name="w2g", aliases=("wtg", "watch2gether"), help=WATCH2GETHER_HELP)
-    async def watch2gether_command(self, ctx: Context, video_url: Optional[str] = None):
-        logger.info("creating watch2gether meeting")
-        try:
-            url = await meetings.create_watch2gether(
-                settings.WATCH2GETHER_API_KEY, video_url
-            )
-        except Exception:
-            logger.exception("could not create watch2gether room")
-            message = await ctx.send(
-                content="🚨 _Could not create watch2gether room. That's embarrassing._"
-            )
-        else:
-            message = await ctx.send(embed=make_watch2gether_embed(url, video_url))
-
         await add_stop_sign(message)
 
     async def edit_meeting_moved(self, message: disnake.Message) -> None:
