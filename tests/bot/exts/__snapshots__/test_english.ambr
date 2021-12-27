@@ -1,4 +1,4 @@
-# name: test_idiom[None]
+# name: test_idiom[False]
   <class 'dict'> {
     'content': '
       **Dropping Like Flies**
@@ -7,7 +7,7 @@
     ',
   }
 ---
-# name: test_idiom[||]
+# name: test_idiom[True]
   <class 'dict'> {
     'content': '
       ||**What Goes Up Must Come Down**||
@@ -16,12 +16,12 @@
     ',
   }
 ---
-# name: test_sentence[None]
+# name: test_sentence[False]
   <class 'dict'> {
     'content': 'Malls are great places to shop; I can find everything I need under one roof.',
   }
 ---
-# name: test_sentence[||]
+# name: test_sentence[True]
   <class 'dict'> {
     'content': '||He was the type of guy who liked Christmas lights on his house in the middle of July.||',
   }
