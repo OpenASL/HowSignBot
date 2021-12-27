@@ -106,9 +106,18 @@ class Schedule(commands.Cog):
     async def schedule_command(self, inter: GuildCommandInteraction):
         pass
 
+    @schedule_command.sub_command(name="new")
+    async def schedule_new(self, inter: GuildCommandInteraction):
+        """Quickly add a new scheduled event with guided prompts."""
+        await self._schedule_new(inter)
+
+    # "Alias for /schedule new"
     @schedule_command.sub_command(name="add")
     async def schedule_add(self, inter: GuildCommandInteraction):
         """Quickly add a new scheduled event with guided prompts."""
+        await self._schedule_new(inter)
+
+    async def _schedule_new(self, inter: GuildCommandInteraction):
         # Step 1: Prompt for the start time
         start_time = await self._prompt_for_text_input(
             inter, prompt=START_TIME_PROMPT, is_initial_interaction=True
@@ -187,7 +196,7 @@ class Schedule(commands.Cog):
 
         event = await guild.create_scheduled_event(
             name=title,
-            description=f"Host: {user.mention}\n_Created with_ `/schedule add`",
+            description=f"Host: {user.mention}\n_Created with_ `/schedule new`",
             scheduled_start_time=scheduled_start_time,
             scheduled_end_time=scheduled_end_time,
             reason=f"/schedule command used by user {user.id} ({display_name(user)})",
