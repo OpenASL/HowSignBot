@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from functools import partial
 from typing import Any
+from typing import Callable
+from typing import Coroutine
+from typing import Sequence
 from typing import TypeVar
 
 import disnake
@@ -56,3 +59,54 @@ def make_button_group_view(creator_id: int, options: dict) -> BaseButtonGroupVie
 
     view_class = type("GeneratedButtonGroupView", (BaseButtonGroupView,), attrs)
     return view_class(creator_id=creator_id)
+
+
+Callback = Callable[[disnake.MessageInteraction, Any], Coroutine]
+
+
+class Dropdown(disnake.ui.Select):
+    def __init__(
+        self,
+        *,
+        options: Sequence[disnake.SelectOption],
+        on_select: Callback,
+        placeholder: str | None = None,
+    ):
+        self.on_select = on_select
+
+        super().__init__(
+            options=options,
+            placeholder=placeholder,
+            min_values=1,
+            max_values=1,
+        )
+
+    async def callback(self, inter: disnake.MessageInteraction):
+        await self.on_select(inter, self.values[0])
+
+
+class DropdownView(disnake.ui.View):
+    def __init__(self):
+        super().__init__()
+        self.dropdown: Dropdown | None = None
+
+    @classmethod
+    def from_options(
+        cls,
+        *,
+        options: Sequence[disnake.SelectOption],
+        on_select: Callback,
+        placeholder: str | None = None,
+    ) -> DropdownView:
+        view = cls()
+
+        async def handle_select(inter: disnake.MessageInteraction, value):
+            await on_select(inter, value)
+            view.stop()
+
+        dropdown = Dropdown(
+            options=options, on_select=handle_select, placeholder=placeholder
+        )
+        view.add_item(dropdown)
+        view.dropdown = dropdown
+        return view
