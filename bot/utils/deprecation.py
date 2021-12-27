@@ -24,6 +24,8 @@ After:
 async def send_deprecation_notice(
     ctx: Context, *, substitute: str, before_example: str, after_example: str
 ):
+    if settings.SEND_DEPRECATION_MESSAGES is False:
+        return
     content = TEMPLATE.format(
         COMMAND_PREFIX=COMMAND_PREFIX,
         ctx=ctx,
