@@ -1,15 +1,13 @@
+from __future__ import annotations
+
 import asyncio
 import logging
 import random
 from typing import Awaitable
 from typing import Callable
 from typing import cast
-from typing import List
 from typing import Mapping
-from typing import Optional
 from typing import Sequence
-from typing import Tuple
-from typing import Union
 
 import disnake
 from aiohttp import client
@@ -94,7 +92,7 @@ FACES = (
 def display_participant_names(
     participants: Sequence[Mapping], meeting: Mapping, max_to_display: int = 15
 ) -> str:
-    names: List[str] = []
+    names: list[str] = []
     for participant in participants:
         if participant["email"] in settings.ZOOM_EMAILS:
             # Display authorized zoom users as mentions
@@ -137,7 +135,7 @@ async def make_zoom_embed(
     meeting_id: int,
     *,
     include_instructions: bool = True,
-) -> Optional[disnake.Embed]:
+) -> disnake.Embed | None:
     meeting = await store.get_zoom_meeting(meeting_id)
     if not meeting:
         return None
@@ -186,10 +184,10 @@ async def make_zoom_embed(
     return embed
 
 
-def is_allowed_zoom_access(ctx: Context):
+def is_allowed_zoom_access(ctx: Context | disnake.ApplicationCommandInteraction):
     if ctx.author.id not in settings.ZOOM_USERS:
         raise errors.CheckFailure(
-            f"⚠️ `{COMMAND_PREFIX}{ctx.command}` can only be used by authorized users under the bot owner's Zoom account."
+            "⚠️ Zoom commands can only be used by authorized users under the bot owner's Zoom account."
         )
     return True
 
@@ -237,7 +235,7 @@ def add_repost_after_delay(
     bot.loop.create_task(add_repost_after_delay_impl(message, delay))
 
 
-async def get_zoom_meeting_id(meeting_id: Union[int, str]) -> int:
+async def get_zoom_meeting_id(meeting_id: int | str) -> int:
     zzzzoom_meeting = (
         await store.get_zzzzoom_meeting(meeting_id)
         if isinstance(meeting_id, str)
@@ -249,14 +247,15 @@ async def get_zoom_meeting_id(meeting_id: Union[int, str]) -> int:
 
 
 async def zoom_impl(
-    ctx: Context,
     *,
-    meeting_id: Optional[Union[int, str]],  # Either a Zoom meeting ID or zzzzoom ID
+    bot,
+    zoom_user: str,
+    channel_id: int,
+    meeting_id: int | str | None,  # Either a Zoom meeting ID or zzzzoom ID
     send_channel_message: Callable[[int], Awaitable],
     set_up: bool,
     with_zzzzoom: bool = False,
-) -> Tuple[int, disnake.Message]:
-    zoom_user = settings.ZOOM_USERS[ctx.author.id]
+) -> tuple[int, disnake.Message]:
     logger.info(f"creating zoom meeting for zoom user: {zoom_user}")
     message = None
     if meeting_id:
@@ -267,14 +266,14 @@ async def zoom_impl(
             )
             message = await send_channel_message(zoom_meeting_id)
             if set_up:
-                add_repost_after_delay(ctx.bot, message)
+                add_repost_after_delay(bot, message)
             logger.info(
-                f"creating zoom meeting message for message {message.id} in channel {ctx.channel.id}"
+                f"creating zoom meeting message for message {message.id} in channel {channel_id}"
             )
             await store.create_zoom_message(
                 meeting_id=zoom_meeting_id,
                 message_id=message.id,
-                channel_id=ctx.channel.id,
+                channel_id=channel_id,
             )
         return zoom_meeting_id, message
     else:
@@ -309,13 +308,13 @@ async def zoom_impl(
                     await store.create_zzzzoom_meeting(meeting_id=meeting.id)
                 message = await send_channel_message(meeting.id)
                 if set_up:
-                    add_repost_after_delay(ctx.bot, message)
+                    add_repost_after_delay(bot, message)
                 logger.info(
-                    f"creating zoom meeting message for message {message.id} in channel {ctx.channel.id}"
+                    f"creating zoom meeting message for message {message.id} in channel {channel_id}"
                 )
                 await store.create_zoom_message(
                     meeting_id=meeting.id,
                     message_id=message.id,
-                    channel_id=ctx.channel.id,
+                    channel_id=channel_id,
                 )
             return meeting.id, message

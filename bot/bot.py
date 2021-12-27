@@ -1,6 +1,7 @@
 import logging
 
 import disnake
+from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 
 from . import settings
@@ -44,6 +45,20 @@ async def on_command_error(ctx, error):
         await ctx.send(error)
     else:
         logger.error(f"unhandled exception from command: {ctx.command}", exc_info=error)
+
+
+@bot.event
+async def on_slash_command_error(inter: ApplicationCommandInteraction, error: Exception):
+    if isinstance(
+        error,
+        (commands.errors.CheckFailure, commands.errors.BadArgument),
+    ):
+        await inter.send(error)
+    else:
+        logger.error(
+            f"unhandled exception from command: {inter.application_command.name!r}",
+            exc_info=error,
+        )
 
 
 async def set_default_presence():

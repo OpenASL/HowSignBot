@@ -1,11 +1,15 @@
 import asyncio
 import logging
+from enum import auto
+from enum import Enum
 from typing import cast
 from typing import List
 from typing import Optional
 from typing import Union
 
 import disnake
+from disnake import ApplicationCommandInteraction
+from disnake import MessageInteraction
 from disnake.ext.commands import Bot
 from disnake.ext.commands import check
 from disnake.ext.commands import Cog
@@ -14,6 +18,8 @@ from disnake.ext.commands import Context
 from disnake.ext.commands import errors
 from disnake.ext.commands import group
 from disnake.ext.commands import is_owner
+from disnake.ext.commands import Param
+from disnake.ext.commands import slash_command
 
 import meetings
 from ._zoom import add_repost_after_delay
@@ -26,13 +32,16 @@ from ._zoom import zoom_impl
 from ._zoom import ZoomCreateError
 from bot import settings
 from bot.database import store
-from bot.utils.prompts import prompt_for_choice
+from bot.utils.deprecation import send_deprecation_notice
 from bot.utils.reactions import add_stop_sign
 from bot.utils.reactions import get_reaction_message
 from bot.utils.reactions import handle_close_reaction
 from bot.utils.reactions import maybe_clear_reaction
 from bot.utils.reactions import should_handle_reaction
 from bot.utils.reactions import STOP_SIGN
+from bot.utils.ui import ButtonGroupOption
+from bot.utils.ui import ButtonGroupView
+from bot.utils.ui import DropdownView
 
 logger = logging.getLogger(__name__)
 
@@ -80,9 +89,278 @@ def make_watch2gether_embed(url: str, video_url: Optional[str]) -> disnake.Embed
     return disnake.Embed(title=url, description=description, color=disnake.Color.gold())
 
 
+class ProtectionType(Enum):
+    WAITING_ROOM = auto()
+    FS_CAPTCHA = auto()
+
+
 class Meetings(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
+
+    @slash_command(name="zoom")
+    @check(is_allowed_zoom_access)
+    async def zoom_command(self, inter: ApplicationCommandInteraction):
+        pass
+
+    @zoom_command.sub_command(name="create")
+    async def zoom_create(self, inter: ApplicationCommandInteraction):
+        """(Authorized users only) Create a Zoom meeting"""
+        assert inter.user is not None
+
+        view = ButtonGroupView.from_options(
+            options=(
+                ButtonGroupOption(
+                    label="FS Captcha", value=ProtectionType.FS_CAPTCHA, emoji="👌"
+                ),
+                ButtonGroupOption(
+                    label="Waiting Room", value=ProtectionType.WAITING_ROOM, emoji="🚪"
+                ),
+            ),
+            creator_id=inter.user.id,
+        )
+        await inter.send(
+            "🔐 **How do you want to protect the meeting?** Choose one.", view=view
+        )
+        value = await view.wait_for_value()
+        with_zzzzoom = value == ProtectionType.FS_CAPTCHA
+
+        async def send_channel_message(mid: int):
+            return await inter.channel.send(embed=await make_zoom_embed(mid))
+
+        await zoom_impl(
+            bot=self.bot,
+            zoom_user=settings.ZOOM_USERS[inter.user.id],
+            channel_id=inter.channel.id,
+            meeting_id=None,
+            send_channel_message=send_channel_message,
+            set_up=True,
+            with_zzzzoom=with_zzzzoom,
+        )
+
+    @zoom_command.sub_command(name="crosspost")
+    async def zoom_crosspost(self, inter: ApplicationCommandInteraction, meeting_id: str):
+        """Crosspost a previously-created Zoom meeting
+
+        Parameters
+        ----------
+        meeting_id: Zoom meeting ID or zzzzoom ID
+        """
+        assert inter.user is not None
+
+        zoom_or_zzzzoom_id: Union[int, str]
+        try:
+            zoom_or_zzzzoom_id = int(meeting_id)
+        except ValueError:
+            zoom_or_zzzzoom_id = meeting_id
+            with_zzzzoom = True
+        else:
+            with_zzzzoom = False
+
+        async def send_channel_message(mid: int):
+            return await inter.channel.send(embed=await make_zoom_embed(mid))
+
+        await zoom_impl(
+            bot=self.bot,
+            zoom_user=settings.ZOOM_USERS[inter.user.id],
+            channel_id=inter.channel.id,
+            meeting_id=zoom_or_zzzzoom_id,
+            send_channel_message=send_channel_message,
+            set_up=True,
+            with_zzzzoom=with_zzzzoom,
+        )
+        await inter.send("_Crossposted Zoom_")
+
+    @zoom_command.sub_command(name="stop")
+    async def zoom_stop(
+        self,
+        inter: ApplicationCommandInteraction,
+        meeting_id_str: str = Param(name="meeting_id"),
+    ):
+        """Remove meeting details for a Zoom meeting
+
+        Parameters
+        ----------
+        meeting_id: Zoom meeting ID or zzzzoom ID
+        """
+        zoom_or_zzzzoom_id: Union[int, str]
+        try:
+            zoom_or_zzzzoom_id = int(meeting_id_str)
+        except ValueError:
+            zoom_or_zzzzoom_id = meeting_id_str
+
+        meeting_id = await get_zoom_meeting_id(zoom_or_zzzzoom_id)
+        meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
+        if not meeting_exists:
+            raise errors.CheckFailure(
+                f"⚠️ Could not find Zoom meeting with ID {meeting_id}. Make sure to run `{COMMAND_PREFIX}zoom setup {meeting_id}` first."
+            )
+        zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
+        if not zoom_messages:
+            raise errors.CheckFailure(f"⚠️ No meeting messages for meeting {meeting_id}.")
+        messages = []
+        for message_info in zoom_messages:
+            channel_id = message_info["channel_id"]
+            message_id = message_info["message_id"]
+            channel = self.bot.get_channel(channel_id)
+            message: disnake.Message = await channel.fetch_message(message_id)
+            messages.append(message)
+            logger.info(
+                f"scrubbing meeting details for meeting {meeting_id} in channel {channel_id}, message {message_id}"
+            )
+            await message.edit(content=ZOOM_CLOSED_MESSAGE, embed=None)
+            await maybe_clear_reaction(message, REPOST_EMOJI)
+        await store.end_zoom_meeting(meeting_id=meeting_id)
+        await inter.send("🛑 Meeting details removed.")
+
+    # XXX: Ideally we'd use slash command permissions intead of a check here,
+    # but those can only be set per-guild at the moment.
+    @zoom_command.sub_command(name="users")
+    @is_owner()
+    async def zoom_users(self, inter: ApplicationCommandInteraction):
+        """(Bot owner only) List users who have access to the zoom commands"""
+        try:
+            users = await meetings.list_zoom_users(token=settings.ZOOM_JWT)
+        except asyncio.exceptions.TimeoutError:
+            logger.exception("zoom request timed out")
+            await inter.send(
+                "🚨 _Request to Zoom API timed out. This may be due to rate limiting. Try again later._"
+            )
+            return
+        licensed_user_emails = {
+            user.email for user in users if user.type == meetings.ZoomPlanType.LICENSED
+        }
+        description = "\n".join(
+            tuple(
+                ("👑 " if email.lower() in licensed_user_emails else "") + f"<@!{user_id}>"
+                for user_id, email in settings.ZOOM_USERS.items()
+            )
+        )
+        embed = disnake.Embed(
+            title=f"Fancy Zoom Users ({len(settings.ZOOM_USERS)})",
+            description=description,
+            color=disnake.Color.blue(),
+        )
+        embed.set_footer(text="👑 = Licensed")
+        await inter.send(embed=embed)
+
+    @zoom_command.sub_command(
+        name="license", hidden=True, help="Upgrade a user to the Licensed plan type."
+    )
+    @is_owner()
+    async def zoom_license(
+        self,
+        inter: ApplicationCommandInteraction,
+        user: disnake.User,
+    ):
+        """(Bot owner only) Upgrade a Zoom user to a Licensed plan"""
+        assert inter.user is not None
+        if user.id not in settings.ZOOM_USERS:
+            await inter.send(f"🚨 _{user.mention} is not a configured Zoom user._")
+            return
+
+        await inter.send(
+            f"✋ **{user.mention} will be upgraded to a Licensed plan**.",
+        )
+        zoom_user_id = settings.ZOOM_USERS[user.id]
+        try:
+            logger.info(f"attempting to upgrade user {user.id} to licensed plan")
+            await meetings.update_zoom_user(
+                token=settings.ZOOM_JWT,
+                user_id=zoom_user_id,
+                data={"type": meetings.ZoomPlanType.LICENSED},
+            )
+        except meetings.MaxZoomLicensesError:
+            try:
+                users = await meetings.list_zoom_users(token=settings.ZOOM_JWT)
+            except asyncio.exceptions.TimeoutError:
+                logger.exception("zoom request timed out")
+                await inter.send(
+                    "🚨 _Request to Zoom API timed out. This may be due to rate limiting. Try again later._"
+                )
+                return
+            zoom_to_discord_user_mapping = {
+                email.lower(): disnake_id
+                for disnake_id, email in settings.ZOOM_USERS.items()
+            }
+            # Discord user IDs for Licensed users
+            licensed_user_discord_ids = tuple(
+                zoom_to_discord_user_mapping[user.email.lower()]
+                for user in users
+                if user.email.lower() in zoom_to_discord_user_mapping
+                and user.type == meetings.ZoomPlanType.LICENSED
+                # Don't allow de-licensing the bot owner, of course
+                and zoom_to_discord_user_mapping[user.email.lower()] != settings.OWNER_ID
+            )
+            if len(licensed_user_discord_ids):
+                options = [
+                    disnake.SelectOption(
+                        label=settings.ZOOM_USERS[discord_user_id], value=discord_user_id
+                    )
+                    for discord_user_id in licensed_user_discord_ids
+                ]
+
+                async def on_select(select_interaction: MessageInteraction, value: str):
+                    downgraded_user_id = int(value)
+                    await select_interaction.response.edit_message(
+                        content=f"☑️ Selected <@!{downgraded_user_id}> to downgrade.",
+                        view=None,
+                    )
+                    try:
+                        logger.info(
+                            f"attempting to downgrade user {downgraded_user_id} to basic plan"
+                        )
+                        await meetings.update_zoom_user(
+                            token=settings.ZOOM_JWT,
+                            user_id=settings.ZOOM_USERS[downgraded_user_id],
+                            data={"type": meetings.ZoomPlanType.BASIC},
+                        )
+                    except meetings.ZoomClientError:
+                        logger.exception(f"failed to downgrade user {downgraded_user_id}")
+                        await inter.send(
+                            f"🚨 _Failed to downgrade <@!{downgraded_user_id}>. Check the logs for details._"
+                        )
+                    try:
+                        logger.info(
+                            f"re-attempting to upgrade user {user.id} to licensed plan"
+                        )
+                        await meetings.update_zoom_user(
+                            token=settings.ZOOM_JWT,
+                            user_id=zoom_user_id,
+                            data={"type": meetings.ZoomPlanType.LICENSED},
+                        )
+                    except meetings.ZoomClientError:
+                        logger.exception(f"failed to upgrade user {user.id}")
+                        await inter.send(
+                            f"🚨 _Failed to upgrade {user.mention}. Check the logs for details._"
+                        )
+                    await inter.send(
+                        f"👑 **{user.mention} successfully upgraded to Licensed plan.**\n<@!{downgraded_user_id}> downgraded to Basic."
+                    )
+
+                view = DropdownView.from_options(
+                    options=options, on_select=on_select, placeholder="Choose a user"
+                )
+                await inter.send("Choose a user to downgrade to Basic.", view=view)
+            else:
+                await inter.send(
+                    "🚨 _No available users to downgrade on Discord. Go to the Zoom account settings to manage licenses_."
+                )
+                return
+            return
+        except meetings.ZoomClientError as error:
+            await inter.send(f"🚨 _{error.args[0]}_")
+            return
+        except Exception:
+            logger.exception(f"failed to license user {user}")
+            await inter.send(
+                f"🚨 _Failed to license user {user.mention}. Check the logs for details._"
+            )
+            return
+        else:
+            await inter.send(f"👑 **{user.mention} upgraded to a Licensed plan**.")
+
+    # Deprecated prefix commands
 
     @group(name="zoom", aliases=("z",), invoke_without_command=True)
     @check(is_allowed_zoom_access)
@@ -107,7 +385,7 @@ class Meetings(Cog):
         help="Reveal meeting details for a meeting started with the setup command",
     )
     @check(is_allowed_zoom_access)
-    async def zoom_start(
+    async def zoom_setup_start(
         self, ctx: Context, meeting_id: Optional[Union[int, str]] = None
     ):
         await ctx.channel.trigger_typing()
@@ -165,46 +443,6 @@ class Meetings(Cog):
             else:
                 await ctx.channel.send("🚀 Meeting details revealed.")
 
-    @zoom_group.command(
-        name="stop",
-        help="Remove meeting details for a meeting",
-    )
-    @check(is_allowed_zoom_access)
-    async def zoom_stop(self, ctx: Context, meeting_id: Union[int, str]):
-        await ctx.channel.trigger_typing()
-        meeting_id = await get_zoom_meeting_id(meeting_id)
-        meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
-        if not meeting_exists:
-            raise errors.CheckFailure(
-                f"⚠️ Could not find Zoom meeting with ID {meeting_id}. Make sure to run `{COMMAND_PREFIX}zoom setup {meeting_id}` first."
-            )
-        zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
-        if not zoom_messages:
-            raise errors.CheckFailure(f"⚠️ No meeting messages for meeting {meeting_id}.")
-        messages = []
-        for message_info in zoom_messages:
-            channel_id = message_info["channel_id"]
-            message_id = message_info["message_id"]
-            channel = self.bot.get_channel(channel_id)
-            message: disnake.Message = await channel.fetch_message(message_id)
-            messages.append(message)
-            logger.info(
-                f"scrubbing meeting details for meeting {meeting_id} in channel {channel_id}, message {message_id}"
-            )
-            await message.edit(content=ZOOM_CLOSED_MESSAGE, embed=None)
-            await maybe_clear_reaction(message, REPOST_EMOJI)
-        await store.end_zoom_meeting(meeting_id=meeting_id)
-        if ctx.guild is None:
-            links = "\n".join(
-                f"[{message.guild} - #{message.channel}]({message.jump_url})"
-                for message in messages
-            )
-            await ctx.send(
-                embed=disnake.Embed(title="🛑 Meeting Ended", description=links)
-            )
-        else:
-            await ctx.channel.send("🛑 Meeting details removed.")
-
     @group(
         name="zzzzoom",
         aliases=("zzoom", "zzzoom", "zzzzzoom", "zz", "zzz", "zzzz", "zzzzz"),
@@ -227,6 +465,7 @@ class Meetings(Cog):
     ):
         await self.zoom_setup_impl(ctx, meeting_id=meeting_id, with_zzzzoom=True)
 
+    @zoom_command.error
     @zzzzoom_group.error
     @zzzzoom_setup.error
     @zoom_group.error
@@ -235,139 +474,6 @@ class Meetings(Cog):
         if isinstance(error, ZoomCreateError):
             logger.error("could not create zoom due to unexpected error", exc_info=error)
             await ctx.send(error)
-
-    # Zoom user management commands
-
-    @zoom_group.command(
-        name="users", hidden=True, help="List users who have access to the zoom commands."
-    )
-    @is_owner()
-    async def zoom_users(self, ctx: Context):
-        await ctx.channel.trigger_typing()
-        try:
-            users = await meetings.list_zoom_users(token=settings.ZOOM_JWT)
-        except asyncio.exceptions.TimeoutError:
-            logger.exception("zoom request timed out")
-            await ctx.send(
-                "🚨 _Request to Zoom API timed out. This may be due to rate limiting. Try again later._"
-            )
-            return
-        licensed_user_emails = {
-            user.email for user in users if user.type == meetings.ZoomPlanType.LICENSED
-        }
-        description = "\n".join(
-            tuple(
-                ("👑 " if email.lower() in licensed_user_emails else "") + f"<@!{user_id}>"
-                for user_id, email in settings.ZOOM_USERS.items()
-            )
-        )
-        embed = disnake.Embed(
-            title=f"Fancy Zoom Users ({len(settings.ZOOM_USERS)})",
-            description=description,
-            color=disnake.Color.blue(),
-        )
-        embed.set_footer(text="👑 = Licensed")
-        await ctx.send(embed=embed)
-
-    @zoom_group.command(
-        name="license", hidden=True, help="Upgrade a user to the Licensed plan type."
-    )
-    @is_owner()
-    async def zoom_license(self, ctx: Context, user: disnake.User):
-        if user.id not in settings.ZOOM_USERS:
-            await ctx.send(f"🚨 _{user.mention} is not a configured Zoom user._")
-            return
-
-        await ctx.channel.trigger_typing()
-        zoom_user_id = settings.ZOOM_USERS[user.id]
-        try:
-            logger.info(f"attempting to upgrade user {user.id} to licensed plan")
-            await meetings.update_zoom_user(
-                token=settings.ZOOM_JWT,
-                user_id=zoom_user_id,
-                data={"type": meetings.ZoomPlanType.LICENSED},
-            )
-        except meetings.MaxZoomLicensesError:
-            try:
-                users = await meetings.list_zoom_users(token=settings.ZOOM_JWT)
-            except asyncio.exceptions.TimeoutError:
-                logger.exception("zoom request timed out")
-                await ctx.send(
-                    "🚨 _Request to Zoom API timed out. This may be due to rate limiting. Try again later._"
-                )
-                return
-            zoom_to_disnake_user_mapping = {
-                email.lower(): disnake_id
-                for disnake_id, email in settings.ZOOM_USERS.items()
-            }
-            # Discord user IDs for Licensed users
-            licensed_user_disnake_ids = tuple(
-                zoom_to_disnake_user_mapping[user.email.lower()]
-                for user in users
-                if user.email.lower() in zoom_to_disnake_user_mapping
-                and user.type == meetings.ZoomPlanType.LICENSED
-                # Don't allow de-licensing the bot owner, of course
-                and zoom_to_disnake_user_mapping[user.email.lower()] != settings.OWNER_ID
-            )
-            if len(licensed_user_disnake_ids) == 1:
-                downgraded_user_id = licensed_user_disnake_ids[0]
-            elif len(licensed_user_disnake_ids) > 1:
-                downgraded_user_id = await prompt_for_choice(
-                    ctx,
-                    prompt=(
-                        f"✋ **{user.mention} will be upgraded to a Licensed plan**.\nChoose a user to downgrade to Basic."
-                    ),
-                    choices={
-                        disnake_user_id: f"<@!{disnake_user_id}>"
-                        for disnake_user_id in licensed_user_disnake_ids
-                    },
-                )
-            else:
-                await ctx.send(
-                    "🚨 _No available users to downgrade on Discord. Go to the Zoom account settings to manage licenses_."
-                )
-                return
-            try:
-                logger.info(
-                    f"attempting to downgrade user {downgraded_user_id} to basic plan"
-                )
-                await meetings.update_zoom_user(
-                    token=settings.ZOOM_JWT,
-                    user_id=settings.ZOOM_USERS[downgraded_user_id],
-                    data={"type": meetings.ZoomPlanType.BASIC},
-                )
-            except meetings.ZoomClientError:
-                logger.exception(f"failed to downgrade user {downgraded_user_id}")
-                await ctx.send(
-                    f"🚨 _Failed to downgrade <@!{downgraded_user_id}>. Check the logs for details._"
-                )
-            try:
-                logger.info(f"re-attempting to upgrade user {user.id} to licensed plan")
-                await meetings.update_zoom_user(
-                    token=settings.ZOOM_JWT,
-                    user_id=zoom_user_id,
-                    data={"type": meetings.ZoomPlanType.LICENSED},
-                )
-            except meetings.ZoomClientError:
-                logger.exception(f"failed to upgrade user {user.id}")
-                await ctx.send(
-                    f"🚨 _Failed to upgrade {user.mention}. Check the logs for details._"
-                )
-            await ctx.send(
-                f"👑 **{user.mention} successfully upgraded to Licensed plan.**\n<@!{downgraded_user_id}> downgraded to Basic."
-            )
-            return
-        except meetings.ZoomClientError as error:
-            await ctx.send(f"🚨 _{error.args[0]}_")
-            return
-        except Exception:
-            logger.exception(f"failed to license user {user}")
-            await ctx.send(
-                f"🚨 _Failed to license user {user.mention}. Check the logs for details._"
-            )
-            return
-        else:
-            await ctx.send(f"👑 **{user.mention} upgraded to a Licensed plan**.")
 
     async def zoom_group_impl(
         self, ctx: Context, *, meeting_id: Optional[Union[int, str]], with_zzzzoom: bool
@@ -378,11 +484,29 @@ class Meetings(Cog):
             return await ctx.reply(embed=await make_zoom_embed(mid))
 
         await zoom_impl(
-            ctx,
+            bot=self.bot,
+            zoom_user=settings.ZOOM_USERS[ctx.author.id],
+            channel_id=ctx.channel.id,
             meeting_id=meeting_id,
             send_channel_message=send_channel_message,
             set_up=True,
             with_zzzzoom=with_zzzzoom,
+        )
+
+        before_example = f"{COMMAND_PREFIX}{ctx.invoked_with}"
+        after_example = "/zoom"
+        if meeting_id:
+            substitute = "/zoom crosspost"
+            before_example += " <meeting id>"
+            after_example += " crosspost <meeting id>"
+        else:
+            substitute = "/zoom create"
+            after_example += " create"
+        await send_deprecation_notice(
+            ctx,
+            substitute=substitute,
+            before_example=before_example,
+            after_example=after_example,
         )
 
     async def zoom_setup_impl(
@@ -400,7 +524,9 @@ class Meetings(Cog):
             )
 
         meeting_id, _ = await zoom_impl(
-            ctx,
+            bot=self.bot,
+            zoom_user=settings.ZOOM_USERS[ctx.author.id],
+            channel_id=ctx.channel.id,
             meeting_id=meeting_id,
             send_channel_message=send_channel_message,
             set_up=False,
@@ -421,6 +547,8 @@ class Meetings(Cog):
                 "When you're ready for people to join, reply with:\n"
                 f"```{COMMAND_PREFIX}zoom start {meeting_id}```"
             )
+
+    # End deprecated prefix commands
 
     @command(name="meet", aliases=("jitsi",), help="Start a Jitsi Meet meeting")
     async def meet_command(self, ctx: Context, *, name: Optional[str]):

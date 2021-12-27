@@ -56,4 +56,6 @@ WATCH2GETHER_API_KEY = env.str("WATCH2GETHER_API_KEY", required=True)
 # When to send practice schedules (in Eastern time)
 DAILY_PRACTICE_SEND_TIME = env.time("DAILY_PRACTICE_SEND_TIME", "10:00")
 
+SEND_DEPRECATION_MESSAGES = env.bool("SEND_DEPRECATION_MESSAGES", default=False)
+
 env.seal()
