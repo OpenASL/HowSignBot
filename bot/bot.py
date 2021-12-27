@@ -50,7 +50,7 @@ async def cycle_presence():
             name=command,
             type=disnake.ActivityType.watching,
         )
-        logger.info(f"changing presence to show command: {command}")
+        logger.debug(f"changing presence to show command: {command}")
         await bot.change_presence(activity=activity)
         await asyncio.sleep(CHANGE_PRESENCE_EVERY)
 
