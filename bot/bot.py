@@ -35,12 +35,10 @@ bot = commands.Bot(
 PRESENCE_COMMANDS = (
     "/sign",
     "/handshape",
-    "/catchphrase",
-    "/codenames",
-    "/schedule",
+    "/catchphrase | /codenames",
+    "/schedule new",
     "/watch2gether",
-    "/sentence",
-    "/idiom",
+    "/sentence | /idiom",
     "/feedback",
 )
 CHANGE_PRESENCE_EVERY = 120  # seconds
