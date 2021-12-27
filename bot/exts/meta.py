@@ -2,34 +2,32 @@ import logging
 from typing import Optional
 
 import disnake
+from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 from disnake.ext.commands import Bot
 from disnake.ext.commands import Cog
 from disnake.ext.commands import command
 from disnake.ext.commands import Context
 from disnake.ext.commands import is_owner
+from disnake.ext.commands import slash_command
 
 from bot import __version__
 from bot import settings
 from bot.bot import set_default_presence
 from bot.utils import truncate
-from bot.utils.datetimes import utcnow
-from bot.utils.gsheets import get_gsheet_client
 
 logger = logging.getLogger(__name__)
 
 COMMAND_PREFIX = settings.COMMAND_PREFIX
 
 
-def post_feedback(feedback: str, guild: Optional[str]):
-    client = get_gsheet_client()
-    # Assumes rows are in the format (date, feedback, guild, version)
-    sheet = client.open_by_key(settings.FEEDBACK_SHEET_KEY)
-    now = utcnow()
-    worksheet = sheet.get_worksheet(0)
-    row = (now.isoformat(), feedback, guild or "", __version__)
-    logger.info(f"submitting feedback: {row}")
-    return worksheet.append_row(row)
+async def post_feedback(bot: commands.Bot, text: str, guild: Optional[str]):
+    embed = disnake.Embed(title="Feedback received", description=text)
+    if guild:
+        embed.add_field(name="Guild", value=guild)
+    embed.add_field(name="Version", value=__version__)
+    owner = bot.get_user(bot.owner_id)
+    await owner.send(embed=embed)
 
 
 def ActivityTypeConverter(argument) -> disnake.ActivityType:
@@ -42,28 +40,21 @@ class Meta(Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @command(name="invite", help="Invite HowSignBot to another Discord server")
-    async def invite_command(self, ctx: Context):
+    @slash_command(name="feedback")
+    async def feedback_command(self, inter: ApplicationCommandInteraction, text: str):
+        """Anonymously share an idea or report a bug"""
+        guild = inter.guild.name if inter.guild else None
+        await post_feedback(self.bot, text, guild)
+        await inter.send("🙌 Your feedback has been received! Thank you for your help.")
+
+    @slash_command(name="invite")
+    async def invite_command(self, inter: ApplicationCommandInteraction):
+        """Invite HowSignBot to another Discord server"""
         url = disnake.utils.oauth_url(
             self.bot.user.id,
             permissions=disnake.Permissions(permissions=59456),
         )
-        await ctx.send(f"Add HowSignBot to another server here:\n<{url}>")
-
-    @command(name="feedback", help="Anonymously share an idea or report a bug")
-    async def feedback_command(self, ctx: Context, *, feedback):
-        await ctx.channel.trigger_typing()
-        author = ctx.author
-        guild = author.guild.name if hasattr(author, "guild") else None
-        post_feedback(feedback, guild)
-        await ctx.send("🙌 Your feedback has been received! Thank you for your help.")
-
-    @feedback_command.error
-    async def feedback_error(self, ctx, error):
-        if isinstance(error, commands.errors.MissingRequiredArgument):
-            await ctx.send(
-                f"I ♥️ feedback! Enter a your feedback after `{COMMAND_PREFIX}feedback`"
-            )
+        await inter.send(f"Add HowSignBot to another server here:\n<{url}>")
 
     @command(name="presence", hidden=True, help="BOT OWNER ONLY: Change bot presense")
     @is_owner()
