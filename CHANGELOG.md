@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.60.0 (2021-12-27)
+### Feature
+* Update presences ([`02cda20`](https://github.com/OpenASL/HowSignBot/commit/02cda20092486f63162473be8258bc30515ba1ef))
+
 ## v21.59.0 (2021-12-27)
 ### Feature
 * Rename /schedule add to /schedule new (keep alias) ([`95f8b6e`](https://github.com/OpenASL/HowSignBot/commit/95f8b6e9c63df56e718f1b48859c81d2fe13c708))
