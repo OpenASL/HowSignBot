@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.61.0 (2021-12-27)
+### Feature
+* Less chatty logs ([`2f531a2`](https://github.com/OpenASL/HowSignBot/commit/2f531a2bf6341ad259cafc55290c83a8c60914a2))
+
 ## v21.60.0 (2021-12-27)
 ### Feature
 * Update presences ([`02cda20`](https://github.com/OpenASL/HowSignBot/commit/02cda20092486f63162473be8258bc30515ba1ef))
