@@ -1,14 +1,14 @@
 # name: test_catchphrase
   <class 'dict'> {
     'content': '
-      ||softball||
-      ||skirt||
-      ||green||
-      ||bay||
-      ||snowman||
-      ||Steve Martin||
       ||river rafting||
       ||Spain||
+      ||dredge||
+      ||earthquake||
+      ||wrinkle||
+      ||Aristotle||
+      ||cousin||
+      ||angel food cake||
       Categories: easy, medium, hard, animals, food, travel, people, household
     ',
   }
@@ -16,14 +16,14 @@
 # name: test_catchphrase_categories[Hard]
   <class 'dict'> {
     'content': '
-      ||audacity||
-      ||wreath||
-      ||through||
-      ||highway||
       ||cardboard||
       ||full moon||
       ||mast||
       ||wool||
+      ||blimp||
+      ||standard||
+      ||escalator||
+      ||shock collar||
       Categories: easy, medium, hard, animals, food, travel, people, household
     ',
   }
@@ -39,14 +39,14 @@
 # name: test_catchphrase_categories[food]
   <class 'dict'> {
     'content': '
-      ||clementine||
-      ||sloppy joe||
-      ||scone||
-      ||chicken pot pie||
-      ||blanch||
-      ||clams||
-      ||Kool-aid||
       ||corn on the cob||
+      ||pineapple||
+      ||yam||
+      ||egg salad sandwich||
+      ||chocolate cake||
+      ||pork||
+      ||nutmeg||
+      ||bok choy||
       Categories: easy, medium, hard, animals, food, travel, people, household
     ',
   }
