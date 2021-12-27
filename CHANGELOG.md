@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.58.0 (2021-12-27)
+### Feature
+* Change presence every 2 minutes ([#373](https://github.com/OpenASL/HowSignBot/issues/373)) ([`beed6a5`](https://github.com/OpenASL/HowSignBot/commit/beed6a5498e020aaa75e8901c9ebcf45d379e13f))
+
 ## v21.57.0 (2021-12-27)
 ### Feature
 * Add /zoom new alias ([#372](https://github.com/OpenASL/HowSignBot/issues/372)) ([`8cfc2e5`](https://github.com/OpenASL/HowSignBot/commit/8cfc2e54a6bcb01cece45448bcd3e8311b435ba2))
