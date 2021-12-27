@@ -105,7 +105,7 @@ class Meetings(Cog):
 
     @zoom_command.sub_command(name="create")
     async def zoom_create(self, inter: ApplicationCommandInteraction):
-        """Create a Zoom meeting"""
+        """(Authorized users only) Create a Zoom meeting"""
         assert inter.user is not None
 
         view = ButtonGroupView.from_options(
