@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v21.57.0 (2021-12-27)
+### Feature
+* Add /zoom new alias ([#372](https://github.com/OpenASL/HowSignBot/issues/372)) ([`8cfc2e5`](https://github.com/OpenASL/HowSignBot/commit/8cfc2e54a6bcb01cece45448bcd3e8311b435ba2))
+* Add /schedule add command ([#371](https://github.com/OpenASL/HowSignBot/issues/371)) ([`ae406dd`](https://github.com/OpenASL/HowSignBot/commit/ae406dd1b3ebddaef5f091942826d1f7fb01299c))
+* /feedback and /invite ([#370](https://github.com/OpenASL/HowSignBot/issues/370)) ([`5c41acc`](https://github.com/OpenASL/HowSignBot/commit/5c41acc22341ae8f11052d7a00e0e70447478f2e))
+* /watch2gether and /jitsi ([#369](https://github.com/OpenASL/HowSignBot/issues/369)) ([`8a395c3`](https://github.com/OpenASL/HowSignBot/commit/8a395c3f3582063ec715e945ce621a9df0022b7c))
+* Port sentence and idiom to slash commands ([#368](https://github.com/OpenASL/HowSignBot/issues/368)) ([`cc31a0c`](https://github.com/OpenASL/HowSignBot/commit/cc31a0c093b2fe8d33b2b0db2905bf64308f9563))
+* Port games to slash commands ([#366](https://github.com/OpenASL/HowSignBot/issues/366)) ([`a816722`](https://github.com/OpenASL/HowSignBot/commit/a816722750bbaf33fc30ccd22abafeaa209de552))
+* Change default presence ([`c0fcaee`](https://github.com/OpenASL/HowSignBot/commit/c0fcaeeb23af24ae82a2d723e9be6e9bb525cad9))
+
 ## v21.56.0 (2021-12-26)
 ### Feature
 * Migrate zoom commands to slash commands ([#365](https://github.com/OpenASL/HowSignBot/issues/365)) ([`df019a9`](https://github.com/OpenASL/HowSignBot/commit/df019a91393a14ff1a2feb08fde8bec37364fd4b))
