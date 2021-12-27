@@ -179,7 +179,7 @@ class AslPracticePartners(Cog):
     @tag_command.sub_command(name="sync")
     @commands.has_permissions(kick_members=True)  # Staff
     async def tag_sync(self, inter: GuildCommandInteraction):
-        """Get tags list up to date"""
+        """(Authorized users only) Get tags list up to date"""
         await inter.response.send_message(**self._tag_sync_impl())
 
     @tag_command.sub_command(name="list")
