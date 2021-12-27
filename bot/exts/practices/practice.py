@@ -77,7 +77,7 @@ async def schedule_impl(guild_id: int, when: Optional[str]):
             # Workaround for https://github.com/scrapinghub/dateparser/issues/403
             "RELATIVE_BASE": now_pacific.replace(tzinfo=None),
         }
-        dtime, _ = parse_human_readable_datetime(when, settings=settings) or utcnow()
+        dtime, _ = parse_human_readable_datetime(when, settings=settings)
         dtime = dtime or utcnow()
     else:
         settings = None
