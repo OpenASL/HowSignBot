@@ -9,7 +9,6 @@
       ||Aristotle||
       ||cousin||
       ||angel food cake||
-      Enter `!cp` or `!cp [category]` for more.
       Categories: easy, medium, hard, animals, food, travel, people, household
     ',
   }
@@ -25,7 +24,6 @@
       ||standard||
       ||escalator||
       ||shock collar||
-      Enter `!cp` or `!cp [category]` for more.
       Categories: easy, medium, hard, animals, food, travel, people, household
     ',
   }
@@ -49,7 +47,6 @@
       ||pork||
       ||nutmeg||
       ||bok choy||
-      Enter `!cp` or `!cp [category]` for more.
       Categories: easy, medium, hard, animals, food, travel, people, household
     ',
   }

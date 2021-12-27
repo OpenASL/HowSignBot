@@ -196,7 +196,7 @@ class AslPracticePartners(Cog):
         hidden=True,
         help="Display a tag or the list of available tags",
     )
-    # XXX: The `tag_name` typing should be str | None, but disnake.py doesn't support unions in arguments
+    # XXX: The `tag_name` typing should be str | None, but disnake doesn't support unions in arguments
     async def tag_group(self, ctx: Context, *, tag_name: str = None):
         if not tag_name:
             await ctx.reply(**self._tag_list_impl())
