@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.63.1 (2021-12-28)
+### Fix
+* Add punctuation ([`0b1b578`](https://github.com/OpenASL/HowSignBot/commit/0b1b57840b264308105ebacdf2bcd63c7d423d67))
+
 ## v21.63.0 (2021-12-28)
 ### Feature
 * Create thread for Handshape of the Day ([#376](https://github.com/OpenASL/HowSignBot/issues/376)) ([`d7fe076`](https://github.com/OpenASL/HowSignBot/commit/d7fe0768db11dfea51dc8a56d3d79d5a068f17ea))
