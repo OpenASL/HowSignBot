@@ -128,6 +128,8 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
             embed = make_base_embed(dtime=dtime)
         file_ = None
 
+        include_handshape_of_the_day = bool(settings.get("include_handshape_of_the_day"))
+        handshape = None
         holiday = holiday_emojis.get(dtime.date())
         if holiday and holiday.term is not None:
             embed.add_field(
@@ -135,7 +137,7 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
                 value=word_display(holiday.term),
                 inline=False,
             )
-        elif settings.get("include_handshape_of_the_day"):
+        elif include_handshape_of_the_day:
             # Handshape of the Day
             handshape = get_daily_handshape(dtime)
             filename = f"{handshape.name}.png"
@@ -162,7 +164,12 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
                     inline=False,
                 )
 
-        await channel.send(file=file_, embed=embed)
+        message = await channel.send(file=file_, embed=embed)
+        if include_handshape_of_the_day and handshape:
+            await message.create_thread(
+                name=f'What signs use the handshape of the day ("{handshape.name}")',
+                auto_archive_duration=disnake.ThreadArchiveDuration.day,
+            )
 
     async def daily_practice_message(self):
         while True:
