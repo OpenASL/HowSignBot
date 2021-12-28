@@ -185,7 +185,7 @@ class Meetings(Cog):
 
     @zoom_command.sub_command(name="setup")
     async def zoom_setup(self, inter: GuildCommandInteraction):
-        """Set up a Zoom before revealing its details to other users"""
+        """(Authorized users only) Set up a Zoom before revealing its details to other users"""
         assert inter.user is not None
         assert inter.channel_id is not None
         value = await self._prompt_for_protection_type(inter)
@@ -224,7 +224,7 @@ class Meetings(Cog):
         inter: ApplicationCommandInteraction,
         meeting_id_str: str = Param(name="meeting_id"),
     ):
-        """"Reveal meeting details for a meeting started with the setup command"""
+        """(Authorized users only) Reveal meeting details for a meeting started with the setup command"""
         zoom_or_zzzzoom_id: Union[int, str]
         try:
             zoom_or_zzzzoom_id = int(meeting_id_str)
