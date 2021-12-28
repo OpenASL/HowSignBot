@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.63.0 (2021-12-28)
+### Feature
+* Create thread for Handshape of the Day ([#376](https://github.com/OpenASL/HowSignBot/issues/376)) ([`d7fe076`](https://github.com/OpenASL/HowSignBot/commit/d7fe0768db11dfea51dc8a56d3d79d5a068f17ea))
+
 ## v21.62.0 (2021-12-27)
 ### Feature
 * **schedule:** Improve /schedule new UI ([#375](https://github.com/OpenASL/HowSignBot/issues/375)) ([`6113ae3`](https://github.com/OpenASL/HowSignBot/commit/6113ae3c88cccdd9d08f8313a5140f7d9bf11c38))
