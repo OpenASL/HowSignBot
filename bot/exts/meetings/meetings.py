@@ -714,6 +714,7 @@ class Meetings(Cog):
                 ),
             ),
             creator_id=inter.user.id,
+            choice_label="🔐 **Protection Type**",
         )
         await inter.send(
             "🔐 **How do you want to protect the meeting?** Choose one.", view=view

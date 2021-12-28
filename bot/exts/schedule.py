@@ -59,13 +59,16 @@ class PromptCancelled(Exception):
     pass
 
 
+def format_scheduled_start_time(dtime: dt.datetime):
+    dtime_pacific = dtime.astimezone(PACIFIC)
+    return dtime_pacific.strftime("%A, %B %-d") + " · " + format_multi_time(dtime)
+
+
 def make_event_embed(event: GuildScheduledEvent) -> disnake.Embed:
     dtime = event.scheduled_start_time
-    dtime_pacific = dtime.astimezone(PACIFIC)
-    description = (
-        "🗓 " + dtime_pacific.strftime("%A, %B %-d") + " · " + format_multi_time(dtime)
+    embed = disnake.Embed(
+        title=event.name, description="🗓" + format_scheduled_start_time(dtime)
     )
-    embed = disnake.Embed(title=event.name, description=description)
     return embed
 
 
@@ -79,11 +82,12 @@ class Schedule(commands.Cog):
         *,
         prompt: str,
         is_initial_interaction: bool = False,
-    ) -> str:
+    ) -> tuple[str, disnake.Message]:
         if is_initial_interaction:
             await inter.send(content=prompt)
+            prompt_message = await inter.original_message()
         else:
-            await inter.channel.send(content=prompt)
+            prompt_message = await inter.channel.send(content=prompt)
 
         def check_user_response(m: disnake.Message):
             return m.author == inter.user and m.channel.id == m.channel.id
@@ -100,7 +104,8 @@ class Schedule(commands.Cog):
         if response_message.content.lower() == "cancel":
             await response_message.reply(content="✨ _Cancelled_")
             raise PromptCancelled
-        return response_message.content.strip()
+        response = response_message.content.strip()
+        return response, prompt_message
 
     @commands.slash_command(name="schedule", guild_ids=(settings.ASLPP_GUILD_ID,))
     async def schedule_command(self, inter: GuildCommandInteraction):
@@ -110,7 +115,7 @@ class Schedule(commands.Cog):
     async def schedule_new(self, inter: GuildCommandInteraction):
         """Quickly add a new scheduled event with guided prompts."""
         # Step 1: Prompt for the start time
-        start_time = await self._prompt_for_text_input(
+        start_time, start_time_message = await self._prompt_for_text_input(
             inter, prompt=START_TIME_PROMPT, is_initial_interaction=True
         )
         logger.info(f"attempting to schedule new practice session: {start_time}")
@@ -134,29 +139,41 @@ class Schedule(commands.Cog):
             raise commands.errors.BadArgument(
                 "⚠Parsed date or time is in the past. Try again with a future date or time."
             )
+        await start_time_message.edit(
+            content=(
+                "☑️ **When will your event start?**\n"
+                f"Entered: {format_scheduled_start_time(scheduled_start_time)}\n"
+                "If this is incorrect, enter `cancel` and run `/schedule new` again."
+            )
+        )
 
         # Step 2: Prompt for title
-        title = await self._prompt_for_text_input(
-            inter, prompt="➡ **Enter a title**, or enter `skip` to use the default."
+        title, title_prompt_message = await self._prompt_for_text_input(
+            inter,
+            prompt='➡ **Enter a title**, or enter `skip` to use the default ("Practice").',
+        )
+        await title_prompt_message.edit(
+            content=f"☑️ **Enter a title.**\nEntered: {title}",
         )
         if title.lower() == "skip":
             title = "Practice"
 
-        guild = inter.guild
         # Step 3: Choosing video service (Zoom or VC)
+        guild = inter.guild
         assert inter.user is not None
         user = inter.user
         video_service_view = ButtonGroupView.from_options(
             options=(
-                ButtonGroupOption(
-                    label="Zoom (recommended)", value=VideoService.ZOOM, emoji="🟦"
-                ),
+                ButtonGroupOption(label="Zoom", value=VideoService.ZOOM, emoji="🟦"),
                 ButtonGroupOption(label="VC", value=VideoService.VC, emoji="🔈"),
                 ButtonGroupOption(label="Skip", value=VideoService.UNDECIDED),
             ),
             creator_id=user.id,
+            choice_label="☑️ **Zoom (recommended) or VC?** Choose one.\nEntered",
         )
-        await inter.channel.send("➡ **Zoom or VC?** Choose one.", view=video_service_view)
+        await inter.channel.send(
+            "➡ **Zoom (recommended) or VC?** Choose one.", view=video_service_view
+        )
         video_service_value: VideoService | None = (
             await video_service_view.wait_for_value()
         )
@@ -196,7 +213,7 @@ class Schedule(commands.Cog):
 
         event_url = f"https://discord.com/events/{event.guild_id}/{event.id}"
         await inter.channel.send(
-            content='🙌 **Successfully created event.** Click "Event Link" below to view or edit your event.',
+            content='🙌 **Successfully created event.** Click "Event Link" below to view/edit your event or mark yourself as "Interested".',
             embed=make_event_embed(event),
             view=LinkView(label="Event Link", url=event_url),
         )

@@ -31,7 +31,7 @@ class ButtonGroupView(disnake.ui.View):
 
     @classmethod
     def from_options(
-        cls, options: Sequence[ButtonGroupOption], *, creator_id: int
+        cls, options: Sequence[ButtonGroupOption], *, creator_id: int, choice_label: str
     ) -> ButtonGroupView:
         attrs = {}
         for i, (label, value, emoji) in enumerate(options):
@@ -42,21 +42,28 @@ class ButtonGroupView(disnake.ui.View):
                 inter: disnake.MessageInteraction,
                 *,
                 value: T,
+                choice_label: str,
+                label: str,
+                emoji: str | None,
             ):
+                assert inter.user is not None
                 # Ignore clicks by other users
                 if inter.user.id != self.creator_id:
+                    await inter.send(
+                        "⚠️ You can't interact with this UI.", ephemeral=True
+                    )
                     return
                 self.value = value
-                button.style = disnake.ButtonStyle.blurple
-                # Disable buttons
-                for child in self.children:
-                    if isinstance(child, disnake.ui.Button):
-                        child.disabled = True
-                await inter.response.edit_message(view=self)
                 self.stop()
+                await inter.response.edit_message(
+                    content=f"{choice_label}: " + (f"{emoji} " if emoji else "") + label,
+                    view=None,
+                )
 
             callback_name = f"callback_{i}"
-            method = partial(callback, value=value)
+            method = partial(
+                callback, value=value, choice_label=choice_label, label=label, emoji=emoji
+            )
             method.__name__ = callback_name  # type: ignore
             decorator = disnake.ui.button(
                 label=label,
