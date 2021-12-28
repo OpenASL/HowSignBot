@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v21.62.0 (2021-12-27)
+### Feature
+* **schedule:** Improve /schedule new UI ([#375](https://github.com/OpenASL/HowSignBot/issues/375)) ([`6113ae3`](https://github.com/OpenASL/HowSignBot/commit/6113ae3c88cccdd9d08f8313a5140f7d9bf11c38))
+* Add /zoom setup and /zoom start ([#374](https://github.com/OpenASL/HowSignBot/issues/374)) ([`7bb217d`](https://github.com/OpenASL/HowSignBot/commit/7bb217d6476b8538392c5490e40ac9b009de124d))
+
 ## v21.61.0 (2021-12-27)
 ### Feature
 * Less chatty logs ([`2f531a2`](https://github.com/OpenASL/HowSignBot/commit/2f531a2bf6341ad259cafc55290c83a8c60914a2))
