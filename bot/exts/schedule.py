@@ -109,15 +109,6 @@ class Schedule(commands.Cog):
     @schedule_command.sub_command(name="new")
     async def schedule_new(self, inter: GuildCommandInteraction):
         """Quickly add a new scheduled event with guided prompts."""
-        await self._schedule_new(inter)
-
-    # "Alias for /schedule new"
-    @schedule_command.sub_command(name="add")
-    async def schedule_add(self, inter: GuildCommandInteraction):
-        """Quickly add a new scheduled event with guided prompts."""
-        await self._schedule_new(inter)
-
-    async def _schedule_new(self, inter: GuildCommandInteraction):
         # Step 1: Prompt for the start time
         start_time = await self._prompt_for_text_input(
             inter, prompt=START_TIME_PROMPT, is_initial_interaction=True
@@ -165,15 +156,15 @@ class Schedule(commands.Cog):
             ),
             creator_id=user.id,
         )
-        await inter.channel.send("➡ **Zoom or VC?**", view=video_service_view)
+        await inter.channel.send("➡ **Zoom or VC?** Choose one.", view=video_service_view)
         video_service_value: VideoService | None = (
             await video_service_view.wait_for_value()
         )
-        video_service_kwargs: dict[str, Any] = {}
         if video_service_value is None:
-            await inter.send(content="⚠️ You waited too long to respond. Try again.")
-            return
-        elif video_service_value == VideoService.ZOOM:
+            video_service_value = VideoService.UNDECIDED
+
+        video_service_kwargs: dict[str, Any] = {}
+        if video_service_value == VideoService.ZOOM:
             video_service_kwargs = dict(
                 entity_type=disnake.GuildScheduledEventEntityType.external,
                 entity_metadata=disnake.GuildScheduledEventMetadata(

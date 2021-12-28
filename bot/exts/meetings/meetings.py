@@ -2,13 +2,13 @@ import asyncio
 import logging
 from enum import auto
 from enum import Enum
-from typing import cast
 from typing import List
 from typing import Optional
 from typing import Union
 
 import disnake
 from disnake import ApplicationCommandInteraction
+from disnake import GuildCommandInteraction
 from disnake import MessageInteraction
 from disnake.ext.commands import Bot
 from disnake.ext.commands import check
@@ -89,6 +89,14 @@ def make_watch2gether_embed(url: str, video_url: Optional[str]) -> disnake.Embed
     return disnake.Embed(title=url, description=description, color=disnake.Color.gold())
 
 
+def make_zoom_standby_embed():
+    return disnake.Embed(
+        color=disnake.Color.blue(),
+        title="✋ Stand By",
+        description="Zoom details will be posted here when the meeting is ready to start.",
+    )
+
+
 class ProtectionType(Enum):
     WAITING_ROOM = auto()
     FS_CAPTCHA = auto()
@@ -103,35 +111,11 @@ class Meetings(Cog):
     async def zoom_command(self, inter: ApplicationCommandInteraction):
         pass
 
-    @zoom_command.sub_command(name="create")
-    async def zoom_create(self, inter: ApplicationCommandInteraction):
-        """(Authorized users only) Create a Zoom meeting"""
-        await self._zoom_create(inter)
-
-    # "Alias" for /zoom create
     @zoom_command.sub_command(name="new")
     async def zoom_new(self, inter: ApplicationCommandInteraction):
         """(Authorized users only) Create a Zoom meeting"""
-        await self._zoom_create(inter)
-
-    async def _zoom_create(self, inter: ApplicationCommandInteraction):
         assert inter.user is not None
-
-        view = ButtonGroupView.from_options(
-            options=(
-                ButtonGroupOption(
-                    label="FS Captcha", value=ProtectionType.FS_CAPTCHA, emoji="👌"
-                ),
-                ButtonGroupOption(
-                    label="Waiting Room", value=ProtectionType.WAITING_ROOM, emoji="🚪"
-                ),
-            ),
-            creator_id=inter.user.id,
-        )
-        await inter.send(
-            "🔐 **How do you want to protect the meeting?** Choose one.", view=view
-        )
-        value = await view.wait_for_value()
+        value = await self._prompt_for_protection_type(inter)
         with_zzzzoom = value == ProtectionType.FS_CAPTCHA
 
         async def send_channel_message(mid: int):
@@ -148,7 +132,11 @@ class Meetings(Cog):
         )
 
     @zoom_command.sub_command(name="crosspost")
-    async def zoom_crosspost(self, inter: ApplicationCommandInteraction, meeting_id: str):
+    async def zoom_crosspost(
+        self,
+        inter: ApplicationCommandInteraction,
+        meeting_id_str: str = Param(name="meeting_id"),
+    ):
         """(Authorized users only) Crosspost a previously-created Zoom meeting
 
         Parameters
@@ -159,15 +147,30 @@ class Meetings(Cog):
 
         zoom_or_zzzzoom_id: Union[int, str]
         try:
-            zoom_or_zzzzoom_id = int(meeting_id)
+            zoom_or_zzzzoom_id = int(meeting_id_str)
         except ValueError:
-            zoom_or_zzzzoom_id = meeting_id
+            zoom_or_zzzzoom_id = meeting_id_str
             with_zzzzoom = True
         else:
             with_zzzzoom = False
 
-        async def send_channel_message(mid: int):
-            return await inter.channel.send(embed=await make_zoom_embed(mid))
+        meeting_id = await get_zoom_meeting_id(zoom_or_zzzzoom_id)
+        meeting = await store.get_zoom_meeting(meeting_id)
+        if meeting is None:
+            await inter.response.edit_message(
+                f"⚠️ Could not find zoom meeting for {meeting_id_str}."
+            )
+            return
+        set_up = meeting["setup_at"] is not None
+        if set_up:
+
+            async def send_channel_message(mid: int):
+                return await inter.channel.send(embed=await make_zoom_embed(mid))
+
+        else:
+
+            async def send_channel_message(mid: int):
+                return await inter.channel.send(embed=make_zoom_standby_embed())
 
         await zoom_impl(
             bot=self.bot,
@@ -175,10 +178,106 @@ class Meetings(Cog):
             channel_id=inter.channel.id,
             meeting_id=zoom_or_zzzzoom_id,
             send_channel_message=send_channel_message,
-            set_up=True,
+            set_up=set_up,
             with_zzzzoom=with_zzzzoom,
         )
-        await inter.send("_Crossposted Zoom_")
+        await inter.send("📋 _Crossposted_")
+
+    @zoom_command.sub_command(name="setup")
+    async def zoom_setup(self, inter: GuildCommandInteraction):
+        """Set up a Zoom before revealing its details to other users"""
+        assert inter.user is not None
+        assert inter.channel_id is not None
+        value = await self._prompt_for_protection_type(inter)
+        with_zzzzoom = value == ProtectionType.FS_CAPTCHA
+
+        async def send_channel_message(_):
+            return await inter.channel.send(embed=make_zoom_standby_embed())
+
+        meeting_id, _ = await zoom_impl(
+            bot=self.bot,
+            zoom_user=settings.ZOOM_USERS[inter.user.id],
+            channel_id=inter.channel_id,
+            meeting_id=None,
+            send_channel_message=send_channel_message,
+            set_up=False,
+            with_zzzzoom=with_zzzzoom,
+        )
+
+        zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
+        # DM zoom link and instructions once
+        if len(zoom_messages) <= 1:
+            await inter.user.send(
+                content="🔨 Set up your meeting below",
+                embed=await make_zoom_embed(meeting_id, include_instructions=False),
+            )
+            await inter.user.send(
+                "To post in another channel, send the following command in that channel:\n"
+                f"```/zoom crosspost {meeting_id}```\n"
+                "When you're ready for people to join, reply with:\n"
+                f"```/zoom start {meeting_id}```"
+            )
+
+    @zoom_command.sub_command(name="start")
+    async def zoom_setup_start(
+        self,
+        inter: ApplicationCommandInteraction,
+        meeting_id_str: str = Param(name="meeting_id"),
+    ):
+        """"Reveal meeting details for a meeting started with the setup command"""
+        zoom_or_zzzzoom_id: Union[int, str]
+        try:
+            zoom_or_zzzzoom_id = int(meeting_id_str)
+        except ValueError:
+            zoom_or_zzzzoom_id = meeting_id_str
+
+        meeting_id = await get_zoom_meeting_id(zoom_or_zzzzoom_id)
+        meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
+        if not meeting_exists:
+            raise errors.CheckFailure(
+                f"⚠️ Could not find Zoom meeting with ID {meeting_id_str}. Make sure to run `/zoom setup` first."
+            )
+        await store.set_up_zoom_meeting(meeting_id=meeting_id)
+        zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
+        if not zoom_messages:
+            raise errors.CheckFailure(f"⚠️ No meeting messages for meeting {meeting_id}.")
+        embed = await make_zoom_embed(meeting_id=meeting_id)
+        messages: List[disnake.Message] = []
+        for message_info in zoom_messages:
+            channel_id = message_info["channel_id"]
+            message_id = message_info["message_id"]
+            channel = self.bot.get_channel(channel_id)
+            message: disnake.Message = await channel.fetch_message(message_id)
+            messages.append(message)
+            logger.info(
+                f"revealing meeting details for meeting {meeting_id} in channel {channel_id}, message {message_id}"
+            )
+            await message.edit(embed=embed)
+            add_repost_after_delay(self.bot, message)
+        if inter.guild_id is None:
+            assert inter.user is not None
+            links = "\n".join(
+                f"[{message.guild} - #{message.channel}]({message.jump_url})"
+                for message in messages
+            )
+            await inter.send(
+                embed=disnake.Embed(title="🚀 Meeting Details Revealed", description=links)
+            )
+        else:
+            channel_message = next(
+                (
+                    message
+                    for message in messages
+                    if message.channel.id == inter.channel_id
+                ),
+                None,
+            )
+            if channel_message:
+                await inter.send(
+                    f"🚀 Meeting details revealed: {channel_message.jump_url}"
+                )
+            else:
+                await inter.send("🚀 Meeting details revealed.", ephemeral=True)
 
     @zoom_command.sub_command(name="stop")
     async def zoom_stop(
@@ -421,79 +520,6 @@ class Meetings(Cog):
         """AUTHORIZED USERS ONLY: Start a Zoom meeting"""
         await self.zoom_group_impl(ctx, meeting_id=meeting_id, with_zzzzoom=False)
 
-    @zoom_group.command(
-        name="setup",
-        help="Set up a Zoom before revealing its details to other users. Useful for meetings that have breakout rooms.",
-    )
-    @check(is_allowed_zoom_access)
-    async def zoom_setup(
-        self, ctx: Context, meeting_id: Optional[Union[int, str]] = None
-    ):
-        await self.zoom_setup_impl(ctx, meeting_id=meeting_id, with_zzzzoom=False)
-
-    @zoom_group.command(
-        name="start",
-        help="Reveal meeting details for a meeting started with the setup command",
-    )
-    @check(is_allowed_zoom_access)
-    async def zoom_setup_start(
-        self, ctx: Context, meeting_id: Optional[Union[int, str]] = None
-    ):
-        await ctx.channel.trigger_typing()
-        if meeting_id:
-            meeting_id = await get_zoom_meeting_id(meeting_id)
-            meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
-            if not meeting_exists:
-                raise errors.CheckFailure(
-                    f"⚠️ Could not find Zoom meeting with ID {meeting_id}. Make sure to run `{COMMAND_PREFIX}zoom setup {meeting_id}` first."
-                )
-        else:
-            zoom_user = settings.ZOOM_USERS[ctx.author.id]
-            latest_meeting = await store.get_latest_pending_zoom_meeting_for_user(
-                zoom_user
-            )
-            if not latest_meeting:
-                raise errors.CheckFailure(
-                    f"⚠️ You do not have any pending Zoom meetings. Make sure to run `{COMMAND_PREFIX}zoom setup [meeting_id]` first."
-                )
-            meeting_id = cast(int, latest_meeting["meeting_id"])
-        await store.set_up_zoom_meeting(meeting_id=meeting_id)
-        zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
-        if not zoom_messages:
-            raise errors.CheckFailure(f"⚠️ No meeting messages for meeting {meeting_id}.")
-        embed = await make_zoom_embed(meeting_id=meeting_id)
-        messages: List[disnake.Message] = []
-        for message_info in zoom_messages:
-            channel_id = message_info["channel_id"]
-            message_id = message_info["message_id"]
-            channel = self.bot.get_channel(channel_id)
-            message: disnake.Message = await channel.fetch_message(message_id)
-            messages.append(message)
-            logger.info(
-                f"revealing meeting details for meeting {meeting_id} in channel {channel_id}, message {message_id}"
-            )
-            await message.edit(embed=embed)
-            add_repost_after_delay(self.bot, message)
-        if ctx.guild is None:
-            links = "\n".join(
-                f"[{message.guild} - #{message.channel}]({message.jump_url})"
-                for message in messages
-            )
-            await ctx.send(
-                embed=disnake.Embed(title="🚀 Meeting Details Revealed", description=links)
-            )
-        else:
-            channel_message = next(
-                (message for message in messages if message.channel.id == ctx.channel.id),
-                None,
-            )
-            if channel_message:
-                await channel_message.reply(
-                    f"🚀 Meeting details revealed: {channel_message.jump_url}"
-                )
-            else:
-                await ctx.channel.send("🚀 Meeting details revealed.")
-
     @group(
         name="zzzzoom",
         aliases=("zzoom", "zzzoom", "zzzzzoom", "zz", "zzz", "zzzz", "zzzzz"),
@@ -559,45 +585,6 @@ class Meetings(Cog):
             before_example=before_example,
             after_example=after_example,
         )
-
-    async def zoom_setup_impl(
-        self, ctx: Context, meeting_id: Optional[Union[int, str]], with_zzzzoom: bool
-    ):
-        await ctx.channel.trigger_typing()
-
-        async def send_channel_message(_):
-            return await ctx.reply(
-                embed=disnake.Embed(
-                    color=disnake.Color.blue(),
-                    title="✋ Stand By",
-                    description="Zoom details will be posted here when the meeting is ready to start.",
-                )
-            )
-
-        meeting_id, _ = await zoom_impl(
-            bot=self.bot,
-            zoom_user=settings.ZOOM_USERS[ctx.author.id],
-            channel_id=ctx.channel.id,
-            meeting_id=meeting_id,
-            send_channel_message=send_channel_message,
-            set_up=False,
-            with_zzzzoom=with_zzzzoom,
-        )
-
-        zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
-        # DM zoom link and instructions once
-        if len(zoom_messages) <= 1:
-            command_name = "zzzzoom" if with_zzzzoom else "zoom"
-            await ctx.author.send(
-                content="🔨 Set up your meeting below",
-                embed=await make_zoom_embed(meeting_id, include_instructions=False),
-            )
-            await ctx.author.send(
-                "To post in another channel, send the following command in that channel:\n"
-                f"```{COMMAND_PREFIX}{command_name} setup {meeting_id}```\n"
-                "When you're ready for people to join, reply with:\n"
-                f"```{COMMAND_PREFIX}zoom start {meeting_id}```"
-            )
 
     @command(name="w2g", aliases=("wtg", "watch2gether"), help=WATCH2GETHER_HELP)
     async def watch2gether_prefix_command(
@@ -712,6 +699,27 @@ class Meetings(Cog):
                 r"w2g\.tv|Could not create watch2gether": WATCH2GETHER_CLOSED_MESSAGE,
             },
         )
+
+    async def _prompt_for_protection_type(
+        self, inter: ApplicationCommandInteraction
+    ) -> ProtectionType:
+        assert inter.user is not None
+        view = ButtonGroupView.from_options(
+            options=(
+                ButtonGroupOption(
+                    label="FS Captcha", value=ProtectionType.FS_CAPTCHA, emoji="👌"
+                ),
+                ButtonGroupOption(
+                    label="Waiting Room", value=ProtectionType.WAITING_ROOM, emoji="🚪"
+                ),
+            ),
+            creator_id=inter.user.id,
+        )
+        await inter.send(
+            "🔐 **How do you want to protect the meeting?** Choose one.", view=view
+        )
+        value = await view.wait_for_value()
+        return value or ProtectionType.FS_CAPTCHA
 
 
 def setup(bot: Bot) -> None:
