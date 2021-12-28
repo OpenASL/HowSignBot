@@ -167,7 +167,7 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
         message = await channel.send(file=file_, embed=embed)
         if include_handshape_of_the_day and handshape:
             await message.create_thread(
-                name=f'What signs use the handshape of the day ("{handshape.name}")?',
+                name=f"What signs use the {handshape.name} handshape?",
                 auto_archive_duration=disnake.ThreadArchiveDuration.day,
             )
 

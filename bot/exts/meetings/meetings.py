@@ -97,7 +97,7 @@ def make_zoom_standby_embed():
     )
 
 
-class ProtectionType(Enum):
+class ProtectionMode(Enum):
     WAITING_ROOM = auto()
     FS_CAPTCHA = auto()
 
@@ -116,7 +116,7 @@ class Meetings(Cog):
         """(Authorized users only) Create a Zoom meeting"""
         assert inter.user is not None
         value = await self._prompt_for_protection_type(inter)
-        with_zzzzoom = value == ProtectionType.FS_CAPTCHA
+        with_zzzzoom = value == ProtectionMode.FS_CAPTCHA
 
         async def send_channel_message(mid: int):
             return await inter.channel.send(embed=await make_zoom_embed(mid))
@@ -189,7 +189,7 @@ class Meetings(Cog):
         assert inter.user is not None
         assert inter.channel_id is not None
         value = await self._prompt_for_protection_type(inter)
-        with_zzzzoom = value == ProtectionType.FS_CAPTCHA
+        with_zzzzoom = value == ProtectionMode.FS_CAPTCHA
 
         async def send_channel_message(_):
             return await inter.channel.send(embed=make_zoom_standby_embed())
@@ -702,25 +702,25 @@ class Meetings(Cog):
 
     async def _prompt_for_protection_type(
         self, inter: ApplicationCommandInteraction
-    ) -> ProtectionType:
+    ) -> ProtectionMode:
         assert inter.user is not None
         view = ButtonGroupView.from_options(
             options=(
                 ButtonGroupOption(
-                    label="FS Captcha", value=ProtectionType.FS_CAPTCHA, emoji="👌"
+                    label="FS Captcha", value=ProtectionMode.FS_CAPTCHA, emoji="👌"
                 ),
                 ButtonGroupOption(
-                    label="Waiting Room", value=ProtectionType.WAITING_ROOM, emoji="🚪"
+                    label="Waiting Room", value=ProtectionMode.WAITING_ROOM, emoji="🚪"
                 ),
             ),
             creator_id=inter.user.id,
-            choice_label="🔐 **Protection Type**",
+            choice_label="🔐 **Protection Mode**",
         )
         await inter.send(
             "🔐 **How do you want to protect the meeting?** Choose one.", view=view
         )
         value = await view.wait_for_value()
-        return value or ProtectionType.FS_CAPTCHA
+        return value or ProtectionMode.FS_CAPTCHA
 
 
 def setup(bot: Bot) -> None:
