@@ -47,7 +47,7 @@ class Topics(Cog):
 
     @slash_command(name="top")
     async def topic(self, inter: ApplicationCommandInteraction):
-        """Post a conversation topic as a thread"""
+        """Post a conversation topic as a thread (like /topic but better)"""
         topics = await store.get_all_topics()
         topic = random.choice(topics)
         await inter.send(content=f"> {topic}")
