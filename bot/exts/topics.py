@@ -4,14 +4,17 @@ import random
 
 import disnake
 from aiohttp import web
+from disnake import ApplicationCommandInteraction
 from disnake.ext.commands import Bot
 from disnake.ext.commands import Cog
 from disnake.ext.commands import command
 from disnake.ext.commands import Context
 from disnake.ext.commands import is_owner
+from disnake.ext.commands import slash_command
 
 from bot import settings
 from bot.database import store
+from bot.utils import truncate
 from bot.utils.datetimes import EASTERN
 from bot.utils.datetimes import utcnow
 from bot.utils.gsheets import get_gsheet_client
@@ -41,6 +44,18 @@ class Topics(Cog):
         await ctx.channel.trigger_typing()
         topics = await sync_topics()
         await ctx.reply(f"✅ Synced {len(topics)} topics.")
+
+    @slash_command(name="top")
+    async def topic(self, inter: ApplicationCommandInteraction):
+        """Post a conversation topic as a thread"""
+        topics = await store.get_all_topics()
+        topic = random.choice(topics)
+        await inter.send(content=f"> {topic}")
+        message = await inter.original_message()
+        await message.create_thread(
+            name=truncate(topic, 99),
+            auto_archive_duration=disnake.ThreadArchiveDuration.hour,
+        )
 
     async def daily_sync(self):
         while True:
