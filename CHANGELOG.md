@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v21.64.0 (2021-12-28)
+### Feature
+* Add /top command ([#378](https://github.com/OpenASL/HowSignBot/issues/378)) ([`0337bcd`](https://github.com/OpenASL/HowSignBot/commit/0337bcd0a37f53342460412d3adce4130109d425))
+* Copy edits ([#377](https://github.com/OpenASL/HowSignBot/issues/377)) ([`92d9f04`](https://github.com/OpenASL/HowSignBot/commit/92d9f049bdaa1f4fa08ce0dcc2a4b7dae84e4dae))
+
 ## v21.63.1 (2021-12-28)
 ### Fix
 * Add punctuation ([`0b1b578`](https://github.com/OpenASL/HowSignBot/commit/0b1b57840b264308105ebacdf2bcd63c7d423d67))
