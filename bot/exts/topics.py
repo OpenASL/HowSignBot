@@ -6,9 +6,11 @@ import disnake
 from aiohttp import web
 from disnake import ApplicationCommandInteraction
 from disnake.ext.commands import Bot
+from disnake.ext.commands import BucketType
 from disnake.ext.commands import Cog
 from disnake.ext.commands import command
 from disnake.ext.commands import Context
+from disnake.ext.commands import cooldown
 from disnake.ext.commands import is_owner
 from disnake.ext.commands import slash_command
 
@@ -46,6 +48,7 @@ class Topics(Cog):
         await ctx.reply(f"✅ Synced {len(topics)} topics.")
 
     @slash_command(name="top")
+    @cooldown(rate=1, per=10, type=BucketType.guild)
     async def topic(self, inter: ApplicationCommandInteraction):
         """Post a conversation topic as a thread (like /topic but better)"""
         topics = await store.get_all_topics()

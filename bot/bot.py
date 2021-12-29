@@ -78,6 +78,11 @@ async def on_slash_command_error(inter: ApplicationCommandInteraction, error: Ex
         (commands.errors.CheckFailure, commands.errors.BadArgument),
     ):
         await inter.send(error)
+    elif isinstance(
+        error,
+        (commands.errors.CommandOnCooldown),
+    ):
+        await inter.send("✋ This command is on cooldown for you.", ephemeral=True)
     else:
         logger.error(
             f"unhandled exception from command: {inter.application_command.name!r}",

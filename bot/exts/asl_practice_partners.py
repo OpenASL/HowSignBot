@@ -4,6 +4,7 @@ import asyncio
 import datetime as dt
 import logging
 from contextlib import suppress
+from textwrap import dedent
 from typing import Mapping
 from typing import Sequence
 
@@ -45,6 +46,16 @@ UNMUTE_WARNING = (
     "we encourage you to keep your voice off during practice. "
     "🤐 You can use the text channels to type responses when needed."
 )
+TOPIC_MESSAGE = """💡 I noticed you used the `-topic` command. Next time try using `/top`. It has more topics and uses threads! 👍
+Before:
+```
+-topic
+```
+After:
+```
+/top
+```
+"""
 DAILY_MESSAGE_TIME = dt.time(8, 0)  # Eastern time
 DAILY_MEMBER_KICK_TIME = dt.time(12, 0)  # Eastern time
 PRUNE_DAYS = 7
@@ -438,6 +449,19 @@ class AslPracticePartners(Cog):
                     user_id=message.author.id,
                     posted_at=message.created_at,
                 )
+        if message.content.strip() == "-topic":
+            with suppress(disnake.errors.Forbidden):
+                embed = disnake.Embed(
+                    title="💡 Tip",
+                    description=dedent(
+                        f"""I noticed you used the `-topic` command [here]({message.jump_url}).
+                    Next time, try using `/top`. It has more topics and uses threads! 👍
+                    Before: `-topic`
+                    After: `/top`""",
+                    ),
+                    color=disnake.Color.yellow(),
+                )
+                await message.author.send(embed=embed)
 
     @Cog.listener()
     async def on_member_remove(self, member: Member) -> None:
