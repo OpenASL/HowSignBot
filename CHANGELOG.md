@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.66.0 (2021-12-29)
+### Feature
+* **aslpp:** Add /top tip; topic cooldown ([#379](https://github.com/OpenASL/HowSignBot/issues/379)) ([`4e14bc2`](https://github.com/OpenASL/HowSignBot/commit/4e14bc2e6571da3ff906476c268274c3bcee07aa))
+
 ## v21.65.0 (2021-12-28)
 ### Feature
 * Update description ([`141ce13`](https://github.com/OpenASL/HowSignBot/commit/141ce13709ddad4174851be68158286b2332af72))
