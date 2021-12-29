@@ -454,11 +454,12 @@ class AslPracticePartners(Cog):
                 embed = disnake.Embed(
                     title="💡 Tip",
                     description=dedent(
-                        f"""I noticed you used the -topic command [here]({message.jump_url}).
+                        f"""I noticed you used the `-topic` command [here]({message.jump_url}).
                     Next time, try using `/top`. It has more topics and uses threads! 👍
                     Before: `-topic`
-                    After: `/top`"""
+                    After: `/top`""",
                     ),
+                    color=disnake.Color.yellow(),
                 )
                 await message.author.send(embed=embed)
 
