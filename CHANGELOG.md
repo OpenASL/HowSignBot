@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.68.1 (2021-12-30)
+### Fix
+* **aslpp:** Use setting for survey ID ([`2f013a9`](https://github.com/OpenASL/HowSignBot/commit/2f013a9fd051474d921efc6fa6bfcdef2a226dde))
+
 ## v21.68.0 (2021-12-30)
 ### Feature
 * **aslpp:** Add vanity role on survey submission ([#383](https://github.com/OpenASL/HowSignBot/issues/383)) ([`4ba8b3e`](https://github.com/OpenASL/HowSignBot/commit/4ba8b3ee30c88be53050aaa1456b908094bf105f))
