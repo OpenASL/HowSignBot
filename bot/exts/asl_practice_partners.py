@@ -174,7 +174,7 @@ class AslPracticePartners(Cog):
         assert inter.user is not None
         url = f"https://tally.so/r/{settings.ASLPP_SURVEY_ID}?uid={inter.user.id}"
         await inter.send(
-            "🙌 We love feedback! Here's the survey link. It'll take less than 2 minutes to complete.",
+            "🙌 We love feedback! Here's the survey link. It'll take less than 5 minutes to complete.",
             view=LinkView(label="Survey Link", url=url),
             ephemeral=True,
         )
