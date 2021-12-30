@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.69.2 (2021-12-30)
+### Fix
+* **aslpp:** Copy change ([`597f9c0`](https://github.com/OpenASL/HowSignBot/commit/597f9c04ef211e3b4c99fff67ee0957cb02e1cce))
+
 ## v21.69.1 (2021-12-30)
 ### Fix
 * **aslpp:** Restrict /survey ([`2f9c5c4`](https://github.com/OpenASL/HowSignBot/commit/2f9c5c4cad9f821391cb82cb855bec7475fa1fda))
