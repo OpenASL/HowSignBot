@@ -166,13 +166,9 @@ class AslPracticePartners(Cog):
             )
         return True
 
-    @slash_command(name="aslpp", guild_ids=(settings.ASLPP_GUILD_ID,))
-    async def aslpp_command(self, inter: GuildCommandInteraction):
-        pass
-
-    @aslpp_command.sub_command(name="feedback")
-    async def aslpp_feedback_command(self, inter: GuildCommandInteraction):
-        """Get a link for the ASLPP feedback survey"""
+    @slash_command(name="survey", guild_ids=(settings.ASLPP_GUILD_ID,))
+    async def survey_command(self, inter: GuildCommandInteraction):
+        """Get a link for the ASL Practice Partners feedback survey"""
         assert inter.user is not None
         url = f"https://tally.so/r/{settings.ASLPP_SURVEY_ID}?uid={inter.user.id}"
         await inter.send(
