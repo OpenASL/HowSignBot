@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v21.69.0 (2021-12-30)
+### Feature
+* **aslpp:** Add /tag edit ([#385](https://github.com/OpenASL/HowSignBot/issues/385)) ([`70477d4`](https://github.com/OpenASL/HowSignBot/commit/70477d4a1e9e80772579b7d63de70d0efa82ed16))
+* **aslpp:** Survey updates ([#384](https://github.com/OpenASL/HowSignBot/issues/384)) ([`87e1627`](https://github.com/OpenASL/HowSignBot/commit/87e162754b8ebc2ad3f07b3d6884781072c5f8e1))
+
 ## v21.68.1 (2021-12-30)
 ### Fix
 * **aslpp:** Use setting for survey ID ([`2f013a9`](https://github.com/OpenASL/HowSignBot/commit/2f013a9fd051474d921efc6fa6bfcdef2a226dde))
