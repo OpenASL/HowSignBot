@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.68.0 (2021-12-30)
+### Feature
+* **aslpp:** Add vanity role on survey submission ([#383](https://github.com/OpenASL/HowSignBot/issues/383)) ([`4ba8b3e`](https://github.com/OpenASL/HowSignBot/commit/4ba8b3ee30c88be53050aaa1456b908094bf105f))
+
 ## v21.67.0 (2021-12-29)
 ### Feature
 * **aslpp:** Add /aslpp feedback command ([#382](https://github.com/OpenASL/HowSignBot/issues/382)) ([`eb3ac60`](https://github.com/OpenASL/HowSignBot/commit/eb3ac609507bd2012847d71d5cd1482702b7a514))
