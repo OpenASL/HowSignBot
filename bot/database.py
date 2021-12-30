@@ -521,6 +521,11 @@ class Store:
     async def clear_aslpp_intros(self):
         await self.db.execute(aslpp_intros.delete())
 
+    async def get_aslpp_member(self, user_id: int) -> Optional[Mapping]:
+        return await self.db.fetch_one(
+            aslpp_members.select().where(aslpp_members.c.user_id == user_id)
+        )
+
     async def add_aslpp_member(
         self,
         *,

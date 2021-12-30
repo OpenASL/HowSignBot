@@ -32,6 +32,7 @@ from bot.utils import get_close_matches
 from bot.utils.datetimes import EASTERN
 from bot.utils.datetimes import utcnow
 from bot.utils.gsheets import get_gsheet_client
+from bot.utils.ui import LinkView
 
 logger = logging.getLogger(__name__)
 
@@ -164,6 +165,21 @@ class AslPracticePartners(Cog):
                 f"⚠️ `{COMMAND_PREFIX}{ctx.invoked_with}` must be run within the ASL Practice Partners server (not a DM)."
             )
         return True
+
+    @slash_command(name="aslpp", guild_ids=(settings.ASLPP_GUILD_ID,))
+    async def aslpp_command(self, inter: GuildCommandInteraction):
+        pass
+
+    @aslpp_command.sub_command(name="feedback")
+    async def aslpp_feedback_command(self, inter: GuildCommandInteraction):
+        """Get a link for the ASLPP feedback survey"""
+        assert inter.user is not None
+        url = f"https://tally.so/r/nW1gJ3?uid={inter.user.id}"
+        await inter.send(
+            "🙌 We love feedback! Here's the survey link. It'll take less than 2 minutes to complete.",
+            view=LinkView(label="Survey Link", url=url),
+            ephemeral=True,
+        )
 
     @slash_command(name="tag", guild_ids=(settings.ASLPP_GUILD_ID,))
     async def tag_command(self, inter: GuildCommandInteraction):
