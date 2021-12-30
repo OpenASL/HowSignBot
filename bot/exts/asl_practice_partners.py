@@ -22,6 +22,7 @@ from disnake.ext.commands import Bot
 from disnake.ext.commands import Cog
 from disnake.ext.commands import Context
 from disnake.ext.commands import group
+from disnake.ext.commands import has_role
 from disnake.ext.commands import is_owner
 from disnake.ext.commands import slash_command
 
@@ -167,6 +168,7 @@ class AslPracticePartners(Cog):
         return True
 
     @slash_command(name="survey", guild_ids=(settings.ASLPP_GUILD_ID,))
+    @has_role(settings.ASLPP_ACKNOWLEDGED_RULES_ROLE_ID)
     async def survey_command(self, inter: GuildCommandInteraction):
         """Get a link for the ASL Practice Partners feedback survey"""
         assert inter.user is not None
