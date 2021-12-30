@@ -38,6 +38,7 @@ async def add_submission_and_apply_role(
             role_names = "|".join([role.name for role in roles])
             if settings.ASLPP_SURVEY_VANITY_ROLE_ID:
                 try:
+                    logger.debug("applying survey vanity role")
                     await member.add_roles(
                         disnake.Object(id=settings.ASLPP_SURVEY_VANITY_ROLE_ID),
                         reason="Completed survey",
@@ -55,15 +56,19 @@ def hash_int(integer: int) -> str:
 
 USER_ID_KEY = "question_wbj5B2_e34181f0-00e1-47ae-a3a8-063f16f5821d"
 FIELD_KEYS_TO_SUBMISSION_FIELDS = {
-    "question_nWEOGP": "practice_session_participation",
-    "question_wa5QbE": "proficiency_improvement",
-    "question_nP1R1x": "ways_improved",
+    "question_nWEOGP": "meeting_participation",
+    "question_w4Jalr": "meeting_absence_reasons",
+    "question_3j6e8Q": "meeting_absence_reasons_other",
     "question_mRMWKP": "does_host",
     "question_woe96M": "wants_to_host",
     "question_nG9evz": "staff_can_follow_up",
     "question_mO4QDA": "discord_username",
-    "question_m6j8bO": "practice_suggestion",
+    "question_m6j8bO": "meeting_suggestion",
+    "question_wa5QbE": "proficiency_improvement",
+    "question_nP1R1x": "ways_improved",
+    "question_w2aj9e": "server_like",
     "question_w7LRB9": "server_suggestion",
+    "question_3xMV8d": "other_feedback",
     "question_3y2PKp": "source",
 }
 
@@ -73,15 +78,19 @@ class Submission(NamedTuple):
     created_at: str
     hashed_user_id: str
     # NOTE: integer values get stringified
-    practice_session_participation: str
-    proficiency_improvement: str
-    ways_improved: str
+    meeting_participation: str
+    meeting_absence_reasons: str
+    meeting_absence_reasons_other: str
     does_host: str
     wants_to_host: str
     staff_can_follow_up: str
     discord_username: str
-    practice_suggestion: str
+    meeting_suggestion: str
+    proficiency_improvement: str
+    ways_improved: str
+    server_like: str
     server_suggestion: str
+    other_feedback: str
     source: str
 
 
@@ -107,6 +116,10 @@ def get_field_value(field: Field) -> str:
         options = field["options"]
         option_map = {option["id"]: option["text"] for option in options}
         return option_map[value] or ""
+    elif field["type"] == "CHECKBOXES":
+        options = field["options"]
+        option_map = {option["id"]: option["text"] for option in options}
+        return "|".join(option_map[v] for v in value)
     else:
         return str(value) if value else ""
 
@@ -115,7 +128,8 @@ async def handle_tally_webhook(bot: Bot, data: dict):
     submission, discord_user_id = make_submission(data)
     if not submission:
         return
-    logger.info(f"adding feedback submission to gsheet: {submission}")
+    logger.info("adding feedback submission to gsheet")
+    logger.debug(f"submission: {submission}")
     client = get_gsheet_client()
     sheet = client.open_by_key(settings.ASLPP_SHEET_KEY)
     worksheet = sheet.worksheet(WORKSHEET_NAME)
