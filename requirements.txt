@@ -11,7 +11,7 @@ dateparser==1.1.0
 nameparser==1.0.6
 nanoid==2.0.0
 pytz==2021.3
-psycopg2==2.9.2
+psycopg2==2.9.3
 holidays==0.11.3.1
 python-dateutil==2.8.2
 # catchphrase
