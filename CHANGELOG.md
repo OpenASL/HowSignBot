@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.67.0 (2021-12-29)
+### Feature
+* **aslpp:** Add /aslpp feedback command ([#382](https://github.com/OpenASL/HowSignBot/issues/382)) ([`eb3ac60`](https://github.com/OpenASL/HowSignBot/commit/eb3ac609507bd2012847d71d5cd1482702b7a514))
+
 ## v21.66.0 (2021-12-29)
 ### Feature
 * **aslpp:** Add /top tip; topic cooldown ([#379](https://github.com/OpenASL/HowSignBot/issues/379)) ([`4e14bc2`](https://github.com/OpenASL/HowSignBot/commit/4e14bc2e6571da3ff906476c268274c3bcee07aa))
