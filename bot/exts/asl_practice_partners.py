@@ -203,7 +203,18 @@ class AslPracticePartners(Cog):
     @commands.has_permissions(kick_members=True)  # Staff
     async def tag_sync(self, inter: GuildCommandInteraction):
         """(Authorized users only) Get tags list up to date"""
-        await inter.response.send_message(**self._tag_sync_impl())
+        await inter.response.send_message(**self._tag_sync_impl(), ephemeral=True)
+
+    @tag_command.sub_command(name="edit")
+    @commands.has_permissions(kick_members=True)  # Staff
+    async def tag_edit(self, inter: GuildCommandInteraction):
+        """(Authorized users only) Edit tags"""
+        url = f"https://docs.google.com/spreadsheets/d/{settings.ASLPP_SHEET_KEY}/edit"
+        await inter.send(
+            "Go to the Google Sheets link below to edit tags.",
+            view=LinkView(label="Google Sheets Link", url=url),
+            ephemeral=True,
+        )
 
     @tag_command.sub_command(name="list")
     async def tag_list(self, inter: GuildCommandInteraction):
