@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 WORKSHEET_NAME = "feedback-submissions"
 
 
-async def add_submission_to_gsheet(
+async def add_submission_and_apply_role(
     *, worksheet, bot: Bot, submission: Submission, discord_user_id: int | None
 ):
     join_month, role_names = "", ""
@@ -36,6 +36,14 @@ async def add_submission_to_gsheet(
             # Skip the @everyone role
             roles = member.roles[1:]
             role_names = "|".join([role.name for role in roles])
+            if settings.ASLPP_SURVEY_VANITY_ROLE_ID:
+                try:
+                    await member.add_roles(
+                        disnake.Object(id=settings.ASLPP_SURVEY_VANITY_ROLE_ID),
+                        reason="Completed survey",
+                    )
+                except Exception:
+                    logger.exception("failed to add vanity role for survey submission")
     row = (join_month, role_names) + submission
     worksheet.append_row(row)
 
@@ -111,7 +119,7 @@ async def handle_tally_webhook(bot: Bot, data: dict):
     client = get_gsheet_client()
     sheet = client.open_by_key(settings.ASLPP_SHEET_KEY)
     worksheet = sheet.worksheet(WORKSHEET_NAME)
-    await add_submission_to_gsheet(
+    await add_submission_and_apply_role(
         worksheet=worksheet,
         bot=bot,
         submission=submission,
@@ -141,7 +149,7 @@ def make_submission(
     for field in fields:
         key = field["key"]
         if key == USER_ID_KEY:
-            with suppress(ValueError):
+            with suppress(ValueError, TypeError):
                 discord_user_id = int(field["value"])
         elif key in FIELD_KEYS_TO_SUBMISSION_FIELDS:
             submission_field_key = FIELD_KEYS_TO_SUBMISSION_FIELDS[key]
