@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.69.1 (2021-12-30)
+### Fix
+* **aslpp:** Restrict /survey ([`2f9c5c4`](https://github.com/OpenASL/HowSignBot/commit/2f9c5c4cad9f821391cb82cb855bec7475fa1fda))
+
 ## v21.69.0 (2021-12-30)
 ### Feature
 * **aslpp:** Add /tag edit ([#385](https://github.com/OpenASL/HowSignBot/issues/385)) ([`70477d4`](https://github.com/OpenASL/HowSignBot/commit/70477d4a1e9e80772579b7d63de70d0efa82ed16))
