@@ -174,7 +174,7 @@ class AslPracticePartners(Cog):
     async def aslpp_feedback_command(self, inter: GuildCommandInteraction):
         """Get a link for the ASLPP feedback survey"""
         assert inter.user is not None
-        url = f"https://tally.so/r/nW1gJ3?uid={inter.user.id}"
+        url = f"https://tally.so/r/{settings.ASLPP_SURVEY_ID}?uid={inter.user.id}"
         await inter.send(
             "🙌 We love feedback! Here's the survey link. It'll take less than 2 minutes to complete.",
             view=LinkView(label="Survey Link", url=url),
