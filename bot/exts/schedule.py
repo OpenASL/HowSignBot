@@ -115,30 +115,38 @@ class Schedule(commands.Cog):
     async def schedule_new(self, inter: GuildCommandInteraction):
         """Quickly add a new scheduled event with guided prompts."""
         # Step 1: Prompt for the start time
-        start_time, start_time_message = await self._prompt_for_text_input(
-            inter, prompt=START_TIME_PROMPT, is_initial_interaction=True
-        )
-        logger.info(f"attempting to schedule new practice session: {start_time}")
-        user_timezone = await store.get_user_timezone(user_id=inter.user.id)
-        try:
-            scheduled_start_time, used_timezone = parse_practice_time(
-                start_time, user_timezone=user_timezone
+        tries = 0
+        max_retries = 3
+        scheduled_start_time: dt.datetime | None = None
+        current_prompt = START_TIME_PROMPT
+        while scheduled_start_time is None:
+            if tries >= max_retries:
+                await inter.send(
+                    "⚠️I can't seem to parse your messages. Try running `/schedule new` again and use more specific input.",
+                    ephemeral=True,
+                )
+                return
+            start_time, start_time_message = await self._prompt_for_text_input(
+                inter,
+                prompt=current_prompt,
+                is_initial_interaction=tries == 0,
             )
-        except NoTimeZoneError:
-            raise commands.errors.BadArgument(
-                f'⚠️Could not parse time zone from "{start_time}". Make sure to include a time zone, e.g. "{PACIFIC_CURRENT_NAME.lower()}".'
-            )
-        except pytz.UnknownTimeZoneError:
-            raise commands.errors.BadArgument("⚠️Invalid time zone. Please try again.")
-        if not scheduled_start_time:
-            raise commands.errors.BadArgument(
-                f'⚠️Could not parse "{start_time}" into a date or time. Make sure to include "am" or "pm" as well as a timezone, e.g. "{PACIFIC_CURRENT_NAME.lower()}".'
-            )
-        assert used_timezone is not None
-        if scheduled_start_time < utcnow():
-            raise commands.errors.BadArgument(
-                "⚠Parsed date or time is in the past. Try again with a future date or time."
-            )
+            logger.info(f"attempting to schedule new practice session: {start_time}")
+            user_timezone = await store.get_user_timezone(user_id=inter.user.id)
+            try:
+                scheduled_start_time, used_timezone = parse_practice_time(
+                    start_time, user_timezone=user_timezone
+                )
+            except NoTimeZoneError:
+                current_prompt = f'⚠️Could not parse time zone from "{start_time}". Try again. Make sure to include a time zone, e.g. "{PACIFIC_CURRENT_NAME.lower()}".'
+            except pytz.UnknownTimeZoneError:
+                current_prompt = "⚠️Invalid time zone. Please try again."
+            else:
+                if not scheduled_start_time:
+                    current_prompt = f'⚠️Could not parse "{start_time}" into a date or time. Try again. Make sure to include "am" or "pm" as well as a timezone, e.g. "{PACIFIC_CURRENT_NAME.lower()}".'
+                elif scheduled_start_time < utcnow():
+                    current_prompt = "⚠Parsed date or time is in the past. Try again with a future date or time."
+            tries += 1
         await start_time_message.edit(
             content=(
                 "☑️ **When will your event start?**\n"
@@ -217,6 +225,8 @@ class Schedule(commands.Cog):
             embed=make_event_embed(event),
             view=LinkView(label="Event Link", url=event_url),
         )
+
+        assert used_timezone is not None
         if str(user_timezone) != str(used_timezone):
             await store.set_user_timezone(user.id, used_timezone)
             new_timezone_display = display_timezone(used_timezone, utcnow()).lower()
