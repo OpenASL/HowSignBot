@@ -102,7 +102,10 @@ class Schedule(commands.Cog):
                 timeout=60,
             )
         except asyncio.exceptions.TimeoutError:
-            await inter.send(content="⚠️ You waited too long to respond. Try again.")
+            await inter.send(
+                content="⚠️ You waited too long to respond. Try running `/schedule new` again."
+            )
+            # TODO: handle this error more gracefully so it doesn't pollute the logs
             raise PromptCancelled
         if response_message.content.lower() == "cancel":
             await response_message.reply(content="✨ _Cancelled_")
@@ -258,10 +261,12 @@ class Schedule(commands.Cog):
                 events.append(event)
 
         if not events:
-            await inter.send("⚠️You have no events cancel.", ephemeral=True)
+            await inter.send("⚠️You have no events to cancel.", ephemeral=True)
             return
 
-        await inter.send("👌 OK, let's cancel your event", ephemeral=True)
+        await inter.send(
+            "👌 OK, let's cancel your event. _Fetching your events…_", ephemeral=True
+        )
 
         async def on_select(select_interaction: MessageInteraction, value: str):
             logger.debug(f"selected event {value}")
@@ -270,7 +275,7 @@ class Schedule(commands.Cog):
             logger.info(f"canceling event {event.id}")
             await event.delete()
             await select_interaction.response.edit_message(
-                content=f'✅ Successfully canceled "{event.name}"',
+                content=f"✅ Successfully cancelled **{event.name}**.",
                 view=None,
             )
 
