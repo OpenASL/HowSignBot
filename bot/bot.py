@@ -47,7 +47,7 @@ CHANGE_PRESENCE_EVERY = 120  # seconds
 
 async def cycle_presence():
     # Add a sleep before setting presence to avoid getting rate-limited
-    await asyncio.sleep(60)
+    await asyncio.sleep(10)
     for command in itertools.cycle(PRESENCE_COMMANDS):
         activity = disnake.Activity(
             name=command,
