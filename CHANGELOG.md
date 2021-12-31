@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.72.1 (2021-12-31)
+### Fix
+* **schedule:** Remove debugging junk ([`6b43863`](https://github.com/OpenASL/HowSignBot/commit/6b43863061b9ada7ddbf047967b2ea01b63f6f27))
+
 ## v21.72.0 (2021-12-31)
 ### Feature
 * **schedule:** Add /schedule edit [name|time|video] ([#388](https://github.com/OpenASL/HowSignBot/issues/388)) ([`7a894ee`](https://github.com/OpenASL/HowSignBot/commit/7a894ee589d0f29192a03a4f1a07878987242792))
