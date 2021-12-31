@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.73.0 (2021-12-31)
+### Feature
+* Add /speakeasy ([#389](https://github.com/OpenASL/HowSignBot/issues/389)) ([`4224771`](https://github.com/OpenASL/HowSignBot/commit/4224771d9f05b0b50d3ee9b94622d3502fdfbe03))
+
 ## v21.72.1 (2021-12-31)
 ### Fix
 * **schedule:** Remove debugging junk ([`6b43863`](https://github.com/OpenASL/HowSignBot/commit/6b43863061b9ada7ddbf047967b2ea01b63f6f27))
