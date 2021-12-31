@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.70.0 (2021-12-31)
+### Feature
+* **aslpp:** Send success message for survey; add test command ([`ca8d669`](https://github.com/OpenASL/HowSignBot/commit/ca8d6693dd699df348b627937605d02af48fe25d))
+
 ## v21.69.2 (2021-12-30)
 ### Fix
 * **aslpp:** Copy change ([`597f9c0`](https://github.com/OpenASL/HowSignBot/commit/597f9c04ef211e3b4c99fff67ee0957cb02e1cce))
