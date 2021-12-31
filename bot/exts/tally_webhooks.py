@@ -10,16 +10,27 @@ from typing import TypedDict
 
 import disnake
 from aiohttp import web
+from disnake import GuildCommandInteraction
+from disnake.ext import commands
 from disnake.ext.commands import Bot
+from disnake.ext.commands import Context
+from disnake.ext.commands import group
+from disnake.ext.commands import guild_permissions
+from disnake.ext.commands import is_owner
+from disnake.ext.commands import slash_command
 
 from bot import settings
 from bot.database import store
+from bot.utils.datetimes import utcnow
 from bot.utils.gsheets import get_gsheet_client
 from bot.utils.ui import LinkView
 
 logger = logging.getLogger(__name__)
 
 WORKSHEET_NAME = "feedback-submissions"
+
+SUCCESS_MESSAGE = """🙌 Thank you for taking the survey. You're a champ!
+I've applied a very special vanity role to your member profile."""
 
 
 async def add_submission_and_apply_role(
@@ -45,6 +56,9 @@ async def add_submission_and_apply_role(
                     )
                 except Exception:
                     logger.exception("failed to add vanity role for survey submission")
+                else:
+                    with suppress(disnake.errors.Forbidden):
+                        await member.send(SUCCESS_MESSAGE)
     row = (join_month, role_names) + submission
     worksheet.append_row(row)
 
@@ -124,15 +138,19 @@ def get_field_value(field: Field) -> str:
         return str(value) if value else ""
 
 
+def get_worksheet():
+    client = get_gsheet_client()
+    sheet = client.open_by_key(settings.ASLPP_SHEET_KEY)
+    return sheet.worksheet(WORKSHEET_NAME)
+
+
 async def handle_tally_webhook(bot: Bot, data: dict):
     submission, discord_user_id = make_submission(data)
     if not submission:
         return
     logger.info("adding feedback submission to gsheet")
     logger.debug(f"submission: {submission}")
-    client = get_gsheet_client()
-    sheet = client.open_by_key(settings.ASLPP_SHEET_KEY)
-    worksheet = sheet.worksheet(WORKSHEET_NAME)
+    worksheet = get_worksheet()
     await add_submission_and_apply_role(
         worksheet=worksheet,
         bot=bot,
@@ -179,6 +197,62 @@ def make_submission(
     )
 
 
+class Survey(commands.Cog):
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+
+    @guild_permissions(
+        settings.ASLPP_GUILD_ID, roles={settings.ASLPP_ACKNOWLEDGED_RULES_ROLE_ID: True}
+    )
+    @slash_command(
+        name="survey", guild_ids=(settings.ASLPP_GUILD_ID,), default_permission=False
+    )
+    async def survey_command(self, inter: GuildCommandInteraction):
+        """Get a link for the ASL Practice Partners feedback survey"""
+        assert inter.user is not None
+        url = f"https://tally.so/r/{settings.ASLPP_SURVEY_ID}?uid={inter.user.id}"
+        await inter.send(
+            "🙌 We love feedback! Here's the survey link. It'll take less than 5 minutes to complete.",
+            view=LinkView(label="Survey Link", url=url),
+            ephemeral=True,
+        )
+
+    @group(name="survey", hidden=True)
+    async def survey_group(self, ctx: Context):
+        pass
+
+    @survey_group.command(name="test", hidden=True)
+    @is_owner()
+    async def test_command(self, ctx: Context):
+        await ctx.channel.trigger_typing()
+        worksheet = get_worksheet()
+        submission = Submission(
+            created_at=utcnow().isoformat(),
+            hashed_user_id=hash_int(ctx.author.id),
+            meeting_participation="5",
+            meeting_absence_reasons="The meetings are at an inconvenient time|Other -  please specify",
+            meeting_absence_reasons_other="TEST",
+            does_host="No",
+            wants_to_host="Yes",
+            staff_can_follow_up="Yes",
+            discord_username="TEST",
+            meeting_suggestion="TEST",
+            proficiency_improvement="4",
+            ways_improved="TEST",
+            server_like="TEST",
+            server_suggestion="TEST",
+            other_feedback="TEST",
+            source="TEST",
+        )
+        await add_submission_and_apply_role(
+            worksheet=worksheet,
+            bot=self.bot,
+            submission=submission,
+            discord_user_id=ctx.author.id,
+        )
+        await ctx.reply("✅ Test submission sent.")
+
+
 def setup(bot: Bot) -> None:
     async def tally(request):
         data = await request.json()
@@ -187,3 +261,4 @@ def setup(bot: Bot) -> None:
         return web.Response(body="", status=200)
 
     bot.app.add_routes([web.post("/tally", tally)])
+    bot.add_cog(Survey(bot))

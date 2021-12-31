@@ -22,7 +22,6 @@ from disnake.ext.commands import Bot
 from disnake.ext.commands import Cog
 from disnake.ext.commands import Context
 from disnake.ext.commands import group
-from disnake.ext.commands import has_role
 from disnake.ext.commands import is_owner
 from disnake.ext.commands import slash_command
 
@@ -166,18 +165,6 @@ class AslPracticePartners(Cog):
                 f"⚠️ `{COMMAND_PREFIX}{ctx.invoked_with}` must be run within the ASL Practice Partners server (not a DM)."
             )
         return True
-
-    @slash_command(name="survey", guild_ids=(settings.ASLPP_GUILD_ID,))
-    @has_role(settings.ASLPP_ACKNOWLEDGED_RULES_ROLE_ID)
-    async def survey_command(self, inter: GuildCommandInteraction):
-        """Get a link for the ASL Practice Partners feedback survey"""
-        assert inter.user is not None
-        url = f"https://tally.so/r/{settings.ASLPP_SURVEY_ID}?uid={inter.user.id}"
-        await inter.send(
-            "🙌 We love feedback! Here's the survey link. It'll take less than 5 minutes to complete.",
-            view=LinkView(label="Survey Link", url=url),
-            ephemeral=True,
-        )
 
     @slash_command(name="tag", guild_ids=(settings.ASLPP_GUILD_ID,))
     async def tag_command(self, inter: GuildCommandInteraction):
