@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v21.71.0 (2021-12-31)
+### Feature
+* **schedule:** Add /schedule cancel ([#387](https://github.com/OpenASL/HowSignBot/issues/387)) ([`764e931`](https://github.com/OpenASL/HowSignBot/commit/764e931d725070106dc2896f88968154add10b58))
+* **schedule:** Add retries ([#386](https://github.com/OpenASL/HowSignBot/issues/386)) ([`598be65`](https://github.com/OpenASL/HowSignBot/commit/598be6594b70bdd0b78b6291119e02ff27ff997e))
+
 ## v21.70.0 (2021-12-31)
 ### Feature
 * **aslpp:** Send success message for survey; add test command ([`ca8d669`](https://github.com/OpenASL/HowSignBot/commit/ca8d6693dd699df348b627937605d02af48fe25d))
