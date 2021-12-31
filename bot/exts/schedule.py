@@ -11,7 +11,9 @@ import disnake
 import pytz
 from disnake import GuildCommandInteraction
 from disnake import GuildScheduledEvent
+from disnake import MessageInteraction
 from disnake.ext import commands
+from disnake.ext.commands import Cog
 
 from bot import settings
 from bot.database import store
@@ -26,6 +28,7 @@ from bot.utils.datetimes import utcnow
 from bot.utils.discord import display_name
 from bot.utils.ui import ButtonGroupOption
 from bot.utils.ui import ButtonGroupView
+from bot.utils.ui import DropdownView
 from bot.utils.ui import LinkView
 
 logger = logging.getLogger(__name__)
@@ -99,7 +102,10 @@ class Schedule(commands.Cog):
                 timeout=60,
             )
         except asyncio.exceptions.TimeoutError:
-            await inter.send(content="⚠️ You waited too long to respond. Try again.")
+            await inter.send(
+                content="⚠️ You waited too long to respond. Try running `/schedule new` again."
+            )
+            # TODO: handle this error more gracefully so it doesn't pollute the logs
             raise PromptCancelled
         if response_message.content.lower() == "cancel":
             await response_message.reply(content="✨ _Cancelled_")
@@ -113,7 +119,7 @@ class Schedule(commands.Cog):
 
     @schedule_command.sub_command(name="new")
     async def schedule_new(self, inter: GuildCommandInteraction):
-        """Quickly add a new scheduled event with guided prompts."""
+        """Add a new scheduled event with guided prompts."""
         # Step 1: Prompt for the start time
         tries = 0
         max_retries = 3
@@ -218,10 +224,14 @@ class Schedule(commands.Cog):
             reason=f"/schedule command used by user {user.id} ({display_name(user)})",
             **video_service_kwargs,
         )
+        await store.create_scheduled_event(event_id=event.id, created_by=user.id)
 
         event_url = f"https://discord.com/events/{event.guild_id}/{event.id}"
         await inter.channel.send(
-            content='🙌 **Successfully created event.** Click "Event Link" below to view/edit your event and mark yourself as "Interested".',
+            content=(
+                '🙌 **Successfully created event.** Click "Event Link" below to mark yourself as "Interested".\n'
+                "To cancel your event, use `/schedule cancel`."
+            ),
             embed=make_event_embed(event),
             view=LinkView(label="Event Link", url=event_url),
         )
@@ -238,6 +248,56 @@ class Schedule(commands.Cog):
                 await user.send(dm_response)
             except disnake.errors.Forbidden:
                 logger.warn("cannot send DM to user. skipping...")
+
+    @schedule_command.sub_command(name="cancel")
+    async def schedule_cancel(self, inter: GuildCommandInteraction):
+        """Cancel an event created through this bot"""
+        assert inter.user is not None
+        scheduled_events = await store.get_scheduled_events_for_user(inter.user.id)
+        events: list[GuildScheduledEvent] = []
+        for event in scheduled_events:
+            event = inter.guild.get_scheduled_event(event["event_id"])
+            if event:
+                events.append(event)
+
+        if not events:
+            await inter.send("⚠️You have no events to cancel.", ephemeral=True)
+            return
+
+        await inter.send(
+            "👌 OK, let's cancel your event. _Fetching your events…_", ephemeral=True
+        )
+
+        async def on_select(select_interaction: MessageInteraction, value: str):
+            logger.debug(f"selected event {value}")
+            event = inter.guild.get_scheduled_event(int(value))
+            assert event is not None
+            logger.info(f"canceling event {event.id}")
+            await event.delete()
+            await select_interaction.response.edit_message(
+                content=f"✅ Successfully cancelled **{event.name}**.",
+                view=None,
+            )
+
+        options = [
+            disnake.SelectOption(
+                label=f"{event.name} · {format_scheduled_start_time(event.scheduled_start_time)}",
+                value=str(event.id),
+            )
+            for event in events
+        ]
+        view = DropdownView.from_options(
+            options=options,
+            on_select=on_select,
+            placeholder="Choose an event",
+            creator_id=inter.user.id,
+        )
+        await inter.send(content="Choose an event to cancel.", view=view, ephemeral=True)
+
+    @Cog.listener()
+    async def on_guild_scheduled_event_delete(self, event: GuildScheduledEvent) -> None:
+        logger.info(f"removing scheduled event {event.id}")
+        await store.remove_scheduled_event(event_id=event.id)
 
 
 def setup(bot: commands.Bot) -> None:
