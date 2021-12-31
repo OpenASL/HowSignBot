@@ -62,6 +62,10 @@ class PromptCancelled(Exception):
     pass
 
 
+class MaxPromptAttemptsExceeded(Exception):
+    pass
+
+
 def format_scheduled_start_time(dtime: dt.datetime):
     dtime_pacific = dtime.astimezone(PACIFIC)
     return dtime_pacific.strftime("%A, %B %-d") + " · " + format_multi_time(dtime)
@@ -73,6 +77,15 @@ def make_event_embed(event: GuildScheduledEvent) -> disnake.Embed:
         title=event.name, description="🗓" + format_scheduled_start_time(dtime)
     )
     return embed
+
+
+def get_event_url(event: GuildScheduledEvent) -> str:
+    return f"https://discord.com/events/{event.guild_id}/{event.id}"
+
+
+def get_event_label(event: GuildScheduledEvent, bold: bool = False) -> str:
+    event_name = f"**{event.name}**" if bold else event.name
+    return f"{event_name} · {format_scheduled_start_time(event.scheduled_start_time)}"
 
 
 class Schedule(commands.Cog):
@@ -103,7 +116,7 @@ class Schedule(commands.Cog):
             )
         except asyncio.exceptions.TimeoutError:
             await inter.send(
-                content="⚠️ You waited too long to respond. Try running `/schedule new` again."
+                content="⚠️ You waited too long to respond. Try running `/schedule …` again."
             )
             # TODO: handle this error more gracefully so it doesn't pollute the logs
             raise PromptCancelled
@@ -121,21 +134,315 @@ class Schedule(commands.Cog):
     async def schedule_new(self, inter: GuildCommandInteraction):
         """Add a new scheduled event with guided prompts."""
         # Step 1: Prompt for the start time
+        try:
+            scheduled_start_time, used_timezone = await self._prompt_for_start_time(inter)
+        except MaxPromptAttemptsExceeded:
+            await inter.send(
+                "⚠️I can't seem to parse your messages. Try running `/schedule new` again and use more specific input.",
+                ephemeral=True,
+            )
+            return
+
+        # Step 2: Prompt for title
+        title, title_prompt_message = await self._prompt_for_text_input(
+            inter,
+            prompt='➡ **Enter a title**, or enter `skip` to use the default ("Practice").',
+        )
+        await title_prompt_message.edit(
+            content=f"☑️ **Enter a title.**\nEntered: {title}",
+        )
+        if title.lower() == "skip":
+            title = "Practice"
+
+        # Step 3: Choosing video service (Zoom or VC)
+        guild = inter.guild
+        assert inter.user is not None
+        user = inter.user
+        video_service_kwargs = await self._prompt_for_video_service(
+            inter, user=user, guild=guild
+        )
+
+        scheduled_end_time = scheduled_start_time + dt.timedelta(hours=1)
+
+        event = await guild.create_scheduled_event(
+            name=title,
+            description=f"Host: {user.mention}\n_Created with_ `/schedule new`",
+            scheduled_start_time=scheduled_start_time,
+            scheduled_end_time=scheduled_end_time,
+            reason=f"/schedule command used by user {user.id} ({display_name(user)})",
+            **video_service_kwargs,
+        )
+        await store.create_scheduled_event(event_id=event.id, created_by=user.id)
+
+        await inter.channel.send(
+            content=(
+                '🙌 **Successfully created event.** Click "Event Link" below to mark yourself as "Interested".\n'
+                "To edit your event, use `/schedule edit …`.\n"
+                "To cancel your event, use `/schedule cancel`."
+            ),
+            embed=make_event_embed(event),
+            view=LinkView(label="Event Link", url=get_event_url(event)),
+        )
+
+        assert used_timezone is not None
+        await self._store_and_notify_for_user_timezone_change(
+            user=inter.user,
+            used_timezone=used_timezone,
+        )
+
+    @schedule_command.sub_command(name="cancel")
+    async def schedule_cancel(self, inter: GuildCommandInteraction):
+        """Cancel an event created through this bot"""
+        assert inter.user is not None
+        events = await self._get_events_for_user(user_id=inter.user.id, guild=inter.guild)
+        if not events:
+            await inter.send("⚠️You have no events to cancel.", ephemeral=True)
+            return
+
+        await inter.send("👌 OK, let's cancel your event.")
+
+        async def on_select(select_interaction: MessageInteraction, value: str):
+            logger.debug(f"selected event {value}")
+            event = inter.guild.get_scheduled_event(int(value))
+            assert event is not None
+            logger.info(f"canceling event {event.id}")
+            await event.delete()
+            await select_interaction.response.edit_message(
+                content=f"🙌 Successfully cancelled **{event.name}**.",
+                view=None,
+            )
+
+        options = [
+            disnake.SelectOption(
+                label=f"{event.name} · {format_scheduled_start_time(event.scheduled_start_time)}",
+                value=str(event.id),
+            )
+            for event in events
+        ]
+        view = DropdownView.from_options(
+            options=options,
+            on_select=on_select,
+            placeholder="Choose an event",
+            creator_id=inter.user.id,
+        )
+        await inter.send(content="Choose an event to cancel.", view=view)
+
+    @schedule_command.sub_command_group(name="edit")
+    async def schedule_edit(self, inter: GuildCommandInteraction):
+        """Edit a scheduled event"""
+        pass
+
+    @schedule_edit.sub_command(name="name")
+    async def schedule_edit_name(self, inter: GuildCommandInteraction):
+        """Edit a scheduled event's name"""
+        assert inter.user is not None
+        events = await self._get_events_for_user(user_id=inter.user.id, guild=inter.guild)
+        if not events:
+            await inter.send("⚠️You have no events to edit.", ephemeral=True)
+            return
+
+        await inter.send("👌 OK, let's edit your event's name.")
+
+        async def on_select(select_interaction: MessageInteraction, value: str):
+            logger.debug(f"selected event {value}")
+            event = inter.guild.get_scheduled_event(int(value))
+            assert event is not None
+            logger.info(f"editing event title for event {event.id}")
+            await select_interaction.response.edit_message(
+                content=f"☑️ Editing: **{event.name}**",
+                view=None,
+            )
+            prompt_content = "➡ What would you like the new name to be?"
+            name, prompt_message = await self._prompt_for_text_input(
+                inter,
+                prompt=prompt_content,
+            )
+            await prompt_message.edit(content=prompt_content.replace("➡", "☑️"))
+            event = await event.edit(name=name)
+            await inter.send(
+                content=f"🙌 Successfully edited event name to: **{name}**.",
+                embed=make_event_embed(event),
+                view=LinkView(label="Event Link", url=get_event_url(event)),
+            )
+
+        options = [
+            disnake.SelectOption(
+                label=get_event_label(event),
+                value=str(event.id),
+            )
+            for event in events
+        ]
+        view = DropdownView.from_options(
+            options=options,
+            on_select=on_select,
+            placeholder="Choose an event",
+            creator_id=inter.user.id,
+        )
+        await inter.send(content="Choose an event to edit.", view=view)
+
+    @schedule_edit.sub_command(name="time")
+    async def schedule_edit_time(self, inter: GuildCommandInteraction):
+        """Edit a scheduled event's time"""
+        assert inter.user is not None
+        events = await self._get_events_for_user(user_id=inter.user.id, guild=inter.guild)
+        if not events:
+            await inter.send("⚠️You have no events to edit.", ephemeral=True)
+            return
+
+        await inter.send("👌 OK, let's edit your event's time.")
+
+        async def on_select(select_interaction: MessageInteraction, value: str):
+            logger.debug(f"selected event {value}")
+            event = inter.guild.get_scheduled_event(int(value))
+            assert event is not None
+            await select_interaction.response.edit_message(
+                content=f"☑️ Editing: {get_event_label(event, bold=True)}",
+                view=None,
+            )
+
+            if event.scheduled_end_time:
+                duration = event.scheduled_end_time - event.scheduled_start_time
+            else:
+                duration = dt.timedelta(hours=1)
+
+            try:
+                scheduled_start_time, used_timezone = await self._prompt_for_start_time(
+                    inter, is_initial_interaction=False
+                )
+            except MaxPromptAttemptsExceeded:
+                await inter.send(
+                    "⚠️I can't seem to parse your messages. Try running `/schedule edit time` again and use more specific input.",
+                    ephemeral=True,
+                )
+                return
+
+            scheduled_end_time = scheduled_start_time + duration
+            logger.info(f"editing event start and end time for event {event.id}")
+            event = await event.edit(
+                scheduled_start_time=scheduled_start_time,
+                scheduled_end_time=scheduled_end_time,
+            )
+            assert event is not None
+            await inter.send(
+                content="🙌 Successfully edited event time.",
+                embed=make_event_embed(event),
+                view=LinkView(label="Event Link", url=get_event_url(event)),
+            )
+            assert used_timezone is not None
+            await self._store_and_notify_for_user_timezone_change(
+                user=inter.user,
+                used_timezone=used_timezone,
+            )
+
+        options = [
+            disnake.SelectOption(
+                label=get_event_label(event),
+                value=str(event.id),
+            )
+            for event in events
+        ]
+        view = DropdownView.from_options(
+            options=options,
+            on_select=on_select,
+            placeholder="Choose an event",
+            creator_id=inter.user.id,
+        )
+        await inter.send(content="Choose an event to edit.", view=view)
+
+    @schedule_edit.sub_command(name="video")
+    async def schedule_edit_video(self, inter: GuildCommandInteraction):
+        """Edit a scheduled event's video service (Zoom or VC)"""
+        assert inter.user is not None
+        events = await self._get_events_for_user(user_id=inter.user.id, guild=inter.guild)
+        if not events:
+            await inter.send("⚠️You have no events to edit.", ephemeral=True)
+            return
+
+        await inter.send("👌 OK, let's edit your event's video service.")
+
+        async def on_select(select_interaction: MessageInteraction, value: str):
+            logger.debug(f"selected event {value}")
+            event = inter.guild.get_scheduled_event(int(value))
+            assert event is not None
+            logger.info(f"editing event title for event {event.id}")
+            await select_interaction.response.edit_message(
+                content=f"☑️ Editing: {get_event_label(event, bold=True)}",
+                view=None,
+            )
+
+            assert inter.user is not None
+            video_service_kwargs = await self._prompt_for_video_service(
+                inter, user=inter.user, guild=inter.guild
+            )
+            logger.info("!!!")
+            logger.info(video_service_kwargs)
+            event = await event.edit(
+                # XXX API requires passing scheduled end time for some reason
+                scheduled_start_time=event.scheduled_start_time,
+                scheduled_end_time=event.scheduled_end_time,
+                **video_service_kwargs,
+            )
+            assert event is not None
+
+            await inter.send(
+                content="🙌 Successfully edited video service.",
+                embed=make_event_embed(event),
+                view=LinkView(label="Event Link", url=get_event_url(event)),
+            )
+
+        options = [
+            disnake.SelectOption(
+                label=get_event_label(event),
+                value=str(event.id),
+            )
+            for event in events
+        ]
+        view = DropdownView.from_options(
+            options=options,
+            on_select=on_select,
+            placeholder="Choose an event",
+            creator_id=inter.user.id,
+        )
+        await inter.send(content="Choose an event to edit.", view=view)
+
+    @Cog.listener()
+    async def on_guild_scheduled_event_delete(self, event: GuildScheduledEvent) -> None:
+        logger.info(f"removing scheduled event {event.id}")
+        await store.remove_scheduled_event(event_id=event.id)
+
+    async def _get_events_for_user(
+        self, user_id: int, *, guild: disnake.Guild
+    ) -> list[GuildScheduledEvent]:
+        scheduled_events = await store.get_scheduled_events_for_user(user_id)
+        events: list[GuildScheduledEvent] = []
+        for event in scheduled_events:
+            event = guild.get_scheduled_event(event["event_id"])
+            if event:
+                events.append(event)
+        return sorted(events, key=lambda e: e.scheduled_start_time)
+
+    async def _prompt_for_start_time(
+        self,
+        inter: GuildCommandInteraction,
+        is_initial_interaction: bool | None = None,
+    ) -> tuple[dt.datetime, dt.tzinfo | None]:
         tries = 0
         max_retries = 3
         scheduled_start_time: dt.datetime | None = None
         current_prompt = START_TIME_PROMPT
+        used_timezone: dt.tzinfo | None = None
         while scheduled_start_time is None:
             if tries >= max_retries:
-                await inter.send(
-                    "⚠️I can't seem to parse your messages. Try running `/schedule new` again and use more specific input.",
-                    ephemeral=True,
-                )
-                return
+                raise MaxPromptAttemptsExceeded
+
             start_time, start_time_message = await self._prompt_for_text_input(
                 inter,
                 prompt=current_prompt,
-                is_initial_interaction=tries == 0,
+                is_initial_interaction=(
+                    is_initial_interaction
+                    if is_initial_interaction is not None
+                    else tries == 0
+                ),
             )
             logger.info(f"attempting to schedule new practice session: {start_time}")
             user_timezone = await store.get_user_timezone(user_id=inter.user.id)
@@ -156,26 +463,34 @@ class Schedule(commands.Cog):
         await start_time_message.edit(
             content=(
                 "☑️ **When will your event start?**\n"
-                f"Entered: {format_scheduled_start_time(scheduled_start_time)}\n"
-                "If this is incorrect, enter `cancel` and run `/schedule new` again."
+                f"Entered: {format_scheduled_start_time(scheduled_start_time)}"
             )
         )
+        return scheduled_start_time, used_timezone
 
-        # Step 2: Prompt for title
-        title, title_prompt_message = await self._prompt_for_text_input(
-            inter,
-            prompt='➡ **Enter a title**, or enter `skip` to use the default ("Practice").',
-        )
-        await title_prompt_message.edit(
-            content=f"☑️ **Enter a title.**\nEntered: {title}",
-        )
-        if title.lower() == "skip":
-            title = "Practice"
+    async def _store_and_notify_for_user_timezone_change(
+        self, user, used_timezone: dt.tzinfo
+    ):
+        user_timezone = await store.get_user_timezone(user_id=user.id)
+        if used_timezone and str(user_timezone) != str(used_timezone):
+            await store.set_user_timezone(user.id, used_timezone)
+            new_timezone_display = display_timezone(used_timezone, utcnow()).lower()
+            dm_response = TIMEZONE_CHANGE_TEMPLATE.format(
+                new_timezone=used_timezone,
+                new_timezone_display=new_timezone_display,
+            )
+            try:
+                await user.send(dm_response)
+            except disnake.errors.Forbidden:
+                logger.warn("cannot send DM to user. skipping...")
 
-        # Step 3: Choosing video service (Zoom or VC)
-        guild = inter.guild
-        assert inter.user is not None
-        user = inter.user
+    async def _prompt_for_video_service(
+        self,
+        inter: GuildCommandInteraction,
+        *,
+        user: disnake.User,
+        guild: disnake.Guild,
+    ) -> dict[str, Any]:
         video_service_view = ButtonGroupView.from_options(
             options=(
                 ButtonGroupOption(label="Zoom", value=VideoService.ZOOM, emoji="🟦"),
@@ -201,6 +516,7 @@ class Schedule(commands.Cog):
                 entity_metadata=disnake.GuildScheduledEventMetadata(
                     location="Zoom will be posted in practice channel"
                 ),
+                channel_id=None,
             )
         elif video_service_value == VideoService.VC:
             voice_channel = guild.voice_channels[0]
@@ -212,92 +528,9 @@ class Schedule(commands.Cog):
             video_service_kwargs = dict(
                 entity_type=disnake.GuildScheduledEventEntityType.external,
                 entity_metadata=disnake.GuildScheduledEventMetadata(location="TBD"),
+                channel_id=None,
             )
-
-        scheduled_end_time = scheduled_start_time + dt.timedelta(hours=1)
-
-        event = await guild.create_scheduled_event(
-            name=title,
-            description=f"Host: {user.mention}\n_Created with_ `/schedule new`",
-            scheduled_start_time=scheduled_start_time,
-            scheduled_end_time=scheduled_end_time,
-            reason=f"/schedule command used by user {user.id} ({display_name(user)})",
-            **video_service_kwargs,
-        )
-        await store.create_scheduled_event(event_id=event.id, created_by=user.id)
-
-        event_url = f"https://discord.com/events/{event.guild_id}/{event.id}"
-        await inter.channel.send(
-            content=(
-                '🙌 **Successfully created event.** Click "Event Link" below to mark yourself as "Interested".\n'
-                "To cancel your event, use `/schedule cancel`."
-            ),
-            embed=make_event_embed(event),
-            view=LinkView(label="Event Link", url=event_url),
-        )
-
-        assert used_timezone is not None
-        if str(user_timezone) != str(used_timezone):
-            await store.set_user_timezone(user.id, used_timezone)
-            new_timezone_display = display_timezone(used_timezone, utcnow()).lower()
-            dm_response = TIMEZONE_CHANGE_TEMPLATE.format(
-                new_timezone=used_timezone,
-                new_timezone_display=new_timezone_display,
-            )
-            try:
-                await user.send(dm_response)
-            except disnake.errors.Forbidden:
-                logger.warn("cannot send DM to user. skipping...")
-
-    @schedule_command.sub_command(name="cancel")
-    async def schedule_cancel(self, inter: GuildCommandInteraction):
-        """Cancel an event created through this bot"""
-        assert inter.user is not None
-        scheduled_events = await store.get_scheduled_events_for_user(inter.user.id)
-        events: list[GuildScheduledEvent] = []
-        for event in scheduled_events:
-            event = inter.guild.get_scheduled_event(event["event_id"])
-            if event:
-                events.append(event)
-
-        if not events:
-            await inter.send("⚠️You have no events to cancel.", ephemeral=True)
-            return
-
-        await inter.send(
-            "👌 OK, let's cancel your event. _Fetching your events…_", ephemeral=True
-        )
-
-        async def on_select(select_interaction: MessageInteraction, value: str):
-            logger.debug(f"selected event {value}")
-            event = inter.guild.get_scheduled_event(int(value))
-            assert event is not None
-            logger.info(f"canceling event {event.id}")
-            await event.delete()
-            await select_interaction.response.edit_message(
-                content=f"✅ Successfully cancelled **{event.name}**.",
-                view=None,
-            )
-
-        options = [
-            disnake.SelectOption(
-                label=f"{event.name} · {format_scheduled_start_time(event.scheduled_start_time)}",
-                value=str(event.id),
-            )
-            for event in events
-        ]
-        view = DropdownView.from_options(
-            options=options,
-            on_select=on_select,
-            placeholder="Choose an event",
-            creator_id=inter.user.id,
-        )
-        await inter.send(content="Choose an event to cancel.", view=view, ephemeral=True)
-
-    @Cog.listener()
-    async def on_guild_scheduled_event_delete(self, event: GuildScheduledEvent) -> None:
-        logger.info(f"removing scheduled event {event.id}")
-        await store.remove_scheduled_event(event_id=event.id)
+        return video_service_kwargs
 
 
 def setup(bot: commands.Bot) -> None:
