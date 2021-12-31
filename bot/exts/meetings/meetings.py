@@ -447,7 +447,10 @@ class Meetings(Cog):
                     )
 
                 view = DropdownView.from_options(
-                    options=options, on_select=on_select, placeholder="Choose a user"
+                    options=options,
+                    on_select=on_select,
+                    placeholder="Choose a user",
+                    creator_id=inter.user.id,
                 )
                 await inter.send("Choose a user to downgrade to Basic.", view=view)
             else:
