@@ -225,7 +225,10 @@ class Schedule(commands.Cog):
 
         event_url = f"https://discord.com/events/{event.guild_id}/{event.id}"
         await inter.channel.send(
-            content='🙌 **Successfully created event.** Click "Event Link" below to view/edit your event and mark yourself as "Interested".',
+            content=(
+                '🙌 **Successfully created event.** Click "Event Link" below to mark yourself as "Interested".\n'
+                "To cancel your event, use `/schedule cancel`."
+            ),
             embed=make_event_embed(event),
             view=LinkView(label="Event Link", url=event_url),
         )
