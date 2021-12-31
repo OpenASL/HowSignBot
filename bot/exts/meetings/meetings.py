@@ -513,6 +513,26 @@ class Meetings(Cog):
         message = await inter.original_message()
         await add_stop_sign(message)
 
+    @slash_command(name="speakeasy")
+    async def speakeasy_command(
+        self, inter: ApplicationCommandInteraction, *, name: Optional[str] = None
+    ):
+        """Start a Speakeasy (https://speakeasy.co/) event
+
+        Parameters
+        ----------
+        name: Name of the meeting
+        """
+        join_url = meetings.create_speakeasy(name, secret=settings.SECRET_KEY)
+        content = f"️🍻 **Speakeasy**\nJoin URL: <{join_url}>"
+        if name:
+            content = f"{content}\n**Name**: {name}"
+        content = f"{content}\n🚀 This event is happening now. Make a friend!"
+        logger.info("sending speakeasy info")
+        await inter.send(content=content)
+        message = await inter.original_message()
+        await add_stop_sign(message)
+
     # Deprecated prefix commands
 
     @group(name="zoom", aliases=("z",), invoke_without_command=True)
@@ -608,8 +628,6 @@ class Meetings(Cog):
 
         await add_stop_sign(message)
 
-    # End deprecated prefix commands
-
     @command(name="meet", aliases=("jitsi",), help="Start a Jitsi Meet meeting")
     async def meet_prefix_command(self, ctx: Context, *, name: Optional[str]):
         meeting = meetings.create_jitsi_meet(name, secret=settings.SECRET_KEY)
@@ -619,7 +637,7 @@ class Meetings(Cog):
         await add_stop_sign(message)
 
     @command(name="speakeasy", help="Start a Speakeasy (https://speakeasy.co/) event")
-    async def speakeasy_command(self, ctx: Context, *, name: Optional[str]):
+    async def speakeasy_prefix_command(self, ctx: Context, *, name: Optional[str]):
         join_url = meetings.create_speakeasy(name, secret=settings.SECRET_KEY)
         content = f"️🍻 **Speakeasy**\nJoin URL: <{join_url}>"
         if name:
@@ -628,6 +646,8 @@ class Meetings(Cog):
         logger.info("sending speakeasy info")
         message = await ctx.send(content=content)
         await add_stop_sign(message)
+
+    # End deprecated prefix commands
 
     async def edit_meeting_moved(self, message: disnake.Message) -> None:
         await message.edit(
