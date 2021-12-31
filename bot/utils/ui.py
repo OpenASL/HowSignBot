@@ -102,8 +102,9 @@ class Dropdown(disnake.ui.Select):
 
 
 class DropdownView(disnake.ui.View):
-    def __init__(self):
+    def __init__(self, creator_id: int):
         super().__init__()
+        self.creator_id = creator_id
         self.dropdown: Dropdown | None = None
 
     @classmethod
@@ -113,10 +114,16 @@ class DropdownView(disnake.ui.View):
         options: Sequence[disnake.SelectOption],
         on_select: Callback,
         placeholder: str | None = None,
+        creator_id: int,
     ) -> DropdownView:
-        view = cls()
+        view = cls(creator_id=creator_id)
 
         async def handle_select(inter: disnake.MessageInteraction, value):
+            # Ignore clicks by other users
+            assert inter.user is not None
+            if inter.user.id != creator_id:
+                await inter.send("⚠️ You can't interact with this UI.", ephemeral=True)
+                return
             await on_select(inter, value)
             view.stop()
 
