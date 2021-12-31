@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v21.73.1 (2021-12-31)
+### Fix
+* Attempt to avoid rate limit ([`f9444e2`](https://github.com/OpenASL/HowSignBot/commit/f9444e23a2e1d72c75865fd0f33d9dc8d6720cf7))
+
 ## v21.73.0 (2021-12-31)
 ### Feature
 * Add /speakeasy ([#389](https://github.com/OpenASL/HowSignBot/issues/389)) ([`4224771`](https://github.com/OpenASL/HowSignBot/commit/4224771d9f05b0b50d3ee9b94622d3502fdfbe03))
