@@ -374,8 +374,6 @@ class Schedule(commands.Cog):
             video_service_kwargs = await self._prompt_for_video_service(
                 inter, user=inter.user, guild=inter.guild
             )
-            logger.info("!!!")
-            logger.info(video_service_kwargs)
             event = await event.edit(
                 # XXX API requires passing scheduled end time for some reason
                 scheduled_start_time=event.scheduled_start_time,
