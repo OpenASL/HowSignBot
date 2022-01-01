@@ -308,7 +308,9 @@ class AslPracticePartners(Cog):
         await ctx.reply("🙌 Video etiquette message posted")
 
     @guild_permissions(settings.ASLPP_GUILD_ID, owner=True)
-    @slash_command(name="syncdata", default_permission=False)
+    @slash_command(
+        name="syncdata", guild_ids=(settings.ASLPP_GUILD_ID,), default_permission=False
+    )
     @is_owner()
     async def sync_data_command(
         self, inter: GuildCommandInteraction, intros: bool = False
