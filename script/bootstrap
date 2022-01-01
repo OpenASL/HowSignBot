@@ -12,6 +12,7 @@ if [ -z "${CI:-}" ]; then
     pyenv install "$python_version" --skip-existing
     pyenv virtualenv "$python_version" "$name"
   fi
+  pyenv local "$name"
   unset name python_version
 fi
 

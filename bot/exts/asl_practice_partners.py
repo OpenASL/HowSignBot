@@ -22,6 +22,7 @@ from disnake.ext.commands import Bot
 from disnake.ext.commands import Cog
 from disnake.ext.commands import Context
 from disnake.ext.commands import group
+from disnake.ext.commands import guild_permissions
 from disnake.ext.commands import is_owner
 from disnake.ext.commands import slash_command
 
@@ -306,29 +307,40 @@ class AslPracticePartners(Cog):
             await asyncio.sleep(1)
         await ctx.reply("🙌 Video etiquette message posted")
 
-    @aslpp_group.command(name="syncdata", hidden=True)
+    @guild_permissions(settings.ASLPP_GUILD_ID, owner=True)
+    @slash_command(name="syncdata", default_permission=False)
     @is_owner()
-    async def sync_data_command(self, ctx: Context):
-        await ctx.channel.trigger_typing()
-        channel = self.bot.get_channel(settings.ASLPP_INTRODUCTIONS_CHANNEL_ID)
-        await store.clear_aslpp_intros()
-        async for message in channel.history(limit=None):
-            logger.info(f"storing intro record {message.id}")
-            await store.add_aslpp_intro(
-                message_id=message.id,
-                user_id=message.author.id,
-                posted_at=message.created_at,
-            )
+    async def sync_data_command(
+        self, inter: GuildCommandInteraction, intros: bool = False
+    ):
+        await inter.send("Syncing data…", ephemeral=True)
+        if intros:
+            channel = self.bot.get_channel(settings.ASLPP_INTRODUCTIONS_CHANNEL_ID)
+            await store.clear_aslpp_intros()
+            async for message in channel.history(limit=None):
+                logger.info(f"storing intro record {message.id}")
+                await store.add_aslpp_intro(
+                    message_id=message.id,
+                    user_id=message.author.id,
+                    posted_at=message.created_at,
+                )
 
-        role = ctx.guild.get_role(settings.ASLPP_ACKNOWLEDGED_RULES_ROLE_ID)
+        role = inter.guild.get_role(settings.ASLPP_ACKNOWLEDGED_RULES_ROLE_ID)
+        assert role is not None
         await store.clear_aslpp_members()
         for member in role.members:
             if member.bot:
                 continue
             logger.info(f"storing member {member.id}")
-            await store.add_aslpp_member(user_id=member.id, joined_at=member.joined_at)
+            await store.add_aslpp_member(
+                user_id=member.id,
+                joined_at=member.joined_at,
+                roles="|".join(
+                    [role.name for role in member.roles[1:]]
+                ),  # skip @everyone
+            )
         logger.info("finished syncing data")
-        await ctx.reply("🙌 Synced data")
+        await inter.send("🙌 Synced data", ephemeral=True)
 
     @aslpp_group.command(name="nointros", aliases=("nointro",), hidden=True)
     @commands.has_permissions(kick_members=True)
