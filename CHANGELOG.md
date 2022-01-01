@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.0.1 (2022-01-01)
+### Fix
+* Restrict syncdata ([`345c59a`](https://github.com/OpenASL/HowSignBot/commit/345c59a18ae5de1dd630f1d8fcab41a5feab2d6e))
+
 ## v22.0.0 (2022-01-01)
 ### Feature
 * New year ([`ffc14c9`](https://github.com/OpenASL/HowSignBot/commit/ffc14c91ec64ef5c17d5a99bca2c815aa9532e1b))
