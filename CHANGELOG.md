@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v22.0.0 (2022-01-01)
+### Feature
+* New year ([`ffc14c9`](https://github.com/OpenASL/HowSignBot/commit/ffc14c91ec64ef5c17d5a99bca2c815aa9532e1b))
+* **aslpp:** Sync role data ([`acf07bd`](https://github.com/OpenASL/HowSignBot/commit/acf07bda2c6057ccc9e38cd284db58de9ed8664e))
+
+### Fix
+* Previous attempt didn't help ([`27320f5`](https://github.com/OpenASL/HowSignBot/commit/27320f5c4c8f9ff15da365ac02b4fd8cdac87e6d))
+
+### Breaking
+* new year ([`ffc14c9`](https://github.com/OpenASL/HowSignBot/commit/ffc14c91ec64ef5c17d5a99bca2c815aa9532e1b))
+
 ## v21.73.1 (2021-12-31)
 ### Fix
 * Attempt to avoid rate limit ([`f9444e2`](https://github.com/OpenASL/HowSignBot/commit/f9444e23a2e1d72c75865fd0f33d9dc8d6720cf7))
