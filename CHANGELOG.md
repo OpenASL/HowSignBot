@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.2.1 (2022-01-02)
+### Fix
+* **aslpp:** Add paranoid check before kicking ([`2b9d4e6`](https://github.com/OpenASL/HowSignBot/commit/2b9d4e6ede4e2916dc6a638444c435da47582d4d))
+
 ## v22.2.0 (2022-01-01)
 ### Feature
 * **aslpp:** Kick users who have no roles for 7 days ([#392](https://github.com/OpenASL/HowSignBot/issues/392)) ([`eca3496`](https://github.com/OpenASL/HowSignBot/commit/eca3496b560159017945da6d5468289a5392fc76))
