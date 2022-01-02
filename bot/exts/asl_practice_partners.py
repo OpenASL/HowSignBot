@@ -6,6 +6,7 @@ import logging
 from contextlib import suppress
 from textwrap import dedent
 from typing import Mapping
+from typing import NamedTuple
 from typing import Sequence
 
 import disnake
@@ -94,14 +95,27 @@ def get_skill_roles() -> list[disnake.Object]:
 MAX_NO_INTRO_USERS_TO_DISPLAY = 30
 
 
-async def make_no_intros_embed():
+class InactiveMemberInfo(NamedTuple):
+    members_without_intro: list[Mapping]
+    n_members_to_prune: int
+
+
+async def get_inactive_user_info(guild: Guild) -> InactiveMemberInfo:
     members_without_intro = await store.get_aslpp_members_without_intro(
         since=dt.timedelta(days=settings.ASLPP_INACTIVE_DAYS + 1)
     )
+    n_members_to_prune = await guild.estimate_pruned_members(
+        days=PRUNE_DAYS, roles=get_skill_roles()
+    )
+    return InactiveMemberInfo(
+        members_without_intro=members_without_intro, n_members_to_prune=n_members_to_prune
+    )
 
+
+async def make_inactive_members_embed(guild: Guild):
+    members_without_intro, n_members_to_prune = await get_inactive_user_info(guild)
     if len(members_without_intro):
-        description = "Here are the oldest memberships:\n"
-        description += "\n".join(
+        description = "\n".join(
             tuple(
                 f"<@!{member['user_id']}> - Member for {(utcnow() - member['joined_at']).days} days"
                 for member in members_without_intro[:MAX_NO_INTRO_USERS_TO_DISPLAY]
@@ -117,7 +131,7 @@ async def make_no_intros_embed():
     )
     embed.set_footer(
         text=f"These members will automatically be kicked at noon Eastern time. Use {COMMAND_PREFIX}aslpp active <members> to prevent members from getting kicked.\n"
-        f"Members who have not logged on in {PRUNE_DAYS} days and have no roles will also be pruned."
+        f"Members who have not logged on in {PRUNE_DAYS} days and have only skill roles will also be pruned (estimate: {n_members_to_prune})."
     )
     return embed
 
@@ -338,11 +352,11 @@ class AslPracticePartners(Cog):
         logger.info("finished syncing data")
         await inter.send("🙌 Synced data", ephemeral=True)
 
-    @aslpp_group.command(name="nointros", aliases=("nointro",), hidden=True)
+    @aslpp_group.command(name="listinactive", aliases=("nointro",), hidden=True)
     @commands.has_permissions(kick_members=True)
-    async def no_intros_command(self, ctx: Context):
+    async def list_inactive_command(self, ctx: Context):
         await ctx.channel.trigger_typing()
-        embed = await make_no_intros_embed()
+        embed = await make_inactive_members_embed(guild=ctx.guild)
         await ctx.send(embed=embed)
 
     @aslpp_group.command(name="active", hidden=True)
@@ -374,8 +388,17 @@ class AslPracticePartners(Cog):
         self,
         ctx: Context | TextChannel,
         *,
-        members_without_intro: list[Mapping],
+        send_message_if_no_inactive_members: bool = False,
     ):
+        members_without_intro, n_members_to_prune = await get_inactive_user_info(
+            ctx.guild
+        )
+
+        if not len(members_without_intro) and not bool(n_members_to_prune):
+            logger.debug("no inactive aslpp members to kick")
+            if send_message_if_no_inactive_members:
+                await ctx.send("✨ _No members to kick_")
+            return
         num_kicked = 0
         guild = ctx.guild
         for member_record in members_without_intro[:MAX_NO_INTRO_USERS_TO_DISPLAY]:
@@ -395,9 +418,9 @@ class AslPracticePartners(Cog):
         total_kicked = num_kicked + num_pruned
         return total_kicked
 
-    @aslpp_group.command(name="kickall", hidden=True)
+    @aslpp_group.command(name="kickinactive", hidden=True)
     @commands.has_permissions(kick_members=True)
-    async def kickall_command(self, ctx: Context):
+    async def kick_inactive_command(self, ctx: Context):
         members_without_intro = await store.get_aslpp_members_without_intro(
             since=dt.timedelta(days=settings.ASLPP_INACTIVE_DAYS + 1)
         )
@@ -408,7 +431,7 @@ class AslPracticePartners(Cog):
             await ctx.send("✨ _No members to kick_")
             return
         num_kicked = await self._kick_inactive(
-            ctx, members_without_intro=members_without_intro
+            ctx, send_message_if_no_inactive_members=True
         )
         await ctx.reply(f"Kicked {num_kicked} members.")
 
@@ -551,7 +574,7 @@ class AslPracticePartners(Cog):
                 content=self.make_role_table_hearing_spectrum(channel.guild)
             )
             await channel.send(content=self.make_role_table_age(channel.guild))
-            embed = await make_no_intros_embed()
+            embed = await make_inactive_members_embed(guild=channel.guild)
             await channel.send(embed=embed)
             logger.info("sent aslpp staff daily message")
 
@@ -564,21 +587,9 @@ class AslPracticePartners(Cog):
             await disnake.utils.sleep_until(
                 next_execution_time.astimezone(dt.timezone.utc)
             )
-            members_without_intro = await store.get_aslpp_members_without_intro(
-                since=dt.timedelta(days=settings.ASLPP_INACTIVE_DAYS + 1)
-            )
             channel = self.bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
-            guild: Guild = channel.guild
-            n_members_to_prune = await guild.estimate_pruned_members(
-                days=PRUNE_DAYS, roles=get_skill_roles()
-            )
-            if not len(members_without_intro) and not bool(n_members_to_prune):
-                logger.info("no inactive aslpp members to kick")
-                continue
             await channel.send(content="🥾 _Kicking inactive members_...")
-            await self._kick_inactive(
-                channel, members_without_intro=members_without_intro
-            )
+            await self._kick_inactive(channel)
             logger.info("cleared aslpp inactive members")
 
 
