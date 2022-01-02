@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.2.0 (2022-01-01)
+### Feature
+* **aslpp:** Kick users who have no roles for 7 days ([#392](https://github.com/OpenASL/HowSignBot/issues/392)) ([`eca3496`](https://github.com/OpenASL/HowSignBot/commit/eca3496b560159017945da6d5468289a5392fc76))
+
 ## v22.1.0 (2022-01-01)
 ### Feature
 * **aslpp:** Syncdata updates ([#391](https://github.com/OpenASL/HowSignBot/issues/391)) ([`1b8d432`](https://github.com/OpenASL/HowSignBot/commit/1b8d432481281bf34e3593c09ad6be52cc966f43))
