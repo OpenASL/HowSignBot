@@ -10,6 +10,7 @@ import databases
 import nanoid
 import pytz
 import sqlalchemy as sa
+from disnake import Member
 from sqlalchemy import sql
 from sqlalchemy.dialects.postgresql import BIGINT
 from sqlalchemy.dialects.postgresql import insert
@@ -123,8 +124,10 @@ aslpp_members = sa.Table(
     sa.Column("user_id", BIGINT, primary_key=True, doc="Discord user ID"),
     sa.Column("joined_at", TIMESTAMP, nullable=False),
     sa.Column("is_active", sa.Boolean, nullable=False, server_default=sql.false()),
-    # NOTE: The roles column is not kept up to date automatically. It is only synced via the /syncdata command
     sa.Column("roles", sa.Text, nullable=True),
+    sa.Column(
+        "has_acknowledged_rules", sa.Boolean, nullable=False, server_default=sql.false()
+    ),
     created_at_column(),
 )
 
@@ -537,20 +540,26 @@ class Store:
             aslpp_members.select().where(aslpp_members.c.user_id == user_id)
         )
 
-    async def add_aslpp_member(
-        self, *, user_id: int, joined_at: dt.datetime, roles: str | None = None
-    ):
+    async def upsert_aslpp_member(self, *, member: Member):
+        user_id = member.id
+        joined_at = member.joined_at
+        role_ids = {role.id for role in member.roles}
+        # skip @everyone
+        roles_concatenated = "|".join([role.name for role in member.roles[1:]])
+        has_acknowledged_rules = settings.ASLPP_ACKNOWLEDGED_RULES_ROLE_ID in role_ids
         stmt = insert(aslpp_members).values(
             user_id=user_id,
             joined_at=joined_at,
-            roles=roles,
+            roles=roles_concatenated,
+            has_acknowledged_rules=has_acknowledged_rules,
             created_at=now(),
         )
         stmt = stmt.on_conflict_do_update(
             index_elements=(aslpp_members.c.user_id,),
             set_=dict(
                 joined_at=stmt.excluded.joined_at,
-                roles=roles,
+                roles=roles_concatenated,
+                has_acknowledged_rules=has_acknowledged_rules,
             ),
         )
         await self.db.execute(stmt)
@@ -565,6 +574,7 @@ class Store:
             aslpp_members.select()
             .where(
                 (aslpp_members.c.is_active == sql.false())
+                & (aslpp_members.c.has_acknowledged_rules == sql.true())
                 & (aslpp_members.c.joined_at < (now() - since))
             )
             .select_from(

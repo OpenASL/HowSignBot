@@ -330,17 +330,11 @@ class AslPracticePartners(Cog):
         role = inter.guild.get_role(settings.ASLPP_ACKNOWLEDGED_RULES_ROLE_ID)
         assert role is not None
         await store.clear_aslpp_members()
-        for member in role.members:
+        for member in inter.guild.members:
             if member.bot:
                 continue
             logger.info(f"storing member {member.id}")
-            await store.add_aslpp_member(
-                user_id=member.id,
-                joined_at=member.joined_at,
-                roles="|".join(
-                    [role.name for role in member.roles[1:]]
-                ),  # skip @everyone
-            )
+            await store.upsert_aslpp_member(member=member)
         logger.info("finished syncing data")
         await inter.send("🙌 Synced data", ephemeral=True)
 
@@ -497,21 +491,17 @@ class AslPracticePartners(Cog):
         await store.remove_aslpp_member(user_id=member.id)
 
     @Cog.listener()
+    async def on_member_join(self, member: Member) -> None:
+        if member.guild.id != settings.ASLPP_GUILD_ID:
+            return
+        logger.info(f"adding data for new aslpp member {member.id}")
+        await store.upsert_aslpp_member(member=member)
+
+    @Cog.listener()
     async def on_member_update(self, before: Member, after: Member) -> None:
         if after.guild.id != settings.ASLPP_GUILD_ID:
             return
-        before_role_ids = {role.id for role in before.roles}
-        after_role_ids = {role.id for role in after.roles}
-        added_role_ids = after_role_ids - before_role_ids
-        removed_role_ids = before_role_ids - after_role_ids
-        if settings.ASLPP_ACKNOWLEDGED_RULES_ROLE_ID in added_role_ids:
-            logger.info(f"aslpp member acknowledged rules. storing member {after.id}")
-            await store.add_aslpp_member(user_id=after.id, joined_at=after.joined_at)
-        elif settings.ASLPP_ACKNOWLEDGED_RULES_ROLE_ID in removed_role_ids:
-            logger.info(
-                f"aslpp member acknowledged rules role removed. removing member {after.id}"
-            )
-            await store.remove_aslpp_member(user_id=after.id)
+        await store.upsert_aslpp_member(member=after)
 
     @Cog.listener()
     async def on_voice_state_update(
