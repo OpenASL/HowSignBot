@@ -587,6 +587,19 @@ class Store:
             .order_by(aslpp_members.c.joined_at)
         )
 
+    async def get_aslpp_members_with_no_roles(
+        self, leeway: dt.timedelta
+    ) -> list[Mapping]:
+        return await self.db.fetch_all(
+            aslpp_members.select()
+            .where(
+                (aslpp_members.c.is_active == sql.false())
+                & (aslpp_members.c.roles == "")
+                & (aslpp_members.c.joined_at < (now() - leeway))
+            )
+            .order_by(aslpp_members.c.joined_at)
+        )
+
     async def has_aslpp_intro(self, user_id: int) -> bool:
         select = sa.select(
             (sa.exists().where(aslpp_intros.c.user_id == user_id).label("result"),)

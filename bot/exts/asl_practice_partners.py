@@ -97,6 +97,7 @@ MAX_NO_INTRO_USERS_TO_DISPLAY = 30
 
 class InactiveMemberInfo(NamedTuple):
     members_without_intro: list[Mapping]
+    members_with_no_roles: list[Mapping]
     n_members_to_prune: int
 
 
@@ -104,16 +105,25 @@ async def get_inactive_user_info(guild: Guild) -> InactiveMemberInfo:
     members_without_intro = await store.get_aslpp_members_without_intro(
         since=dt.timedelta(days=settings.ASLPP_INACTIVE_DAYS + 1)
     )
+    members_with_no_roles = await store.get_aslpp_members_with_no_roles(
+        leeway=dt.timedelta(days=PRUNE_DAYS)
+    )
     n_members_to_prune = await guild.estimate_pruned_members(
         days=PRUNE_DAYS, roles=get_skill_roles()
     )
     return InactiveMemberInfo(
-        members_without_intro=members_without_intro, n_members_to_prune=n_members_to_prune
+        members_without_intro=members_without_intro,
+        members_with_no_roles=members_with_no_roles,
+        n_members_to_prune=n_members_to_prune,
     )
 
 
 async def make_inactive_members_embed(guild: Guild):
-    members_without_intro, n_members_to_prune = await get_inactive_user_info(guild)
+    (
+        members_without_intro,
+        members_with_no_roles,
+        n_members_to_prune,
+    ) = await get_inactive_user_info(guild)
     if len(members_without_intro):
         description = "\n".join(
             tuple(
@@ -131,7 +141,7 @@ async def make_inactive_members_embed(guild: Guild):
     )
     embed.set_footer(
         text=f"These members will automatically be kicked at noon Eastern time. Use {COMMAND_PREFIX}aslpp active <members> to prevent members from getting kicked.\n"
-        f"Members who have not logged on in {PRUNE_DAYS} days and have only skill roles will also be pruned (estimate: {n_members_to_prune})."
+        f"Members who haven't had channel access for {PRUNE_DAYS} will also be pruned (estimate: {n_members_to_prune + len(members_with_no_roles)})."
     )
     return embed
 
@@ -390,17 +400,26 @@ class AslPracticePartners(Cog):
         *,
         send_message_if_no_inactive_members: bool = False,
     ):
-        members_without_intro, n_members_to_prune = await get_inactive_user_info(
-            ctx.guild
-        )
+        (
+            members_without_intro,
+            members_with_no_roles,
+            n_members_to_prune,
+        ) = await get_inactive_user_info(ctx.guild)
 
-        if not len(members_without_intro) and not bool(n_members_to_prune):
+        if not any(
+            (
+                len(members_without_intro),
+                len(members_with_no_roles),
+                bool(n_members_to_prune),
+            )
+        ):
             logger.debug("no inactive aslpp members to kick")
             if send_message_if_no_inactive_members:
                 await ctx.send("✨ _No members to kick_")
             return
         num_kicked = 0
         guild = ctx.guild
+
         for member_record in members_without_intro[:MAX_NO_INTRO_USERS_TO_DISPLAY]:
             user_id = member_record["user_id"]
             member = guild.get_member(user_id)
@@ -411,8 +430,19 @@ class AslPracticePartners(Cog):
             logger.info(f"kicking member {member.id}")
             await guild.kick(member, reason="Inactivity")
             num_kicked += 1
+
+        logger.info(f"kicking members who have had no roles {PRUNE_DAYS}")
+        for member_record in members_with_no_roles:
+            user_id = member_record["user_id"]
+            member = guild.get_member(user_id)
+            if not member:
+                continue
+            logger.info(f"kicking member {member.id}")
+            await guild.kick(member, reason="Inactivity (no roles=no channel access)")
+            num_kicked += 1
+
         logger.info(
-            f"pruning members who have not logged on in {PRUNE_DAYS} days and have no roles"
+            f"pruning members who have not logged on in {PRUNE_DAYS} days and have only skill roles"
         )
         num_pruned = await guild.prune_members(days=PRUNE_DAYS, roles=get_skill_roles())
         total_kicked = num_kicked + num_pruned
@@ -421,19 +451,12 @@ class AslPracticePartners(Cog):
     @aslpp_group.command(name="kickinactive", hidden=True)
     @commands.has_permissions(kick_members=True)
     async def kick_inactive_command(self, ctx: Context):
-        members_without_intro = await store.get_aslpp_members_without_intro(
-            since=dt.timedelta(days=settings.ASLPP_INACTIVE_DAYS + 1)
-        )
-        n_members_to_prune = await ctx.guild.estimate_pruned_members(
-            days=PRUNE_DAYS, roles=get_skill_roles()
-        )
-        if not len(members_without_intro) and not n_members_to_prune:
-            await ctx.send("✨ _No members to kick_")
-            return
+        await ctx.channel.trigger_typing()
         num_kicked = await self._kick_inactive(
             ctx, send_message_if_no_inactive_members=True
         )
-        await ctx.reply(f"Kicked {num_kicked} members.")
+        if num_kicked:
+            await ctx.reply(f"Kicked {num_kicked} members.")
 
     @group(
         name="rolestats",
