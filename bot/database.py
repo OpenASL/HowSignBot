@@ -123,7 +123,6 @@ aslpp_members = sa.Table(
     sa.Column("user_id", BIGINT, primary_key=True, doc="Discord user ID"),
     sa.Column("joined_at", TIMESTAMP, nullable=False),
     sa.Column("is_active", sa.Boolean, nullable=False, server_default=sql.false()),
-    # NOTE: The roles column is not kept up to date automatically. It is only synced via the /syncdata command
     sa.Column("roles", sa.Text, nullable=True),
     created_at_column(),
 )
@@ -537,7 +536,7 @@ class Store:
             aslpp_members.select().where(aslpp_members.c.user_id == user_id)
         )
 
-    async def add_aslpp_member(
+    async def upsert_aslpp_member(
         self, *, user_id: int, joined_at: dt.datetime, roles: str | None = None
     ):
         stmt = insert(aslpp_members).values(

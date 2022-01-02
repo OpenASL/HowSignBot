@@ -334,7 +334,7 @@ class AslPracticePartners(Cog):
             if member.bot:
                 continue
             logger.info(f"storing member {member.id}")
-            await store.add_aslpp_member(
+            await store.upsert_aslpp_member(
                 user_id=member.id,
                 joined_at=member.joined_at,
                 roles="|".join(
@@ -502,16 +502,20 @@ class AslPracticePartners(Cog):
             return
         before_role_ids = {role.id for role in before.roles}
         after_role_ids = {role.id for role in after.roles}
-        added_role_ids = after_role_ids - before_role_ids
         removed_role_ids = before_role_ids - after_role_ids
-        if settings.ASLPP_ACKNOWLEDGED_RULES_ROLE_ID in added_role_ids:
-            logger.info(f"aslpp member acknowledged rules. storing member {after.id}")
-            await store.add_aslpp_member(user_id=after.id, joined_at=after.joined_at)
-        elif settings.ASLPP_ACKNOWLEDGED_RULES_ROLE_ID in removed_role_ids:
-            logger.info(
+        if settings.ASLPP_ACKNOWLEDGED_RULES_ROLE_ID in removed_role_ids:
+            logger.debug(
                 f"aslpp member acknowledged rules role removed. removing member {after.id}"
             )
             await store.remove_aslpp_member(user_id=after.id)
+        else:
+            if after.joined_at:
+                logger.debug(f"upserting aslpp member {after.id}")
+                await store.upsert_aslpp_member(
+                    user_id=after.id,
+                    joined_at=after.joined_at,
+                    roles="|".join([role.name for role in after.roles[1:]]),
+                )
 
     @Cog.listener()
     async def on_voice_state_update(
