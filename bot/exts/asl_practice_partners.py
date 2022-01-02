@@ -437,6 +437,9 @@ class AslPracticePartners(Cog):
             member = guild.get_member(user_id)
             if not member:
                 continue
+            # Paranoid check. NOTE: all members will have the @everyone role
+            if len(member.roles) > 1:
+                continue
             logger.info(f"kicking member {member.id}")
             await guild.kick(member, reason="Inactivity (no roles=no channel access)")
             num_kicked += 1
