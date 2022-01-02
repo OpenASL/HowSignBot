@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.1.0 (2022-01-01)
+### Feature
+* **aslpp:** Syncdata updates ([#391](https://github.com/OpenASL/HowSignBot/issues/391)) ([`1b8d432`](https://github.com/OpenASL/HowSignBot/commit/1b8d432481281bf34e3593c09ad6be52cc966f43))
+
 ## v22.0.1 (2022-01-01)
 ### Fix
 * Restrict syncdata ([`345c59a`](https://github.com/OpenASL/HowSignBot/commit/345c59a18ae5de1dd630f1d8fcab41a5feab2d6e))
