@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.3.0 (2022-01-04)
+### Feature
+* Add ASLCORE and STEM dictionary ([#394](https://github.com/OpenASL/HowSignBot/issues/394)) ([`78f04ed`](https://github.com/OpenASL/HowSignBot/commit/78f04ed53616ca47be8e1f31a1561c355264c024))
+
 ## v22.2.1 (2022-01-02)
 ### Fix
 * **aslpp:** Add paranoid check before kicking ([`2b9d4e6`](https://github.com/OpenASL/HowSignBot/commit/2b9d4e6ede4e2916dc6a638444c435da47582d4d))
