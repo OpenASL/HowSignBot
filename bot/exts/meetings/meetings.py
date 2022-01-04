@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from enum import Enum, auto
-from typing import List, Optional, Union
+from typing import List, Optional, Union, cast
 
 import disnake
 import meetings
@@ -123,7 +123,9 @@ class Meetings(Cog):
         with_zzzzoom = value == ProtectionMode.FS_CAPTCHA
 
         async def send_channel_message(mid: int):
-            return await inter.channel.send(embed=await make_zoom_embed(mid))
+            embed = await make_zoom_embed(mid)
+            assert embed is not None
+            return await inter.channel.send(embed=embed)
 
         await zoom_impl(
             bot=self.bot,
@@ -162,14 +164,16 @@ class Meetings(Cog):
         meeting = await store.get_zoom_meeting(meeting_id)
         if meeting is None:
             await inter.response.edit_message(
-                f"⚠️ Could not find zoom meeting for {meeting_id_str}."
+                content=f"⚠️ Could not find zoom meeting for {meeting_id_str}."
             )
             return
         set_up = meeting["setup_at"] is not None
         if set_up:
 
             async def send_channel_message(mid: int):
-                return await inter.channel.send(embed=await make_zoom_embed(mid))
+                embed = await make_zoom_embed(mid)
+                assert embed is not None
+                return await inter.channel.send(embed=embed)
 
         else:
 
@@ -211,10 +215,9 @@ class Meetings(Cog):
         zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
         # DM zoom link and instructions once
         if len(zoom_messages) <= 1:
-            await inter.user.send(
-                content="🔨 Set up your meeting below",
-                embed=await make_zoom_embed(meeting_id, include_instructions=False),
-            )
+            embed = await make_zoom_embed(meeting_id, include_instructions=False)
+            assert embed is not None
+            await inter.user.send(content="🔨 Set up your meeting below", embed=embed)
             await inter.user.send(
                 "To post in another channel, send the following command in that channel:\n"
                 f"```/zoom crosspost {meeting_id}```\n"
@@ -250,7 +253,8 @@ class Meetings(Cog):
         for message_info in zoom_messages:
             channel_id = message_info["channel_id"]
             message_id = message_info["message_id"]
-            channel = self.bot.get_channel(channel_id)
+            channel = cast(disnake.TextChannel, self.bot.get_channel(channel_id))
+            assert channel is not None
             message: disnake.Message = await channel.fetch_message(message_id)
             messages.append(message)
             logger.info(
@@ -314,7 +318,7 @@ class Meetings(Cog):
         for message_info in zoom_messages:
             channel_id = message_info["channel_id"]
             message_id = message_info["message_id"]
-            channel = self.bot.get_channel(channel_id)
+            channel = cast(disnake.TextChannel, self.bot.get_channel(channel_id))
             message: disnake.Message = await channel.fetch_message(message_id)
             messages.append(message)
             logger.info(
@@ -559,21 +563,9 @@ class Meetings(Cog):
         """AUTHORIZED USERS ONLY: Start a Zoom meeting and display the zzzzoom.us join URL instead of the normal join URL."""
         await self.zoom_group_impl(ctx, meeting_id=meeting_id, with_zzzzoom=True)
 
-    @zzzzoom_group.command(
-        name="setup",
-        help="Set up a Zoom before revealing its details to other users. Useful for meetings that have breakout rooms.",
-    )
-    @check(is_allowed_zoom_access)
-    async def zzzzoom_setup(
-        self, ctx: Context, meeting_id: Optional[Union[int, str]] = None
-    ):
-        await self.zoom_setup_impl(ctx, meeting_id=meeting_id, with_zzzzoom=True)
-
     @zoom_command.error
     @zzzzoom_group.error
-    @zzzzoom_setup.error
-    @zoom_group.error
-    @zoom_setup.error
+    @zoom_group.error  # type: ignore
     async def zoom_error(self, ctx, error):
         if isinstance(error, ZoomCreateError):
             logger.error("could not create zoom due to unexpected error", exc_info=error)
@@ -680,7 +672,10 @@ class Meetings(Cog):
                 if message.reference.cached_message:
                     original_message = message.reference.cached_message
                 else:
-                    channel = self.bot.get_channel(message.channel.id)
+                    channel = cast(
+                        disnake.TextChannel, self.bot.get_channel(message.channel.id)
+                    )
+                    assert message.reference.message_id is not None
                     original_message = await channel.fetch_message(
                         message.reference.message_id
                     )

@@ -41,7 +41,8 @@ async def add_submission_and_apply_role(
         aslpp_member = await store.get_aslpp_member(discord_user_id)
         if aslpp_member:
             join_month = aslpp_member["joined_at"].strftime("%Y-%m")
-        guild: disnake.Guild = bot.get_guild(settings.ASLPP_GUILD_ID)
+        guild = bot.get_guild(settings.ASLPP_GUILD_ID)
+        assert guild is not None
         member = guild.get_member(discord_user_id)
         if member:
             # Skip the @everyone role
@@ -113,7 +114,7 @@ class Option(TypedDict):
     text: str
 
 
-class Field(TypedDict, total=False):
+class Field(TypedDict):
     key: str
     label: str
     type: str
@@ -159,7 +160,9 @@ async def handle_tally_webhook(bot: Bot, data: dict):
     )
 
     url = f"https://docs.google.com/spreadsheets/d/{settings.ASLPP_SHEET_KEY}/edit#gid={worksheet.id}"
-    await bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID).send(
+    channel = bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
+    assert channel is not None
+    await channel.send(  # type: ignore
         "🙌 A member submitted the survey!",
         view=LinkView("Survey Results", url=url),
     )
@@ -260,5 +263,5 @@ def setup(bot: Bot) -> None:
         asyncio.create_task(handle_tally_webhook(bot, data))
         return web.Response(body="", status=200)
 
-    bot.app.add_routes([web.post("/tally", tally)])
+    bot.app.add_routes([web.post("/tally", tally)])  # type: ignore
     bot.add_cog(Survey(bot))

@@ -35,11 +35,11 @@ async def zoom_request(
     timeout: int = 10,
     **kwargs,
 ) -> AsyncIterator[aiohttp.ClientResponse]:
-    timeout = aiohttp.ClientTimeout(total=timeout)
+    client_timeout = aiohttp.ClientTimeout(total=timeout)
     async with aiohttp.request(
         method,
         f"https://api.zoom.us/v2/{path.lstrip('/')}",
-        timeout=timeout,
+        timeout=client_timeout,
         headers={"Authorization": f"Bearer {token}"},
         **kwargs,
     ) as resp:

@@ -1,7 +1,7 @@
 import logging
 import re
 from contextlib import suppress
-from typing import Awaitable, Callable, Iterable, Mapping, Optional, Union
+from typing import Awaitable, Callable, Iterable, Mapping, Optional, Union, cast
 
 import disnake
 from disnake.ext.commands import Bot
@@ -35,15 +35,17 @@ async def get_reaction_message(
     bot: Bot,
     payload: disnake.RawReactionActionEvent,
 ) -> Optional[disnake.Message]:
+    message = None
     with suppress(disnake.NotFound):
-        channel = bot.get_channel(payload.channel_id)
+        channel = cast(disnake.TextChannel, bot.get_channel(payload.channel_id))
         if not channel:
             return None
-        message: disnake.Message = await channel.fetch_message(payload.message_id)
+        message = await channel.fetch_message(payload.message_id)
     return message
 
 
 def reactor_is_human(bot: Bot, payload: disnake.RawReactionActionEvent) -> bool:
+    member = None
     with suppress(disnake.NotFound):
         member = bot.get_user(payload.user_id)
     return not bool(getattr(member, "bot", None))
@@ -90,7 +92,7 @@ async def handle_close_reaction(
                     await message.edit(content=close_message, embed=None)
                     return
                 for field in embed.fields:
-                    if field.name and re.search(pattern, field.name):
+                    if field.name and re.search(pattern, field.name):  # type: ignore
                         if callable(close_message):
                             close_message = await close_message(message)
                         logger.info(f"cleaning up room with message: {close_message}")

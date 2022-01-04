@@ -2,7 +2,7 @@ import asyncio
 import datetime as dt
 import logging
 import random
-from typing import Optional, Tuple
+from typing import Optional, Tuple, cast
 
 import clthat
 import disnake
@@ -93,14 +93,14 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
         await self.send_daily_message(channel_id, send_dtime)
 
         if channel_id != ctx.channel.id:
-            channel = self.bot.get_channel(channel_id)
+            channel = cast(disnake.TextChannel, self.bot.get_channel(channel_id))
             guild = channel.guild
             await ctx.send(f'🗓 Daily message sent to "{guild.name}", #{channel.name}')
 
     async def send_daily_message(
         self, channel_id: int, dtime: Optional[dt.datetime] = None
     ):
-        channel = self.bot.get_channel(channel_id)
+        channel = cast(disnake.TextChannel, self.bot.get_channel(channel_id))
         guild = channel.guild
         logger.info(f'sending daily message for guild: "{guild.name}" in #{channel.name}')
         guild_id = guild.id
@@ -160,6 +160,7 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
                     inline=False,
                 )
 
+        assert file_ is not None
         message = await channel.send(file=file_, embed=embed)
         if include_handshape_of_the_day and handshape:
             await message.create_thread(

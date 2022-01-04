@@ -5,7 +5,7 @@ import datetime as dt
 import logging
 from contextlib import suppress
 from textwrap import dedent
-from typing import Mapping, NamedTuple, Sequence
+from typing import Mapping, NamedTuple, Sequence, cast
 
 import disnake
 from disnake import (
@@ -249,7 +249,7 @@ class AslPracticePartners(Cog):
         if not tag_name:
             await ctx.reply(**self._tag_list_impl())
             return
-        await ctx.reply(self._tag_impl(tag_name))
+        await ctx.reply(**self._tag_impl(tag_name))
 
     @tag_group.command(
         "update",
@@ -260,7 +260,7 @@ class AslPracticePartners(Cog):
     @commands.has_permissions(kick_members=True)  # Staff
     async def update_tags(self, ctx: Context):
         await ctx.channel.trigger_typing()
-        await ctx.reply(self._tag_sync_impl())
+        await ctx.reply(**self._tag_sync_impl())
 
     # END DEPRECATED TAG COMMANDS
 
@@ -341,7 +341,9 @@ class AslPracticePartners(Cog):
     ):
         await inter.send("Syncing data…", ephemeral=True)
         if intros:
-            channel = self.bot.get_channel(settings.ASLPP_INTRODUCTIONS_CHANNEL_ID)
+            channel = cast(
+                TextChannel, self.bot.get_channel(settings.ASLPP_INTRODUCTIONS_CHANNEL_ID)
+            )
             await store.clear_aslpp_intros()
             async for message in channel.history(limit=None):
                 logger.info(f"storing intro record {message.id}")
@@ -366,6 +368,7 @@ class AslPracticePartners(Cog):
     @commands.has_permissions(kick_members=True)
     async def list_inactive_command(self, ctx: Context):
         await ctx.channel.trigger_typing()
+        assert ctx.guild is not None
         embed = await make_inactive_members_embed(guild=ctx.guild)
         await ctx.send(embed=embed)
 
@@ -385,6 +388,7 @@ class AslPracticePartners(Cog):
     @commands.has_permissions(kick_members=True)
     async def kick_command(self, ctx: Context, targets: commands.Greedy[Member]):
         num_kicked = 0
+        assert ctx.guild is not None
         for target in targets:
             with suppress(disnake.errors.Forbidden):  # user may not allow DMs from bot
                 await target.send(KICK_MESSAGE)
@@ -400,6 +404,7 @@ class AslPracticePartners(Cog):
         *,
         send_message_if_no_inactive_members: bool = False,
     ):
+        assert ctx.guild is not None
         (
             members_without_intro,
             members_with_no_roles,
@@ -448,6 +453,8 @@ class AslPracticePartners(Cog):
             f"pruning members who have not logged on in {PRUNE_DAYS} days and have only skill roles"
         )
         num_pruned = await guild.prune_members(days=PRUNE_DAYS, roles=get_skill_roles())
+        if num_pruned is None:
+            num_pruned = 0
         total_kicked = num_kicked + num_pruned
         return total_kicked
 
@@ -470,6 +477,7 @@ class AslPracticePartners(Cog):
     )
     @commands.has_permissions(kick_members=True)  # Staff
     async def role_table_group(self, ctx: Context):
+        assert ctx.guild is not None
         await ctx.channel.trigger_typing()
         await ctx.send(content=self.make_role_table_skill(ctx.guild))
         await ctx.send(content=self.make_role_table_hearing_spectrum(ctx.guild))
@@ -478,31 +486,13 @@ class AslPracticePartners(Cog):
     def make_role_table_skill(self, guild: Guild):
         return make_role_table(guild, "Skill", settings.ASLPP_SKILL_ROLE_IDS)
 
-    @role_table_group.command("skill", hidden=True)
-    @commands.has_permissions(kick_members=True)  # Staff
-    async def role_table_skill(self, ctx: Context):
-        await ctx.channel.trigger_typing()
-        await ctx.reply(content=self.make_role_table_skill(ctx.guild))
-
     def make_role_table_hearing_spectrum(self, guild: Guild):
         return make_role_table(
             guild, "Hearing Spectrum", settings.ASLPP_HEARING_SPECTRUM_ROLE_IDS
         )
 
-    @role_table_group.command("hearingspectrum", hidden=True)
-    @commands.has_permissions(kick_members=True)  # Staff
-    async def role_table_hearing_spectrum(self, ctx: Context):
-        await ctx.channel.trigger_typing()
-        await ctx.reply(content=self.make_role_table_hearing_spectrum(ctx.build))
-
     def make_role_table_age(self, guild: Guild):
         return make_role_table(guild, "Age", settings.ASLPP_AGE_ROLE_IDS)
-
-    @role_table_group.command("age", hidden=True)
-    @commands.has_permissions(kick_members=True)  # Staff
-    async def role_table_age(self, ctx: Context):
-        await ctx.channel.trigger_typing()
-        await ctx.reply(content=self.make_role_table_age(ctx.guild))
 
     @Cog.listener()
     async def on_message(self, message: Message) -> None:
@@ -594,7 +584,9 @@ class AslPracticePartners(Cog):
             await disnake.utils.sleep_until(
                 next_execution_time.astimezone(dt.timezone.utc)
             )
-            channel = self.bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
+            channel = cast(
+                TextChannel, self.bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
+            )
             await channel.send(content=self.make_role_table_skill(channel.guild))
             await channel.send(
                 content=self.make_role_table_hearing_spectrum(channel.guild)
@@ -613,7 +605,9 @@ class AslPracticePartners(Cog):
             await disnake.utils.sleep_until(
                 next_execution_time.astimezone(dt.timezone.utc)
             )
-            channel = self.bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
+            channel = cast(
+                TextChannel, self.bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
+            )
             await channel.send(content="🥾 _Kicking inactive members_...")
             await self._kick_inactive(channel)
             logger.info("cleared aslpp inactive members")

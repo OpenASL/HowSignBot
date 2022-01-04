@@ -119,8 +119,8 @@ async def totm(request):
 
 
 def setup(bot: Bot) -> None:
-    cors = bot.app.cors
-    resource = bot.app.router.add_resource("/totm")
+    cors = bot.app.cors  # type: ignore
+    resource = bot.app.router.add_resource("/totm")  # type: ignore
     resource.add_route("GET", totm)
     cors.add(resource)
 

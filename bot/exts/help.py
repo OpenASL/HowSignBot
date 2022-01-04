@@ -60,6 +60,7 @@ class HelpCommand(commands.HelpCommand):
                 last_content = content
             else:
                 last_embed = embed
+        assert last_embed is not None
         embeds.append(last_embed)
         return embeds
 
@@ -109,7 +110,7 @@ class HelpCommand(commands.HelpCommand):
         """
         embeds: List[disnake.Embed] = []
         if hasattr(cog, "_help_embed_func"):
-            embed = await cog.get_help_embed(self)
+            embed = await cog.get_help_embed(self)  # type: ignore
             embeds.append(embed)
         else:
             embed = await self.make_cog_embed(cog)
@@ -120,6 +121,7 @@ class HelpCommand(commands.HelpCommand):
             error = self.command_not_found(cog.qualified_name)
             await self.send_error_message(error)
             return []
+        assert embed is not None
         if embeds:
             before = embed.copy()
         else:
@@ -130,9 +132,9 @@ class HelpCommand(commands.HelpCommand):
 
         self.add_command_fields(cmds, embed)
         if len(embed) > 6000 and embeds:
-            embeds[0] = before
+            embeds[0] = before  # type: ignore
             embed = disnake.Embed(
-                color=before.color, description=cog.description or disnake.Embed.Empty
+                color=before.color, description=cog.description or disnake.Embed.Empty  # type: ignore
             )
             embed.set_author(name=cog.qualified_name)
             self.add_command_fields(cmds, embed)
@@ -225,7 +227,7 @@ class HelpCommand(commands.HelpCommand):
         Assumption: Embed's total character count does not exceed 6000.
         """
         if getattr(command, "_help_embed_func", False):
-            embed = await command.get_help_embed(self)
+            embed = await command.get_help_embed(self)  # type: ignore
         else:
             embed = await self.make_command_embed(command)
         if not isinstance(command, commands.Group):

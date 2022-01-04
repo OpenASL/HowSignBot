@@ -11,10 +11,10 @@ def utcnow() -> dt.datetime:
     return dt.datetime.now(dt.timezone.utc)
 
 
-PACIFIC = pytz.timezone("America/Los_Angeles")
-MOUNTAIN = pytz.timezone("America/Denver")
-CENTRAL = pytz.timezone("America/Chicago")
-EASTERN = pytz.timezone("America/New_York")
+PACIFIC = cast(StaticTzInfo, pytz.timezone("America/Los_Angeles"))
+MOUNTAIN = cast(StaticTzInfo, pytz.timezone("America/Denver"))
+CENTRAL = cast(StaticTzInfo, pytz.timezone("America/Chicago"))
+EASTERN = cast(StaticTzInfo, pytz.timezone("America/New_York"))
 
 # EDT and PDT change to EST and PST during the winter
 # Show the current name in docs
@@ -81,8 +81,8 @@ def display_time(dtime: dt.datetime, time_format: str, tzinfo: StaticTzInfo) -> 
 
 def format_multi_time(dtime: dt.datetime) -> str:
     time_format = TIME_FORMAT if dtime.minute != 0 else TIME_FORMAT_NO_MINUTES
-    pacific_dstr = display_time(dtime, time_format, tzinfo=cast(StaticTzInfo, PACIFIC))
-    mountain_dstr = display_time(dtime, time_format, tzinfo=cast(StaticTzInfo, MOUNTAIN))
-    central_dstr = display_time(dtime, time_format, tzinfo=cast(StaticTzInfo, CENTRAL))
-    eastern_dstr = display_time(dtime, time_format, tzinfo=cast(StaticTzInfo, EASTERN))
+    pacific_dstr = display_time(dtime, time_format, tzinfo=PACIFIC)
+    mountain_dstr = display_time(dtime, time_format, tzinfo=MOUNTAIN)
+    central_dstr = display_time(dtime, time_format, tzinfo=CENTRAL)
+    eastern_dstr = display_time(dtime, time_format, tzinfo=EASTERN)
     return " / ".join((pacific_dstr, mountain_dstr, central_dstr, eastern_dstr))
