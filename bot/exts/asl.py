@@ -2,19 +2,12 @@ import logging
 from urllib.parse import quote_plus
 
 import disnake
-from disnake import ApplicationCommandInteraction
-from disnake.ext.commands import Bot
-from disnake.ext.commands import Cog
-from disnake.ext.commands import command
-from disnake.ext.commands import Context
-from disnake.ext.commands import errors
-from disnake.ext.commands import slash_command
-
 import handshapes
+from disnake import ApplicationCommandInteraction
+from disnake.ext.commands import Bot, Cog, Context, command, errors, slash_command
+
 from bot import settings
-from bot.utils import did_you_mean
-from bot.utils import get_close_matches
-from bot.utils import get_spoiler_text
+from bot.utils import did_you_mean, get_close_matches, get_spoiler_text
 
 logger = logging.getLogger(__name__)
 

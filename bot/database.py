@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 import logging
-from typing import Iterator
-from typing import Mapping
-from typing import Sequence
+from typing import Iterator, Mapping, Sequence
 
 import databases
 import nanoid
@@ -13,8 +11,8 @@ import sqlalchemy as sa
 from disnake import Member
 from sqlalchemy import sql
 from sqlalchemy.dialects.postgresql import BIGINT
-from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.dialects.postgresql import TIMESTAMP as _TIMESTAMP
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.sql.schema import ForeignKey
 
 from . import settings

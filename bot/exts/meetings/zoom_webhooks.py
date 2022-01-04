@@ -8,11 +8,11 @@ import disnake
 from aiohttp import web
 from disnake.ext.commands import Bot
 
-from ._zoom import make_zoom_embed
-from ._zoom import REPOST_EMOJI
 from bot import settings
 from bot.database import store
 from bot.utils.reactions import maybe_clear_reaction
+
+from ._zoom import REPOST_EMOJI, make_zoom_embed
 
 logger = logging.getLogger(__name__)
 

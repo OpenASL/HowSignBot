@@ -2,28 +2,24 @@ import asyncio
 import datetime as dt
 import logging
 import random
-from typing import Optional
-from typing import Tuple
-
-import disnake
-from disnake.ext.commands import Bot
-from disnake.ext.commands import Cog
-from disnake.ext.commands import command
-from disnake.ext.commands import Context
-from disnake.ext.commands import is_owner
+from typing import Optional, Tuple
 
 import clthat
+import disnake
 import handshapes
 import holiday_emojis
-from ._practice_sessions import get_practice_sessions
-from ._practice_sessions import make_base_embed
-from ._practice_sessions import make_practice_session_embed
+from disnake.ext.commands import Bot, Cog, Context, command, is_owner
+
 from bot import settings
 from bot.database import store
 from bot.exts.asl import word_display
-from bot.utils.datetimes import EASTERN
-from bot.utils.datetimes import parse_human_readable_datetime
-from bot.utils.datetimes import utcnow
+from bot.utils.datetimes import EASTERN, parse_human_readable_datetime, utcnow
+
+from ._practice_sessions import (
+    get_practice_sessions,
+    make_base_embed,
+    make_practice_session_embed,
+)
 
 logger = logging.getLogger(__name__)
 

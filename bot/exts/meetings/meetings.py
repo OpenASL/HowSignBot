@@ -1,47 +1,51 @@
 import asyncio
 import logging
-from enum import auto
-from enum import Enum
-from typing import List
-from typing import Optional
-from typing import Union
+from enum import Enum, auto
+from typing import List, Optional, Union
 
 import disnake
-from disnake import ApplicationCommandInteraction
-from disnake import GuildCommandInteraction
-from disnake import MessageInteraction
-from disnake.ext.commands import Bot
-from disnake.ext.commands import check
-from disnake.ext.commands import Cog
-from disnake.ext.commands import command
-from disnake.ext.commands import Context
-from disnake.ext.commands import errors
-from disnake.ext.commands import group
-from disnake.ext.commands import is_owner
-from disnake.ext.commands import Param
-from disnake.ext.commands import slash_command
-
 import meetings
-from ._zoom import add_repost_after_delay
-from ._zoom import get_zoom_meeting_id
-from ._zoom import is_allowed_zoom_access
-from ._zoom import make_zoom_embed
-from ._zoom import REPOST_EMOJI
-from ._zoom import ZOOM_CLOSED_MESSAGE
-from ._zoom import zoom_impl
-from ._zoom import ZoomCreateError
+from disnake import (
+    ApplicationCommandInteraction,
+    GuildCommandInteraction,
+    MessageInteraction,
+)
+from disnake.ext.commands import (
+    Bot,
+    Cog,
+    Context,
+    Param,
+    check,
+    command,
+    errors,
+    group,
+    is_owner,
+    slash_command,
+)
+
 from bot import settings
 from bot.database import store
 from bot.utils.deprecation import send_deprecation_notice
-from bot.utils.reactions import add_stop_sign
-from bot.utils.reactions import get_reaction_message
-from bot.utils.reactions import handle_close_reaction
-from bot.utils.reactions import maybe_clear_reaction
-from bot.utils.reactions import should_handle_reaction
-from bot.utils.reactions import STOP_SIGN
-from bot.utils.ui import ButtonGroupOption
-from bot.utils.ui import ButtonGroupView
-from bot.utils.ui import DropdownView
+from bot.utils.reactions import (
+    STOP_SIGN,
+    add_stop_sign,
+    get_reaction_message,
+    handle_close_reaction,
+    maybe_clear_reaction,
+    should_handle_reaction,
+)
+from bot.utils.ui import ButtonGroupOption, ButtonGroupView, DropdownView
+
+from ._zoom import (
+    REPOST_EMOJI,
+    ZOOM_CLOSED_MESSAGE,
+    ZoomCreateError,
+    add_repost_after_delay,
+    get_zoom_meeting_id,
+    is_allowed_zoom_access,
+    make_zoom_embed,
+    zoom_impl,
+)
 
 logger = logging.getLogger(__name__)
 

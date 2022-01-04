@@ -2,8 +2,7 @@
 import importlib
 import inspect
 import pkgutil
-from typing import Iterator
-from typing import NoReturn
+from typing import Iterator, NoReturn
 
 from bot import exts
 

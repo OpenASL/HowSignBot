@@ -1,12 +1,10 @@
 import datetime as dt
-from typing import Optional
-from typing import Tuple
+from typing import Optional, Tuple
 
 import dateparser
 import pytz
-from pytz.tzinfo import StaticTzInfo
-
 import pytz_informal
+from pytz.tzinfo import StaticTzInfo
 
 
 def utcnow() -> dt.datetime:

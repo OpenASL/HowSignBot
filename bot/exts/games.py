@@ -5,21 +5,15 @@ import random
 from contextlib import suppress
 from typing import Sequence
 
-import disnake
-from disnake import ApplicationCommandInteraction
-from disnake.ext.commands import Bot
-from disnake.ext.commands import Cog
-from disnake.ext.commands import command
-from disnake.ext.commands import Context
-from disnake.ext.commands import Param
-from disnake.ext.commands import slash_command
-
 import catchphrase
 import cuteid
+import disnake
+from disnake import ApplicationCommandInteraction
+from disnake.ext.commands import Bot, Cog, Context, Param, command, slash_command
+
 from bot import settings
 from bot.utils import did_you_mean
-from bot.utils.reactions import get_reaction_message
-from bot.utils.reactions import should_handle_reaction
+from bot.utils.reactions import get_reaction_message, should_handle_reaction
 
 logger = logging.getLogger(__name__)
 

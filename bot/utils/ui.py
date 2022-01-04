@@ -1,12 +1,7 @@
 from __future__ import annotations
 
 from functools import partial
-from typing import Any
-from typing import Callable
-from typing import Coroutine
-from typing import NamedTuple
-from typing import Sequence
-from typing import TypeVar
+from typing import Any, Callable, Coroutine, NamedTuple, Sequence, TypeVar
 
 import disnake
 

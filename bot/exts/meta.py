@@ -4,15 +4,9 @@ from typing import Optional
 import disnake
 from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
-from disnake.ext.commands import Bot
-from disnake.ext.commands import Cog
-from disnake.ext.commands import command
-from disnake.ext.commands import Context
-from disnake.ext.commands import is_owner
-from disnake.ext.commands import slash_command
+from disnake.ext.commands import Bot, Cog, Context, command, is_owner, slash_command
 
-from bot import __version__
-from bot import settings
+from bot import __version__, settings
 from bot.bot import set_default_presence
 from bot.utils import truncate
 

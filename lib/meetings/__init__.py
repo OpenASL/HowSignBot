@@ -6,13 +6,11 @@ import hmac
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from enum import IntEnum
-from typing import Callable
-from typing import NamedTuple
+from typing import Callable, NamedTuple
 
 import aiohttp
-from slugify import slugify
-
 import cuteid
+from slugify import slugify
 
 
 class ZoomClientError(Exception):

@@ -3,25 +3,18 @@ from __future__ import annotations
 import asyncio
 import logging
 import random
-from typing import Awaitable
-from typing import Callable
-from typing import cast
-from typing import Mapping
-from typing import Sequence
+from typing import Awaitable, Callable, Mapping, Sequence, cast
 
 import disnake
-from aiohttp import client
-from disnake.ext.commands import Bot
-from disnake.ext.commands import Context
-from disnake.ext.commands import errors
-from nameparser import HumanName
-
 import holiday_emojis
 import meetings
+from aiohttp import client
+from disnake.ext.commands import Bot, Context, errors
+from nameparser import HumanName
+
 from bot import settings
 from bot.database import store
-from bot.utils.datetimes import PACIFIC
-from bot.utils.datetimes import utcnow
+from bot.utils.datetimes import PACIFIC, utcnow
 from bot.utils.reactions import maybe_add_reaction
 
 logger = logging.getLogger(__name__)

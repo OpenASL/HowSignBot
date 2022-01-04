@@ -1,31 +1,33 @@
 import datetime as dt
 import logging
 from contextlib import suppress
-from typing import Any
-from typing import Dict
-from typing import Optional
-from typing import Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import disnake
 import pytz
 from disnake.ext import commands
 from disnake.ext.commands import Context
 
-from ._practice_sessions import get_practice_sessions
-from ._practice_sessions import get_practice_worksheet_for_guild
-from ._practice_sessions import make_practice_session_embed
 from bot import settings
 from bot.database import store
 from bot.utils import get_and_strip_quoted_text
-from bot.utils.datetimes import display_timezone
-from bot.utils.datetimes import EASTERN_CURRENT_NAME
-from bot.utils.datetimes import format_multi_time
-from bot.utils.datetimes import NoTimeZoneError
-from bot.utils.datetimes import PACIFIC
-from bot.utils.datetimes import PACIFIC_CURRENT_NAME
-from bot.utils.datetimes import parse_human_readable_datetime
-from bot.utils.datetimes import utcnow
+from bot.utils.datetimes import (
+    EASTERN_CURRENT_NAME,
+    PACIFIC,
+    PACIFIC_CURRENT_NAME,
+    NoTimeZoneError,
+    display_timezone,
+    format_multi_time,
+    parse_human_readable_datetime,
+    utcnow,
+)
 from bot.utils.discord import display_name
+
+from ._practice_sessions import (
+    get_practice_sessions,
+    get_practice_worksheet_for_guild,
+    make_practice_session_embed,
+)
 
 logger = logging.getLogger(__name__)
 

@@ -1,20 +1,20 @@
 import datetime as dt
 import logging
-from typing import List
-from typing import NamedTuple
-from typing import Optional
+from typing import List, NamedTuple, Optional
 
 import disnake
-
 import holiday_emojis
+
 from bot import settings
 from bot.database import store
 from bot.utils import truncate
-from bot.utils.datetimes import format_multi_time
-from bot.utils.datetimes import PACIFIC
-from bot.utils.datetimes import PACIFIC_CURRENT_NAME
-from bot.utils.datetimes import parse_human_readable_datetime
-from bot.utils.datetimes import utcnow
+from bot.utils.datetimes import (
+    PACIFIC,
+    PACIFIC_CURRENT_NAME,
+    format_multi_time,
+    parse_human_readable_datetime,
+    utcnow,
+)
 from bot.utils.gcal import create_gcal_url
 from bot.utils.gsheets import get_gsheet_client
 

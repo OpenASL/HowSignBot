@@ -3,33 +3,29 @@ from __future__ import annotations
 import asyncio
 import datetime as dt
 import logging
-from enum import auto
-from enum import Enum
+from enum import Enum, auto
 from typing import Any
 
 import disnake
 import pytz
-from disnake import GuildCommandInteraction
-from disnake import GuildScheduledEvent
-from disnake import MessageInteraction
+from disnake import GuildCommandInteraction, GuildScheduledEvent, MessageInteraction
 from disnake.ext import commands
 from disnake.ext.commands import Cog
 
 from bot import settings
 from bot.database import store
 from bot.exts.practices.practice import parse_practice_time
-from bot.utils.datetimes import display_timezone
-from bot.utils.datetimes import EASTERN_CURRENT_NAME
-from bot.utils.datetimes import format_multi_time
-from bot.utils.datetimes import NoTimeZoneError
-from bot.utils.datetimes import PACIFIC
-from bot.utils.datetimes import PACIFIC_CURRENT_NAME
-from bot.utils.datetimes import utcnow
+from bot.utils.datetimes import (
+    EASTERN_CURRENT_NAME,
+    PACIFIC,
+    PACIFIC_CURRENT_NAME,
+    NoTimeZoneError,
+    display_timezone,
+    format_multi_time,
+    utcnow,
+)
 from bot.utils.discord import display_name
-from bot.utils.ui import ButtonGroupOption
-from bot.utils.ui import ButtonGroupView
-from bot.utils.ui import DropdownView
-from bot.utils.ui import LinkView
+from bot.utils.ui import ButtonGroupOption, ButtonGroupView, DropdownView, LinkView
 
 logger = logging.getLogger(__name__)
 

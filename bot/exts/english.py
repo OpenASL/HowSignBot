@@ -1,11 +1,11 @@
 import logging
 from typing import Optional
 
+import catchphrase
 from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 from disnake.ext.commands import Context
 
-import catchphrase
 from bot import settings
 
 logger = logging.getLogger(__name__)

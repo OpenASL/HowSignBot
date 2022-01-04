@@ -1,7 +1,6 @@
 from pathlib import Path
 
-from ariadne import load_schema_from_path
-from ariadne import make_executable_schema
+from ariadne import load_schema_from_path, make_executable_schema
 
 from .types import types
 

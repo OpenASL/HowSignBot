@@ -6,7 +6,6 @@ from typing import Optional
 
 import yaml
 
-
 HERE = Path(__file__).parent
 
 with (HERE / "game_words.yaml").open("r") as fp:

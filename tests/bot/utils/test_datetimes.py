@@ -4,8 +4,7 @@ import pytest
 import pytz
 from freezegun import freeze_time
 
-from bot.utils.datetimes import display_timezone
-from bot.utils.datetimes import parse_human_readable_datetime
+from bot.utils.datetimes import display_timezone, parse_human_readable_datetime
 
 
 @pytest.mark.parametrize(

@@ -2,7 +2,6 @@ from ariadne import QueryType
 
 from bot.database import store
 
-
 query = QueryType()
 
 

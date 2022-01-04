@@ -4,13 +4,12 @@ from contextlib import suppress
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.exc import ProgrammingError
-from sqlalchemy_utils import create_database
-from sqlalchemy_utils import drop_database
+from sqlalchemy_utils import create_database, drop_database
 
 # Must be before bot import
 os.environ["TESTING"] = "true"
 
-from bot import settings, database  # noqa:E402
+from bot import database, settings  # noqa:E402
 
 
 # https://www.starlette.io/database/#test-isolation

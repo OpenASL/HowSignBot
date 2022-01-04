@@ -4,20 +4,20 @@ import asyncio
 import hashlib
 import logging
 from contextlib import suppress
-from typing import Any
-from typing import NamedTuple
-from typing import TypedDict
+from typing import Any, NamedTuple, TypedDict
 
 import disnake
 from aiohttp import web
 from disnake import GuildCommandInteraction
 from disnake.ext import commands
-from disnake.ext.commands import Bot
-from disnake.ext.commands import Context
-from disnake.ext.commands import group
-from disnake.ext.commands import guild_permissions
-from disnake.ext.commands import is_owner
-from disnake.ext.commands import slash_command
+from disnake.ext.commands import (
+    Bot,
+    Context,
+    group,
+    guild_permissions,
+    is_owner,
+    slash_command,
+)
 
 from bot import settings
 from bot.database import store

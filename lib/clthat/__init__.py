@@ -3,7 +3,6 @@ import json
 import random as _random
 from pathlib import Path
 
-
 HERE = Path(__file__).parent
 
 with (HERE / "text.json").open("r") as fp:

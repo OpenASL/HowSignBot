@@ -1,12 +1,7 @@
 import logging
 import re
 from contextlib import suppress
-from typing import Awaitable
-from typing import Callable
-from typing import Iterable
-from typing import Mapping
-from typing import Optional
-from typing import Union
+from typing import Awaitable, Callable, Iterable, Mapping, Optional, Union
 
 import disnake
 from disnake.ext.commands import Bot
