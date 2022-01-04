@@ -1,4 +1,5 @@
 import logging
+import re
 from urllib.parse import quote_plus
 
 import disnake
@@ -13,20 +14,24 @@ logger = logging.getLogger(__name__)
 
 COMMAND_PREFIX = settings.COMMAND_PREFIX
 
-SIGN_TEMPLATE = """[🤲 **Handspeak** - Search results]({handspeak})
+SIGN_TEMPLATE = """[🍃 **ASLCORE** - {word_uppercased}]({aslcore})
+[📜 **ASL Signbank** - {word_uppercased}]({asl_signbank})
+[🤲 **Handspeak** - Search results]({handspeak})
 [🧬 **Lifeprint** - Search results]({lifeprint})
 [🤝 **SigningSavvy** - Sign for {word_uppercased}]({signingsavvy})
 [🌐 **Spread The Sign** - {word_uppercased}]({spread_the_sign})
-[📜 **ASL Signbank** - {word_uppercased}]({asl_signbank})
+[🔬 **STEM Dictionary** - {word_uppercased}]({stem_dictionary})
 [📹 **YouGlish** - ASL videos with {word_uppercased}]({youglish})
 Share: {howsign}
 """
 
-SIGN_SPOILER_TEMPLATE = """[🤲 **Handspeak** - Search results]({handspeak})
+SIGN_SPOILER_TEMPLATE = """[🍃 **ASLCORE** - ||{word_uppercased}||]({aslcore})
+[📜 **ASL Signbank** - ||{word_uppercased}||]({asl_signbank})
+[🤲 **Handspeak** - Search results]({handspeak})
 [🧬 **Lifeprint** - Search results]({lifeprint})
 [🤝 **SigningSavvy** - Sign for ||{word_uppercased}||]({signingsavvy})
 [🌐 **Spread The Sign** - ||{word_uppercased}||]({spread_the_sign})
-[📜 **ASL Signbank** - ||{word_uppercased}||]({asl_signbank})
+[🔬 **STEM Dictionary** - ||{word_uppercased}||]({stem_dictionary})
 [📹 **YouGlish** - ASL videos with ||{word_uppercased}||]({youglish})
 Share: ||{howsign}||
 """
@@ -52,14 +57,18 @@ def word_display(word: str, *, template: str = SIGN_TEMPLATE, max_length: int = 
     if len(word) > max_length:
         raise errors.BadArgument("⚠️ Input too long. Try a shorter query.")
     quoted_word = quote_plus(word).lower()
+    dasherized_word = re.sub(r"\s+", "-", word)
+    quoted_dasherized_word = quote_plus(dasherized_word).lower()
     return template.format(
         word_uppercased=word.upper(),
+        aslcore=f"https://aslcore.org/search/?query={quoted_word}&architecture=1&art=1&biology=1&computerscience=1&engineering=1&literature=1&organicchemistry=1&philosophy=1&physics=1&sustainability=1",
+        asl_signbank=f"https://aslsignbank.haskins.yale.edu/signs/search/?keyword={quoted_word}",
         howsign=f"https://howsign.app/?s={quoted_word}",
         lifeprint=f"https://www.google.com/search?&q=site%3Alifeprint.com+{quoted_word}",
         handspeak=f"https://www.google.com/search?&q=site%3Ahandspeak.com+{quoted_word}",
         signingsavvy=f"https://www.signingsavvy.com/search/{quoted_word}",
         spread_the_sign=f"https://www.spreadthesign.com/en.us/search/?q={quoted_word}",
-        asl_signbank=f"https://aslsignbank.haskins.yale.edu/signs/search/?keyword={quoted_word}",
+        stem_dictionary=f"https://deaftec.org/stem-dictionary/dictionary_term/{quoted_dasherized_word}/",
         youglish=f"https://youglish.com/pronounce/{quoted_word}/signlanguage/us",
     )
 
