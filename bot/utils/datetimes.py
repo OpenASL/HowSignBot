@@ -1,22 +1,20 @@
 import datetime as dt
-from typing import Optional
-from typing import Tuple
+from typing import Optional, Tuple, cast
 
 import dateparser
 import pytz
-from pytz.tzinfo import StaticTzInfo
-
 import pytz_informal
+from pytz.tzinfo import StaticTzInfo
 
 
 def utcnow() -> dt.datetime:
     return dt.datetime.now(dt.timezone.utc)
 
 
-PACIFIC = pytz.timezone("America/Los_Angeles")
-MOUNTAIN = pytz.timezone("America/Denver")
-CENTRAL = pytz.timezone("America/Chicago")
-EASTERN = pytz.timezone("America/New_York")
+PACIFIC = cast(StaticTzInfo, pytz.timezone("America/Los_Angeles"))
+MOUNTAIN = cast(StaticTzInfo, pytz.timezone("America/Denver"))
+CENTRAL = cast(StaticTzInfo, pytz.timezone("America/Chicago"))
+EASTERN = cast(StaticTzInfo, pytz.timezone("America/New_York"))
 
 # EDT and PDT change to EST and PST during the winter
 # Show the current name in docs
@@ -47,11 +45,11 @@ class NoTimeZoneError(ValueError):
 
 def parse_human_readable_datetime(
     dstr: str,
-    settings: Optional[dict] = None,
-    user_timezone: Optional[pytz.BaseTzInfo] = None,
+    settings=None,
+    user_timezone: Optional[StaticTzInfo] = None,
     # By default, use Pacific time if timezone can't be parsed
     fallback_timezone: Optional[pytz.BaseTzInfo] = PACIFIC,
-) -> Tuple[Optional[dt.datetime], Optional[dt.tzinfo]]:
+) -> Tuple[Optional[dt.datetime], Optional[StaticTzInfo]]:
     parsed = dateparser.parse(dstr, settings=settings)
     if parsed is None:
         return None, None
@@ -63,7 +61,7 @@ def parse_human_readable_datetime(
                 raise NoTimeZoneError(f"Time zone could not be parsed from {dstr}.")
             parsed = fallback_timezone.localize(parsed)
     parsed = normalize_timezone(parsed)
-    used_timezone = parsed.tzinfo
+    used_timezone = cast(StaticTzInfo, parsed.tzinfo)
     return parsed.astimezone(dt.timezone.utc), used_timezone
 
 
@@ -75,7 +73,7 @@ def display_timezone(tzinfo: StaticTzInfo, dtime: dt.datetime) -> str:
     return ret
 
 
-def display_time(dtime: dt.datetime, time_format: str, tzinfo: pytz.BaseTzInfo) -> str:
+def display_time(dtime: dt.datetime, time_format: str, tzinfo: StaticTzInfo) -> str:
     return dtime.astimezone(tzinfo).strftime(time_format) + display_timezone(
         tzinfo, dtime
     )

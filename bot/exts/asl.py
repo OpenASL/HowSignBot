@@ -2,19 +2,12 @@ import logging
 from urllib.parse import quote_plus
 
 import disnake
-from disnake import ApplicationCommandInteraction
-from disnake.ext.commands import Bot
-from disnake.ext.commands import Cog
-from disnake.ext.commands import command
-from disnake.ext.commands import Context
-from disnake.ext.commands import errors
-from disnake.ext.commands import slash_command
-
 import handshapes
+from disnake import ApplicationCommandInteraction
+from disnake.ext.commands import Bot, Cog, Context, command, errors, slash_command
+
 from bot import settings
-from bot.utils import did_you_mean
-from bot.utils import get_close_matches
-from bot.utils import get_spoiler_text
+from bot.utils import did_you_mean, get_close_matches, get_spoiler_text
 
 logger = logging.getLogger(__name__)
 
@@ -165,19 +158,6 @@ class ASL(Cog):
     @command(name="sign", aliases=("howsign", COMMAND_PREFIX), help=SIGN_HELP)
     async def sign_prefix_command(self, ctx: Context, *, term: str):
         await ctx.reply(**sign_impl(term))
-
-    @sign_command.error
-    async def sign_error(self, ctx: Context, error: Exception):
-        # Ignore "??"
-        if isinstance(error, errors.MissingRequiredArgument):
-            if ctx.invoked_with == COMMAND_PREFIX:
-                logger.info(
-                    f"no argument passed to {COMMAND_PREFIX}{ctx.invoked_with}. ignoring..."
-                )
-            else:
-                await ctx.send(
-                    f"⚠️ Enter a word or phrase to search for after `{COMMAND_PREFIX}{ctx.invoked_with}`."
-                )
 
     @slash_command(name="handshape")
     async def handshape_command(self, inter: ApplicationCommandInteraction):

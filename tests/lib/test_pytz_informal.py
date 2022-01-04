@@ -1,6 +1,5 @@
 import pytest
 import pytz
-
 import pytz_informal
 
 

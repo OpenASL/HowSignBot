@@ -3,33 +3,30 @@ from __future__ import annotations
 import asyncio
 import datetime as dt
 import logging
-from enum import auto
-from enum import Enum
+from enum import Enum, auto
 from typing import Any
 
 import disnake
 import pytz
-from disnake import GuildCommandInteraction
-from disnake import GuildScheduledEvent
-from disnake import MessageInteraction
+from disnake import GuildCommandInteraction, GuildScheduledEvent, MessageInteraction
 from disnake.ext import commands
 from disnake.ext.commands import Cog
+from pytz.tzinfo import StaticTzInfo
 
 from bot import settings
 from bot.database import store
 from bot.exts.practices.practice import parse_practice_time
-from bot.utils.datetimes import display_timezone
-from bot.utils.datetimes import EASTERN_CURRENT_NAME
-from bot.utils.datetimes import format_multi_time
-from bot.utils.datetimes import NoTimeZoneError
-from bot.utils.datetimes import PACIFIC
-from bot.utils.datetimes import PACIFIC_CURRENT_NAME
-from bot.utils.datetimes import utcnow
+from bot.utils.datetimes import (
+    EASTERN_CURRENT_NAME,
+    PACIFIC,
+    PACIFIC_CURRENT_NAME,
+    NoTimeZoneError,
+    display_timezone,
+    format_multi_time,
+    utcnow,
+)
 from bot.utils.discord import display_name
-from bot.utils.ui import ButtonGroupOption
-from bot.utils.ui import ButtonGroupView
-from bot.utils.ui import DropdownView
-from bot.utils.ui import LinkView
+from bot.utils.ui import ButtonGroupOption, ButtonGroupView, DropdownView, LinkView
 
 logger = logging.getLogger(__name__)
 
@@ -374,10 +371,15 @@ class Schedule(commands.Cog):
             video_service_kwargs = await self._prompt_for_video_service(
                 inter, user=inter.user, guild=inter.guild
             )
+            scheduled_end_time = (
+                event.scheduled_end_time
+                if event.scheduled_end_time
+                else event.scheduled_start_time + dt.timedelta(hours=1)
+            )
             event = await event.edit(
                 # XXX API requires passing scheduled end time for some reason
                 scheduled_start_time=event.scheduled_start_time,
-                scheduled_end_time=event.scheduled_end_time,
+                scheduled_end_time=scheduled_end_time,
                 **video_service_kwargs,
             )
             assert event is not None
@@ -423,12 +425,13 @@ class Schedule(commands.Cog):
         self,
         inter: GuildCommandInteraction,
         is_initial_interaction: bool | None = None,
-    ) -> tuple[dt.datetime, dt.tzinfo | None]:
+    ) -> tuple[dt.datetime, StaticTzInfo | None]:
         tries = 0
         max_retries = 3
         scheduled_start_time: dt.datetime | None = None
         current_prompt = START_TIME_PROMPT
-        used_timezone: dt.tzinfo | None = None
+        used_timezone: StaticTzInfo | None = None
+        start_time_message: disnake.Message | None = None
         while scheduled_start_time is None:
             if tries >= max_retries:
                 raise MaxPromptAttemptsExceeded
@@ -443,6 +446,7 @@ class Schedule(commands.Cog):
                 ),
             )
             logger.info(f"attempting to schedule new practice session: {start_time}")
+            assert inter.user is not None
             user_timezone = await store.get_user_timezone(user_id=inter.user.id)
             try:
                 scheduled_start_time, used_timezone = parse_practice_time(
@@ -458,6 +462,7 @@ class Schedule(commands.Cog):
                 elif scheduled_start_time < utcnow():
                     current_prompt = "⚠Parsed date or time is in the past. Try again with a future date or time."
             tries += 1
+        assert start_time_message is not None
         await start_time_message.edit(
             content=(
                 "☑️ **When will your event start?**\n"
@@ -467,7 +472,7 @@ class Schedule(commands.Cog):
         return scheduled_start_time, used_timezone
 
     async def _store_and_notify_for_user_timezone_change(
-        self, user, used_timezone: dt.tzinfo
+        self, user, used_timezone: StaticTzInfo
     ):
         user_timezone = await store.get_user_timezone(user_id=user.id)
         if used_timezone and str(user_timezone) != str(used_timezone):
@@ -486,7 +491,7 @@ class Schedule(commands.Cog):
         self,
         inter: GuildCommandInteraction,
         *,
-        user: disnake.User,
+        user: disnake.User | disnake.Member,
         guild: disnake.Guild,
     ) -> dict[str, Any]:
         video_service_view = ButtonGroupView.from_options(

@@ -8,11 +8,11 @@ import disnake
 from aiohttp import web
 from disnake.ext.commands import Bot
 
-from ._zoom import make_zoom_embed
-from ._zoom import REPOST_EMOJI
 from bot import settings
 from bot.database import store
 from bot.utils.reactions import maybe_clear_reaction
+
+from ._zoom import REPOST_EMOJI, make_zoom_embed
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +49,8 @@ async def handle_zoom_event(bot: Bot, data: dict):
 
     edit_kwargs = None
     banned_user_joined = False
+    participant_name = None
+    email = None
     if event == "meeting.ended":
         logger.info(f"automatically ending zoom meeting {meeting_id}")
         await store.end_zoom_meeting(meeting_id=meeting_id)
@@ -108,7 +110,7 @@ async def handle_zoom_event(bot: Bot, data: dict):
         for message in messages:
             channel_id = message["channel_id"]
             message_id = message["message_id"]
-            channel = bot.get_channel(channel_id)
+            channel = cast(disnake.TextChannel, bot.get_channel(channel_id))
             if edit_kwargs:
                 logger.info(f"editing zoom message {message_id} for event {event}")
                 disnake_message: disnake.Message = await channel.fetch_message(message_id)
@@ -122,7 +124,10 @@ async def handle_zoom_event(bot: Bot, data: dict):
             content = f"🚨 <@&{settings.ASLPP_MOD_ROLE_ID}> Banned user **{participant_name}** (email: **{email}**) entered a Zoom meeting: {disnake_messages[0].jump_url}"
         else:
             content = f"🚨 <@&{settings.ASLPP_MOD_ROLE_ID}> Banned user **{participant_name}** (email: **{email}**) entered a Zoom meeting."
-        await bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID).send(content=content)
+        channel = cast(
+            disnake.TextChannel, bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
+        )
+        await channel.send(content=content)
 
 
 def setup(bot: Bot) -> None:
@@ -135,4 +140,4 @@ def setup(bot: Bot) -> None:
         asyncio.create_task(handle_zoom_event(bot, data))
         return web.Response(body="", status=200)
 
-    bot.app.add_routes([web.post("/zoom", zoom)])
+    bot.app.add_routes([web.post("/zoom", zoom)])  # type: ignore

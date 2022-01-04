@@ -1,10 +1,12 @@
 import gspread
 
-from bot.settings import GOOGLE_CLIENT_EMAIL
-from bot.settings import GOOGLE_PRIVATE_KEY
-from bot.settings import GOOGLE_PRIVATE_KEY_ID
-from bot.settings import GOOGLE_PROJECT_ID
-from bot.settings import GOOGLE_TOKEN_URI
+from bot.settings import (
+    GOOGLE_CLIENT_EMAIL,
+    GOOGLE_PRIVATE_KEY,
+    GOOGLE_PRIVATE_KEY_ID,
+    GOOGLE_PROJECT_ID,
+    GOOGLE_TOKEN_URI,
+)
 
 credentials = {
     "type": "service_account",

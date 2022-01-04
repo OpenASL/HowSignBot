@@ -2,28 +2,24 @@ import asyncio
 import datetime as dt
 import logging
 import random
-from typing import Optional
-from typing import Tuple
-
-import disnake
-from disnake.ext.commands import Bot
-from disnake.ext.commands import Cog
-from disnake.ext.commands import command
-from disnake.ext.commands import Context
-from disnake.ext.commands import is_owner
+from typing import Optional, Tuple, cast
 
 import clthat
+import disnake
 import handshapes
 import holiday_emojis
-from ._practice_sessions import get_practice_sessions
-from ._practice_sessions import make_base_embed
-from ._practice_sessions import make_practice_session_embed
+from disnake.ext.commands import Bot, Cog, Context, command, is_owner
+
 from bot import settings
 from bot.database import store
 from bot.exts.asl import word_display
-from bot.utils.datetimes import EASTERN
-from bot.utils.datetimes import parse_human_readable_datetime
-from bot.utils.datetimes import utcnow
+from bot.utils.datetimes import EASTERN, parse_human_readable_datetime, utcnow
+
+from ._practice_sessions import (
+    get_practice_sessions,
+    make_base_embed,
+    make_practice_session_embed,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -97,14 +93,14 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
         await self.send_daily_message(channel_id, send_dtime)
 
         if channel_id != ctx.channel.id:
-            channel = self.bot.get_channel(channel_id)
+            channel = cast(disnake.TextChannel, self.bot.get_channel(channel_id))
             guild = channel.guild
             await ctx.send(f'🗓 Daily message sent to "{guild.name}", #{channel.name}')
 
     async def send_daily_message(
         self, channel_id: int, dtime: Optional[dt.datetime] = None
     ):
-        channel = self.bot.get_channel(channel_id)
+        channel = cast(disnake.TextChannel, self.bot.get_channel(channel_id))
         guild = channel.guild
         logger.info(f'sending daily message for guild: "{guild.name}" in #{channel.name}')
         guild_id = guild.id
@@ -164,6 +160,7 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
                     inline=False,
                 )
 
+        assert file_ is not None
         message = await channel.send(file=file_, embed=embed)
         if include_handshape_of_the_day and handshape:
             await message.create_thread(

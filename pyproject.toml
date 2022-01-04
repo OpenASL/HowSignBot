@@ -8,3 +8,6 @@ upload_to_pypi = false
 upload_to_release = false
 build_command = ""
 remove_dist = false
+
+[tool.isort]
+profile = "black" 

@@ -4,15 +4,9 @@ from typing import Optional
 import disnake
 from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
-from disnake.ext.commands import Bot
-from disnake.ext.commands import Cog
-from disnake.ext.commands import command
-from disnake.ext.commands import Context
-from disnake.ext.commands import is_owner
-from disnake.ext.commands import slash_command
+from disnake.ext.commands import Bot, Cog, Context, command, is_owner, slash_command
 
-from bot import __version__
-from bot import settings
+from bot import __version__, settings
 from bot.bot import set_default_presence
 from bot.utils import truncate
 
@@ -26,12 +20,14 @@ async def post_feedback(bot: commands.Bot, text: str, guild: Optional[str]):
     if guild:
         embed.add_field(name="Guild", value=guild)
     embed.add_field(name="Version", value=__version__)
+    assert bot.owner_id is not None
     owner = bot.get_user(bot.owner_id)
+    assert owner is not None
     await owner.send(embed=embed)
 
 
 def ActivityTypeConverter(argument) -> disnake.ActivityType:
-    if argument not in disnake.ActivityType._enum_member_names_:
+    if argument not in disnake.ActivityType._enum_member_names_:  # type: ignore
         raise commands.CommandError(f'⚠️"{argument}" is not a valid activity type.')
     return getattr(disnake.ActivityType, argument)
 
@@ -108,7 +104,7 @@ class Meta(Cog):
         def check(m: disnake.Message):
             return (
                 m.author == ctx.author
-                and m.reference
+                and bool(m.reference)
                 and m.reference.message_id == response.id
             )
 

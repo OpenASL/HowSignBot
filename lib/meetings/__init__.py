@@ -6,13 +6,11 @@ import hmac
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from enum import IntEnum
-from typing import Callable
-from typing import NamedTuple
+from typing import Callable, NamedTuple
 
 import aiohttp
-from slugify import slugify
-
 import cuteid
+from slugify import slugify
 
 
 class ZoomClientError(Exception):
@@ -37,11 +35,11 @@ async def zoom_request(
     timeout: int = 10,
     **kwargs,
 ) -> AsyncIterator[aiohttp.ClientResponse]:
-    timeout = aiohttp.ClientTimeout(total=timeout)
+    client_timeout = aiohttp.ClientTimeout(total=timeout)
     async with aiohttp.request(
         method,
         f"https://api.zoom.us/v2/{path.lstrip('/')}",
-        timeout=timeout,
+        timeout=client_timeout,
         headers={"Authorization": f"Bearer {token}"},
         **kwargs,
     ) as resp:

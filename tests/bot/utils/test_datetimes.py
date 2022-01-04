@@ -4,8 +4,7 @@ import pytest
 import pytz
 from freezegun import freeze_time
 
-from bot.utils.datetimes import display_timezone
-from bot.utils.datetimes import parse_human_readable_datetime
+from bot.utils.datetimes import display_timezone, parse_human_readable_datetime
 
 
 @pytest.mark.parametrize(
@@ -22,6 +21,7 @@ from bot.utils.datetimes import parse_human_readable_datetime
 @freeze_time("2020-09-25 14:00:00")
 def test_parse_human_readable_datetime(value, snapshot):
     dtime, _ = parse_human_readable_datetime(value)
+    assert dtime is not None
     assert dtime.tzinfo == dt.timezone.utc
     assert dtime.isoformat() == snapshot
 

@@ -15,7 +15,7 @@ from .utils.extensions import walk_extensions
 logger = logging.getLogger(__name__)
 
 # Assign app to bot so that extensions can add routes
-bot.app = app = web.Application()
+bot.app = app = web.Application()  # type: ignore
 
 app.cors = cors = aiohttp_cors.setup(
     app,
@@ -49,8 +49,7 @@ async def graphql_server(request):
 
 
 app.add_routes([web.get("/ping", ping)])
-resource = bot.app.router.add_resource("/graphql")
-resource.add_route("GET", graphql_playground)
+resource = bot.app.router.add_resource("/graphql")  # type: ignore
 cors.add(resource.add_route("POST", graphql_server))
 
 

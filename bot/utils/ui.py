@@ -1,16 +1,9 @@
 from __future__ import annotations
 
 from functools import partial
-from typing import Any
-from typing import Callable
-from typing import Coroutine
-from typing import NamedTuple
-from typing import Sequence
-from typing import TypeVar
+from typing import Any, Callable, Coroutine, NamedTuple, Sequence, Type, cast
 
 import disnake
-
-T = TypeVar("T")
 
 
 class ButtonGroupOption(NamedTuple):
@@ -25,7 +18,7 @@ class ButtonGroupView(disnake.ui.View):
         self.creator_id = creator_id
         self.value: Any | None = None
 
-    async def wait_for_value(self) -> T | None:
+    async def wait_for_value(self) -> Any | None:
         await self.wait()
         return self.value
 
@@ -41,7 +34,7 @@ class ButtonGroupView(disnake.ui.View):
                 button: disnake.ui.Button,
                 inter: disnake.MessageInteraction,
                 *,
-                value: T,
+                value: Any,
                 choice_label: str,
                 label: str,
                 emoji: str | None,
@@ -73,7 +66,7 @@ class ButtonGroupView(disnake.ui.View):
 
             attrs[callback_name] = decorator(method)
 
-        view_class = type("GeneratedButtonGroupView", (cls,), attrs)
+        view_class = cast(Type[cls], type("GeneratedButtonGroupView", (cls,), attrs))  # type: ignore
         return view_class(creator_id=creator_id)
 
 
@@ -84,7 +77,7 @@ class Dropdown(disnake.ui.Select):
     def __init__(
         self,
         *,
-        options: Sequence[disnake.SelectOption],
+        options: list[disnake.SelectOption],
         on_select: Callback,
         placeholder: str | None = None,
     ):
@@ -111,7 +104,7 @@ class DropdownView(disnake.ui.View):
     def from_options(
         cls,
         *,
-        options: Sequence[disnake.SelectOption],
+        options: list[disnake.SelectOption],
         on_select: Callback,
         placeholder: str | None = None,
         creator_id: int,
