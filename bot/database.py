@@ -9,6 +9,7 @@ import nanoid
 import pytz
 import sqlalchemy as sa
 from disnake import Member
+from pytz.tzinfo import StaticTzInfo
 from sqlalchemy import sql
 from sqlalchemy.dialects.postgresql import BIGINT
 from sqlalchemy.dialects.postgresql import TIMESTAMP as _TIMESTAMP
@@ -234,7 +235,7 @@ class Store:
         )
         await self.db.execute(stmt)
 
-    async def get_user_timezone(self, user_id: int) -> pytz.BaseTzInfo | None:
+    async def get_user_timezone(self, user_id: int) -> StaticTzInfo | None:
         logger.info(f"retrieving timezone for user_id {user_id}")
         query = user_settings.select().where(user_settings.c.user_id == user_id)
         return await self.db.fetch_val(query=query, column=user_settings.c.timezone)

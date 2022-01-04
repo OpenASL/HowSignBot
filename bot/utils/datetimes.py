@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import Optional, Tuple
+from typing import Optional, Tuple, cast
 
 import dateparser
 import pytz
@@ -45,11 +45,11 @@ class NoTimeZoneError(ValueError):
 
 def parse_human_readable_datetime(
     dstr: str,
-    settings: Optional[dict] = None,
-    user_timezone: Optional[pytz.BaseTzInfo] = None,
+    settings=None,
+    user_timezone: Optional[StaticTzInfo] = None,
     # By default, use Pacific time if timezone can't be parsed
     fallback_timezone: Optional[pytz.BaseTzInfo] = PACIFIC,
-) -> Tuple[Optional[dt.datetime], Optional[dt.tzinfo]]:
+) -> Tuple[Optional[dt.datetime], Optional[StaticTzInfo]]:
     parsed = dateparser.parse(dstr, settings=settings)
     if parsed is None:
         return None, None
@@ -61,7 +61,7 @@ def parse_human_readable_datetime(
                 raise NoTimeZoneError(f"Time zone could not be parsed from {dstr}.")
             parsed = fallback_timezone.localize(parsed)
     parsed = normalize_timezone(parsed)
-    used_timezone = parsed.tzinfo
+    used_timezone = cast(StaticTzInfo, parsed.tzinfo)
     return parsed.astimezone(dt.timezone.utc), used_timezone
 
 
@@ -73,7 +73,7 @@ def display_timezone(tzinfo: StaticTzInfo, dtime: dt.datetime) -> str:
     return ret
 
 
-def display_time(dtime: dt.datetime, time_format: str, tzinfo: pytz.BaseTzInfo) -> str:
+def display_time(dtime: dt.datetime, time_format: str, tzinfo: StaticTzInfo) -> str:
     return dtime.astimezone(tzinfo).strftime(time_format) + display_timezone(
         tzinfo, dtime
     )
@@ -81,8 +81,8 @@ def display_time(dtime: dt.datetime, time_format: str, tzinfo: pytz.BaseTzInfo) 
 
 def format_multi_time(dtime: dt.datetime) -> str:
     time_format = TIME_FORMAT if dtime.minute != 0 else TIME_FORMAT_NO_MINUTES
-    pacific_dstr = display_time(dtime, time_format, tzinfo=PACIFIC)
-    mountain_dstr = display_time(dtime, time_format, tzinfo=MOUNTAIN)
-    central_dstr = display_time(dtime, time_format, tzinfo=CENTRAL)
-    eastern_dstr = display_time(dtime, time_format, tzinfo=EASTERN)
+    pacific_dstr = display_time(dtime, time_format, tzinfo=cast(StaticTzInfo, PACIFIC))
+    mountain_dstr = display_time(dtime, time_format, tzinfo=cast(StaticTzInfo, MOUNTAIN))
+    central_dstr = display_time(dtime, time_format, tzinfo=cast(StaticTzInfo, CENTRAL))
+    eastern_dstr = display_time(dtime, time_format, tzinfo=cast(StaticTzInfo, EASTERN))
     return " / ".join((pacific_dstr, mountain_dstr, central_dstr, eastern_dstr))

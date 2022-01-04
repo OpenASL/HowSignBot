@@ -7,6 +7,7 @@ import disnake
 import pytz
 from disnake.ext import commands
 from disnake.ext.commands import Context
+from pytz.tzinfo import StaticTzInfo
 
 from bot import settings
 from bot.database import store
@@ -44,6 +45,7 @@ async def is_in_guild(ctx: Context) -> bool:
 
 async def has_practice_schedule(ctx: Context) -> bool:
     await is_in_guild(ctx)
+    assert ctx.guild is not None
     has_practice_schedule = await store.guild_has_practice_schedule(ctx.guild.id)
     if not has_practice_schedule:
         raise commands.errors.CheckFailure(
@@ -124,8 +126,8 @@ Enter `{COMMAND_PREFIX}schedule` to see today's schedule.
 
 
 def parse_practice_time(
-    human_readable_datetime: str, user_timezone: Optional[pytz.BaseTzInfo] = None
-) -> Tuple[Optional[dt.datetime], Optional[dt.tzinfo]]:
+    human_readable_datetime: str, user_timezone: Optional[StaticTzInfo] = None
+) -> Tuple[Optional[dt.datetime], Optional[StaticTzInfo]]:
     # First try current_period to capture dates in the near future
     dtime, used_timezone = parse_human_readable_datetime(
         human_readable_datetime,
@@ -245,12 +247,14 @@ class Practice(commands.Cog):
                 guild = bot.get_guild(guild_id)
                 # Use fetch_member to check membership instead of get_member because cache might not be populated
                 try:
+                    assert guild is not None
                     member = await guild.fetch_member(ctx.author.id)
                 except Exception:
                     pass
                 else:
                     members_and_guilds.append((member, guild))
         else:
+            assert ctx.guild is not None
             has_practice_schedule = await store.guild_has_practice_schedule(ctx.guild.id)
             if not has_practice_schedule:
                 raise commands.errors.CheckFailure(
@@ -262,6 +266,7 @@ class Practice(commands.Cog):
         old_timezone, new_timezone = None, None
         channel_id, channel = None, None
         for member, guild in members_and_guilds:
+            assert guild is not None
             guild_id = guild.id
             ret = await practice_impl(
                 guild_id=guild_id,
@@ -273,8 +278,12 @@ class Practice(commands.Cog):
             old_timezone = ret.pop("old_timezone")
             new_timezone = ret.pop("new_timezone")
             channel_id = await store.get_guild_daily_message_channel_id(guild_id)
+            if not channel_id:
+                continue
             channel = bot.get_channel(channel_id)
-            message = await channel.send(**ret)
+            if not channel:
+                continue
+            message = await channel.send(**ret)  # type: ignore
             with suppress(Exception):
                 await message.add_reaction("✅")
         if is_dm:
@@ -283,6 +292,7 @@ class Practice(commands.Cog):
                     "🙌  Thanks for scheduling a practice in the following servers:\n"
                 )
                 for _, guild in members_and_guilds:
+                    assert guild is not None
                     dm_response += f"*{guild.name}*\n"
             else:
                 dm_response = "⚠️ You are not a member of any servers that have a practice schedule."
@@ -297,7 +307,7 @@ class Practice(commands.Cog):
                 )
             # message sent outside of practice schedule channel
             if channel_id and channel and ctx.channel.id != channel_id:
-                await ctx.channel.send(f"🙌  New practice posted in {channel.mention}.")
+                await ctx.channel.send(f"🙌  New practice posted in {channel.mention}.")  # type: ignore
         if dm_response:
             try:
                 await ctx.author.send(dm_response)
@@ -308,11 +318,12 @@ class Practice(commands.Cog):
     @commands.check(has_practice_schedule)
     async def schedule_command(self, ctx: Context, *, when: Optional[str]):
         await ctx.channel.trigger_typing()
+        assert ctx.guild is not None
         ret = await schedule_impl(guild_id=ctx.guild.id, when=when)
         await ctx.send(**ret)
 
     @practice_command.error
-    @schedule_command.error
+    @schedule_command.error  # type: ignore
     async def practices_error(self, ctx: Context, error: Exception):
         if isinstance(error, commands.errors.MissingRequiredArgument):
             await ctx.send(PRACTICE_ERROR)

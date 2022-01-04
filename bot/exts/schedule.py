@@ -11,6 +11,7 @@ import pytz
 from disnake import GuildCommandInteraction, GuildScheduledEvent, MessageInteraction
 from disnake.ext import commands
 from disnake.ext.commands import Cog
+from pytz.tzinfo import StaticTzInfo
 
 from bot import settings
 from bot.database import store
@@ -370,10 +371,15 @@ class Schedule(commands.Cog):
             video_service_kwargs = await self._prompt_for_video_service(
                 inter, user=inter.user, guild=inter.guild
             )
+            scheduled_end_time = (
+                event.scheduled_end_time
+                if event.scheduled_end_time
+                else event.scheduled_start_time + dt.timedelta(hours=1)
+            )
             event = await event.edit(
                 # XXX API requires passing scheduled end time for some reason
                 scheduled_start_time=event.scheduled_start_time,
-                scheduled_end_time=event.scheduled_end_time,
+                scheduled_end_time=scheduled_end_time,
                 **video_service_kwargs,
             )
             assert event is not None
@@ -419,12 +425,13 @@ class Schedule(commands.Cog):
         self,
         inter: GuildCommandInteraction,
         is_initial_interaction: bool | None = None,
-    ) -> tuple[dt.datetime, dt.tzinfo | None]:
+    ) -> tuple[dt.datetime, StaticTzInfo | None]:
         tries = 0
         max_retries = 3
         scheduled_start_time: dt.datetime | None = None
         current_prompt = START_TIME_PROMPT
-        used_timezone: dt.tzinfo | None = None
+        used_timezone: StaticTzInfo | None = None
+        start_time_message: disnake.Message | None = None
         while scheduled_start_time is None:
             if tries >= max_retries:
                 raise MaxPromptAttemptsExceeded
@@ -439,6 +446,7 @@ class Schedule(commands.Cog):
                 ),
             )
             logger.info(f"attempting to schedule new practice session: {start_time}")
+            assert inter.user is not None
             user_timezone = await store.get_user_timezone(user_id=inter.user.id)
             try:
                 scheduled_start_time, used_timezone = parse_practice_time(
@@ -454,6 +462,7 @@ class Schedule(commands.Cog):
                 elif scheduled_start_time < utcnow():
                     current_prompt = "⚠Parsed date or time is in the past. Try again with a future date or time."
             tries += 1
+        assert start_time_message is not None
         await start_time_message.edit(
             content=(
                 "☑️ **When will your event start?**\n"
@@ -463,7 +472,7 @@ class Schedule(commands.Cog):
         return scheduled_start_time, used_timezone
 
     async def _store_and_notify_for_user_timezone_change(
-        self, user, used_timezone: dt.tzinfo
+        self, user, used_timezone: StaticTzInfo
     ):
         user_timezone = await store.get_user_timezone(user_id=user.id)
         if used_timezone and str(user_timezone) != str(used_timezone):
@@ -482,7 +491,7 @@ class Schedule(commands.Cog):
         self,
         inter: GuildCommandInteraction,
         *,
-        user: disnake.User,
+        user: disnake.User | disnake.Member,
         guild: disnake.Guild,
     ) -> dict[str, Any]:
         video_service_view = ButtonGroupView.from_options(
