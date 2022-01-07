@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.4.0 (2022-01-06)
+### Feature
+* **schedule:** Show display name as Host; handle past dates ([#398](https://github.com/OpenASL/HowSignBot/issues/398)) ([`5887dbd`](https://github.com/OpenASL/HowSignBot/commit/5887dbdd005e81de307a85af6814a553983711fd))
+
 ## v22.3.0 (2022-01-04)
 ### Feature
 * Add ASLCORE and STEM dictionary ([#394](https://github.com/OpenASL/HowSignBot/issues/394)) ([`78f04ed`](https://github.com/OpenASL/HowSignBot/commit/78f04ed53616ca47be8e1f31a1561c355264c024))
