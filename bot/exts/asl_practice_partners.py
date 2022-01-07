@@ -61,7 +61,7 @@ After:
 """
 DAILY_MESSAGE_TIME = dt.time(8, 0)  # Eastern time
 DAILY_MEMBER_KICK_TIME = dt.time(12, 0)  # Eastern time
-PRUNE_DAYS = 7
+PRUNE_DAYS = settings.ASLPP_PRUNE_DAYS
 
 
 def get_next_task_execution_datetime(time_in_eastern: dt.time) -> dt.datetime:
