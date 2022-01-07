@@ -139,6 +139,11 @@ class Schedule(commands.Cog):
                 ephemeral=True,
             )
             return
+        if scheduled_start_time < utcnow():
+            await inter.send(
+                "⚠️ Can't schedule an event in the past. Try running `/schedule new` again and use a more specific input."
+            )
+            return
 
         # Step 2: Prompt for title
         title, title_prompt_message = await self._prompt_for_text_input(
@@ -163,7 +168,7 @@ class Schedule(commands.Cog):
 
         event = await guild.create_scheduled_event(
             name=title,
-            description=f"Host: {user.mention}\n_Created with_ `/schedule new`",
+            description=f"Host: {display_name(user)} ({user.mention})\n_Created with_ `/schedule new`",
             scheduled_start_time=scheduled_start_time,
             scheduled_end_time=scheduled_end_time,
             reason=f"/schedule command used by user {user.id} ({display_name(user)})",
