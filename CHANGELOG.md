@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.5.0 (2022-01-06)
+### Feature
+* **aslpp:** Configurable prune days ([`03e9f98`](https://github.com/OpenASL/HowSignBot/commit/03e9f983dd3340d03c0217c06bec532bc8f66713))
+
 ## v22.4.0 (2022-01-06)
 ### Feature
 * **schedule:** Show display name as Host; handle past dates ([#398](https://github.com/OpenASL/HowSignBot/issues/398)) ([`5887dbd`](https://github.com/OpenASL/HowSignBot/commit/5887dbdd005e81de307a85af6814a553983711fd))
