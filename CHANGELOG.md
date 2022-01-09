@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.6.0 (2022-01-09)
+### Feature
+* **zoom:** Automatically license zoom users ([#399](https://github.com/OpenASL/HowSignBot/issues/399)) ([`bd33c8b`](https://github.com/OpenASL/HowSignBot/commit/bd33c8bd9d228a97161f0365fd731191c69364ab))
+
 ## v22.5.0 (2022-01-06)
 ### Feature
 * **aslpp:** Configurable prune days ([`03e9f98`](https://github.com/OpenASL/HowSignBot/commit/03e9f983dd3340d03c0217c06bec532bc8f66713))
