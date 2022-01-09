@@ -1,5 +1,7 @@
+import argparse
 import datetime as dt
 import subprocess
+import sys
 
 import jwt
 from environs import Env
@@ -24,10 +26,18 @@ def generate_token():
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--set", action=argparse.BooleanOptionalAction)
+    args = parser.parse_args()
     token = generate_token()
-    print("==> Setting ZOOM_JWT in Heroku")
-    subprocess.check_call(("heroku", "config:set", f"ZOOM_JWT={token}", "-a", HEROKU_APP))
-    print("==> Finished.")
+    if args.set:
+        print("==> Setting ZOOM_JWT in Heroku", file=sys.stderr)
+        subprocess.check_call(
+            ("heroku", "config:set", f"ZOOM_JWT={token}", "-a", HEROKU_APP)
+        )
+        print("==> Finished.", file=sys.stderr)
+    else:
+        print(token)
 
 
 if __name__ == "__main__":
