@@ -49,16 +49,6 @@ UNMUTE_WARNING = (
     "we encourage you to keep your voice off during practice. "
     "🤐 You can use the text channels to type responses when needed."
 )
-TOPIC_MESSAGE = """💡 I noticed you used the `-topic` command. Next time try using `/top`. It has more topics and uses threads! 👍
-Before:
-```
--topic
-```
-After:
-```
-/top
-```
-"""
 DAILY_MESSAGE_TIME = dt.time(8, 0)  # Eastern time
 DAILY_MEMBER_KICK_TIME = dt.time(12, 0)  # Eastern time
 PRUNE_DAYS = settings.ASLPP_PRUNE_DAYS
