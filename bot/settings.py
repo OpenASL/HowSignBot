@@ -51,6 +51,8 @@ ASLPP_SURVEY_VANITY_ROLE_ID = env.int(
 
 # Mapping of Discord user IDs => emails
 ZOOM_USERS = env.dict("ZOOM_USERS", subcast_keys=int, required=True)
+# Emails for Zoom users that should never be downgraded to Basic
+ZOOM_NO_DOWNGRADE = env.list("ZOOM_NO_DOWNGRADE", default=[], subcast=str)
 ZOOM_EMAILS = {email: zoom_id for zoom_id, email in ZOOM_USERS.items()}
 ZOOM_JWT = env.str("ZOOM_JWT", required=True)
 ZOOM_HOOK_TOKEN = env.str("ZOOM_HOOK_TOKEN", required=True)

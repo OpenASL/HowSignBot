@@ -270,6 +270,7 @@ async def zoom_impl(
             )
         return zoom_meeting_id, message
     else:
+        await maybe_license_zoom_user(user_id=zoom_user)
         try:
             meeting = await meetings.create_zoom(
                 token=settings.ZOOM_JWT,
@@ -311,3 +312,67 @@ async def zoom_impl(
                     channel_id=channel_id,
                 )
             return meeting.id, message
+
+
+async def maybe_license_zoom_user(user_id: str):
+    """Try to automatically license the Zoom user with Zoom ID `user_id`. Downgrades the first
+    available license.
+
+    NOTE: This assumes that all licensed are currently being used.
+    """
+    try:
+        users = await meetings.list_zoom_users(token=settings.ZOOM_JWT)
+    except asyncio.exceptions.TimeoutError:
+        logger.exception(
+            f"zoom request to list users timed out, possibly due to rate-limiting. cannot auto-license {user_id}"
+        )
+        return
+
+    licensed_users = [
+        user
+        for user in users
+        if user.type == meetings.ZoomPlanType.LICENSED
+        and user.email not in settings.ZOOM_NO_DOWNGRADE
+    ]
+    licensed_user_ids = {each.email for each in licensed_users} | {
+        each.id for each in licensed_users
+    }
+    if user_id in licensed_user_ids:
+        logger.info(f"zoom user {user_id} is already licensed")
+        return
+
+    if len(licensed_users):
+        # Use the first available license
+        downgraded_user = licensed_users[0]
+
+        try:
+            logger.info(
+                f"attempting to downgrade user zoom user {downgraded_user.email} to basic plan"
+            )
+            await meetings.update_zoom_user(
+                token=settings.ZOOM_JWT,
+                user_id=downgraded_user.id,
+                data={"type": meetings.ZoomPlanType.BASIC},
+            )
+        except meetings.ZoomClientError:
+            logger.exception(f"failed to downgrade zoom user {downgraded_user.email}")
+
+        try:
+            logger.info(f"attempting to upgrade user {user_id} to licensed plan")
+            await meetings.update_zoom_user(
+                token=settings.ZOOM_JWT,
+                user_id=user_id,
+                data={"type": meetings.ZoomPlanType.LICENSED},
+            )
+        except meetings.ZoomClientError:
+            logger.exception(f"failed to upgrade user {user_id}")
+            return
+        else:
+            logger.info(f"successfully upgraded user {user_id} to licensed plan")
+            return
+    else:
+        logger.warning(
+            f"no available users to downgrade to basic. cannot auto-license {user_id}"
+        )
+        return
+    return
