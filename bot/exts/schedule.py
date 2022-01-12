@@ -16,6 +16,7 @@ from pytz.tzinfo import StaticTzInfo
 from bot import settings
 from bot.database import store
 from bot.exts.practices.practice import parse_practice_time
+from bot.utils import truncate
 from bot.utils.datetimes import (
     EASTERN_CURRENT_NAME,
     PACIFIC,
@@ -26,7 +27,7 @@ from bot.utils.datetimes import (
     utcnow,
 )
 from bot.utils.discord import display_name
-from bot.utils.ui import ButtonGroupOption, ButtonGroupView, DropdownView, LinkView
+from bot.utils.ui import ButtonGroupOption, ButtonGroupView, DropdownView
 
 logger = logging.getLogger(__name__)
 
@@ -68,21 +69,15 @@ def format_scheduled_start_time(dtime: dt.datetime):
     return dtime_pacific.strftime("%A, %B %-d") + " · " + format_multi_time(dtime)
 
 
-def make_event_embed(event: GuildScheduledEvent) -> disnake.Embed:
-    dtime = event.scheduled_start_time
-    embed = disnake.Embed(
-        title=event.name, description="🗓" + format_scheduled_start_time(dtime)
-    )
-    return embed
-
-
 def get_event_url(event: GuildScheduledEvent) -> str:
     return f"https://discord.com/events/{event.guild_id}/{event.id}"
 
 
 def get_event_label(event: GuildScheduledEvent, bold: bool = False) -> str:
-    event_name = f"**{event.name}**" if bold else event.name
-    return f"{event_name} · {format_scheduled_start_time(event.scheduled_start_time)}"
+    formatted_time = format_scheduled_start_time(event.scheduled_start_time)
+    truncated_event_name = truncate(event.name, max_len=100 - len(formatted_time) - 4)
+    event_name = f"**{truncated_event_name}**" if bold else truncated_event_name
+    return f"{event_name} · {formatted_time}"
 
 
 class Schedule(commands.Cog):
@@ -109,7 +104,7 @@ class Schedule(commands.Cog):
             response_message: disnake.Message = await self.bot.wait_for(
                 "message",
                 check=check_user_response,
-                timeout=60,
+                timeout=120,
             )
         except asyncio.exceptions.TimeoutError:
             await inter.send(
@@ -178,12 +173,10 @@ class Schedule(commands.Cog):
 
         await inter.channel.send(
             content=(
-                '🙌 **Successfully created event.** Click "Event Link" below to mark yourself as "Interested".\n'
+                '🙌 **Successfully created event.** Mark yourself as "Interested" below.\n'
                 "To edit your event, use `/schedule edit …`.\n"
-                "To cancel your event, use `/schedule cancel`."
+                "To cancel your event, use `/schedule cancel`.\n" + get_event_url(event)
             ),
-            embed=make_event_embed(event),
-            view=LinkView(label="Event Link", url=get_event_url(event)),
         )
 
         assert used_timezone is not None
@@ -262,9 +255,8 @@ class Schedule(commands.Cog):
             await prompt_message.edit(content=prompt_content.replace("➡", "☑️"))
             event = await event.edit(name=name)
             await inter.send(
-                content=f"🙌 Successfully edited event name to: **{name}**.",
-                embed=make_event_embed(event),
-                view=LinkView(label="Event Link", url=get_event_url(event)),
+                content=f"🙌 Successfully edited event name to: **{name}**.\n"
+                + get_event_url(event),
             )
 
         options = [
@@ -326,9 +318,7 @@ class Schedule(commands.Cog):
             )
             assert event is not None
             await inter.send(
-                content="🙌 Successfully edited event time.",
-                embed=make_event_embed(event),
-                view=LinkView(label="Event Link", url=get_event_url(event)),
+                content="🙌 Successfully edited event time.\n" + get_event_url(event),
             )
             assert used_timezone is not None
             await self._store_and_notify_for_user_timezone_change(
@@ -390,9 +380,7 @@ class Schedule(commands.Cog):
             assert event is not None
 
             await inter.send(
-                content="🙌 Successfully edited video service.",
-                embed=make_event_embed(event),
-                view=LinkView(label="Event Link", url=get_event_url(event)),
+                content="🙌 Successfully edited video service.\n" + get_event_url(event)
             )
 
         options = [
@@ -522,7 +510,7 @@ class Schedule(commands.Cog):
             video_service_kwargs = dict(
                 entity_type=disnake.GuildScheduledEventEntityType.external,
                 entity_metadata=disnake.GuildScheduledEventMetadata(
-                    location="Zoom will be posted in practice channel"
+                    location="Zoom will be posted when event starts"
                 ),
                 channel_id=None,
             )
