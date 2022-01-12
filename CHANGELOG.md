@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v22.7.0 (2022-01-12)
+### Feature
+* **schedule:** Display event embed when creating an event ([#401](https://github.com/OpenASL/HowSignBot/issues/401)) ([`f0f1826`](https://github.com/OpenASL/HowSignBot/commit/f0f18261775f0eb7cbe1366fb2dde69f78c0e3e7))
+
+### Fix
+* **aslpp:** Don't show message if no members to kick ([#400](https://github.com/OpenASL/HowSignBot/issues/400)) ([`a1da00b`](https://github.com/OpenASL/HowSignBot/commit/a1da00b8074100f96da25129372eaa67c7ef462d))
+
 ## v22.6.0 (2022-01-09)
 ### Feature
 * **zoom:** Automatically license zoom users ([#399](https://github.com/OpenASL/HowSignBot/issues/399)) ([`bd33c8b`](https://github.com/OpenASL/HowSignBot/commit/bd33c8bd9d228a97161f0365fd731191c69364ab))
