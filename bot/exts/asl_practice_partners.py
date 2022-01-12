@@ -131,7 +131,7 @@ async def make_inactive_members_embed(guild: Guild):
     )
     embed.set_footer(
         text=f"These members will automatically be kicked at noon Eastern time. Use {COMMAND_PREFIX}aslpp active <members> to prevent members from getting kicked.\n"
-        f"Members who haven't had channel access for {PRUNE_DAYS} will also be pruned (estimate: {n_members_to_prune + len(members_with_no_roles)})."
+        f"Members who haven't had channel access for {PRUNE_DAYS} days will also be pruned (estimate: {n_members_to_prune + len(members_with_no_roles)})."
     )
     return embed
 
@@ -598,8 +598,20 @@ class AslPracticePartners(Cog):
             channel = cast(
                 TextChannel, self.bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
             )
-            await channel.send(content="🥾 _Kicking inactive members_...")
-            await self._kick_inactive(channel)
+            (
+                members_without_intro,
+                members_with_no_roles,
+                n_members_to_prune,
+            ) = await get_inactive_user_info(channel.guild)
+            if any(
+                (
+                    len(members_without_intro),
+                    len(members_with_no_roles),
+                    bool(n_members_to_prune),
+                )
+            ):
+                await channel.send(content="🥾 _Kicking inactive members_...")
+                await self._kick_inactive(channel)
             logger.info("cleared aslpp inactive members")
 
 
