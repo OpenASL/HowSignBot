@@ -32,8 +32,15 @@ def get_today_random(dtime: Optional[dt.datetime] = None) -> random.Random:
     return random.Random(seed)
 
 
+RANDOMIZED_HANDSHAPE_NAMES = list(handshapes.HANDSHAPE_NAMES)
+random.Random("handshapes").shuffle(RANDOMIZED_HANDSHAPE_NAMES)
+
+
 def get_daily_handshape(dtime: Optional[dt.datetime] = None) -> handshapes.Handshape:
-    return handshapes.get_random_handshape(get_today_random(dtime))
+    dtime = dtime or utcnow()
+    day_of_year = dtime.timetuple().tm_yday
+    name = RANDOMIZED_HANDSHAPE_NAMES[day_of_year % len(RANDOMIZED_HANDSHAPE_NAMES)]
+    return handshapes.get_handshape(name)
 
 
 async def get_daily_topics(dtime: Optional[dt.datetime] = None) -> Tuple[str, str]:
@@ -122,8 +129,8 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
             embed = await make_practice_session_embed(guild_id, sessions, dtime=dtime)
         else:
             embed = make_base_embed(dtime=dtime)
-        file_ = None
 
+        send_kwargs = {}
         include_handshape_of_the_day = bool(settings.get("include_handshape_of_the_day"))
         handshape = None
         holiday = holiday_emojis.get(dtime.date())
@@ -137,7 +144,7 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
             # Handshape of the Day
             handshape = get_daily_handshape(dtime)
             filename = f"{handshape.name}.png"
-            file_ = disnake.File(handshape.path, filename=filename)
+            send_kwargs["file"] = disnake.File(handshape.path, filename=filename)
             embed.set_thumbnail(url=f"attachment://{filename}")
             embed.add_field(
                 name="Handshape of the Day", value=f'"{handshape.name}"', inline=False
@@ -160,8 +167,7 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
                     inline=False,
                 )
 
-        assert file_ is not None
-        message = await channel.send(file=file_, embed=embed)
+        message = await channel.send(embed=embed, **send_kwargs)
         if include_handshape_of_the_day and handshape:
             await message.create_thread(
                 name=f"What signs use the {handshape.name} handshape?",
