@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.7.1 (2022-01-13)
+### Fix
+* **daily_message:** Fix daily message on holidays; reduce dupe consecutive handshapes ([#404](https://github.com/OpenASL/HowSignBot/issues/404)) ([`0f34194`](https://github.com/OpenASL/HowSignBot/commit/0f3419408f8fd79d87894583f31977c4e0ddaa57))
+
 ## v22.7.0 (2022-01-12)
 ### Feature
 * **schedule:** Display event embed when creating an event ([#401](https://github.com/OpenASL/HowSignBot/issues/401)) ([`f0f1826`](https://github.com/OpenASL/HowSignBot/commit/f0f18261775f0eb7cbe1366fb2dde69f78c0e3e7))
