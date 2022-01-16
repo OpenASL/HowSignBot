@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.8.0 (2022-01-16)
+### Feature
+* Rename ASLPP->Sign Cafe; increase prune grace period ([#408](https://github.com/OpenASL/HowSignBot/issues/408)) ([`caecff4`](https://github.com/OpenASL/HowSignBot/commit/caecff43c8eefed0ae5728c19045ef16df3763f4))
+
 ## v22.7.1 (2022-01-13)
 ### Fix
 * **daily_message:** Fix daily message on holidays; reduce dupe consecutive handshapes ([#404](https://github.com/OpenASL/HowSignBot/issues/404)) ([`0f34194`](https://github.com/OpenASL/HowSignBot/commit/0f3419408f8fd79d87894583f31977c4e0ddaa57))
