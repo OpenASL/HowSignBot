@@ -108,8 +108,8 @@ user_settings = sa.Table(
     sa.Column("timezone", TimeZone),
 )
 
-aslpp_intros = sa.Table(
-    "aslpp_intros",
+sign_cafe_intros = sa.Table(
+    "sign_cafe_intros",
     metadata,
     sa.Column("message_id", BIGINT, primary_key=True, doc="Discord message ID"),
     sa.Column("user_id", BIGINT, index=True, nullable=False, doc="Discord user ID"),
@@ -117,8 +117,8 @@ aslpp_intros = sa.Table(
     created_at_column(),
 )
 
-aslpp_members = sa.Table(
-    "aslpp_members",
+sign_cafe_members = sa.Table(
+    "sign_cafe_members",
     metadata,
     sa.Column("user_id", BIGINT, primary_key=True, doc="Discord user ID"),
     sa.Column("joined_at", TIMESTAMP, nullable=False),
@@ -499,16 +499,16 @@ class Store:
         all_topics = await self.db.fetch_all(topics.select())
         return [record["content"] for record in all_topics]
 
-    # ASLPP
+    # SIGN_CAFE
 
-    async def add_aslpp_intro(
+    async def add_sign_cafe_intro(
         self,
         *,
         message_id: int,
         user_id: int,
         posted_at: dt.datetime,
     ):
-        stmt = insert(aslpp_intros).values(
+        stmt = insert(sign_cafe_intros).values(
             message_id=message_id,
             user_id=user_id,
             posted_at=posted_at,
@@ -517,7 +517,7 @@ class Store:
             created_at=now(),
         )
         stmt = stmt.on_conflict_do_update(
-            index_elements=(aslpp_intros.c.message_id,),
+            index_elements=(sign_cafe_intros.c.message_id,),
             set_=dict(
                 user_id=stmt.excluded.user_id,
                 posted_at=stmt.excluded.posted_at,
@@ -526,27 +526,27 @@ class Store:
         )
         await self.db.execute(stmt)
 
-    async def clear_aslpp_members(self):
+    async def clear_sign_cafe_members(self):
         await self.db.execute(
-            aslpp_members.delete().where(aslpp_members.c.is_active == sql.false())
+            sign_cafe_members.delete().where(sign_cafe_members.c.is_active == sql.false())
         )
 
-    async def clear_aslpp_intros(self):
-        await self.db.execute(aslpp_intros.delete())
+    async def clear_sign_cafe_intros(self):
+        await self.db.execute(sign_cafe_intros.delete())
 
-    async def get_aslpp_member(self, user_id: int) -> Mapping | None:
+    async def get_sign_cafe_member(self, user_id: int) -> Mapping | None:
         return await self.db.fetch_one(
-            aslpp_members.select().where(aslpp_members.c.user_id == user_id)
+            sign_cafe_members.select().where(sign_cafe_members.c.user_id == user_id)
         )
 
-    async def upsert_aslpp_member(self, *, member: Member):
+    async def upsert_sign_cafe_member(self, *, member: Member):
         user_id = member.id
         joined_at = member.joined_at
         role_ids = {role.id for role in member.roles}
         # skip @everyone
         roles_concatenated = "|".join([role.name for role in member.roles[1:]])
-        has_acknowledged_rules = settings.ASLPP_ACKNOWLEDGED_RULES_ROLE_ID in role_ids
-        stmt = insert(aslpp_members).values(
+        has_acknowledged_rules = settings.SIGN_CAFE_ACKNOWLEDGED_RULES_ROLE_ID in role_ids
+        stmt = insert(sign_cafe_members).values(
             user_id=user_id,
             joined_at=joined_at,
             roles=roles_concatenated,
@@ -554,7 +554,7 @@ class Store:
             created_at=now(),
         )
         stmt = stmt.on_conflict_do_update(
-            index_elements=(aslpp_members.c.user_id,),
+            index_elements=(sign_cafe_members.c.user_id,),
             set_=dict(
                 joined_at=stmt.excluded.joined_at,
                 roles=roles_concatenated,
@@ -563,62 +563,65 @@ class Store:
         )
         await self.db.execute(stmt)
 
-    async def remove_aslpp_member(self, *, user_id: int):
+    async def remove_sign_cafe_member(self, *, user_id: int):
         await self.db.execute(
-            aslpp_members.delete().where(aslpp_members.c.user_id == user_id)
+            sign_cafe_members.delete().where(sign_cafe_members.c.user_id == user_id)
         )
 
-    async def get_aslpp_members_without_intro(self, since: dt.timedelta) -> list[Mapping]:
+    async def get_sign_cafe_members_without_intro(
+        self, since: dt.timedelta
+    ) -> list[Mapping]:
         return await self.db.fetch_all(
-            aslpp_members.select()
+            sign_cafe_members.select()
             .where(
-                (aslpp_members.c.is_active == sql.false())
-                & (aslpp_members.c.has_acknowledged_rules == sql.true())
-                & (aslpp_members.c.joined_at < (now() - since))
+                (sign_cafe_members.c.is_active == sql.false())
+                & (sign_cafe_members.c.has_acknowledged_rules == sql.true())
+                & (sign_cafe_members.c.joined_at < (now() - since))
             )
             .select_from(
-                aslpp_members.outerjoin(
-                    aslpp_intros, aslpp_members.c.user_id == aslpp_intros.c.user_id
+                sign_cafe_members.outerjoin(
+                    sign_cafe_intros,
+                    sign_cafe_members.c.user_id == sign_cafe_intros.c.user_id,
                 )
             )
-            .group_by(aslpp_members.c.user_id)
-            .having(sa.func.count(aslpp_intros.c.user_id) < 1)
-            .order_by(aslpp_members.c.joined_at)
+            .group_by(sign_cafe_members.c.user_id)
+            .having(sa.func.count(sign_cafe_intros.c.user_id) < 1)
+            .order_by(sign_cafe_members.c.joined_at)
         )
 
-    async def get_aslpp_members_with_no_roles(
+    async def get_sign_cafe_members_with_no_roles(
         self, leeway: dt.timedelta
     ) -> list[Mapping]:
         return await self.db.fetch_all(
-            aslpp_members.select()
+            sign_cafe_members.select()
             .where(
-                (aslpp_members.c.is_active == sql.false())
-                & (aslpp_members.c.roles == "")
-                & (aslpp_members.c.joined_at < (now() - leeway))
+                (sign_cafe_members.c.is_active == sql.false())
+                & (sign_cafe_members.c.roles == "")
+                & (sign_cafe_members.c.joined_at < (now() - leeway))
             )
-            .order_by(aslpp_members.c.joined_at)
+            .order_by(sign_cafe_members.c.joined_at)
         )
 
-    async def has_aslpp_intro(self, user_id: int) -> bool:
+    async def has_sign_cafe_intro(self, user_id: int) -> bool:
         select = sa.select(
-            (sa.exists().where(aslpp_intros.c.user_id == user_id).label("result"),)
+            (sa.exists().where(sign_cafe_intros.c.user_id == user_id).label("result"),)
         )
         record = await self.db.fetch_one(select)
         if not record:
             return False
         return record["result"]
 
-    async def mark_aslpp_members_active(self, user_ids: list[int]):
+    async def mark_sign_cafe_members_active(self, user_ids: list[int]):
         await self.db.execute(
-            aslpp_members.update()
-            .where(aslpp_members.c.user_id.in_(user_ids))
+            sign_cafe_members.update()
+            .where(sign_cafe_members.c.user_id.in_(user_ids))
             .values(is_active=True)
         )
 
-    async def mark_aslpp_members_inactive(self, user_ids: list[int]):
+    async def mark_sign_cafe_members_inactive(self, user_ids: list[int]):
         await self.db.execute(
-            aslpp_members.update()
-            .where(aslpp_members.c.user_id.in_(user_ids))
+            sign_cafe_members.update()
+            .where(sign_cafe_members.c.user_id.in_(user_ids))
             .values(is_active=False)
         )
 

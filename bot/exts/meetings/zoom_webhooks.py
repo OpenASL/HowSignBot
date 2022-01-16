@@ -74,7 +74,7 @@ async def handle_zoom_event(bot: Bot, data: dict):
         )
         embed = await make_zoom_embed(meeting_id=meeting_id)
         edit_kwargs = {"embed": embed}
-        banned_user_joined = email in settings.ASLPP_ZOOM_WATCH_LIST
+        banned_user_joined = email in settings.SIGN_CAFE_ZOOM_WATCH_LIST
     elif event == "meeting.participant_left":
         # XXX Sleep to reduce the likelihood that particpants will be removed
         #   after leaving breakout rooms.
@@ -118,14 +118,14 @@ async def handle_zoom_event(bot: Bot, data: dict):
                 await disnake_message.edit(**edit_kwargs)
                 if event == "meeting.ended":
                     await maybe_clear_reaction(disnake_message, REPOST_EMOJI)
-    # If a banned user joins, notify @Mod in ASLPP
+    # If a banned user joins, notify @Mod in SIGN_CAFE
     if banned_user_joined:
         if disnake_messages:
-            content = f"🚨 <@&{settings.ASLPP_MOD_ROLE_ID}> Banned user **{participant_name}** (email: **{email}**) entered a Zoom meeting: {disnake_messages[0].jump_url}"
+            content = f"🚨 <@&{settings.SIGN_CAFE_MOD_ROLE_ID}> Banned user **{participant_name}** (email: **{email}**) entered a Zoom meeting: {disnake_messages[0].jump_url}"
         else:
-            content = f"🚨 <@&{settings.ASLPP_MOD_ROLE_ID}> Banned user **{participant_name}** (email: **{email}**) entered a Zoom meeting."
+            content = f"🚨 <@&{settings.SIGN_CAFE_MOD_ROLE_ID}> Banned user **{participant_name}** (email: **{email}**) entered a Zoom meeting."
         channel = cast(
-            disnake.TextChannel, bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
+            disnake.TextChannel, bot.get_channel(settings.SIGN_CAFE_BOT_CHANNEL_ID)
         )
         await channel.send(content=content)
 

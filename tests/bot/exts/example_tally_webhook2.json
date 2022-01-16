@@ -7,7 +7,7 @@
     "submissionId": "wg4DAJ",
     "respondentId": "nWzyQR",
     "formId": "nW1gJ3",
-    "formName": "ASL Practice Partners - Feedback",
+    "formName": "Sign Cafe - Feedback",
     "createdAt": "2021-12-30T21:19:52.000Z",
     "fields": [
       {
@@ -180,7 +180,7 @@
       },
       {
         "key": "question_w2aj9e",
-        "label": "What do you like about ASL Practice Partners? What keeps you involved in the server?",
+        "label": "What do you like about Sign Cafe? What keeps you involved in the server?",
         "type": "TEXTAREA",
         "value": null
       },
@@ -198,7 +198,7 @@
       },
       {
         "key": "question_3y2PKp",
-        "label": "How did you find out about ASL Practice Partners?",
+        "label": "How did you find out about Sign Cafe?",
         "type": "INPUT_TEXT",
         "value": "Don't remember"
       }

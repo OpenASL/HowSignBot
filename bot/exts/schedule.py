@@ -118,7 +118,7 @@ class Schedule(commands.Cog):
         response = response_message.content.strip()
         return response, prompt_message
 
-    @commands.slash_command(name="schedule", guild_ids=(settings.ASLPP_GUILD_ID,))
+    @commands.slash_command(name="schedule", guild_ids=(settings.SIGN_CAFE_GUILD_ID,))
     async def schedule_command(self, inter: GuildCommandInteraction):
         pass
 
