@@ -38,21 +38,21 @@ async def add_submission_and_apply_role(
 ):
     join_month, role_names = "", ""
     if discord_user_id:
-        aslpp_member = await store.get_aslpp_member(discord_user_id)
-        if aslpp_member:
-            join_month = aslpp_member["joined_at"].strftime("%Y-%m")
-        guild = bot.get_guild(settings.ASLPP_GUILD_ID)
+        sign_cafe_member = await store.get_sign_cafe_member(discord_user_id)
+        if sign_cafe_member:
+            join_month = sign_cafe_member["joined_at"].strftime("%Y-%m")
+        guild = bot.get_guild(settings.SIGN_CAFE_GUILD_ID)
         assert guild is not None
         member = guild.get_member(discord_user_id)
         if member:
             # Skip the @everyone role
             roles = member.roles[1:]
             role_names = "|".join([role.name for role in roles])
-            if settings.ASLPP_SURVEY_VANITY_ROLE_ID:
+            if settings.SIGN_CAFE_SURVEY_VANITY_ROLE_ID:
                 try:
                     logger.debug("applying survey vanity role")
                     await member.add_roles(
-                        disnake.Object(id=settings.ASLPP_SURVEY_VANITY_ROLE_ID),
+                        disnake.Object(id=settings.SIGN_CAFE_SURVEY_VANITY_ROLE_ID),
                         reason="Completed survey",
                     )
                 except Exception:
@@ -141,7 +141,7 @@ def get_field_value(field: Field) -> str:
 
 def get_worksheet():
     client = get_gsheet_client()
-    sheet = client.open_by_key(settings.ASLPP_SHEET_KEY)
+    sheet = client.open_by_key(settings.SIGN_CAFE_SHEET_KEY)
     return sheet.worksheet(WORKSHEET_NAME)
 
 
@@ -159,8 +159,8 @@ async def handle_tally_webhook(bot: Bot, data: dict):
         discord_user_id=discord_user_id,
     )
 
-    url = f"https://docs.google.com/spreadsheets/d/{settings.ASLPP_SHEET_KEY}/edit#gid={worksheet.id}"
-    channel = bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
+    url = f"https://docs.google.com/spreadsheets/d/{settings.SIGN_CAFE_SHEET_KEY}/edit#gid={worksheet.id}"
+    channel = bot.get_channel(settings.SIGN_CAFE_BOT_CHANNEL_ID)
     assert channel is not None
     await channel.send(  # type: ignore
         "🙌 A member submitted the survey!",
@@ -205,15 +205,16 @@ class Survey(commands.Cog):
         self.bot = bot
 
     @guild_permissions(
-        settings.ASLPP_GUILD_ID, roles={settings.ASLPP_ACKNOWLEDGED_RULES_ROLE_ID: True}
+        settings.SIGN_CAFE_GUILD_ID,
+        roles={settings.SIGN_CAFE_ACKNOWLEDGED_RULES_ROLE_ID: True},
     )
     @slash_command(
-        name="survey", guild_ids=(settings.ASLPP_GUILD_ID,), default_permission=False
+        name="survey", guild_ids=(settings.SIGN_CAFE_GUILD_ID,), default_permission=False
     )
     async def survey_command(self, inter: GuildCommandInteraction):
-        """Get a link for the ASL Practice Partners feedback survey"""
+        """Get a link for the Sign Cafe feedback survey"""
         assert inter.user is not None
-        url = f"https://tally.so/r/{settings.ASLPP_SURVEY_ID}?uid={inter.user.id}"
+        url = f"https://tally.so/r/{settings.SIGN_CAFE_SURVEY_ID}?uid={inter.user.id}"
         await inter.send(
             "🙌 We love feedback! Here's the survey link. It'll take less than 5 minutes to complete.",
             view=LinkView(label="Survey Link", url=url),

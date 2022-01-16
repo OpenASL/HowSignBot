@@ -39,9 +39,9 @@ from bot.utils.ui import LinkView
 logger = logging.getLogger(__name__)
 
 COMMAND_PREFIX = settings.COMMAND_PREFIX
-KICK_MESSAGE = """You've been removed from ASL Practice Partners server due to inactivity from your account.
+KICK_MESSAGE = """You've been kicked from Sign Cafe server due to inactivity from your account.
 Don't worry, you can re-join (and we'd love to have you back). You can find the invite link here:
-<https://aslpractice.partners>
+<https://signcafe.chat>
 If you decide to re-join, make sure to post an intro so you don't get kicked again.
 """
 UNMUTE_WARNING = (
@@ -51,7 +51,7 @@ UNMUTE_WARNING = (
 )
 DAILY_MESSAGE_TIME = dt.time(8, 0)  # Eastern time
 DAILY_MEMBER_KICK_TIME = dt.time(12, 0)  # Eastern time
-PRUNE_DAYS = settings.ASLPP_PRUNE_DAYS
+PRUNE_DAYS = settings.SIGN_CAFE_PRUNE_DAYS
 
 
 def get_next_task_execution_datetime(time_in_eastern: dt.time) -> dt.datetime:
@@ -68,7 +68,7 @@ def get_next_task_execution_datetime(time_in_eastern: dt.time) -> dt.datetime:
 
 def get_gsheet():
     client = get_gsheet_client()
-    return client.open_by_key(settings.ASLPP_SHEET_KEY)
+    return client.open_by_key(settings.SIGN_CAFE_SHEET_KEY)
 
 
 def get_sheet_content(worksheet_name: str) -> list[str]:
@@ -79,7 +79,7 @@ def get_sheet_content(worksheet_name: str) -> list[str]:
 
 
 def get_skill_roles() -> list[disnake.Object]:
-    return [disnake.Object(id=role_id) for role_id in settings.ASLPP_SKILL_ROLE_IDS]
+    return [disnake.Object(id=role_id) for role_id in settings.SIGN_CAFE_SKILL_ROLE_IDS]
 
 
 MAX_NO_INTRO_USERS_TO_DISPLAY = 30
@@ -92,10 +92,10 @@ class InactiveMemberInfo(NamedTuple):
 
 
 async def get_inactive_user_info(guild: Guild) -> InactiveMemberInfo:
-    members_without_intro = await store.get_aslpp_members_without_intro(
-        since=dt.timedelta(days=settings.ASLPP_INACTIVE_DAYS + 1)
+    members_without_intro = await store.get_sign_cafe_members_without_intro(
+        since=dt.timedelta(days=settings.SIGN_CAFE_INACTIVE_DAYS + 1)
     )
-    members_with_no_roles = await store.get_aslpp_members_with_no_roles(
+    members_with_no_roles = await store.get_sign_cafe_members_with_no_roles(
         leeway=dt.timedelta(days=PRUNE_DAYS)
     )
     n_members_to_prune = await guild.estimate_pruned_members(
@@ -125,12 +125,12 @@ async def make_inactive_members_embed(guild: Guild):
         description = "✨ _No members to review_"
 
     embed = Embed(
-        title=f"{len(members_without_intro)} members joined > {settings.ASLPP_INACTIVE_DAYS} days ago, acknowledged the rules, and have not posted an intro",
+        title=f"{len(members_without_intro)} members joined > {settings.SIGN_CAFE_INACTIVE_DAYS} days ago, acknowledged the rules, and have not posted an intro",
         description=description,
         color=Color.orange(),
     )
     embed.set_footer(
-        text=f"These members will automatically be kicked at noon Eastern time. Use {COMMAND_PREFIX}aslpp active <members> to prevent members from getting kicked.\n"
+        text=f"These members will automatically be kicked at noon Eastern time. Use {COMMAND_PREFIX}signcafe active <members> to prevent members from getting kicked.\n"
         f"Members who haven't had channel access for {PRUNE_DAYS} days will also be pruned (estimate: {n_members_to_prune + len(members_with_no_roles)})."
     )
     return embed
@@ -168,20 +168,20 @@ def make_role_table(guild: Guild, label: str, role_ids: Sequence[int]) -> str:
     return f"```\n{label.upper()}\n{table}\n```"
 
 
-class AslPracticePartners(Cog):
+class SignCafe(Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.tags: dict[str, dict[str, str]] = {}
         self.unmute_warnings: dict[int, dt.datetime] = {}
 
     def cog_check(self, ctx: Context):
-        if not bool(ctx.guild) or ctx.guild.id != settings.ASLPP_GUILD_ID:
+        if not bool(ctx.guild) or ctx.guild.id != settings.SIGN_CAFE_GUILD_ID:
             raise commands.errors.CheckFailure(
-                f"⚠️ `{COMMAND_PREFIX}{ctx.invoked_with}` must be run within the ASL Practice Partners server (not a DM)."
+                f"⚠️ `{COMMAND_PREFIX}{ctx.invoked_with}` must be run within the Sign Cafe server (not a DM)."
             )
         return True
 
-    @slash_command(name="tag", guild_ids=(settings.ASLPP_GUILD_ID,))
+    @slash_command(name="tag", guild_ids=(settings.SIGN_CAFE_GUILD_ID,))
     async def tag_command(self, inter: GuildCommandInteraction):
         pass
 
@@ -213,7 +213,9 @@ class AslPracticePartners(Cog):
     @commands.has_permissions(kick_members=True)  # Staff
     async def tag_edit(self, inter: GuildCommandInteraction):
         """(Authorized users only) Edit tags"""
-        url = f"https://docs.google.com/spreadsheets/d/{settings.ASLPP_SHEET_KEY}/edit"
+        url = (
+            f"https://docs.google.com/spreadsheets/d/{settings.SIGN_CAFE_SHEET_KEY}/edit"
+        )
         await inter.send(
             "Go to the Google Sheets link below to edit tags.",
             view=LinkView(label="Google Sheets Link", url=url),
@@ -276,12 +278,12 @@ class AslPracticePartners(Cog):
         embed.set_footer(text="To show a tag, type /tag show <name>.")
         return {"embed": embed}
 
-    @group(name="aslpp", hidden=True)
-    async def aslpp_group(self, ctx: Context):
+    @group(name="signcafe", hidden=True)
+    async def sign_cafe_group(self, ctx: Context):
         pass
 
     # TODO: Allow mods/admins to use these commands
-    @aslpp_group.command(name="faq", hidden=True)
+    @sign_cafe_group.command(name="faq", hidden=True)
     @is_owner()
     async def faq_command(self, ctx: Context, channel: TextChannel):
         await ctx.channel.trigger_typing()
@@ -291,7 +293,7 @@ class AslPracticePartners(Cog):
             await asyncio.sleep(1)
         await ctx.reply("🙌 FAQ posted")
 
-    @aslpp_group.command(name="rules", hidden=True)
+    @sign_cafe_group.command(name="rules", hidden=True)
     @is_owner()
     async def rules_command(self, ctx: Context, channel: TextChannel):
         await ctx.channel.trigger_typing()
@@ -301,7 +303,7 @@ class AslPracticePartners(Cog):
             await asyncio.sleep(1)
         await ctx.reply("🙌 Rules posted")
 
-    @aslpp_group.command(name="welcome", hidden=True)
+    @sign_cafe_group.command(name="welcome", hidden=True)
     @is_owner()
     async def welcome_command(self, ctx: Context, channel: TextChannel):
         await ctx.channel.trigger_typing()
@@ -311,7 +313,7 @@ class AslPracticePartners(Cog):
             await asyncio.sleep(1)
         await ctx.reply("🙌 Welcome message posted")
 
-    @aslpp_group.command(name="video", hidden=True)
+    @sign_cafe_group.command(name="video", hidden=True)
     @is_owner()
     async def video_command(self, ctx: Context, channel: TextChannel):
         await ctx.channel.trigger_typing()
@@ -321,9 +323,11 @@ class AslPracticePartners(Cog):
             await asyncio.sleep(1)
         await ctx.reply("🙌 Video etiquette message posted")
 
-    @guild_permissions(settings.ASLPP_GUILD_ID, owner=True)
+    @guild_permissions(settings.SIGN_CAFE_GUILD_ID, owner=True)
     @slash_command(
-        name="syncdata", guild_ids=(settings.ASLPP_GUILD_ID,), default_permission=False
+        name="syncdata",
+        guild_ids=(settings.SIGN_CAFE_GUILD_ID,),
+        default_permission=False,
     )
     @is_owner()
     async def sync_data_command(
@@ -332,29 +336,30 @@ class AslPracticePartners(Cog):
         await inter.send("Syncing data…", ephemeral=True)
         if intros:
             channel = cast(
-                TextChannel, self.bot.get_channel(settings.ASLPP_INTRODUCTIONS_CHANNEL_ID)
+                TextChannel,
+                self.bot.get_channel(settings.SIGN_CAFE_INTRODUCTIONS_CHANNEL_ID),
             )
-            await store.clear_aslpp_intros()
+            await store.clear_sign_cafe_intros()
             async for message in channel.history(limit=None):
                 logger.info(f"storing intro record {message.id}")
-                await store.add_aslpp_intro(
+                await store.add_sign_cafe_intro(
                     message_id=message.id,
                     user_id=message.author.id,
                     posted_at=message.created_at,
                 )
 
-        role = inter.guild.get_role(settings.ASLPP_ACKNOWLEDGED_RULES_ROLE_ID)
+        role = inter.guild.get_role(settings.SIGN_CAFE_ACKNOWLEDGED_RULES_ROLE_ID)
         assert role is not None
-        await store.clear_aslpp_members()
+        await store.clear_sign_cafe_members()
         for member in inter.guild.members:
             if member.bot:
                 continue
             logger.info(f"storing member {member.id}")
-            await store.upsert_aslpp_member(member=member)
+            await store.upsert_sign_cafe_member(member=member)
         logger.info("finished syncing data")
         await inter.send("🙌 Synced data", ephemeral=True)
 
-    @aslpp_group.command(name="listinactive", aliases=("nointro",), hidden=True)
+    @sign_cafe_group.command(name="listinactive", aliases=("nointro",), hidden=True)
     @commands.has_permissions(kick_members=True)
     async def list_inactive_command(self, ctx: Context):
         await ctx.channel.trigger_typing()
@@ -362,19 +367,19 @@ class AslPracticePartners(Cog):
         embed = await make_inactive_members_embed(guild=ctx.guild)
         await ctx.send(embed=embed)
 
-    @aslpp_group.command(name="active", hidden=True)
+    @sign_cafe_group.command(name="active", hidden=True)
     @commands.has_permissions(kick_members=True)
     async def active_command(self, ctx: Context, members: commands.Greedy[Member]):
-        await store.mark_aslpp_members_active(user_ids=[m.id for m in members])
+        await store.mark_sign_cafe_members_active(user_ids=[m.id for m in members])
         await ctx.reply(f"Marked {len(members)} member(s) active.")
 
-    @aslpp_group.command(name="inactive", hidden=True)
+    @sign_cafe_group.command(name="inactive", hidden=True)
     @commands.has_permissions(kick_members=True)
     async def inactive_command(self, ctx: Context, members: commands.Greedy[Member]):
-        await store.mark_aslpp_members_inactive(user_ids=[m.id for m in members])
+        await store.mark_sign_cafe_members_inactive(user_ids=[m.id for m in members])
         await ctx.reply(f"Marked {len(members)} member(s) inactive.")
 
-    @aslpp_group.command(name="kick", hidden=True)
+    @sign_cafe_group.command(name="kick", hidden=True)
     @commands.has_permissions(kick_members=True)
     async def kick_command(self, ctx: Context, targets: commands.Greedy[Member]):
         num_kicked = 0
@@ -408,7 +413,7 @@ class AslPracticePartners(Cog):
                 bool(n_members_to_prune),
             )
         ):
-            logger.debug("no inactive aslpp members to kick")
+            logger.debug("no inactive sign_cafe members to kick")
             if send_message_if_no_inactive_members:
                 await ctx.send("✨ _No members to kick_")
             return
@@ -448,7 +453,7 @@ class AslPracticePartners(Cog):
         total_kicked = num_kicked + num_pruned
         return total_kicked
 
-    @aslpp_group.command(name="kickinactive", hidden=True)
+    @sign_cafe_group.command(name="kickinactive", hidden=True)
     @commands.has_permissions(kick_members=True)
     async def kick_inactive_command(self, ctx: Context):
         await ctx.channel.trigger_typing()
@@ -474,26 +479,26 @@ class AslPracticePartners(Cog):
         await ctx.send(content=self.make_role_table_age(ctx.guild))
 
     def make_role_table_skill(self, guild: Guild):
-        return make_role_table(guild, "Skill", settings.ASLPP_SKILL_ROLE_IDS)
+        return make_role_table(guild, "Skill", settings.SIGN_CAFE_SKILL_ROLE_IDS)
 
     def make_role_table_hearing_spectrum(self, guild: Guild):
         return make_role_table(
-            guild, "Hearing Spectrum", settings.ASLPP_HEARING_SPECTRUM_ROLE_IDS
+            guild, "Hearing Spectrum", settings.SIGN_CAFE_HEARING_SPECTRUM_ROLE_IDS
         )
 
     def make_role_table_age(self, guild: Guild):
-        return make_role_table(guild, "Age", settings.ASLPP_AGE_ROLE_IDS)
+        return make_role_table(guild, "Age", settings.SIGN_CAFE_AGE_ROLE_IDS)
 
     @Cog.listener()
     async def on_message(self, message: Message) -> None:
-        if message.guild and message.guild.id != settings.ASLPP_GUILD_ID:
+        if message.guild and message.guild.id != settings.SIGN_CAFE_GUILD_ID:
             return
-        if message.channel.id == settings.ASLPP_INTRODUCTIONS_CHANNEL_ID:
-            if await store.has_aslpp_intro(message.author.id):
+        if message.channel.id == settings.SIGN_CAFE_INTRODUCTIONS_CHANNEL_ID:
+            if await store.has_sign_cafe_intro(message.author.id):
                 logger.debug(f"{message.author.id} already has intro")
             else:
                 logger.info(f"storing intro record {message.id}")
-                await store.add_aslpp_intro(
+                await store.add_sign_cafe_intro(
                     message_id=message.id,
                     user_id=message.author.id,
                     posted_at=message.created_at,
@@ -514,31 +519,31 @@ class AslPracticePartners(Cog):
 
     @Cog.listener()
     async def on_member_remove(self, member: Member) -> None:
-        if member.guild.id != settings.ASLPP_GUILD_ID:
+        if member.guild.id != settings.SIGN_CAFE_GUILD_ID:
             return
-        logger.info(f"removing data for aslpp member {member.id}")
-        await store.remove_aslpp_member(user_id=member.id)
+        logger.info(f"removing data for sign cafe member {member.id}")
+        await store.remove_sign_cafe_member(user_id=member.id)
 
     @Cog.listener()
     async def on_member_join(self, member: Member) -> None:
-        if member.guild.id != settings.ASLPP_GUILD_ID:
+        if member.guild.id != settings.SIGN_CAFE_GUILD_ID:
             return
-        logger.info(f"adding data for new aslpp member {member.id}")
-        await store.upsert_aslpp_member(member=member)
+        logger.info(f"adding data for new sign cafe member {member.id}")
+        await store.upsert_sign_cafe_member(member=member)
 
     @Cog.listener()
     async def on_member_update(self, before: Member, after: Member) -> None:
-        if after.guild.id != settings.ASLPP_GUILD_ID:
+        if after.guild.id != settings.SIGN_CAFE_GUILD_ID:
             return
-        await store.upsert_aslpp_member(member=after)
+        await store.upsert_sign_cafe_member(member=after)
 
     @Cog.listener()
     async def on_voice_state_update(
         self, member: Member, before: VoiceState, after: VoiceState
     ) -> None:
-        if member.guild.id != settings.ASLPP_GUILD_ID:
+        if member.guild.id != settings.SIGN_CAFE_GUILD_ID:
             return
-        if not settings.ASLPP_ENABLE_UNMUTE_WARNING:
+        if not settings.SIGN_CAFE_ENABLE_UNMUTE_WARNING:
             return
         if after.channel is None:  # member left VC
             return
@@ -563,19 +568,19 @@ class AslPracticePartners(Cog):
     async def on_ready(self):
         self.bot.loop.create_task(self.daily_message())
         self.bot.loop.create_task(self.daily_member_kick())
-        self.tags = get_tags() if settings.ASLPP_SYNC_TAGS else {}
+        self.tags = get_tags() if settings.SIGN_CAFE_SYNC_TAGS else {}
 
     async def daily_message(self):
         while True:
             next_execution_time = get_next_task_execution_datetime(DAILY_MESSAGE_TIME)
             logger.info(
-                f"aslpp staff daily message will be sent at at {next_execution_time.isoformat()}"
+                f"sign cafe staff daily message will be sent at at {next_execution_time.isoformat()}"
             )
             await disnake.utils.sleep_until(
                 next_execution_time.astimezone(dt.timezone.utc)
             )
             channel = cast(
-                TextChannel, self.bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
+                TextChannel, self.bot.get_channel(settings.SIGN_CAFE_BOT_CHANNEL_ID)
             )
             await channel.send(content=self.make_role_table_skill(channel.guild))
             await channel.send(
@@ -584,19 +589,19 @@ class AslPracticePartners(Cog):
             await channel.send(content=self.make_role_table_age(channel.guild))
             embed = await make_inactive_members_embed(guild=channel.guild)
             await channel.send(embed=embed)
-            logger.info("sent aslpp staff daily message")
+            logger.info("sent sign cafe staff daily message")
 
     async def daily_member_kick(self):
         while True:
             next_execution_time = get_next_task_execution_datetime(DAILY_MEMBER_KICK_TIME)
             logger.info(
-                f"aslpp inactive members will be kicked at {next_execution_time.isoformat()}"
+                f"sign cafe inactive members will be kicked at {next_execution_time.isoformat()}"
             )
             await disnake.utils.sleep_until(
                 next_execution_time.astimezone(dt.timezone.utc)
             )
             channel = cast(
-                TextChannel, self.bot.get_channel(settings.ASLPP_BOT_CHANNEL_ID)
+                TextChannel, self.bot.get_channel(settings.SIGN_CAFE_BOT_CHANNEL_ID)
             )
             (
                 members_without_intro,
@@ -612,8 +617,8 @@ class AslPracticePartners(Cog):
             ):
                 await channel.send(content="🥾 _Kicking inactive members_...")
                 await self._kick_inactive(channel)
-            logger.info("cleared aslpp inactive members")
+            logger.info("cleared sign cafe inactive members")
 
 
 def setup(bot: Bot) -> None:
-    bot.add_cog(AslPracticePartners(bot))
+    bot.add_cog(SignCafe(bot))
