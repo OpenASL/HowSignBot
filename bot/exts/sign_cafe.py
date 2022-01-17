@@ -45,8 +45,8 @@ Don't worry, you can re-join (and we'd love to have you back). You can find the 
 If you decide to re-join, make sure to post an intro so you don't get kicked again.
 """
 UNMUTE_WARNING = (
-    "⚠️ You're unmuted in a practice room VC. To maximize inclusivity and learning for all members, "
-    "we encourage you to keep your voice off during practice. "
+    "⚠️ You're unmuted in a VC. To maximize inclusivity and learning for all members, "
+    "we encourage you to keep your voice off during sessions. "
     "🤐 You can use the text channels to type responses when needed."
 )
 DAILY_MESSAGE_TIME = dt.time(8, 0)  # Eastern time
