@@ -99,8 +99,8 @@
     'embed': <class 'Embed'> {
       Empty=Embed.Empty,
       author=EmbedProxy(),
-      color=<Colour value=15105570>,
-      colour=<Colour value=15105570>,
+      color=<Colour value=8701136>,
+      colour=<Colour value=8701136>,
       description='Today - Friday, September 25',
       fields=<class 'list'> [
         EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[+Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+recurring&dates=20200925T210000Z%2F20200925T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: <@!12345>\n> Details: recurring'),
@@ -123,8 +123,8 @@
     'embed': <class 'Embed'> {
       Empty=Embed.Empty,
       author=EmbedProxy(),
-      color=<Colour value=15105570>,
-      colour=<Colour value=15105570>,
+      color=<Colour value=8701136>,
+      colour=<Colour value=8701136>,
       description='Today - Friday, September 25',
       fields=<class 'list'> [
         EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[+Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+recurring&dates=20200925T210000Z%2F20200925T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: <@!12345>\n> Details: recurring'),
@@ -147,8 +147,8 @@
     'embed': <class 'Embed'> {
       Empty=Embed.Empty,
       author=EmbedProxy(),
-      color=<Colour value=15105570>,
-      colour=<Colour value=15105570>,
+      color=<Colour value=8701136>,
+      colour=<Colour value=8701136>,
       description='Today - Thursday, November 26 🦃',
       fields=<class 'list'> [
         EmbedProxy(inline=False, name='11 AM PST / 12 PM MST / 1 PM CST / 2 PM EST', value='[+Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+Turkey+day+PRACTICE&dates=20201126T190000Z%2F20201126T200000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Details: Turkey day PRACTICE'),
