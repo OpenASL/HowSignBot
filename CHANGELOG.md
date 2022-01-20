@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.9.1 (2022-01-19)
+### Fix
+* Another attempt to fix startup time ([`07f0cb6`](https://github.com/OpenASL/HowSignBot/commit/07f0cb6cfe76721866d3cb9649ce40c5e49527e6))
+
 ## v22.9.0 (2022-01-19)
 ### Feature
 * **daily_message:** Add guild announcements to daily message ([#411](https://github.com/OpenASL/HowSignBot/issues/411)) ([`e304091`](https://github.com/OpenASL/HowSignBot/commit/e3040912bb7f0d23539f817dbcc284935114f97a))
