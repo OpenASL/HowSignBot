@@ -8,15 +8,7 @@ from textwrap import dedent
 from typing import Mapping, NamedTuple, Sequence, cast
 
 import disnake
-from disnake import (
-    Color,
-    Embed,
-    Guild,
-    GuildCommandInteraction,
-    Member,
-    Message,
-    VoiceState,
-)
+from disnake import Embed, Guild, GuildCommandInteraction, Member, Message, VoiceState
 from disnake.channel import TextChannel
 from disnake.ext import commands
 from disnake.ext.commands import (
@@ -33,6 +25,7 @@ from bot import settings
 from bot.database import store
 from bot.utils import did_you_mean, get_close_matches
 from bot.utils.datetimes import EASTERN, utcnow
+from bot.utils.discord import THEME_COLOR
 from bot.utils.gsheets import get_gsheet_client
 from bot.utils.ui import LinkView
 
@@ -127,7 +120,7 @@ async def make_inactive_members_embed(guild: Guild):
     embed = Embed(
         title=f"{len(members_without_intro)} members joined > {settings.SIGN_CAFE_INACTIVE_DAYS} days ago, acknowledged the rules, and have not posted an intro",
         description=description,
-        color=Color.orange(),
+        color=THEME_COLOR,
     )
     embed.set_footer(
         text=f"These members will automatically be kicked at noon Eastern time. Use {COMMAND_PREFIX}signcafe active <members> to prevent members from getting kicked.\n"

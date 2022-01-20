@@ -130,6 +130,14 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
         else:
             embed = make_base_embed(dtime=dtime)
 
+        announcements = await store.get_guild_announcements(guild.id)
+        for announcement in announcements:
+            embed.add_field(
+                name=announcement["title"],
+                value=f"> {announcement['description']}",
+                inline=False,
+            )
+
         send_kwargs = {}
         include_handshape_of_the_day = bool(settings.get("include_handshape_of_the_day"))
         handshape = None

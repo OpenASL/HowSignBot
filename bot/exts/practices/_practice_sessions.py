@@ -15,6 +15,7 @@ from bot.utils.datetimes import (
     parse_human_readable_datetime,
     utcnow,
 )
+from bot.utils.discord import THEME_COLOR
 from bot.utils.gcal import create_gcal_url
 from bot.utils.gsheets import get_gsheet_client
 
@@ -98,10 +99,7 @@ def make_base_embed(dtime: dt.datetime) -> disnake.Embed:
     holiday = holiday_emojis.get(dtime_pacific.date())
     if holiday and holiday.emoji:
         description += f" {holiday.emoji}"
-    return disnake.Embed(
-        description=description,
-        color=disnake.Color.orange(),
-    )
+    return disnake.Embed(description=description, color=THEME_COLOR)
 
 
 async def make_practice_session_embed(
