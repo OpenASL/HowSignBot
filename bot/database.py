@@ -101,6 +101,26 @@ guild_settings = sa.Table(
     ),
 )
 
+guild_announcements = sa.Table(
+    "guild_announcements",
+    metadata,
+    sa.Column(
+        "guild_id",
+        ForeignKey(guild_settings.c.guild_id, ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    sa.Column("title", sa.Text, nullable=False, doc="Announcement title"),
+    sa.Column("description", sa.Text, nullable=False, doc="Announcement description"),
+    sa.Column(
+        "is_active",
+        sa.Boolean,
+        nullable=False,
+        server_default=sql.true(),
+        doc="Whether to display the announcement in daily messages",
+    ),
+    created_at_column(),
+)
+
 user_settings = sa.Table(
     "user_settings",
     metadata,
@@ -244,6 +264,17 @@ class Store:
         logger.info(f"retrieving guild settings sheet key for guild_id {guild_id}")
         query = guild_settings.select().where(guild_settings.c.guild_id == guild_id)
         return await self.db.fetch_one(query=query)
+
+    async def get_guild_announcements(self, guild_id: int) -> list[Mapping]:
+        query = (
+            guild_announcements.select()
+            .where(
+                (guild_announcements.c.guild_id == guild_id)
+                & (guild_announcements.c.is_active == sql.true())
+            )
+            .order_by(guild_announcements.c.created_at.desc())
+        )
+        return await self.db.fetch_all(query=query)
 
     async def get_guild_schedule_sheet_key(self, guild_id: int) -> str | None:
         query = guild_settings.select().where(guild_settings.c.guild_id == guild_id)
