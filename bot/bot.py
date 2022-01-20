@@ -15,7 +15,7 @@ COMMAND_PREFIX = settings.COMMAND_PREFIX
 
 intents = disnake.Intents.default()
 intents.typing = False
-intents.presences = False
+intents.presences = True
 intents.bans = False
 intents.integrations = False
 intents.webhooks = False
