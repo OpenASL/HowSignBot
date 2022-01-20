@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v22.9.0 (2022-01-19)
+### Feature
+* **daily_message:** Add guild announcements to daily message ([#411](https://github.com/OpenASL/HowSignBot/issues/411)) ([`e304091`](https://github.com/OpenASL/HowSignBot/commit/e3040912bb7f0d23539f817dbcc284935114f97a))
+* **sign_cafe:** Minor copy change ([`6e88b0f`](https://github.com/OpenASL/HowSignBot/commit/6e88b0f8e3d8a38584193d774b98ca4e16a1ee7d))
+
+### Fix
+* Attempt to speed up startup ([`f4195b2`](https://github.com/OpenASL/HowSignBot/commit/f4195b26eae218a8689279eb4287cca535dbcce6))
+
 ## v22.8.0 (2022-01-16)
 ### Feature
 * Rename ASLPP->Sign Cafe; increase prune grace period ([#408](https://github.com/OpenASL/HowSignBot/issues/408)) ([`caecff4`](https://github.com/OpenASL/HowSignBot/commit/caecff43c8eefed0ae5728c19045ef16df3763f4))
