@@ -15,7 +15,7 @@ COMMAND_PREFIX = settings.COMMAND_PREFIX
 
 intents = disnake.Intents.default()
 intents.typing = False
-intents.presences = True
+intents.presences = False
 intents.bans = False
 intents.integrations = False
 intents.webhooks = False
@@ -31,6 +31,7 @@ bot = commands.Bot(
     sync_permissions=True,
     reload=settings.DEBUG,
     test_guilds=settings.TEST_GUILDS or None,
+    chunk_guilds_at_startup=False,
 )
 
 PRESENCE_COMMANDS = (
