@@ -575,6 +575,9 @@ class SignCafe(Cog):
             channel = cast(
                 TextChannel, self.bot.get_channel(settings.SIGN_CAFE_BOT_CHANNEL_ID)
             )
+            # Fetch all members and add them to the cache
+            # This is necessary because we disable chunking guilds at startup
+            await channel.guild.chunk(cache=True)
             await channel.send(content=self.make_role_table_skill(channel.guild))
             await channel.send(
                 content=self.make_role_table_hearing_spectrum(channel.guild)
