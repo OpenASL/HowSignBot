@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.9.3 (2022-01-21)
+### Fix
+* Make sure DB is connected before starting bot ([`3d0087e`](https://github.com/OpenASL/HowSignBot/commit/3d0087ea36b507548601e897b1491aafc4db5802))
+
 ## v22.9.2 (2022-01-20)
 ### Fix
 * **sign_cafe:** Fix role graphs ([`34ebb0b`](https://github.com/OpenASL/HowSignBot/commit/34ebb0bfb3c0305b0e67cacf281576d6ed2b60ea))
