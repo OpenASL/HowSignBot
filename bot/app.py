@@ -63,9 +63,9 @@ async def start_bot():
 async def on_startup(app):
     for ext in walk_extensions():
         bot.load_extension(ext)
+    await store.connect()
     app["bot_task"] = asyncio.create_task(start_bot())
     app["bot"] = bot
-    await store.connect()
 
 
 async def on_shutdown(app):
