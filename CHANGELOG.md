@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v22.9.2 (2022-01-20)
+### Fix
+* **sign_cafe:** Fix role graphs ([`34ebb0b`](https://github.com/OpenASL/HowSignBot/commit/34ebb0bfb3c0305b0e67cacf281576d6ed2b60ea))
+
+### Documentation
+* Add PRIVACY.md ([`cefd600`](https://github.com/OpenASL/HowSignBot/commit/cefd60064ed42010499bc2e0d821d565849c25b6))
+
 ## v22.9.1 (2022-01-19)
 ### Fix
 * Another attempt to fix startup time ([`07f0cb6`](https://github.com/OpenASL/HowSignBot/commit/07f0cb6cfe76721866d3cb9649ce40c5e49527e6))
