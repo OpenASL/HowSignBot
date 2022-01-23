@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.10.0 (2022-01-23)
+### Feature
+* **daily_message:** Add setting to show scheduled events in daily messages ([#413](https://github.com/OpenASL/HowSignBot/issues/413)) ([`54564ab`](https://github.com/OpenASL/HowSignBot/commit/54564ab66a57d3870963eed4a73e51c04328144c))
+
 ## v22.9.3 (2022-01-21)
 ### Fix
 * Make sure DB is connected before starting bot ([`3d0087e`](https://github.com/OpenASL/HowSignBot/commit/3d0087ea36b507548601e897b1491aafc4db5802))
