@@ -13,7 +13,14 @@ from disnake.ext.commands import Bot, Cog, Context, command, is_owner
 from bot import settings
 from bot.database import store
 from bot.exts.asl import word_display
-from bot.utils.datetimes import EASTERN, parse_human_readable_datetime, utcnow
+from bot.utils.datetimes import (
+    EASTERN,
+    PACIFIC,
+    format_multi_time,
+    parse_human_readable_datetime,
+    utcnow,
+)
+from bot.utils.discord import get_event_url
 
 from ._practice_sessions import (
     get_practice_sessions,
@@ -63,7 +70,7 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
 
     @Cog.listener()
     async def on_ready(self):
-        self.bot.loop.create_task(self.daily_practice_message())
+        self.bot.loop.create_task(self.daily_message())
 
     @command(
         name="send_daily_message",
@@ -120,7 +127,7 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
         if not settings:
             return
         embed: disnake.Embed
-        if settings.get("include_practice_schedule"):
+        if settings["include_practice_schedule"]:
             sessions = await get_practice_sessions(
                 guild_id,
                 dtime=dtime,
@@ -129,6 +136,27 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
             embed = await make_practice_session_embed(guild_id, sessions, dtime=dtime)
         else:
             embed = make_base_embed(dtime=dtime)
+
+        if settings["include_scheduled_events"]:
+            # Display scheduled events for today
+            events = await guild.fetch_scheduled_events()
+            events_today = sorted(
+                (
+                    event
+                    for event in events
+                    if (
+                        event.scheduled_start_time.astimezone(PACIFIC).date()
+                        == dtime.astimezone(PACIFIC).date()
+                    )
+                ),
+                key=lambda event: event.scheduled_start_time,
+            )
+            for event in events_today:
+                embed.add_field(
+                    name=format_multi_time(event.scheduled_start_time),
+                    value=f"{event.name} · [Details/RSVP]({get_event_url(event)})",
+                    inline=False,
+                )
 
         announcements = await store.get_guild_announcements(guild.id)
         for announcement in announcements:
@@ -139,7 +167,7 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
             )
 
         send_kwargs = {}
-        include_handshape_of_the_day = bool(settings.get("include_handshape_of_the_day"))
+        include_handshape_of_the_day = settings["include_handshape_of_the_day"]
         handshape = None
         holiday = holiday_emojis.get(dtime.date())
         if holiday and holiday.term is not None:
@@ -182,7 +210,7 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
                 auto_archive_duration=disnake.ThreadArchiveDuration.day,
             )
 
-    async def daily_practice_message(self):
+    async def daily_message(self):
         while True:
             # DAILY_PRACTICE_SEND_TIME is defined in Eastern time
             now_eastern = dt.datetime.now(EASTERN)

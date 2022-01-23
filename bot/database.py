@@ -99,6 +99,12 @@ guild_settings = sa.Table(
         server_default=sql.false(),
         nullable=False,
     ),
+    sa.Column(
+        "include_scheduled_events",
+        sa.Boolean,
+        server_default=sql.false(),
+        nullable=False,
+    ),
 )
 
 guild_announcements = sa.Table(
