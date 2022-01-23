@@ -26,7 +26,7 @@ from bot.utils.datetimes import (
     format_multi_time,
     utcnow,
 )
-from bot.utils.discord import display_name
+from bot.utils.discord import display_name, get_event_url
 from bot.utils.ui import ButtonGroupOption, ButtonGroupView, DropdownView
 
 logger = logging.getLogger(__name__)
@@ -67,10 +67,6 @@ class MaxPromptAttemptsExceeded(Exception):
 def format_scheduled_start_time(dtime: dt.datetime):
     dtime_pacific = dtime.astimezone(PACIFIC)
     return dtime_pacific.strftime("%A, %B %-d") + " · " + format_multi_time(dtime)
-
-
-def get_event_url(event: GuildScheduledEvent) -> str:
-    return f"https://discord.com/events/{event.guild_id}/{event.id}"
 
 
 def get_event_label(event: GuildScheduledEvent, bold: bool = False) -> str:
