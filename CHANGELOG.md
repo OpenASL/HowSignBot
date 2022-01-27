@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.12.0 (2022-01-27)
+### Feature
+* **daily_message:** Add wordle ([`14b70a6`](https://github.com/OpenASL/HowSignBot/commit/14b70a65735852cb50f5584c1b01ad0702e3063f))
+
 ## v22.11.0 (2022-01-26)
 ### Feature
 * Set presence via envvar ([`b5ef1bf`](https://github.com/OpenASL/HowSignBot/commit/b5ef1bf843a402fa0cb9edf9238a4efa020ef242))
