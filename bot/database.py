@@ -105,6 +105,12 @@ guild_settings = sa.Table(
         server_default=sql.false(),
         nullable=False,
     ),
+    sa.Column(
+        "include_wordle",
+        sa.Boolean,
+        server_default=sql.false(),
+        nullable=False,
+    ),
 )
 
 guild_announcements = sa.Table(

@@ -202,9 +202,17 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
                     value=f'How would you sign: "{get_daily_clthat(dtime)}"',
                     inline=False,
                 )
+        include_wordle = settings["include_wordle"]
+        if include_wordle:
+            embed.add_field(name="Daily Wordle", value="https://dactle.asl.cafe/")
 
         message = await channel.send(embed=embed, **send_kwargs)
-        if include_handshape_of_the_day and handshape:
+        if include_wordle:
+            await message.create_thread(
+                name="🟩⬜🟨🟩⬜️ Wordle",
+                auto_archive_duration=disnake.ThreadArchiveDuration.day,
+            )
+        elif include_handshape_of_the_day and handshape:
             await message.create_thread(
                 name=f"What signs use the {handshape.name} handshape?",
                 auto_archive_duration=disnake.ThreadArchiveDuration.day,
