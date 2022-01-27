@@ -1,7 +1,9 @@
 import logging
 
 from databases import DatabaseURL
+from disnake import ActivityType
 from environs import Env
+from marshmallow.validate import OneOf
 
 env = Env(eager=False)
 env.read_env()
@@ -19,6 +21,12 @@ PARTICIPANT_EMOJI = env.str("PARTICIPANT_EMOJI", default=None)
 DAILY_MESSAGE_RANDOM_SEED = env.str("DAILY_MESSAGE_RANDOM_SEED", default=None)
 PORT = env.int("PORT", 5000)
 TEST_GUILDS = env.list("TEST_GUILDS", default=[], subcast=int)
+PRESENCE_ACTIVITY = env.str(
+    "PRESENCE_ACTIVITY",
+    validate=OneOf(ActivityType._enum_member_names_),  # type: ignore
+    default=None,
+)
+PRESENCE_CONTENT = env.str("PRESENCE_CONTENT", default=None)
 
 GOOGLE_PROJECT_ID = env.str("GOOGLE_PROJECT_ID", required=True)
 GOOGLE_PRIVATE_KEY = env.str("GOOGLE_PRIVATE_KEY", required=True)

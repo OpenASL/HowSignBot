@@ -61,7 +61,14 @@ async def cycle_presence():
 
 @bot.event
 async def on_ready():
-    bot.loop.create_task(cycle_presence())
+    if settings.PRESENCE_ACTIVITY and settings.PRESENCE_CONTENT:
+        activity = disnake.Activity(
+            name=settings.PRESENCE_CONTENT,
+            type=getattr(disnake.ActivityType, settings.PRESENCE_ACTIVITY),
+        )
+        await bot.change_presence(activity=activity)
+    else:
+        bot.loop.create_task(cycle_presence())
 
 
 @bot.event

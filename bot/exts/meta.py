@@ -7,7 +7,6 @@ from disnake.ext import commands
 from disnake.ext.commands import Bot, Cog, Context, command, is_owner, slash_command
 
 from bot import __version__, settings
-from bot.bot import set_default_presence
 from bot.utils import truncate
 
 logger = logging.getLogger(__name__)
@@ -24,12 +23,6 @@ async def post_feedback(bot: commands.Bot, text: str, guild: Optional[str]):
     owner = bot.get_user(bot.owner_id)
     assert owner is not None
     await owner.send(embed=embed)
-
-
-def ActivityTypeConverter(argument) -> disnake.ActivityType:
-    if argument not in disnake.ActivityType._enum_member_names_:  # type: ignore
-        raise commands.CommandError(f'⚠️"{argument}" is not a valid activity type.')
-    return getattr(disnake.ActivityType, argument)
 
 
 class Meta(Cog):
@@ -51,21 +44,6 @@ class Meta(Cog):
             permissions=disnake.Permissions(permissions=59456),
         )
         await inter.send(f"Add HowSignBot to another server here:\n<{url}>")
-
-    @command(name="presence", hidden=True, help="BOT OWNER ONLY: Change bot presense")
-    @is_owner()
-    async def presence_command(self, ctx: Context, activity_type: Optional[ActivityTypeConverter] = None, name: str = ""):  # type: ignore[valid-type]
-        if not activity_type:
-            await set_default_presence()
-            await ctx.send("Presence reset.")
-            return
-        activity = disnake.Activity(
-            name=name.format(p=COMMAND_PREFIX),
-            type=activity_type,
-        )
-        logger.info(f"changing presence to {activity}")
-        await self.bot.change_presence(activity=activity)
-        await ctx.send(f"Changed presence to: `{activity}`")
 
     @command(name="stats", hidden=True, help="BOT OWNER ONLY: Get bot stats")
     @is_owner()
