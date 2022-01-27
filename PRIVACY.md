@@ -13,17 +13,20 @@ For the Sign Cafe and American Sign Language servers, I store the following data
 - Discord user IDs
 - User time zones
 - Zoom meeting IDs, URLs, passcode, and topic for meetings created using one of the Zoom commands
+  - These are only stored for the duration of the meeting. They are permanently deleted when a Zoom meeting ends.
 - Zoom participant name, join time, and email (for the participant indicators)
   - These are only stored for the duration of the meeting. They are permanently deleted when a Zoom meeting ends.
+- Zoom usernames for users with access to the Zoom commands
+  - Used for authentication via the Zoom API. No other Zoom profile information is stored.
 
 The following are stored for the Sign Cafe server only:
 
 - Scheduled event IDs
-- Server join date
 - Member roles
+- Server join date
+  - Used to compute and kick inactive users.
 - Creation date of messages posted in #introductions
-
-These are used to compute and kick inactive users and for server analytics.
+  - Used to compute and kick inactive users.
 
 **No message content is stored.**
 
