@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v22.11.0 (2022-01-26)
+### Feature
+* Set presence via envvar ([`b5ef1bf`](https://github.com/OpenASL/HowSignBot/commit/b5ef1bf843a402fa0cb9edf9238a4efa020ef242))
+
+### Documentation
+* Update PRIVACY.md ([`2cbb6cf`](https://github.com/OpenASL/HowSignBot/commit/2cbb6cfc0834ad8b980878e965b10e368eb18f80))
+
 ## v22.10.0 (2022-01-23)
 ### Feature
 * **daily_message:** Add setting to show scheduled events in daily messages ([#413](https://github.com/OpenASL/HowSignBot/issues/413)) ([`54564ab`](https://github.com/OpenASL/HowSignBot/commit/54564ab66a57d3870963eed4a73e51c04328144c))
