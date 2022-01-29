@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.13.0 (2022-01-29)
+### Feature
+* **daily_message:** Separate wordle message and thread from main message ([`7e9ddd8`](https://github.com/OpenASL/HowSignBot/commit/7e9ddd81b0b9e00c9735f57c436c89aa8ae58893))
+
 ## v22.12.0 (2022-01-27)
 ### Feature
 * **daily_message:** Add wordle ([`14b70a6`](https://github.com/OpenASL/HowSignBot/commit/14b70a65735852cb50f5584c1b01ad0702e3063f))
