@@ -2,6 +2,7 @@ import asyncio
 import datetime as dt
 import logging
 import random
+from pathlib import Path
 from typing import Optional, Tuple, cast
 
 import clthat
@@ -20,7 +21,7 @@ from bot.utils.datetimes import (
     parse_human_readable_datetime,
     utcnow,
 )
-from bot.utils.discord import get_event_url
+from bot.utils.discord import THEME_COLOR, get_event_url
 
 from ._practice_sessions import (
     get_practice_sessions,
@@ -31,6 +32,7 @@ from ._practice_sessions import (
 logger = logging.getLogger(__name__)
 
 COMMAND_PREFIX = settings.COMMAND_PREFIX
+HERE = Path(__file__).parent
 
 
 def get_today_random(dtime: Optional[dt.datetime] = None) -> random.Random:
@@ -202,19 +204,29 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
                     value=f'How would you sign: "{get_daily_clthat(dtime)}"',
                     inline=False,
                 )
-        include_wordle = settings["include_wordle"]
-        if include_wordle:
-            embed.add_field(name="Daily Wordle", value="https://dactle.asl.cafe/")
 
         message = await channel.send(embed=embed, **send_kwargs)
-        if include_wordle:
-            await message.create_thread(
-                name="🟩⬜🟨🟩⬜️ Wordle",
-                auto_archive_duration=disnake.ThreadArchiveDuration.day,
-            )
-        elif include_handshape_of_the_day and handshape:
+        if include_handshape_of_the_day and handshape:
             await message.create_thread(
                 name=f"What signs use the {handshape.name} handshape?",
+                auto_archive_duration=disnake.ThreadArchiveDuration.day,
+            )
+        include_wordle = settings["include_wordle"]
+        if include_wordle:
+            wordle_embed = disnake.Embed(
+                title="Daily ASL Wordle",
+                description="https://dactle.asl.cafe/",
+                color=THEME_COLOR,
+            )
+            wordle_embed.set_thumbnail(url="attachment://wordle.png")
+            wordle_message = await channel.send(
+                embed=wordle_embed,
+                file=disnake.File(HERE / "wordle.png", filename="wordle.png"),
+            )
+            epoch = dt.datetime(2022, 1, 26, tzinfo=EASTERN)
+            wordle_num = (dtime - epoch).days
+            await wordle_message.create_thread(
+                name=f"Wordle {wordle_num}",
                 auto_archive_duration=disnake.ThreadArchiveDuration.day,
             )
 
