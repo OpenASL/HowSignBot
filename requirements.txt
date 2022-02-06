@@ -1,5 +1,5 @@
 ariadne==0.14.1
-disnake==2.3.0
+disnake==2.3.1
 environs==9.5.0
 gspread==5.1.1
 aiohttp==3.7.4.post0
