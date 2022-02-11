@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v22.14.0 (2022-02-11)
+### Feature
+* **sign_cafe:** More detailed kick reason ([`2966310`](https://github.com/OpenASL/HowSignBot/commit/29663103aa15b366ec99c286adaa9bc141dda589))
+
+### Fix
+* **schedule:** Edit commands only return events that aren't finished ([#427](https://github.com/OpenASL/HowSignBot/issues/427)) ([`f9fbebd`](https://github.com/OpenASL/HowSignBot/commit/f9fbebd7f928244d223085d2199c61e3913324d4))
+
 ## v22.13.2 (2022-02-11)
 ### Fix
 * **sign_cafe:** Fix kickinactive ([`06eddc3`](https://github.com/OpenASL/HowSignBot/commit/06eddc32a89cb5cbe7010b7dc92241ab948b2dce))
