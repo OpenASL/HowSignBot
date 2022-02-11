@@ -413,10 +413,14 @@ class SignCafe(Cog):
         num_kicked = 0
         guild = ctx.guild
 
+        logger.info(
+            f"kicking members who have not posted an intro in {settings.SIGN_CAFE_INACTIVE_DAYS} days"
+        )
         for member_record in members_without_intro[:MAX_NO_INTRO_USERS_TO_DISPLAY]:
             user_id = member_record["user_id"]
             member = guild.get_member(user_id)
             if not member:
+                logging.warn(f"member {user_id} not found")
                 continue
             with suppress(disnake.errors.Forbidden):  # user may not allow DMs from bot
                 await member.send(KICK_MESSAGE)
@@ -424,7 +428,7 @@ class SignCafe(Cog):
             await guild.kick(member, reason="Inactivity")
             num_kicked += 1
 
-        logger.info(f"kicking members who have had no roles {PRUNE_DAYS}")
+        logger.info(f"kicking members who have had no roles for {PRUNE_DAYS} days")
         for member_record in members_with_no_roles:
             user_id = member_record["user_id"]
             member = guild.get_member(user_id)
