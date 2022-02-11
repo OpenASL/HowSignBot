@@ -418,7 +418,7 @@ class SignCafe(Cog):
         )
         for member_record in members_without_intro[:MAX_NO_INTRO_USERS_TO_DISPLAY]:
             user_id = member_record["user_id"]
-            member = guild.get_member(user_id)
+            member = await guild.get_or_fetch_member(user_id)
             if not member:
                 logging.warn(f"member {user_id} not found")
                 continue
@@ -431,8 +431,9 @@ class SignCafe(Cog):
         logger.info(f"kicking members who have had no roles for {PRUNE_DAYS} days")
         for member_record in members_with_no_roles:
             user_id = member_record["user_id"]
-            member = guild.get_member(user_id)
+            member = await guild.get_or_fetch_member(user_id)
             if not member:
+                logging.warn(f"member {user_id} not found")
                 continue
             # Paranoid check. NOTE: all members will have the @everyone role
             if len(member.roles) > 1:
