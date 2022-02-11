@@ -1,4 +1,4 @@
 #!/bin/sh
 set -eu
-pre-commit run --all-files
+pyright
 pytest
