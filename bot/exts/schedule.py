@@ -406,8 +406,9 @@ class Schedule(commands.Cog):
         events: list[GuildScheduledEvent] = []
         for event in scheduled_events:
             event = guild.get_scheduled_event(event["event_id"])
-            if event:
-                events.append(event)
+            if event and event.scheduled_end_time:
+                if event.scheduled_end_time > utcnow():
+                    events.append(event)
         return sorted(events, key=lambda e: e.scheduled_start_time)
 
     async def _prompt_for_start_time(
