@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.13.2 (2022-02-11)
+### Fix
+* **sign_cafe:** Fix kickinactive ([`06eddc3`](https://github.com/OpenASL/HowSignBot/commit/06eddc32a89cb5cbe7010b7dc92241ab948b2dce))
+
 ## v22.13.1 (2022-02-11)
 ### Fix
 * Add more logging ([`5ec096d`](https://github.com/OpenASL/HowSignBot/commit/5ec096d849931097f595d78101cbc70cb870695e))
