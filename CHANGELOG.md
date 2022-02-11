@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.13.1 (2022-02-11)
+### Fix
+* Add more logging ([`5ec096d`](https://github.com/OpenASL/HowSignBot/commit/5ec096d849931097f595d78101cbc70cb870695e))
+
 ## v22.13.0 (2022-01-29)
 ### Feature
 * **daily_message:** Separate wordle message and thread from main message ([`7e9ddd8`](https://github.com/OpenASL/HowSignBot/commit/7e9ddd81b0b9e00c9735f57c436c89aa8ae58893))
