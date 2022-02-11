@@ -425,7 +425,10 @@ class SignCafe(Cog):
             with suppress(disnake.errors.Forbidden):  # user may not allow DMs from bot
                 await member.send(KICK_MESSAGE)
             logger.info(f"kicking member {member.id}")
-            await guild.kick(member, reason="Inactivity")
+            await guild.kick(
+                member,
+                reason=f"Inactivity (no intro in {settings.SIGN_CAFE_INACTIVE_DAYS} days)",
+            )
             num_kicked += 1
 
         logger.info(f"kicking members who have had no roles for {PRUNE_DAYS} days")
