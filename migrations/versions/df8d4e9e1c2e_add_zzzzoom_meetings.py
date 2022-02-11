@@ -5,10 +5,10 @@ Revises: 816ea3631582
 Create Date: 2021-03-21 19:01:14.653939
 
 """
-from alembic import op
 import sqlalchemy as sa
-import bot
+from alembic import op
 
+import bot
 
 # revision identifiers, used by Alembic.
 revision = "df8d4e9e1c2e"

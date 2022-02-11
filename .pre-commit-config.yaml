@@ -17,12 +17,15 @@ repos:
   hooks:
   - id: flake8
     additional_dependencies: ['flake8-bugbear==22.1.11']
+# https://github.com/microsoft/pyright/blob/main/docs/ci-integration.md#integrating-pyright-into-continuous-integration-ci
 - repo: local
   hooks:
   - id: pyright
     name: pyright
     entry: pyright
     types: [python]
-    language: system
+    pass_filenames: false
+    language: node
+    additional_dependencies: ['pyright@1.1.220']
 
 exclude: migrations
