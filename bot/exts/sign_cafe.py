@@ -25,7 +25,7 @@ from bot import settings
 from bot.database import store
 from bot.utils import did_you_mean, get_close_matches
 from bot.utils.datetimes import EASTERN, utcnow
-from bot.utils.discord import THEME_COLOR
+from bot.utils.discord import THEME_COLOR, display_name
 from bot.utils.gsheets import get_gsheet_client
 from bot.utils.ui import LinkView
 
@@ -494,6 +494,7 @@ class SignCafe(Cog):
     async def on_message(self, message: Message) -> None:
         if message.guild and message.guild.id != settings.SIGN_CAFE_GUILD_ID:
             return
+        # Store when introductions were posted, for autokick functionality
         if message.channel.id == settings.SIGN_CAFE_INTRODUCTIONS_CHANNEL_ID:
             if await store.has_sign_cafe_intro(message.author.id):
                 logger.debug(f"{message.author.id} already has intro")
@@ -504,6 +505,7 @@ class SignCafe(Cog):
                     user_id=message.author.id,
                     posted_at=message.created_at,
                 )
+        # Suggest using /top instead of -topic
         if message.content.strip() == "-topic":
             with suppress(disnake.errors.Forbidden):
                 embed = disnake.Embed(
@@ -517,6 +519,12 @@ class SignCafe(Cog):
                     color=disnake.Color.yellow(),
                 )
                 await message.author.send(embed=embed)
+        # Autothreading
+        if message.channel.id in settings.SIGN_CAFE_AUTOTHREAD_CHANNEL_IDS:
+            await message.create_thread(
+                name=f"{display_name(message.author)} - {message.created_at:%H·%M %b %d}",
+                auto_archive_duration=disnake.ThreadArchiveDuration.day,
+            )
 
     @Cog.listener()
     async def on_member_remove(self, member: Member) -> None:
