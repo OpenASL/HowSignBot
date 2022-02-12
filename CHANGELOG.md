@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.15.0 (2022-02-12)
+### Feature
+* **sign_cafe:** Basic autothreading functionality ([#429](https://github.com/OpenASL/HowSignBot/issues/429)) ([`97f95fb`](https://github.com/OpenASL/HowSignBot/commit/97f95fb1901bec7f68c46955a1b6fd539f2a82e1))
+
 ## v22.14.0 (2022-02-11)
 ### Feature
 * **sign_cafe:** More detailed kick reason ([`2966310`](https://github.com/OpenASL/HowSignBot/commit/29663103aa15b366ec99c286adaa9bc141dda589))
