@@ -22,6 +22,7 @@ from bot.utils.datetimes import (
     utcnow,
 )
 from bot.utils.discord import THEME_COLOR, get_event_url
+from bot.utils.tasks import daily_task
 
 from ._practice_sessions import (
     get_practice_sessions,
@@ -231,20 +232,10 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
             )
 
     async def daily_message(self):
-        while True:
-            # DAILY_PRACTICE_SEND_TIME is defined in Eastern time
-            now_eastern = dt.datetime.now(EASTERN)
-            date = now_eastern.date()
-            if now_eastern.time() > settings.DAILY_PRACTICE_SEND_TIME:
-                date = now_eastern.date() + dt.timedelta(days=1)
-            then = EASTERN.localize(
-                dt.datetime.combine(date, settings.DAILY_PRACTICE_SEND_TIME)
-            )
+        async with daily_task(
+            settings.DAILY_PRACTICE_SEND_TIME, name="daily message send"
+        ):
             channel_ids = list(await store.get_daily_message_channel_ids())
-            logger.info(
-                f"practice schedules for {len(channel_ids)} channels will be sent at {then.isoformat()}"
-            )
-            await disnake.utils.sleep_until(then.astimezone(dt.timezone.utc))
             for channel_id in channel_ids:
                 try:
                     asyncio.create_task(self.send_daily_message(channel_id))

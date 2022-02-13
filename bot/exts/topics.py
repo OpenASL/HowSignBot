@@ -19,8 +19,9 @@ from disnake.ext.commands import (
 from bot import settings
 from bot.database import store
 from bot.utils import truncate
-from bot.utils.datetimes import EASTERN, utcnow
+from bot.utils.datetimes import utcnow
 from bot.utils.gsheets import get_gsheet_client
+from bot.utils.tasks import daily_task
 
 logger = logging.getLogger(__name__)
 
@@ -62,14 +63,7 @@ class Topics(Cog):
         )
 
     async def daily_sync(self):
-        while True:
-            now_eastern = dt.datetime.now(EASTERN)
-            date = now_eastern.date()
-            if now_eastern.time() > DAILY_SYNC_TIME:
-                date = now_eastern.date() + dt.timedelta(days=1)
-            then = EASTERN.localize(dt.datetime.combine(date, DAILY_SYNC_TIME))
-            logger.info(f"topics will be synced at at {then.isoformat()}")
-            await disnake.utils.sleep_until(then.astimezone(dt.timezone.utc))
+        async with daily_task(DAILY_SYNC_TIME, name="topic sync"):
             topics = await sync_topics()
             logger.info(f"synced {len(topics)} topics")
 

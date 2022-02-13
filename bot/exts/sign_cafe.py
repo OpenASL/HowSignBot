@@ -24,9 +24,10 @@ from disnake.ext.commands import (
 from bot import settings
 from bot.database import store
 from bot.utils import did_you_mean, get_close_matches
-from bot.utils.datetimes import EASTERN, utcnow
+from bot.utils.datetimes import utcnow
 from bot.utils.discord import THEME_COLOR, display_name
 from bot.utils.gsheets import get_gsheet_client
+from bot.utils.tasks import daily_task
 from bot.utils.ui import LinkView
 
 logger = logging.getLogger(__name__)
@@ -42,21 +43,9 @@ UNMUTE_WARNING = (
     "we encourage you to keep your voice off during sessions. "
     "🤐 You can use the text channels to type responses when needed."
 )
-DAILY_MESSAGE_TIME = dt.time(8, 0)  # Eastern time
+DAILY_MESSAGE_TIME = dt.time(12, 12)  # Eastern time
 DAILY_MEMBER_KICK_TIME = dt.time(12, 0)  # Eastern time
 PRUNE_DAYS = settings.SIGN_CAFE_PRUNE_DAYS
-
-
-def get_next_task_execution_datetime(time_in_eastern: dt.time) -> dt.datetime:
-    """Get next execution time for a daily task.
-
-    Returns an eastern-localized datetime.
-    """
-    now_eastern = dt.datetime.now(EASTERN)
-    date = now_eastern.date()
-    if now_eastern.time() > time_in_eastern:
-        date = now_eastern.date() + dt.timedelta(days=1)
-    return EASTERN.localize(dt.datetime.combine(date, time_in_eastern))
 
 
 def get_gsheet():
@@ -580,14 +569,7 @@ class SignCafe(Cog):
         self.tags = get_tags() if settings.SIGN_CAFE_SYNC_TAGS else {}
 
     async def daily_message(self):
-        while True:
-            next_execution_time = get_next_task_execution_datetime(DAILY_MESSAGE_TIME)
-            logger.info(
-                f"sign cafe staff daily message will be sent at at {next_execution_time.isoformat()}"
-            )
-            await disnake.utils.sleep_until(
-                next_execution_time.astimezone(dt.timezone.utc)
-            )
+        async with daily_task(DAILY_MESSAGE_TIME, name="sign cafe staff message"):
             channel = cast(
                 TextChannel, self.bot.get_channel(settings.SIGN_CAFE_BOT_CHANNEL_ID)
             )
@@ -601,17 +583,11 @@ class SignCafe(Cog):
             await channel.send(content=self.make_role_table_age(channel.guild))
             embed = await make_inactive_members_embed(guild=channel.guild)
             await channel.send(embed=embed)
-            logger.info("sent sign cafe staff daily message")
 
     async def daily_member_kick(self):
-        while True:
-            next_execution_time = get_next_task_execution_datetime(DAILY_MEMBER_KICK_TIME)
-            logger.info(
-                f"sign cafe inactive members will be kicked at {next_execution_time.isoformat()}"
-            )
-            await disnake.utils.sleep_until(
-                next_execution_time.astimezone(dt.timezone.utc)
-            )
+        async with daily_task(
+            DAILY_MEMBER_KICK_TIME, name="sign cafe inactive member pruning"
+        ):
             channel = cast(
                 TextChannel, self.bot.get_channel(settings.SIGN_CAFE_BOT_CHANNEL_ID)
             )
@@ -629,7 +605,6 @@ class SignCafe(Cog):
             ):
                 await channel.send(content="🥾 _Kicking inactive members_...")
                 await self._kick_inactive(channel)
-            logger.info("cleared sign cafe inactive members")
 
 
 def setup(bot: Bot) -> None:
