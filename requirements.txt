@@ -12,7 +12,7 @@ nameparser==1.1.1
 nanoid==2.0.0
 pytz==2021.3
 psycopg2==2.9.3
-holidays==0.12
+holidays==0.13
 python-dateutil==2.8.2
 # catchphrase
 PyYAML==6.0
