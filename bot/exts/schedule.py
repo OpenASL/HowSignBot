@@ -64,9 +64,13 @@ class MaxPromptAttemptsExceeded(Exception):
     pass
 
 
-def format_scheduled_start_time(dtime: dt.datetime):
+def format_scheduled_start_time_date(dtime: dt.datetime):
     dtime_pacific = dtime.astimezone(PACIFIC)
-    return dtime_pacific.strftime("%A, %B %-d") + " · " + format_multi_time(dtime)
+    return dtime_pacific.strftime("%a, %b %-d")
+
+
+def format_scheduled_start_time(dtime: dt.datetime):
+    return format_scheduled_start_time_date(dtime) + " · " + format_multi_time(dtime)
 
 
 def get_event_label(event: GuildScheduledEvent, bold: bool = False) -> str:
@@ -181,6 +185,8 @@ class Schedule(commands.Cog):
             used_timezone=used_timezone,
         )
 
+    # TODO: Allow passing an event URL
+    # Needs something like https://github.com/DisnakeDev/disnake/issues/367
     @schedule_command.sub_command(name="cancel")
     async def schedule_cancel(self, inter: GuildCommandInteraction):
         """Cancel an event created through this bot"""
@@ -205,7 +211,7 @@ class Schedule(commands.Cog):
 
         options = [
             disnake.SelectOption(
-                label=f"{event.name} · {format_scheduled_start_time(event.scheduled_start_time)}",
+                label=f"{event.name} · {format_scheduled_start_time_date(event.scheduled_start_time)}",
                 value=str(event.id),
             )
             for event in events
