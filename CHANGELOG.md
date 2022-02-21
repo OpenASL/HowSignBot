@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v22.18.0 (2022-02-21)
+### Feature
+* **zoom:** Add support for Verified role ([#445](https://github.com/OpenASL/HowSignBot/issues/445)) ([`84d45a6`](https://github.com/OpenASL/HowSignBot/commit/84d45a6d0088efc17fb07b1f54ea92a25c068965))
+* **stars:** Add /stars give and /stars remove ([#444](https://github.com/OpenASL/HowSignBot/issues/444)) ([`6a26ba1`](https://github.com/OpenASL/HowSignBot/commit/6a26ba14ea07d0d203ed215c69e707bd8aa5ec45))
+
 ## v22.17.0 (2022-02-20)
 ### Feature
 * **stars:** Validate stars param; refactoring ([#443](https://github.com/OpenASL/HowSignBot/issues/443)) ([`3187ba6`](https://github.com/OpenASL/HowSignBot/commit/3187ba6fedbf3eb20f5dd15065120105d5204542))
