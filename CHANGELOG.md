@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v22.16.0 (2022-02-20)
+### Feature
+* **stars:** Add /stars info and /stars me ([#440](https://github.com/OpenASL/HowSignBot/issues/440)) ([`d992f03`](https://github.com/OpenASL/HowSignBot/commit/d992f0305e1c7dcb85088465dd63df71f4498759))
+* **sign_cafe:** Add star functionality ([#439](https://github.com/OpenASL/HowSignBot/issues/439)) ([`07b7931`](https://github.com/OpenASL/HowSignBot/commit/07b793132e8d3aa120b52de6f86a07fade065e7c))
+
+### Fix
+* **schedule:** Avoid hitting length limits when listing events ([#438](https://github.com/OpenASL/HowSignBot/issues/438)) ([`a3daa45`](https://github.com/OpenASL/HowSignBot/commit/a3daa459dbcb03b9da8fbd2d15a2e57b8f9d8f7e))
+
 ## v22.15.0 (2022-02-12)
 ### Feature
 * **sign_cafe:** Basic autothreading functionality ([#429](https://github.com/OpenASL/HowSignBot/issues/429)) ([`97f95fb`](https://github.com/OpenASL/HowSignBot/commit/97f95fb1901bec7f68c46955a1b6fd539f2a82e1))
