@@ -69,14 +69,8 @@ class Stars(Cog):
                 to_user_id=user.id,
                 star_count=stars,
             )
-        embed = Embed(
-            description=f"Set star count for {user.mention}", color=disnake.Color.yellow()
-        )
-        user_stars = await store.get_user_stars(user.id)
-        embed.add_field(name=f"{STAR_EMOJI} count", value=str(user_stars))
-        embed.set_author(
-            name=display_name(user),
-            icon_url=user.avatar.url if user.avatar else Embed.Empty,
+        embed = await make_user_star_count_embed(
+            user=user, description=f"Set star count for {user.mention}"
         )
         await inter.response.send_message(embed=embed)
 
@@ -171,7 +165,7 @@ class Stars(Cog):
             return None, None
         if not message.guild:
             return None, None
-        if not message.guild.id == settings.SIGN_CAFE_GUILD_ID:
+        if message.guild.id != settings.SIGN_CAFE_GUILD_ID:
             return None, None
         if bool(getattr(message.author, "bot", None)):  # User is a bot
             return None, None
