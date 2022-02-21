@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.18.1 (2022-02-21)
+### Fix
+* **zoom:** Fix displaying verified button when /zoom start is sent in a DM ([#446](https://github.com/OpenASL/HowSignBot/issues/446)) ([`2ded208`](https://github.com/OpenASL/HowSignBot/commit/2ded2087cc1892089978e8afff6dc5b6693c82f1))
+
 ## v22.18.0 (2022-02-21)
 ### Feature
 * **zoom:** Add support for Verified role ([#445](https://github.com/OpenASL/HowSignBot/issues/445)) ([`84d45a6`](https://github.com/OpenASL/HowSignBot/commit/84d45a6d0088efc17fb07b1f54ea92a25c068965))
