@@ -46,7 +46,13 @@ class Stars(Cog):
         user: The user to change
         stars: The star count to set
         """
-        await store.set_user_stars(user_id=user.id, star_count=stars)
+        assert inter.user is not None
+        async with store.transaction():
+            await store.set_user_stars(
+                from_user_id=inter.user.id,
+                to_user_id=user.id,
+                star_count=stars,
+            )
         embed = Embed(
             description=f"Set star count for {user.mention}", color=disnake.Color.yellow()
         )

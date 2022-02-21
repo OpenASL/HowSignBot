@@ -779,11 +779,23 @@ class Store:
         query = user_stars.select().where(user_stars.c.user_id == user_id)
         return await self.db.fetch_val(query=query, column=user_stars.c.star_count) or 0
 
-    async def set_user_stars(self, user_id: int, star_count: int):
+    async def set_user_stars(
+        self, *, from_user_id: int, to_user_id: int, star_count: int
+    ):
         created_at = now()
+        # Insert a star log
+        stmt = insert(star_logs).values(
+            id=uuid.uuid4(),
+            from_user_id=from_user_id,
+            to_user_id=to_user_id,
+            message_id=None,
+            created_at=created_at,
+            action="SET",
+        )
+        await self.db.execute(stmt)
         # Update the user's star count
         stmt = insert(user_stars).values(
-            user_id=user_id,
+            user_id=to_user_id,
             star_count=star_count,
             created_at=created_at,
             updated_at=created_at,
