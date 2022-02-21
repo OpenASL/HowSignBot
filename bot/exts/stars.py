@@ -74,6 +74,7 @@ class Stars(Cog):
                 [
                     f"{i+1}. <@{record['user_id']}> | {record['star_count']} {STAR_EMOJI}"
                     for i, record in enumerate(records)
+                    if record["star_count"] > 0
                 ]
             ),
             color=disnake.Color.yellow(),
