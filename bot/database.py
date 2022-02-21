@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 import logging
+import uuid
 from typing import Iterator, Mapping, Sequence
 
 import databases
@@ -13,7 +14,7 @@ from pytz.tzinfo import StaticTzInfo
 from sqlalchemy import sql
 from sqlalchemy.dialects.postgresql import BIGINT
 from sqlalchemy.dialects.postgresql import TIMESTAMP as _TIMESTAMP
-from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.dialects.postgresql import UUID, insert
 from sqlalchemy.sql.schema import ForeignKey
 
 from . import settings
@@ -46,8 +47,18 @@ class TIMESTAMP(sa.TypeDecorator):
     impl = _TIMESTAMP(timezone=True)
 
 
+def id_column(name="id", **kwargs):
+    return sa.Column(
+        name, UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, **kwargs
+    )
+
+
 def created_at_column(name="created_at", **kwargs):
     return sa.Column(name, TIMESTAMP, nullable=False, default=now, **kwargs)
+
+
+def updated_at_column(name="updated_at", **kwargs):
+    return sa.Column(name, TIMESTAMP, nullable=False, default=now, onupdate=now, **kwargs)
 
 
 NANOID_ALPHABET = "23456789abcdefghijkmnopqrstuvwxyz"
@@ -232,6 +243,26 @@ scheduled_events = sa.Table(
         index=True,
         doc="Discord user ID for the user who created the event through the bot",
     ),
+    created_at_column(),
+)
+
+user_stars = sa.Table(
+    "user_stars",
+    metadata,
+    sa.Column("user_id", BIGINT, primary_key=True, doc="Discord user ID"),
+    sa.Column("star_count", sa.Integer, doc="Number of stars for the user"),
+    created_at_column(),
+    updated_at_column(),
+)
+
+star_logs = sa.Table(
+    "star_logs",
+    metadata,
+    id_column(),
+    sa.Column("from_user_id", BIGINT, doc="Discord user ID of the giver"),
+    sa.Column("to_user_id", BIGINT, doc="Discord user ID of the recipient"),
+    sa.Column("message_id", BIGINT, doc="Discord message ID"),
+    sa.Column("action", sa.Text, nullable=False, doc="The type of action"),
     created_at_column(),
 )
 
@@ -688,6 +719,96 @@ class Store:
     async def remove_scheduled_event(self, *, event_id: int):
         await self.db.execute(
             scheduled_events.delete().where(scheduled_events.c.event_id == event_id)
+        )
+
+    ##### Stars #####
+
+    async def give_star(self, *, from_user_id: int, to_user_id: int, message_id: int):
+        created_at = now()
+        # Insert a star log
+        stmt = insert(star_logs).values(
+            id=uuid.uuid4(),
+            from_user_id=from_user_id,
+            to_user_id=to_user_id,
+            message_id=message_id,
+            created_at=created_at,
+            action="ADD",
+        )
+        await self.db.execute(stmt)
+
+        # Update the user's star count
+        stmt = insert(user_stars).values(
+            user_id=to_user_id,
+            star_count=1,
+            created_at=created_at,
+            updated_at=created_at,
+        )
+        stmt = stmt.on_conflict_do_update(
+            index_elements=(user_stars.c.user_id,),
+            set_=dict(star_count=user_stars.c.star_count + 1, updated_at=created_at),
+        )
+        await self.db.execute(stmt)
+
+    async def remove_star(self, *, from_user_id: int, to_user_id: int, message_id: int):
+        created_at = now()
+        # Insert a star log
+        stmt = insert(star_logs).values(
+            id=uuid.uuid4(),
+            from_user_id=from_user_id,
+            to_user_id=to_user_id,
+            message_id=message_id,
+            created_at=created_at,
+            action="REMOVE",
+        )
+        await self.db.execute(stmt)
+
+        # Update the user's star count
+        stmt = insert(user_stars).values(
+            user_id=to_user_id,
+            star_count=0,
+            created_at=created_at,
+            updated_at=created_at,
+        )
+        stmt = stmt.on_conflict_do_update(
+            index_elements=(user_stars.c.user_id,),
+            set_=dict(star_count=user_stars.c.star_count - 1, updated_at=created_at),
+        )
+        await self.db.execute(stmt)
+
+    async def get_user_stars(self, user_id: int) -> int:
+        query = user_stars.select().where(user_stars.c.user_id == user_id)
+        return await self.db.fetch_val(query=query, column=user_stars.c.star_count) or 0
+
+    async def set_user_stars(
+        self, *, from_user_id: int, to_user_id: int, star_count: int
+    ):
+        created_at = now()
+        # Insert a star log
+        stmt = insert(star_logs).values(
+            id=uuid.uuid4(),
+            from_user_id=from_user_id,
+            to_user_id=to_user_id,
+            message_id=None,
+            created_at=created_at,
+            action="SET",
+        )
+        await self.db.execute(stmt)
+        # Update the user's star count
+        stmt = insert(user_stars).values(
+            user_id=to_user_id,
+            star_count=star_count,
+            created_at=created_at,
+            updated_at=created_at,
+        )
+        stmt = stmt.on_conflict_do_update(
+            index_elements=(user_stars.c.user_id,),
+            set_=dict(star_count=stmt.excluded.star_count, updated_at=created_at),
+        )
+        await self.db.execute(stmt)
+
+    async def list_user_stars(self, limit: int) -> list[Mapping]:
+        return await self.db.fetch_all(
+            user_stars.select().order_by(user_stars.c.star_count.desc()).limit(limit)
         )
 
 
