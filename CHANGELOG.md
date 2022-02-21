@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.16.1 (2022-02-20)
+### Fix
+* **stars:** Fix log message ([#441](https://github.com/OpenASL/HowSignBot/issues/441)) ([`8360a30`](https://github.com/OpenASL/HowSignBot/commit/8360a304ce768f7eca868a240a157ec675f2a28b))
+
 ## v22.16.0 (2022-02-20)
 ### Feature
 * **stars:** Add /stars info and /stars me ([#440](https://github.com/OpenASL/HowSignBot/issues/440)) ([`d992f03`](https://github.com/OpenASL/HowSignBot/commit/d992f0305e1c7dcb85088465dd63df71f4498759))
