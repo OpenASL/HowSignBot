@@ -6,7 +6,7 @@ from typing import cast
 import disnake
 from disnake import Embed, GuildCommandInteraction
 from disnake.ext import commands
-from disnake.ext.commands import Bot, Cog, Context, slash_command
+from disnake.ext.commands import Bot, Cog, Context, Param, slash_command
 
 from bot import settings
 from bot.database import store
@@ -17,6 +17,22 @@ logger = logging.getLogger(__name__)
 
 COMMAND_PREFIX = settings.COMMAND_PREFIX
 STAR_EMOJI = "⭐"
+
+
+async def make_user_star_count_embed(
+    user: disnake.Member | disnake.User, *, description: str | None = None
+) -> Embed:
+    embed = Embed(
+        description=description,
+        color=disnake.Color.yellow(),
+    )
+    user_stars = await store.get_user_stars(user.id)
+    embed.add_field(name=f"{STAR_EMOJI} count", value=str(user_stars))
+    embed.set_author(
+        name=display_name(user),
+        icon_url=user.avatar.url if user.avatar else Embed.Empty,
+    )
+    return embed
 
 
 class Stars(Cog):
@@ -37,7 +53,7 @@ class Stars(Cog):
     @stars_command.sub_command(name="set")
     @commands.has_permissions(kick_members=True)  # Staff
     async def stars_set(
-        self, inter: GuildCommandInteraction, user: disnake.User, stars: int
+        self, inter: GuildCommandInteraction, user: disnake.User, stars: int = Param(ge=0)
     ):
         """(Authorized users only) Set a user's star count
 
@@ -81,7 +97,68 @@ class Stars(Cog):
         )
         await inter.response.send_message(embed=embed)
 
-    async def maybe_get_star_reaction_message_and_user(
+    @stars_command.sub_command(name="me")
+    async def stars_me(self, inter: GuildCommandInteraction):
+        """Show how many stars you have"""
+        assert inter.user is not None
+        embed = await make_user_star_count_embed(user=inter.user)
+        await inter.send(embed=embed)
+
+    @stars_command.sub_command(name="info")
+    async def stars_info(self, inter: GuildCommandInteraction, user: disnake.User):
+        """Show how many stars a user has"""
+        embed = await make_user_star_count_embed(user=user)
+        await inter.send(embed=embed)
+
+    @Cog.listener()
+    async def on_raw_reaction_add(self, payload: disnake.RawReactionActionEvent) -> None:
+        message, from_user = await self._maybe_get_star_reaction_message_and_user(payload)
+        if message is None or from_user is None:
+            return
+
+        to_user = message.author
+
+        async with store.transaction():
+            await store.give_star(
+                from_user_id=from_user.id,
+                to_user_id=to_user.id,
+                message_id=message.id,
+            )
+        channel = cast(
+            disnake.TextChannel, self.bot.get_channel(settings.SIGN_CAFE_BOT_CHANNEL_ID)
+        )
+        embed = await make_user_star_count_embed(
+            user=to_user,
+            description=f"{to_user.mention} received a {STAR_EMOJI} from {from_user.mention}\n[Source message]({message.jump_url})",
+        )
+        await channel.send(embed=embed)
+
+    @Cog.listener()
+    async def on_raw_reaction_remove(
+        self, payload: disnake.RawReactionActionEvent
+    ) -> None:
+        message, from_user = await self._maybe_get_star_reaction_message_and_user(payload)
+        if message is None or from_user is None:
+            return
+
+        to_user = message.author
+
+        async with store.transaction():
+            await store.remove_star(
+                from_user_id=from_user.id,
+                to_user_id=to_user.id,
+                message_id=message.id,
+            )
+        channel = cast(
+            disnake.TextChannel, self.bot.get_channel(settings.SIGN_CAFE_BOT_CHANNEL_ID)
+        )
+        embed = await make_user_star_count_embed(
+            user=to_user,
+            description=f"{to_user.mention} had a {STAR_EMOJI} removed by {from_user.mention}\n[Source message]({message.jump_url})",
+        )
+        await channel.send(embed=embed)
+
+    async def _maybe_get_star_reaction_message_and_user(
         self,
         payload: disnake.RawReactionActionEvent,
     ) -> tuple[disnake.Message | None, disnake.Member | None]:
@@ -109,91 +186,6 @@ class Stars(Cog):
         if not is_staff:
             return None, None
         return message, from_user
-
-    @stars_command.sub_command(name="me")
-    async def stars_me(self, inter: GuildCommandInteraction):
-        """Show how many stars you have"""
-        assert inter.user is not None
-        embed = Embed(color=disnake.Color.yellow())
-        user_stars = await store.get_user_stars(inter.user.id)
-        embed.add_field(name=f"{STAR_EMOJI} count", value=str(user_stars))
-        embed.set_author(
-            name=display_name(inter.user),
-            icon_url=inter.user.avatar.url if inter.user.avatar else Embed.Empty,
-        )
-        await inter.send(embed=embed)
-
-    @stars_command.sub_command(name="info")
-    async def stars_info(self, inter: GuildCommandInteraction, user: disnake.User):
-        """Show how many stars a user has"""
-        embed = Embed(color=disnake.Color.yellow())
-        user_stars = await store.get_user_stars(user.id)
-        embed.add_field(name=f"{STAR_EMOJI} count", value=str(user_stars))
-        embed.set_author(
-            name=display_name(user),
-            icon_url=user.avatar.url if user.avatar else Embed.Empty,
-        )
-        await inter.send(embed=embed)
-
-    @Cog.listener()
-    async def on_raw_reaction_add(self, payload: disnake.RawReactionActionEvent) -> None:
-        message, from_user = await self.maybe_get_star_reaction_message_and_user(payload)
-        if message is None or from_user is None:
-            return
-
-        to_user = message.author
-
-        async with store.transaction():
-            await store.give_star(
-                from_user_id=from_user.id,
-                to_user_id=to_user.id,
-                message_id=message.id,
-            )
-        channel = cast(
-            disnake.TextChannel, self.bot.get_channel(settings.SIGN_CAFE_BOT_CHANNEL_ID)
-        )
-        embed = Embed(
-            description=f"{to_user.mention} received a {STAR_EMOJI} from {from_user.mention}\n[Source message]({message.jump_url})",
-            color=disnake.Color.yellow(),
-        )
-        user_stars = await store.get_user_stars(to_user.id)
-        embed.add_field(name=f"{STAR_EMOJI} count", value=str(user_stars))
-        embed.set_author(
-            name=display_name(to_user),
-            icon_url=to_user.avatar.url if to_user.avatar else Embed.Empty,
-        )
-        await channel.send(embed=embed)
-
-    @Cog.listener()
-    async def on_raw_reaction_remove(
-        self, payload: disnake.RawReactionActionEvent
-    ) -> None:
-        message, from_user = await self.maybe_get_star_reaction_message_and_user(payload)
-        if message is None or from_user is None:
-            return
-
-        to_user = message.author
-
-        async with store.transaction():
-            await store.remove_star(
-                from_user_id=from_user.id,
-                to_user_id=to_user.id,
-                message_id=message.id,
-            )
-        channel = cast(
-            disnake.TextChannel, self.bot.get_channel(settings.SIGN_CAFE_BOT_CHANNEL_ID)
-        )
-        embed = Embed(
-            description=f"{to_user.mention} had a {STAR_EMOJI} removed by {from_user.mention}\n[Source message]({message.jump_url})",
-            color=disnake.Color.yellow(),
-        )
-        user_stars = await store.get_user_stars(to_user.id)
-        embed.add_field(name=f"{STAR_EMOJI} count", value=str(user_stars))
-        embed.set_author(
-            name=display_name(to_user),
-            icon_url=to_user.avatar.url if to_user.avatar else Embed.Empty,
-        )
-        await channel.send(embed=embed)
 
 
 def setup(bot: Bot) -> None:
