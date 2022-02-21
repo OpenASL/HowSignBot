@@ -183,7 +183,7 @@ class Stars(Cog):
             disnake.TextChannel, self.bot.get_channel(settings.SIGN_CAFE_BOT_CHANNEL_ID)
         )
         embed = Embed(
-            description=f"{to_user.mention} removed a {STAR_EMOJI} from {from_user.mention}\n[Source message]({message.jump_url})",
+            description=f"{to_user.mention} had a {STAR_EMOJI} removed by {from_user.mention}\n[Source message]({message.jump_url})",
             color=disnake.Color.yellow(),
         )
         user_stars = await store.get_user_stars(to_user.id)
