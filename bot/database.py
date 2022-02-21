@@ -723,7 +723,9 @@ class Store:
 
     ##### Stars #####
 
-    async def give_star(self, *, from_user_id: int, to_user_id: int, message_id: int):
+    async def give_star(
+        self, *, from_user_id: int, to_user_id: int, message_id: int | None
+    ):
         created_at = now()
         # Insert a star log
         stmt = insert(star_logs).values(
@@ -749,7 +751,9 @@ class Store:
         )
         await self.db.execute(stmt)
 
-    async def remove_star(self, *, from_user_id: int, to_user_id: int, message_id: int):
+    async def remove_star(
+        self, *, from_user_id: int, to_user_id: int, message_id: int | None
+    ):
         created_at = now()
         # Insert a star log
         stmt = insert(star_logs).values(
