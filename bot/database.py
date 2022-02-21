@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from disnake import Member
 from pytz.tzinfo import StaticTzInfo
 from sqlalchemy import sql
-from sqlalchemy.dialects.postgresql import BIGINT
+from sqlalchemy.dialects.postgresql import ARRAY, BIGINT
 from sqlalchemy.dialects.postgresql import TIMESTAMP as _TIMESTAMP
 from sqlalchemy.dialects.postgresql import UUID, insert
 from sqlalchemy.sql.schema import ForeignKey
@@ -121,6 +121,13 @@ guild_settings = sa.Table(
         sa.Boolean,
         server_default=sql.false(),
         nullable=False,
+    ),
+    sa.Column(
+        "verified_role_ids",
+        ARRAY(sa.BIGINT),
+        server_default="{}",
+        nullable=False,
+        doc="Role IDs that can bypass Zoom FS Captcha",
     ),
 )
 
@@ -290,7 +297,7 @@ class Store:
         return self.db.transaction()
 
     async def set_user_timezone(self, user_id: int, timezone: dt.tzinfo | None):
-        logger.info(f"setting timezone for user_id {user_id}")
+        logger.debug(f"setting timezone for user_id {user_id}")
         stmt = insert(user_settings).values(user_id=user_id, timezone=timezone)
         stmt = stmt.on_conflict_do_update(
             index_elements=(user_settings.c.user_id,),
@@ -299,12 +306,12 @@ class Store:
         await self.db.execute(stmt)
 
     async def get_user_timezone(self, user_id: int) -> StaticTzInfo | None:
-        logger.info(f"retrieving timezone for user_id {user_id}")
+        logger.debug(f"retrieving timezone for user_id {user_id}")
         query = user_settings.select().where(user_settings.c.user_id == user_id)
         return await self.db.fetch_val(query=query, column=user_settings.c.timezone)
 
     async def get_guild_settings(self, guild_id: int) -> Mapping | None:
-        logger.info(f"retrieving guild settings sheet key for guild_id {guild_id}")
+        logger.debug(f"retrieving guild settings for guild_id {guild_id}")
         query = guild_settings.select().where(guild_settings.c.guild_id == guild_id)
         return await self.db.fetch_one(query=query)
 

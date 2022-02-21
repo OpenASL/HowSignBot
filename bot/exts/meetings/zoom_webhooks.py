@@ -12,7 +12,7 @@ from bot import settings
 from bot.database import store
 from bot.utils.reactions import maybe_clear_reaction
 
-from ._zoom import REPOST_EMOJI, make_zoom_embed
+from ._zoom import REPOST_EMOJI, make_zoom_send_kwargs
 
 logger = logging.getLogger(__name__)
 
@@ -47,14 +47,12 @@ async def handle_zoom_event(bot: Bot, data: dict):
             meeting_id, host_id=data["payload"]["object"]["host_id"]
         )
 
-    edit_kwargs = None
     banned_user_joined = False
     participant_name = None
     email = None
     if event == "meeting.ended":
         logger.info(f"automatically ending zoom meeting {meeting_id}")
         await store.end_zoom_meeting(meeting_id=meeting_id)
-        edit_kwargs = {"content": "✨ _Zoom meeting ended by host_", "embed": None}
     elif event == "meeting.participant_joined":
         participant_data = data["payload"]["object"]["participant"]
         # Use user_name as the identifier for participants because id isn't guaranteed to
@@ -72,8 +70,6 @@ async def handle_zoom_event(bot: Bot, data: dict):
             email=email,
             joined_at=joined_at,
         )
-        embed = await make_zoom_embed(meeting_id=meeting_id)
-        edit_kwargs = {"embed": embed}
         banned_user_joined = email in settings.SIGN_CAFE_ZOOM_WATCH_LIST
     elif event == "meeting.participant_left":
         # XXX Sleep to reduce the likelihood that particpants will be removed
@@ -102,8 +98,6 @@ async def handle_zoom_event(bot: Bot, data: dict):
             return
         logger.info(f"removing participant for meeting id {meeting_id}")
         await store.remove_zoom_participant(meeting_id=meeting_id, name=participant_name)
-        embed = await make_zoom_embed(meeting_id=meeting_id)
-        edit_kwargs = {"embed": embed}
 
     disnake_messages = []
     if zoom_meeting["setup_at"]:
@@ -111,13 +105,22 @@ async def handle_zoom_event(bot: Bot, data: dict):
             channel_id = message["channel_id"]
             message_id = message["message_id"]
             channel = cast(disnake.TextChannel, bot.get_channel(channel_id))
-            if edit_kwargs:
-                logger.info(f"editing zoom message {message_id} for event {event}")
-                disnake_message: disnake.Message = await channel.fetch_message(message_id)
-                disnake_messages.append(disnake_message)
-                await disnake_message.edit(**edit_kwargs)
-                if event == "meeting.ended":
-                    await maybe_clear_reaction(disnake_message, REPOST_EMOJI)
+            logger.info(f"editing zoom message {message_id} for event {event}")
+            disnake_message: disnake.Message = await channel.fetch_message(message_id)
+            disnake_messages.append(disnake_message)
+            if event == "meeting.ended":
+                await maybe_clear_reaction(disnake_message, REPOST_EMOJI)
+                edit_kwargs = {
+                    "content": "✨ _Zoom meeting ended by host_",
+                    "embed": None,
+                    "view": None,
+                }
+            else:
+                edit_kwargs = await make_zoom_send_kwargs(
+                    meeting_id=meeting_id,
+                    guild_id=disnake_message.guild.id if disnake_message.guild else None,
+                )
+            await disnake_message.edit(**edit_kwargs)
     # If a banned user joins, notify @Mod in SIGN_CAFE
     if banned_user_joined:
         if disnake_messages:

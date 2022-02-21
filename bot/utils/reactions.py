@@ -89,18 +89,18 @@ async def handle_close_reaction(
                     if callable(close_message):
                         close_message = await close_message(message)
                     logger.info(f"cleaning up room with message: {close_message}")
-                    await message.edit(content=close_message, embed=None)
+                    await message.edit(content=close_message, embed=None, view=None)
                     return
                 for field in embed.fields:
                     if field.name and re.search(pattern, field.name):  # type: ignore
                         if callable(close_message):
                             close_message = await close_message(message)
                         logger.info(f"cleaning up room with message: {close_message}")
-                        await message.edit(content=close_message, embed=None)
+                        await message.edit(content=close_message, embed=None, view=None)
                         return
         if re.search(pattern, message.content):
             if callable(close_message):
                 close_message = await close_message(message)
             logger.info(f"cleaning up room with message: {close_message}")
-            await message.edit(content=close_message, embed=None)
+            await message.edit(content=close_message, embed=None, view=None)
             return

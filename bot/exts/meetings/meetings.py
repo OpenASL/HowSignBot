@@ -43,7 +43,7 @@ from ._zoom import (
     add_repost_after_delay,
     get_zoom_meeting_id,
     is_allowed_zoom_access,
-    make_zoom_embed,
+    make_zoom_send_kwargs,
     zoom_impl,
 )
 
@@ -123,9 +123,8 @@ class Meetings(Cog):
         with_zzzzoom = value == ProtectionMode.FS_CAPTCHA
 
         async def send_channel_message(mid: int):
-            embed = await make_zoom_embed(mid)
-            assert embed is not None
-            return await inter.channel.send(embed=embed)
+            send_kwargs = await make_zoom_send_kwargs(mid, guild_id=inter.guild_id)
+            return await inter.channel.send(**send_kwargs)
 
         await zoom_impl(
             bot=self.bot,
@@ -171,9 +170,8 @@ class Meetings(Cog):
         if set_up:
 
             async def send_channel_message(mid: int):
-                embed = await make_zoom_embed(mid)
-                assert embed is not None
-                return await inter.channel.send(embed=embed)
+                send_kwargs = await make_zoom_send_kwargs(mid, guild_id=inter.guild_id)
+                return await inter.channel.send(**send_kwargs)
 
         else:
 
@@ -215,9 +213,10 @@ class Meetings(Cog):
         zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
         # DM zoom link and instructions once
         if len(zoom_messages) <= 1:
-            embed = await make_zoom_embed(meeting_id, include_instructions=False)
-            assert embed is not None
-            await inter.user.send(content="🔨 Set up your meeting below", embed=embed)
+            send_kwargs = await make_zoom_send_kwargs(
+                meeting_id, guild_id=None, include_instructions=False
+            )
+            await inter.user.send(content="🔨 Set up your meeting below", **send_kwargs)
             await inter.user.send(
                 "To post in another channel, send the following command in that channel:\n"
                 f"```/zoom crosspost {meeting_id}```\n"
@@ -248,7 +247,9 @@ class Meetings(Cog):
         zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
         if not zoom_messages:
             raise errors.CheckFailure(f"⚠️ No meeting messages for meeting {meeting_id}.")
-        embed = await make_zoom_embed(meeting_id=meeting_id)
+        send_kwargs = await make_zoom_send_kwargs(
+            meeting_id=meeting_id, guild_id=inter.guild_id
+        )
         messages: List[disnake.Message] = []
         for message_info in zoom_messages:
             channel_id = message_info["channel_id"]
@@ -260,7 +261,7 @@ class Meetings(Cog):
             logger.info(
                 f"revealing meeting details for meeting {meeting_id} in channel {channel_id}, message {message_id}"
             )
-            await message.edit(embed=embed)
+            await message.edit(**send_kwargs)
             add_repost_after_delay(self.bot, message)
         if inter.guild_id is None:
             assert inter.user is not None
@@ -324,7 +325,7 @@ class Meetings(Cog):
             logger.info(
                 f"scrubbing meeting details for meeting {meeting_id} in channel {channel_id}, message {message_id}"
             )
-            await message.edit(content=ZOOM_CLOSED_MESSAGE, embed=None)
+            await message.edit(content=ZOOM_CLOSED_MESSAGE, embed=None, view=None)
             await maybe_clear_reaction(message, REPOST_EMOJI)
         await store.end_zoom_meeting(meeting_id=meeting_id)
         await inter.send("🛑 Meeting details removed.")
@@ -577,7 +578,10 @@ class Meetings(Cog):
         await ctx.channel.trigger_typing()
 
         async def send_channel_message(mid: int):
-            return await ctx.reply(embed=await make_zoom_embed(mid))
+            send_kwargs = await make_zoom_send_kwargs(
+                mid, guild_id=ctx.guild.id if ctx.guild else None
+            )
+            return await ctx.reply(**send_kwargs)
 
         await zoom_impl(
             bot=self.bot,
@@ -649,6 +653,7 @@ class Meetings(Cog):
         await message.edit(
             content=f"{REPOST_EMOJI} *Meeting details moved below.*",
             embed=None,
+            view=None,
         )
         await maybe_clear_reaction(message, REPOST_EMOJI)
 
@@ -689,10 +694,14 @@ class Meetings(Cog):
                 await self.edit_meeting_moved(message)
 
             send_method = original_message.reply if original_message else message.reply
+            send_kwargs = await make_zoom_send_kwargs(
+                zoom_message["meeting_id"],
+                guild_id=message.guild.id if message.guild else None,
+            )
             new_message = await send_method(
                 content="👐 **This meeting is still going**. Come on in!",
-                embed=await make_zoom_embed(zoom_message["meeting_id"]),
                 mention_author=False,
+                **send_kwargs,
             )
             add_repost_after_delay(self.bot, new_message)
 
@@ -715,7 +724,7 @@ class Meetings(Cog):
             self.bot,
             payload,
             close_messages={
-                r"zoom\.us|Stand By|Could not create Zoom": close_zoom_message,
+                r"zoom\.us|Stand By|Could not create Zoom|localhost": close_zoom_message,
                 r"meet\.jit\.si": MEET_CLOSED_MESSAGE,
                 r"Speakeasy": SPEAKEASY_CLOSED_MESSAGE,
                 r"w2g\.tv|Could not create watch2gether": WATCH2GETHER_CLOSED_MESSAGE,
