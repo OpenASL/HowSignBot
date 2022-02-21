@@ -50,6 +50,49 @@ class Stars(Cog):
     async def stars_command(self, inter: GuildCommandInteraction):
         pass
 
+    @stars_command.sub_command(name="give")
+    @commands.has_permissions(kick_members=True)  # Staff
+    async def stars_give(self, inter: GuildCommandInteraction, user: disnake.User):
+        """(Authorized users only) Give a star to a user
+
+        Parameters
+        ----------
+        user: The user to give a star to
+        """
+        assert inter.user is not None
+        async with store.transaction():
+            await store.give_star(
+                from_user_id=inter.user.id, to_user_id=user.id, message_id=None
+            )
+        embed = await make_user_star_count_embed(
+            description=f"{user.mention} received a {STAR_EMOJI} from {inter.user.mention}",
+            user=user,
+        )
+        await inter.send(embed=embed)
+
+    @stars_command.sub_command(name="remove")
+    @commands.has_permissions(kick_members=True)  # Staff
+    async def stars_remove(self, inter: GuildCommandInteraction, user: disnake.User):
+        """(Authorized users only) Remove a star from a user
+
+        Parameters
+        ----------
+        user: The user to remove a star from
+        """
+        assert inter.user is not None
+        async with store.transaction():
+            await store.remove_star(
+                from_user_id=inter.user.id,
+                to_user_id=user.id,
+                message_id=None,
+            )
+        assert inter.user is not None
+        embed = await make_user_star_count_embed(
+            description=f"{user.mention} had a {STAR_EMOJI} removed by {inter.user.mention}",
+            user=user,
+        )
+        await inter.send(embed=embed)
+
     @stars_command.sub_command(name="set")
     @commands.has_permissions(kick_members=True)  # Staff
     async def stars_set(
@@ -123,7 +166,7 @@ class Stars(Cog):
         )
         embed = await make_user_star_count_embed(
             user=to_user,
-            description=f"{to_user.mention} received a {STAR_EMOJI} from {from_user.mention}\n[Source message]({message.jump_url})",
+            description=f"{to_user.mention} received a {STAR_EMOJI} from {from_user.mention} by a reaction\n[Source message]({message.jump_url})",
         )
         await channel.send(embed=embed)
 
