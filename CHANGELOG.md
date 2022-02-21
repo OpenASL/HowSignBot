@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v22.17.0 (2022-02-20)
+### Feature
+* **stars:** Validate stars param; refactoring ([#443](https://github.com/OpenASL/HowSignBot/issues/443)) ([`3187ba6`](https://github.com/OpenASL/HowSignBot/commit/3187ba6fedbf3eb20f5dd15065120105d5204542))
+
+### Fix
+* **stars:** Don't show users who have 0 stars in leaderboard ([#442](https://github.com/OpenASL/HowSignBot/issues/442)) ([`90ea3dc`](https://github.com/OpenASL/HowSignBot/commit/90ea3dc5c7ee392f46c56c4e1542670be7afd022))
+
 ## v22.16.1 (2022-02-20)
 ### Fix
 * **stars:** Fix log message ([#441](https://github.com/OpenASL/HowSignBot/issues/441)) ([`8360a30`](https://github.com/OpenASL/HowSignBot/commit/8360a304ce768f7eca868a240a157ec675f2a28b))
