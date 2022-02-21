@@ -109,6 +109,31 @@ class Stars(Cog):
             return None, None
         return message, from_user
 
+    @stars_command.sub_command(name="me")
+    async def stars_me(self, inter: GuildCommandInteraction):
+        """Show how many stars you have"""
+        assert inter.user is not None
+        embed = Embed(color=disnake.Color.yellow())
+        user_stars = await store.get_user_stars(inter.user.id)
+        embed.add_field(name=f"{STAR_EMOJI} count", value=str(user_stars))
+        embed.set_author(
+            name=display_name(inter.user),
+            icon_url=inter.user.avatar.url if inter.user.avatar else Embed.Empty,
+        )
+        await inter.send(embed=embed)
+
+    @stars_command.sub_command(name="info")
+    async def stars_info(self, inter: GuildCommandInteraction, user: disnake.User):
+        """Show how many stars a user has"""
+        embed = Embed(color=disnake.Color.yellow())
+        user_stars = await store.get_user_stars(user.id)
+        embed.add_field(name=f"{STAR_EMOJI} count", value=str(user_stars))
+        embed.set_author(
+            name=display_name(user),
+            icon_url=user.avatar.url if user.avatar else Embed.Empty,
+        )
+        await inter.send(embed=embed)
+
     @Cog.listener()
     async def on_raw_reaction_add(self, payload: disnake.RawReactionActionEvent) -> None:
         message, from_user = await self.maybe_get_star_reaction_message_and_user(payload)
