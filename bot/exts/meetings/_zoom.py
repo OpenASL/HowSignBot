@@ -3,19 +3,21 @@ from __future__ import annotations
 import asyncio
 import logging
 import random
-from typing import Awaitable, Callable, Mapping, Sequence, cast
+from typing import Any, Awaitable, Callable, Mapping, Sequence, Type, cast
 
 import disnake
 import holiday_emojis
 import meetings
 from aiohttp import client
-from disnake.ext.commands import Bot, Context, errors
+from disnake.ext.commands import Bot, Context, errors, has_any_role
+from disnake.ext.commands.errors import MissingAnyRole, NoPrivateMessage
 from nameparser import HumanName
 
 from bot import settings
 from bot.database import store
 from bot.utils.datetimes import PACIFIC, utcnow
 from bot.utils.reactions import maybe_add_reaction
+from bot.utils.ui import LinkView
 
 logger = logging.getLogger(__name__)
 
@@ -124,14 +126,58 @@ def get_participant_emoji() -> str:
     return random.choice(FACES)
 
 
-async def make_zoom_embed(
+class ZoomVerifiedView(disnake.ui.View):
+    def __init__(self, join_url: str, verified_role_ids: list[int]):
+        super().__init__(timeout=None)
+        self.join_url = join_url
+        self.verified_role_ids = verified_role_ids
+
+    @classmethod
+    def from_join_url(
+        cls, join_url: str, *, verified_role_ids: list[int]
+    ) -> ZoomVerifiedView:
+        async def callback(
+            self, button: disnake.ui.Button, inter: disnake.MessageInteraction
+        ):
+            validator = has_any_role(*self.verified_role_ids).predicate
+            try:
+                await validator(inter)
+            except MissingAnyRole:
+                await inter.send(
+                    "⚠️ You are not yet verified. If you think you should be verified, message an admin.",
+                    ephemeral=True,
+                )
+                return
+            except NoPrivateMessage:
+                await inter.send(
+                    "⚠️ Cannot check verification in a private message.", ephemeral=True
+                )
+                return
+            await inter.send(
+                "🚀 You're verified! Join the meeting using the link below.",
+                view=LinkView(label="Join Zoom", url=self.join_url),
+                ephemeral=True,
+            )
+
+        decorator = disnake.ui.button(
+            label="Got the Verified role? Click here to skip the FS Captcha",
+            style=disnake.ButtonStyle.blurple,
+            custom_id=f"{join_url}:button",
+        )
+        button_method = decorator(callback)
+        view_class = cast(Type[cls], type("GeneratedZoomVerifiedView", (cls,), {"get_zoom_link": button_method}))  # type: ignore
+        return view_class(join_url=join_url, verified_role_ids=verified_role_ids)
+
+
+async def make_zoom_send_kwargs(
     meeting_id: int,
     *,
+    guild_id: int | None,
     include_instructions: bool = True,
-) -> disnake.Embed | None:
+) -> dict[str, Any]:
     meeting = await store.get_zoom_meeting(meeting_id)
     if not meeting:
-        return None
+        raise RuntimeError(f"zoom meeting {meeting_id} not found")
     zzzzoom_meeting = await store.get_zzzzoom_meeting_for_zoom_meeting(
         meeting_id=meeting_id
     )
@@ -174,7 +220,17 @@ async def make_zoom_embed(
         )
         embed.add_field(name="👥 Participants", value=participant_names, inline=True)
 
-    return embed
+    ret: dict[str, Any] = {"embed": embed}
+    if guild_id and has_zzzzoom:
+        guild_settings = await store.get_guild_settings(guild_id)
+        if guild_settings:
+            verified_role_ids = guild_settings["verified_role_ids"]
+            if verified_role_ids:
+                ret["view"] = ZoomVerifiedView.from_join_url(
+                    meeting["join_url"], verified_role_ids=verified_role_ids
+                )
+
+    return ret
 
 
 def is_allowed_zoom_access(ctx: Context | disnake.ApplicationCommandInteraction):
