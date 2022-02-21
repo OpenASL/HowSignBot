@@ -247,9 +247,6 @@ class Meetings(Cog):
         zoom_messages = tuple(await store.get_zoom_messages(meeting_id=meeting_id))
         if not zoom_messages:
             raise errors.CheckFailure(f"⚠️ No meeting messages for meeting {meeting_id}.")
-        send_kwargs = await make_zoom_send_kwargs(
-            meeting_id=meeting_id, guild_id=inter.guild_id
-        )
         messages: List[disnake.Message] = []
         for message_info in zoom_messages:
             channel_id = message_info["channel_id"]
@@ -260,6 +257,10 @@ class Meetings(Cog):
             messages.append(message)
             logger.info(
                 f"revealing meeting details for meeting {meeting_id} in channel {channel_id}, message {message_id}"
+            )
+            send_kwargs = await make_zoom_send_kwargs(
+                meeting_id=meeting_id,
+                guild_id=message.guild.id if message.guild else None,
             )
             await message.edit(**send_kwargs)
             add_repost_after_delay(self.bot, message)
