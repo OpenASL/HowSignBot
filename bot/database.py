@@ -730,8 +730,8 @@ class Store:
 
     ##### Stars #####
 
-    async def give_star(
-        self, *, from_user_id: int, to_user_id: int, message_id: int | None
+    async def give_stars(
+        self, *, from_user_id: int, to_user_id: int, n_stars: int, message_id: int | None
     ):
         created_at = now()
         # Insert a star log
@@ -754,12 +754,14 @@ class Store:
         )
         stmt = stmt.on_conflict_do_update(
             index_elements=(user_stars.c.user_id,),
-            set_=dict(star_count=user_stars.c.star_count + 1, updated_at=created_at),
+            set_=dict(
+                star_count=user_stars.c.star_count + n_stars, updated_at=created_at
+            ),
         )
         await self.db.execute(stmt)
 
-    async def remove_star(
-        self, *, from_user_id: int, to_user_id: int, message_id: int | None
+    async def remove_stars(
+        self, *, from_user_id: int, to_user_id: int, n_stars: int, message_id: int | None
     ):
         created_at = now()
         # Insert a star log
@@ -782,7 +784,11 @@ class Store:
         )
         stmt = stmt.on_conflict_do_update(
             index_elements=(user_stars.c.user_id,),
-            set_=dict(star_count=user_stars.c.star_count - 1, updated_at=created_at),
+            set_=dict(
+                # TODO: don't allow negative count
+                star_count=user_stars.c.star_count - n_stars,
+                updated_at=created_at,
+            ),
         )
         await self.db.execute(stmt)
 
@@ -819,7 +825,10 @@ class Store:
 
     async def list_user_stars(self, limit: int) -> list[Mapping]:
         return await self.db.fetch_all(
-            user_stars.select().order_by(user_stars.c.star_count.desc()).limit(limit)
+            user_stars.select()
+            .where(user_stars.c.star_count > 0)
+            .order_by(user_stars.c.star_count.desc())
+            .limit(limit)
         )
 
 
