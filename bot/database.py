@@ -819,7 +819,10 @@ class Store:
 
     async def list_user_stars(self, limit: int) -> list[Mapping]:
         return await self.db.fetch_all(
-            user_stars.select().order_by(user_stars.c.star_count.desc()).limit(limit)
+            user_stars.select()
+            .where(user_stars.c.star_count > 0)
+            .order_by(user_stars.c.star_count.desc())
+            .limit(limit)
         )
 
 

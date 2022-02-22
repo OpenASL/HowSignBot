@@ -120,16 +120,21 @@ class Stars(Cog):
     @stars_command.sub_command(name="board")
     async def stars_board(self, inter: GuildCommandInteraction):
         """Show the star leaderboard"""
-        records = await store.list_user_stars(limit=10)
+        records = await store.list_user_stars(limit=100)
+        description = ""
+        # TODO: use a paginated embed
+        # https://discord.com/developers/docs/resources/channel#embed-limits
+        max_description_length = 4096
+        for i, record in enumerate(records):
+            member = await inter.guild.get_or_fetch_member(record["user_id"])
+            if not member:
+                continue
+            line = f"{i+1}. {member.display_name} | `{member.name}#{member.discriminator}` | {record['star_count']} {STAR_EMOJI}\n"
+            if len(description) + len(line) < max_description_length:
+                description += line
         embed = Embed(
             title=f"{STAR_EMOJI} Leaderboard",
-            description="\n".join(
-                [
-                    f"{i+1}. <@{record['user_id']}> | {record['star_count']} {STAR_EMOJI}"
-                    for i, record in enumerate(records)
-                    if record["star_count"] > 0
-                ]
-            ),
+            description=description,
             color=disnake.Color.yellow(),
         )
         await inter.response.send_message(embed=embed)
