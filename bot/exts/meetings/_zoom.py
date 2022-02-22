@@ -127,24 +127,27 @@ def get_participant_emoji() -> str:
 
 
 class ZoomVerifiedView(disnake.ui.View):
-    def __init__(self, join_url: str, verified_role_ids: list[int]):
+    def __init__(self, join_url: str, *, verified_role_ids: list[int], zzzzoom_url: str):
         super().__init__(timeout=None)
         self.join_url = join_url
         self.verified_role_ids = verified_role_ids
+        self.zzzzoom_url = zzzzoom_url
 
     @classmethod
     def from_join_url(
-        cls, join_url: str, *, verified_role_ids: list[int]
+        cls, join_url: str, *, verified_role_ids: list[int], zzzzoom_url: str
     ) -> ZoomVerifiedView:
         async def callback(
-            self, button: disnake.ui.Button, inter: disnake.MessageInteraction
+            self: ZoomVerifiedView,
+            button: disnake.ui.Button,
+            inter: disnake.MessageInteraction,
         ):
             validator = has_any_role(*self.verified_role_ids).predicate
             try:
                 await validator(inter)
             except MissingAnyRole:
                 await inter.send(
-                    "⚠️ You are not yet verified. If you think you should be verified, message an admin.",
+                    f"⚠️ You are not yet verified. Use {self.zzzzoom_url} to join the meeting.",
                     ephemeral=True,
                 )
                 return
@@ -154,7 +157,7 @@ class ZoomVerifiedView(disnake.ui.View):
                 )
                 return
             await inter.send(
-                "🚀 You're verified! Join the meeting using the link below.",
+                "✅ You're verified! Join the meeting using the link below.",
                 view=LinkView(label="Join Zoom", url=self.join_url),
                 ephemeral=True,
             )
@@ -166,7 +169,11 @@ class ZoomVerifiedView(disnake.ui.View):
         )
         button_method = decorator(callback)
         view_class = cast(Type[cls], type("GeneratedZoomVerifiedView", (cls,), {"get_zoom_link": button_method}))  # type: ignore
-        return view_class(join_url=join_url, verified_role_ids=verified_role_ids)
+        return view_class(
+            join_url=join_url,
+            verified_role_ids=verified_role_ids,
+            zzzzoom_url=zzzzoom_url,
+        )
 
 
 async def make_zoom_send_kwargs(
@@ -227,7 +234,9 @@ async def make_zoom_send_kwargs(
             verified_role_ids = guild_settings["verified_role_ids"]
             if verified_role_ids:
                 ret["view"] = ZoomVerifiedView.from_join_url(
-                    meeting["join_url"], verified_role_ids=verified_role_ids
+                    meeting["join_url"],
+                    verified_role_ids=verified_role_ids,
+                    zzzzoom_url=join_url,
                 )
 
     return ret
