@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.18.2 (2022-02-22)
+### Fix
+* **stars:** Various stars fixes ([#447](https://github.com/OpenASL/HowSignBot/issues/447)) ([`32fd2a9`](https://github.com/OpenASL/HowSignBot/commit/32fd2a9c89087c9b1edf634dcf1b054e69571493))
+
 ## v22.18.1 (2022-02-21)
 ### Fix
 * **zoom:** Fix displaying verified button when /zoom start is sent in a DM ([#446](https://github.com/OpenASL/HowSignBot/issues/446)) ([`2ded208`](https://github.com/OpenASL/HowSignBot/commit/2ded2087cc1892089978e8afff6dc5b6693c82f1))
