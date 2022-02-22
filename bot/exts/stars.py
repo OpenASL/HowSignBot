@@ -23,7 +23,7 @@ async def make_user_star_count_embed(
     user: disnake.Member | disnake.User, *, description: str | None = None
 ) -> Embed:
     embed = Embed(
-        description=description,
+        description=description or Embed.Empty,
         color=disnake.Color.yellow(),
     )
     user_stars = await store.get_user_stars(user.id)
@@ -52,43 +52,58 @@ class Stars(Cog):
 
     @stars_command.sub_command(name="give")
     @commands.has_permissions(kick_members=True)  # Staff
-    async def stars_give(self, inter: GuildCommandInteraction, user: disnake.User):
+    async def stars_give(
+        self,
+        inter: GuildCommandInteraction,
+        user: disnake.User,
+        n: int = Param(ge=0, default=1),
+    ):
         """(Authorized users only) Give a star to a user
 
         Parameters
         ----------
         user: The user to give a star to
+        n: The number of stars to give
         """
         assert inter.user is not None
         async with store.transaction():
-            await store.give_star(
-                from_user_id=inter.user.id, to_user_id=user.id, message_id=None
+            await store.give_stars(
+                from_user_id=inter.user.id, to_user_id=user.id, n_stars=n, message_id=None
             )
+        noun = f"{STAR_EMOJI}s" if n > 1 else f"a {STAR_EMOJI}"
         embed = await make_user_star_count_embed(
-            description=f"{user.mention} received a {STAR_EMOJI} from {inter.user.mention}",
+            description=f"{user.mention} received {noun} from {inter.user.mention}",
             user=user,
         )
         await inter.send(embed=embed)
 
     @stars_command.sub_command(name="remove")
     @commands.has_permissions(kick_members=True)  # Staff
-    async def stars_remove(self, inter: GuildCommandInteraction, user: disnake.User):
+    async def stars_remove(
+        self,
+        inter: GuildCommandInteraction,
+        user: disnake.User,
+        n: int = Param(ge=0, default=1),
+    ):
         """(Authorized users only) Remove a star from a user
 
         Parameters
         ----------
         user: The user to remove a star from
+        n: The number of stars to remove
         """
         assert inter.user is not None
         async with store.transaction():
-            await store.remove_star(
+            await store.remove_stars(
                 from_user_id=inter.user.id,
                 to_user_id=user.id,
+                n_stars=n,
                 message_id=None,
             )
         assert inter.user is not None
+        noun = f"{STAR_EMOJI}s" if n > 1 else f"a {STAR_EMOJI}"
         embed = await make_user_star_count_embed(
-            description=f"{user.mention} had a {STAR_EMOJI} removed by {inter.user.mention}",
+            description=f"{user.mention} had {noun} removed by {inter.user.mention}",
             user=user,
         )
         await inter.send(embed=embed)
@@ -161,9 +176,10 @@ class Stars(Cog):
         to_user = message.author
 
         async with store.transaction():
-            await store.give_star(
+            await store.give_stars(
                 from_user_id=from_user.id,
                 to_user_id=to_user.id,
+                n_stars=1,
                 message_id=message.id,
             )
         channel = cast(
@@ -186,9 +202,10 @@ class Stars(Cog):
         to_user = message.author
 
         async with store.transaction():
-            await store.remove_star(
+            await store.remove_stars(
                 from_user_id=from_user.id,
                 to_user_id=to_user.id,
+                n_stars=1,
                 message_id=message.id,
             )
         channel = cast(
