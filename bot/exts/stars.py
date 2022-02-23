@@ -68,7 +68,11 @@ class Stars(Cog):
         assert inter.user is not None
         async with store.transaction():
             await store.give_stars(
-                from_user_id=inter.user.id, to_user_id=user.id, n_stars=n, message_id=None
+                from_user_id=inter.user.id,
+                to_user_id=user.id,
+                n_stars=n,
+                message_id=None,
+                jump_url=None,
             )
         noun = f"{STAR_EMOJI}s" if n > 1 else f"a {STAR_EMOJI}"
         embed = await make_user_star_count_embed(
@@ -99,6 +103,7 @@ class Stars(Cog):
                 to_user_id=user.id,
                 n_stars=n,
                 message_id=None,
+                jump_url=None,
             )
         assert inter.user is not None
         noun = f"{STAR_EMOJI}s" if n > 1 else f"a {STAR_EMOJI}"
@@ -181,6 +186,7 @@ class Stars(Cog):
                 to_user_id=to_user.id,
                 n_stars=1,
                 message_id=message.id,
+                jump_url=message.jump_url,
             )
         channel = cast(
             disnake.TextChannel, self.bot.get_channel(settings.SIGN_CAFE_BOT_CHANNEL_ID)
@@ -207,6 +213,7 @@ class Stars(Cog):
                 to_user_id=to_user.id,
                 n_stars=1,
                 message_id=message.id,
+                jump_url=message.jump_url,
             )
         channel = cast(
             disnake.TextChannel, self.bot.get_channel(settings.SIGN_CAFE_BOT_CHANNEL_ID)

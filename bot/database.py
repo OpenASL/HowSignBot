@@ -268,7 +268,8 @@ star_logs = sa.Table(
     id_column(),
     sa.Column("from_user_id", BIGINT, doc="Discord user ID of the giver"),
     sa.Column("to_user_id", BIGINT, doc="Discord user ID of the recipient"),
-    sa.Column("message_id", BIGINT, doc="Discord message ID"),
+    sa.Column("message_id", BIGINT, doc="Discord message ID"),  # TODO: Remove?
+    sa.Column("jump_url", sa.Text, doc="Discord jump URL for the message"),
     sa.Column("action", sa.Text, nullable=False, doc="The type of action"),
     created_at_column(),
 )
@@ -731,7 +732,13 @@ class Store:
     ##### Stars #####
 
     async def give_stars(
-        self, *, from_user_id: int, to_user_id: int, n_stars: int, message_id: int | None
+        self,
+        *,
+        from_user_id: int,
+        to_user_id: int,
+        n_stars: int,
+        message_id: int | None,
+        jump_url: str | None,
     ):
         created_at = now()
         # Insert a star log
@@ -740,6 +747,7 @@ class Store:
             from_user_id=from_user_id,
             to_user_id=to_user_id,
             message_id=message_id,
+            jump_url=jump_url,
             created_at=created_at,
             action="ADD",
         )
@@ -761,7 +769,13 @@ class Store:
         await self.db.execute(stmt)
 
     async def remove_stars(
-        self, *, from_user_id: int, to_user_id: int, n_stars: int, message_id: int | None
+        self,
+        *,
+        from_user_id: int,
+        to_user_id: int,
+        n_stars: int,
+        message_id: int | None,
+        jump_url: str | None,
     ):
         created_at = now()
         # Insert a star log
@@ -770,6 +784,7 @@ class Store:
             from_user_id=from_user_id,
             to_user_id=to_user_id,
             message_id=message_id,
+            jump_url=jump_url,
             created_at=created_at,
             action="REMOVE",
         )
@@ -806,6 +821,7 @@ class Store:
             from_user_id=from_user_id,
             to_user_id=to_user_id,
             message_id=None,
+            jump_url=None,
             created_at=created_at,
             action="SET",
         )
