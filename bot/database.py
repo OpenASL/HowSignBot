@@ -884,7 +884,9 @@ class Store:
     ) -> list[Mapping]:
 
         query = star_logs.select().where(
-            (star_logs.c.to_user_id == user_id) & (star_logs.c.message_id != NULL)
+            (star_logs.c.to_user_id == user_id)
+            & (star_logs.c.jump_url != NULL)
+            & (star_logs.c.action == "ADD")
         )
         if after:
             query = query.where(star_logs.c.created_at > after)
