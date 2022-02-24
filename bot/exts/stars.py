@@ -149,6 +149,21 @@ class Stars(Cog):
     async def stars_command(self, inter: GuildCommandInteraction):
         pass
 
+    @stars_command.sub_command(name="milestones")
+    @commands.has_permissions(kick_members=True)  # Staff
+    async def stars_milestones(
+        self,
+        inter: GuildCommandInteraction,
+    ):
+        """(Authorized users only) Show the star reward milestones"""
+        assert inter.guild_id is not None
+        guild_settings = await store.get_guild_settings(guild_id=inter.guild_id)
+        assert guild_settings is not None
+        milestone_display = ",".join(str(m) for m in guild_settings["reward_milestones"])
+        await inter.send(
+            f"Current {STAR_EMOJI} milestones: {milestone_display}\nUse `/stars setmilestones` to update the milestones."
+        )
+
     @stars_command.sub_command(name="setmilestones")
     @commands.has_permissions(kick_members=True)  # Staff
     async def stars_set_milestones(
