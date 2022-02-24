@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v22.19.0 (2022-02-23)
+### Feature
+* **stars:** Add /stars milestones ([`ea89390`](https://github.com/OpenASL/HowSignBot/commit/ea893904017ed228c9f65111167b7219cc64f6e3))
+* **stars:** Add rewards ([#450](https://github.com/OpenASL/HowSignBot/issues/450)) ([`fb1976a`](https://github.com/OpenASL/HowSignBot/commit/fb1976a035a72a5a92009de0153bc6d6f9b839f8))
+* **zoom:** Show zzzzoom URL when not verified ([`cdb6916`](https://github.com/OpenASL/HowSignBot/commit/cdb6916395ef6f696fb8f40b99ba337a2264ea52))
+
+### Fix
+* Fix typings ([`85d4999`](https://github.com/OpenASL/HowSignBot/commit/85d4999ba078bbf726b8ea70be38cef667578769))
+* **sign_cafe:** Fix daily message time ([`2f9de62`](https://github.com/OpenASL/HowSignBot/commit/2f9de629b90b20774396802d33735720decfc589))
+
 ## v22.18.2 (2022-02-22)
 ### Fix
 * **stars:** Various stars fixes ([#447](https://github.com/OpenASL/HowSignBot/issues/447)) ([`32fd2a9`](https://github.com/OpenASL/HowSignBot/commit/32fd2a9c89087c9b1edf634dcf1b054e69571493))
