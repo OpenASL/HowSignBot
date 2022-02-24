@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.19.1 (2022-02-23)
+### Fix
+* **stars:** Fix highlight query ([`5285329`](https://github.com/OpenASL/HowSignBot/commit/5285329ec35fbfb323084a9e99ac142b9c6e9566))
+
 ## v22.19.0 (2022-02-23)
 ### Feature
 * **stars:** Add /stars milestones ([`ea89390`](https://github.com/OpenASL/HowSignBot/commit/ea893904017ed228c9f65111167b7219cc64f6e3))
