@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+import datetime as dt
 import logging
-from typing import cast
+import math
+import random
+from contextlib import suppress
+from pathlib import Path
+from typing import Any, cast
 
 import disnake
 from disnake import Embed, GuildCommandInteraction
@@ -17,6 +22,8 @@ logger = logging.getLogger(__name__)
 
 COMMAND_PREFIX = settings.COMMAND_PREFIX
 STAR_EMOJI = "⭐"
+
+ASSETS_PATH = Path(__file__).parent / "assets"
 
 
 async def make_user_star_count_embed(
@@ -35,6 +42,98 @@ async def make_user_star_count_embed(
     return embed
 
 
+REWARD_GIFS = sorted(ASSETS_PATH.glob("*.gif"))
+
+
+def get_next_milestone(star_count: int, reward_milestones: list[int]) -> int:
+    """Get the next milestone number of stars, given a current star_count."""
+    next_milestone = next(
+        (milestone for milestone in reward_milestones if milestone > star_count),
+        None,
+    )
+    # After the last milestone in reward_milestones, return the next highest multiple of 5
+    return next_milestone or int(math.ceil((star_count + 1) / 5.0)) * 5
+
+
+HIGHLIGHT_PREFIXES = (
+    f"{STAR_EMOJI} Great work here - ",
+    f"{STAR_EMOJI} 10/10 - ",
+    f"{STAR_EMOJI} CHAMP - ",
+)
+
+
+async def make_reward_send_kwargs(
+    milestone: int,
+    *,
+    user_id: int,
+    user_stars: int,
+    last_reward_at: dt.datetime | None,
+    reward_milestones: list[int],
+) -> dict[str, Any]:
+    if milestone in reward_milestones:
+        index = reward_milestones.index(milestone)
+        image_path = REWARD_GIFS[index % len(REWARD_GIFS)]
+    else:
+        image_path = random.choice(REWARD_GIFS)
+    filename = "reward.gif"
+    file_ = disnake.File(image_path, filename=filename)
+    embed = disnake.Embed(
+        title=f"🙌 You've earned {user_stars} {STAR_EMOJI}s!",
+        description="Keep up the good work 👍",
+        color=disnake.Color.yellow(),
+    )
+    embed.set_image(url=f"attachment://{filename}")
+    star_logs = await store.list_user_star_highlight_logs(
+        user_id=user_id, limit=3, after=last_reward_at
+    )
+    seen_logs = set()
+    highlight_display = ""
+    for i, log in enumerate(star_logs):
+        if log["message_id"] not in seen_logs:
+            highlight_display += f"{HIGHLIGHT_PREFIXES[i]}[Message]({log['jump_url']})\n"
+            seen_logs.add(log["message_id"])
+    if highlight_display:
+        embed.add_field(
+            name="Highlights",
+            value=highlight_display,
+        )
+    next_milestone = get_next_milestone(user_stars, reward_milestones=reward_milestones)
+    gap = next_milestone - user_stars
+    noun = f"{STAR_EMOJI}s" if gap > 1 else STAR_EMOJI
+    embed.add_field(name="Progress", value=f"Only {gap} {noun} until next milestone")
+    return {"embed": embed, "file": file_}
+
+
+async def maybe_reward_user(user: disnake.Member | disnake.User):
+    guild_settings = await store.get_guild_settings(settings.SIGN_CAFE_GUILD_ID)
+    if not guild_settings:
+        return
+    reward_milestones = guild_settings["reward_milestones"]
+    if not reward_milestones:
+        return
+    last_reward_at, last_reward_star_count = None, 0
+    last_reward = await store.get_latest_star_reward(user_id=user.id)
+    if last_reward:
+        last_reward_at = last_reward["created_at"]
+        last_reward_star_count = last_reward["star_count"]
+
+    next_milestone = get_next_milestone(
+        last_reward_star_count, reward_milestones=reward_milestones
+    )
+    user_stars = await store.get_user_stars(user.id)
+    if next_milestone and user_stars >= next_milestone:
+        send_kwargs = await make_reward_send_kwargs(
+            milestone=next_milestone,
+            user_id=user.id,
+            user_stars=user_stars,
+            last_reward_at=last_reward_at,
+            reward_milestones=reward_milestones,
+        )
+        with suppress(disnake.errors.Forbidden):  # user may not allow DMs from bot
+            await user.send(**send_kwargs)
+            await store.store_star_reward(user_id=user.id, star_count=user_stars)
+
+
 class Stars(Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -49,6 +148,35 @@ class Stars(Cog):
     @slash_command(name="stars", guild_ids=(settings.SIGN_CAFE_GUILD_ID,))
     async def stars_command(self, inter: GuildCommandInteraction):
         pass
+
+    @stars_command.sub_command(name="setmilestones")
+    @commands.has_permissions(kick_members=True)  # Staff
+    async def stars_set_milestones(
+        self,
+        inter: GuildCommandInteraction,
+        milestones: str,
+    ):
+        """(Authorized users only) Set the star reward milestones
+
+        Parameters
+        ----------
+        milestones: Comma-separated list of integer values (example: 3,5,8,10,15)
+        """
+        try:
+            milestone_list = [int(m) for m in milestones.split(",")]
+            if any(m < 1 for m in milestone_list):
+                raise ValueError
+        except ValueError:
+            await inter.send(
+                "⚠️ Invalid value. Pass a comma-separated list of positive integers (example: `3,5,8,10,15`)."
+            )
+            return
+        assert inter.guild_id is not None
+        await store.update_reward_milestones(
+            guild_id=inter.guild_id, reward_milestones=milestone_list
+        )
+        milestone_display = ",".join(str(m) for m in milestone_list)
+        await inter.send(f"✅ Updated star reward milestones to: {milestone_display}")
 
     @stars_command.sub_command(name="give")
     @commands.has_permissions(kick_members=True)  # Staff
@@ -80,6 +208,7 @@ class Stars(Cog):
             user=user,
         )
         await inter.send(embed=embed)
+        await maybe_reward_user(user)
 
     @stars_command.sub_command(name="remove")
     @commands.has_permissions(kick_members=True)  # Staff
@@ -136,6 +265,7 @@ class Stars(Cog):
             user=user, description=f"Set star count for {user.mention}"
         )
         await inter.response.send_message(embed=embed)
+        await maybe_reward_user(user)
 
     @stars_command.sub_command(name="board")
     async def stars_board(self, inter: GuildCommandInteraction):
@@ -196,6 +326,7 @@ class Stars(Cog):
             description=f"{to_user.mention} received a {STAR_EMOJI} from {from_user.mention} by a reaction\n[Source message]({message.jump_url})",
         )
         await channel.send(embed=embed)
+        await maybe_reward_user(to_user)
 
     @Cog.listener()
     async def on_raw_reaction_remove(

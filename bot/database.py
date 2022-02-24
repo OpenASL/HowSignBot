@@ -129,6 +129,13 @@ guild_settings = sa.Table(
         nullable=False,
         doc="Role IDs that can bypass Zoom FS Captcha",
     ),
+    sa.Column(
+        "reward_milestones",
+        ARRAY(sa.Integer),
+        server_default="{}",
+        nullable=False,
+        doc="Star counts at which members receive rewards (Sign Cafe only). If empty, rewards are disabled.",
+    ),
 )
 
 guild_announcements = sa.Table(
@@ -271,6 +278,21 @@ star_logs = sa.Table(
     sa.Column("message_id", BIGINT, doc="Discord message ID"),  # TODO: Remove?
     sa.Column("jump_url", sa.Text, doc="Discord jump URL for the message"),
     sa.Column("action", sa.Text, nullable=False, doc="The type of action"),
+    created_at_column(),
+)
+
+
+star_rewards = sa.Table(
+    "star_rewards",
+    metadata,
+    id_column(),
+    sa.Column("user_id", BIGINT, nullable=False, doc="Discord user ID of the recipient"),
+    sa.Column(
+        "star_count",
+        sa.Integer,
+        nullable=False,
+        doc="Number of stars the user had when the reward was given",
+    ),
     created_at_column(),
 )
 
@@ -806,6 +828,8 @@ class Store:
             ),
         )
         await self.db.execute(stmt)
+        star_count = await self.get_user_stars(user_id=to_user_id)
+        await self._clean_rewards(user_id=to_user_id, star_count=star_count)
 
     async def get_user_stars(self, user_id: int) -> int:
         query = user_stars.select().where(user_stars.c.user_id == user_id)
@@ -839,12 +863,58 @@ class Store:
         )
         await self.db.execute(stmt)
 
+        await self._clean_rewards(user_id=to_user_id, star_count=star_count)
+
+    async def _clean_rewards(self, user_id: int, star_count: int):
+        stmt = star_rewards.delete().where(
+            (star_rewards.c.user_id == user_id) & (star_rewards.c.star_count > star_count)
+        )
+        await self.db.execute(stmt)
+
     async def list_user_stars(self, limit: int) -> list[Mapping]:
         return await self.db.fetch_all(
             user_stars.select()
             .where(user_stars.c.star_count > 0)
             .order_by(user_stars.c.star_count.desc())
             .limit(limit)
+        )
+
+    async def list_user_star_highlight_logs(
+        self, user_id: int, *, limit: int, after: dt.datetime | None
+    ) -> list[Mapping]:
+
+        query = star_logs.select().where(
+            (star_logs.c.to_user_id == user_id) & (star_logs.c.message_id != NULL)
+        )
+        if after:
+            query = query.where(star_logs.c.created_at > after)
+        return await self.db.fetch_all(
+            query.order_by(star_logs.c.created_at.desc()).limit(limit)
+        )
+
+    async def get_latest_star_reward(self, user_id: int) -> Mapping | None:
+        query = (
+            star_rewards.select()
+            .where(star_rewards.c.user_id == user_id)
+            .order_by(star_rewards.c.created_at.desc())
+            .limit(1)
+        )
+        return await self.db.fetch_one(query=query)
+
+    async def store_star_reward(self, user_id: int, star_count: int):
+        stmt = insert(star_rewards).values(
+            id=uuid.uuid4(),
+            user_id=user_id,
+            star_count=star_count,
+            created_at=now(),
+        )
+        await self.db.execute(stmt)
+
+    async def update_reward_milestones(self, guild_id: int, reward_milestones: list[int]):
+        await self.db.execute(
+            guild_settings.update()
+            .where(guild_settings.c.guild_id == guild_id)
+            .values(reward_milestones=reward_milestones)
         )
 
 
