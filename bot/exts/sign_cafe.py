@@ -43,7 +43,7 @@ UNMUTE_WARNING = (
     "we encourage you to keep your voice off during sessions. "
     "🤐 You can use the text channels to type responses when needed."
 )
-DAILY_MESSAGE_TIME = dt.time(12, 12)  # Eastern time
+DAILY_MESSAGE_TIME = dt.time(8, 0)  # Eastern time
 DAILY_MEMBER_KICK_TIME = dt.time(12, 0)  # Eastern time
 PRUNE_DAYS = settings.SIGN_CAFE_PRUNE_DAYS
 
@@ -218,8 +218,7 @@ class SignCafe(Cog):
         hidden=True,
         help="Display a tag or the list of available tags",
     )
-    # XXX: The `tag_name` typing should be str | None, but disnake doesn't support unions in arguments
-    async def tag_group(self, ctx: Context, *, tag_name: str = None):
+    async def tag_group(self, ctx: Context, *, tag_name: str = ""):
         if not tag_name:
             await ctx.reply(**self._tag_list_impl())
             return
