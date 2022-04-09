@@ -504,9 +504,6 @@ class Meetings(Cog):
         else:
             await inter.send(embed=make_watch2gether_embed(url, video_url))
 
-        message = await inter.original_message()
-        await add_stop_sign(message)
-
     @slash_command(name="jitsi")
     async def jitsi_command(
         self, inter: ApplicationCommandInteraction, *, name: Optional[str] = None
