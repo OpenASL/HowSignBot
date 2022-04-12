@@ -5,6 +5,6 @@ pre-commit==2.18.1
 PyJWT==2.3.0
 pyright==0.0.13.post0
 pytest-asyncio==0.18.3
-python-semantic-release==7.27.1
+python-semantic-release==7.28.0
 SQLAlchemy-Utils==0.38.2
 syrupy==1.7.4
