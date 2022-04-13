@@ -1,6 +1,6 @@
 # name: test_catchphrase
-  <class 'dict'> {
-    'content': '
+  dict({
+    'content': '''
       ||river rafting||
       ||Spain||
       ||dredge||
@@ -10,12 +10,12 @@
       ||cousin||
       ||angel food cake||
       Categories: easy, medium, hard, animals, food, travel, people, household
-    ',
-  }
----
+    ''',
+  })
+# ---
 # name: test_catchphrase_categories[Hard]
-  <class 'dict'> {
-    'content': '
+  dict({
+    'content': '''
       ||cardboard||
       ||full moon||
       ||mast||
@@ -25,20 +25,20 @@
       ||escalator||
       ||shock collar||
       Categories: easy, medium, hard, animals, food, travel, people, household
-    ',
-  }
----
+    ''',
+  })
+# ---
 # name: test_catchphrase_categories[categories]
-  <class 'dict'> {
-    'content': '
+  dict({
+    'content': '''
       easy, medium, hard, animals, food, travel, people, household
       Enter `!cp` or `!cp [category]` to generate a list of words/phrases.
-    ',
-  }
----
+    ''',
+  })
+# ---
 # name: test_catchphrase_categories[food]
-  <class 'dict'> {
-    'content': '
+  dict({
+    'content': '''
       ||corn on the cob||
       ||pineapple||
       ||yam||
@@ -48,6 +48,6 @@
       ||nutmeg||
       ||bok choy||
       Categories: easy, medium, hard, animals, food, travel, people, household
-    ',
-  }
----
+    ''',
+  })
+# ---
