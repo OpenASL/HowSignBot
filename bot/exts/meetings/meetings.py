@@ -89,7 +89,7 @@ def make_watch2gether_embed(url: str, video_url: Optional[str]) -> disnake.Embed
     description = "🚀 Watch videos together!"
     if video_url:
         description += f"\nQueued video: <{video_url}>"
-    description += "\n*When finished, click 🛑 to remove this message.*"
+    description += "\n*When finished, react with 🛑 to remove this message.*"
     return disnake.Embed(title=url, description=description, color=disnake.Color.gold())
 
 
