@@ -18,7 +18,7 @@ from bot.utils.datetimes import (
     PACIFIC_CURRENT_NAME,
     NoTimeZoneError,
     display_timezone,
-    format_multi_time,
+    format_datetime,
     parse_human_readable_datetime,
     utcnow,
 )
@@ -204,8 +204,7 @@ async def practice_impl(
     logger.info(f"adding new practice session to sheet: {row}")
     worksheet = await get_practice_worksheet_for_guild(guild_id)
     worksheet.append_row(row)
-    dtime_pacific = dtime.astimezone(PACIFIC)
-    short_display_date = f"{dtime_pacific:%a, %b %d} {format_multi_time(dtime)}"
+    short_display_date = format_datetime(dtime)
     sessions = await get_practice_sessions(
         guild_id=guild_id, dtime=dtime, worksheet=worksheet
     )

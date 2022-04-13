@@ -73,6 +73,10 @@ def display_timezone(tzinfo: StaticTzInfo, dtime: dt.datetime) -> str:
     return ret
 
 
+def format_datetime(dtime: dt.datetime, format_type="f") -> str:
+    return f"<t:{round(dtime.timestamp())}:{format_type}>"
+
+
 def display_time(dtime: dt.datetime, time_format: str, tzinfo: StaticTzInfo) -> str:
     return dtime.astimezone(tzinfo).strftime(time_format) + display_timezone(
         tzinfo, dtime
