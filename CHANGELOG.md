@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v22.20.0 (2022-04-12)
+### Feature
+* Use built-in timestamp formatting ([#480](https://github.com/OpenASL/HowSignBot/issues/480)) ([`80f8afa`](https://github.com/OpenASL/HowSignBot/commit/80f8afae199bdb5f5d9933d70c17fbb572efa8d0))
+* Don't add stop sign to watch2gether ([`0d36d6b`](https://github.com/OpenASL/HowSignBot/commit/0d36d6b5a0142f546a3db23905810f89591d4bb5))
+
 ## v22.19.1 (2022-02-23)
 ### Fix
 * **stars:** Fix highlight query ([`5285329`](https://github.com/OpenASL/HowSignBot/commit/5285329ec35fbfb323084a9e99ac142b9c6e9566))
