@@ -1,4 +1,5 @@
 #!/bin/sh
 set -eo pipefail
 
+docker-compose up -d
 DEBUG=true python -m bot
