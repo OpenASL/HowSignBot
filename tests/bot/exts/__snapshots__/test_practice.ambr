@@ -1,111 +1,111 @@
 # name: test_practice["classifiers" at 6pm pdt]
-  <class 'tuple'> (
+  tuple(
     'Friday, September 25 06:00 PM PDT 2020',
     'Steve',
     '<@!12345>',
     'classifiers',
   )
----
+# ---
 # name: test_practice["games" 10am edt Sunday]
-  <class 'tuple'> (
+  tuple(
     'Sunday, September 27 10:00 AM EDT 2020',
     'Steve',
     '<@!12345>',
     'games',
   )
----
+# ---
 # name: test_practice["games" at 10am edt on 9/27]
-  <class 'tuple'> (
+  tuple(
     'Sunday, September 27 10:00 AM EDT 2020',
     'Steve',
     '<@!12345>',
     'games',
   )
----
+# ---
 # name: test_practice["games" at 10am edt on Sunday]
-  <class 'tuple'> (
+  tuple(
     'Sunday, September 27 10:00 AM EDT 2020',
     'Steve',
     '<@!12345>',
     'games',
   )
----
+# ---
 # name: test_practice[10am edt "games" on 9/27]
-  <class 'tuple'> (
+  tuple(
     'Sunday, September 27 10:00 AM EDT 2020',
     'Steve',
     '<@!12345>',
     'games',
   )
----
+# ---
 # name: test_practice[2pm edt "chat and games! \U0001f389"]
-  <class 'tuple'> (
+  tuple(
     'Friday, September 25 02:00 PM EDT 2020',
     'Steve',
     '<@!12345>',
     'chat and games! 🎉',
   )
----
+# ---
 # name: test_practice[2pm edt]
-  <class 'tuple'> (
+  tuple(
     'Friday, September 25 02:00 PM EDT 2020',
     'Steve',
     '<@!12345>',
     '',
   )
----
+# ---
 # name: test_practice[9/24 1:45pm edt \u201caround 45 min.-1 hour\u201d]
-  <class 'tuple'> (
+  tuple(
     'Friday, September 24 01:45 PM EDT 2021',
     'Steve',
     '<@!12345>',
     'around 45 min.-1 hour',
   )
----
+# ---
 # name: test_practice[9/27 9am cdt]
-  <class 'tuple'> (
+  tuple(
     'Sunday, September 27 09:00 AM CDT 2020',
     'Steve',
     '<@!12345>',
     '',
   )
----
+# ---
 # name: test_practice[at 2pm edt]
-  <class 'tuple'> (
+  tuple(
     'Friday, September 25 02:00 PM EDT 2020',
     'Steve',
     '<@!12345>',
     '',
   )
----
+# ---
 # name: test_practice[sunday 10:30pm pdt]
-  <class 'tuple'> (
+  tuple(
     'Sunday, September 27 10:30 PM PDT 2020',
     'Steve',
     '<@!12345>',
     '',
   )
----
+# ---
 # name: test_practice[tomorrow 2pm pdt]
-  <class 'tuple'> (
+  tuple(
     'Saturday, September 26 02:00 PM PDT 2020',
     'Steve',
     '<@!12345>',
     '',
   )
----
+# ---
 # name: test_schedule[None]
-  <class 'dict'> {
-    'embed': <class 'Embed'> {
+  dict({
+    'embed': Embed(
       Empty=Embed.Empty,
       author=EmbedProxy(),
       color=<Colour value=8701136>,
       colour=<Colour value=8701136>,
       description='Today - Friday, September 25',
-      fields=<class 'list'> [
+      fields=list([
         EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[+Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+recurring&dates=20200925T210000Z%2F20200925T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: <@!12345>\n> Details: recurring'),
         EmbedProxy(inline=True, name='🗓 View or edit the schedule using the link below.', value='[Full schedule](https://docs.google.com/spreadsheets/d/abc/edit)'),
-      ],
+      ]),
       footer=EmbedProxy(),
       image=EmbedProxy(),
       provider=EmbedProxy(),
@@ -115,21 +115,21 @@
       type='rich',
       url=Embed.Empty,
       video=EmbedProxy(),
-    },
-  }
----
+    ),
+  })
+# ---
 # name: test_schedule[today]
-  <class 'dict'> {
-    'embed': <class 'Embed'> {
+  dict({
+    'embed': Embed(
       Empty=Embed.Empty,
       author=EmbedProxy(),
       color=<Colour value=8701136>,
       colour=<Colour value=8701136>,
       description='Today - Friday, September 25',
-      fields=<class 'list'> [
+      fields=list([
         EmbedProxy(inline=False, name='2 PM PDT / 3 PM MDT / 4 PM CDT / 5 PM EDT', value='[+Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+recurring&dates=20200925T210000Z%2F20200925T220000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Host: <@!12345>\n> Details: recurring'),
         EmbedProxy(inline=True, name='🗓 View or edit the schedule using the link below.', value='[Full schedule](https://docs.google.com/spreadsheets/d/abc/edit)'),
-      ],
+      ]),
       footer=EmbedProxy(),
       image=EmbedProxy(),
       provider=EmbedProxy(),
@@ -139,21 +139,21 @@
       type='rich',
       url=Embed.Empty,
       video=EmbedProxy(),
-    },
-  }
----
+    ),
+  })
+# ---
 # name: test_schedule_on_a_holiday
-  <class 'dict'> {
-    'embed': <class 'Embed'> {
+  dict({
+    'embed': Embed(
       Empty=Embed.Empty,
       author=EmbedProxy(),
       color=<Colour value=8701136>,
       colour=<Colour value=8701136>,
       description='Today - Thursday, November 26 🦃',
-      fields=<class 'list'> [
+      fields=list([
         EmbedProxy(inline=False, name='11 AM PST / 12 PM MST / 1 PM CST / 2 PM EST', value='[+Google Calendar](http://www.google.com/calendar/event?action=TEMPLATE&text=ASL+Practice%3A+Turkey+day+PRACTICE&dates=20201126T190000Z%2F20201126T200000Z&details=See+the+full+schedule+here%3A+https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fabc%2Fedit)\n> Details: Turkey day PRACTICE'),
         EmbedProxy(inline=True, name='🗓 View or edit the schedule using the link below.', value='[Full schedule](https://docs.google.com/spreadsheets/d/abc/edit)'),
-      ],
+      ]),
       footer=EmbedProxy(),
       image=EmbedProxy(),
       provider=EmbedProxy(),
@@ -163,6 +163,6 @@
       type='rich',
       url=Embed.Empty,
       video=EmbedProxy(),
-    },
-  }
----
+    ),
+  })
+# ---
