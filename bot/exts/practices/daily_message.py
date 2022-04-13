@@ -17,7 +17,7 @@ from bot.exts.asl import word_display
 from bot.utils.datetimes import (
     EASTERN,
     PACIFIC,
-    format_multi_time,
+    format_datetime,
     parse_human_readable_datetime,
     utcnow,
 )
@@ -156,7 +156,7 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
             )
             for event in events_today:
                 embed.add_field(
-                    name=format_multi_time(event.scheduled_start_time),
+                    name=format_datetime(event.scheduled_start_time, format_type="t"),
                     value=f"{event.name} · [Details/RSVP]({get_event_url(event)})",
                     inline=False,
                 )

@@ -11,7 +11,7 @@ from bot.utils import truncate
 from bot.utils.datetimes import (
     PACIFIC,
     PACIFIC_CURRENT_NAME,
-    format_multi_time,
+    format_datetime,
     parse_human_readable_datetime,
     utcnow,
 )
@@ -113,7 +113,7 @@ async def make_practice_session_embed(
     else:
         num_sessions = len(sessions)
         for session in sessions:
-            title = format_multi_time(session.dtime)
+            title = format_datetime(session.dtime, format_type="t")
             gcal_event_title = (
                 f"ASL Practice: {truncate(session.notes, 50)}"
                 if session.notes

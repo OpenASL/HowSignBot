@@ -23,6 +23,7 @@ from bot.utils.datetimes import (
     PACIFIC_CURRENT_NAME,
     NoTimeZoneError,
     display_timezone,
+    format_datetime,
     format_multi_time,
     utcnow,
 )
@@ -70,6 +71,7 @@ def format_scheduled_start_time_date(dtime: dt.datetime):
 
 
 def format_scheduled_start_time(dtime: dt.datetime):
+    # NOTE: <t:...> format doesn't work in dropdown labels
     return format_scheduled_start_time_date(dtime) + " · " + format_multi_time(dtime)
 
 
@@ -462,7 +464,7 @@ class Schedule(commands.Cog):
         await start_time_message.edit(
             content=(
                 "☑️ **When will your event start?**\n"
-                f"Entered: {format_scheduled_start_time(scheduled_start_time)}"
+                f"Entered: {format_datetime(scheduled_start_time, format_type='F')}"
             )
         )
         return scheduled_start_time, used_timezone
