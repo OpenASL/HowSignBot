@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.20.1 (2022-04-12)
+### Fix
+* Copy ([`3121efb`](https://github.com/OpenASL/HowSignBot/commit/3121efbdedd7f911edbdac8bd8d1591eb87c4aab))
+
 ## v22.20.0 (2022-04-12)
 ### Feature
 * Use built-in timestamp formatting ([#480](https://github.com/OpenASL/HowSignBot/issues/480)) ([`80f8afa`](https://github.com/OpenASL/HowSignBot/commit/80f8afae199bdb5f5d9933d70c17fbb572efa8d0))
