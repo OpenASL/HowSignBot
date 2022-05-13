@@ -2,7 +2,7 @@
 asynctest==0.13.0
 freezegun==1.2.1
 pre-commit==2.19.0
-PyJWT==2.3.0
+PyJWT==2.4.0
 pyright==0.0.13.post0
 pytest-asyncio==0.18.3
 python-semantic-release==7.28.1
