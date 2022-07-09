@@ -110,9 +110,15 @@ async def handle_zoom_event(bot: Bot, data: dict):
             disnake_messages.append(disnake_message)
             if event == "meeting.ended":
                 await maybe_clear_reaction(disnake_message, REPOST_EMOJI)
+                embed = disnake.Embed(
+                    title="✨ _Zoom meeting ended by host_", color=disnake.Color.blue()
+                )
+                embed.set_footer(
+                    text="🌱🌱 2 trees will be planted to offset the emissions from this meeting."
+                )
                 edit_kwargs = {
-                    "content": "✨ _Zoom meeting ended by host_",
-                    "embed": None,
+                    "content": None,
+                    "embed": embed,
                     "view": None,
                 }
             else:
