@@ -6,5 +6,5 @@ PyJWT==2.4.0
 pyright==0.0.13.post0
 pytest-asyncio==0.18.3
 python-semantic-release==7.29.4
-SQLAlchemy-Utils==0.38.2
+SQLAlchemy-Utils==0.38.3
 syrupy==2.3.1
