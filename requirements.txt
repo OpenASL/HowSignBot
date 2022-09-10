@@ -1,4 +1,4 @@
-ariadne==0.15.1
+ariadne==0.16.0
 disnake==2.4.0
 environs==9.5.0
 gspread==5.5.0
