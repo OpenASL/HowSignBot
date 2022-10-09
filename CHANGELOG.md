@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v22.21.0 (2022-10-09)
+### Feature
+* Add zoom close message (trees) ([#504](https://github.com/OpenASL/HowSignBot/issues/504)) ([`61afca2`](https://github.com/OpenASL/HowSignBot/commit/61afca27edd0cf54706768563f02e9e4c21f7e72))
+
+### Fix
+* Update API URL for watch2gether ([#527](https://github.com/OpenASL/HowSignBot/issues/527)) ([`16a72f5`](https://github.com/OpenASL/HowSignBot/commit/16a72f5f222b8e1f3582b37890613b53a0931111))
+
 ## v22.20.1 (2022-04-12)
 ### Fix
 * Copy ([`3121efb`](https://github.com/OpenASL/HowSignBot/commit/3121efbdedd7f911edbdac8bd8d1591eb87c4aab))
