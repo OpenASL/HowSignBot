@@ -4,7 +4,7 @@ services:
   db:
     ports:
       - 54321:5432 # don't conflict with Homebrew postgres
-    image: postgres:12
+    image: postgres:15
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
