@@ -7,4 +7,4 @@ pyright==0.0.13.post0
 pytest-asyncio==0.18.3
 python-semantic-release==7.32.2
 SQLAlchemy-Utils==0.38.3
-syrupy==3.0.4
+syrupy==3.0.5
