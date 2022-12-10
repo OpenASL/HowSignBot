@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.21.4 (2022-12-10)
+### Fix
+* Don't chunk at startup ([`0642ec8`](https://github.com/OpenASL/HowSignBot/commit/0642ec84a068b831e1c00e8de8ed63b28ca4649f))
+
 ## v22.21.3 (2022-12-10)
 ### Fix
 * **sign_cafe:** Fix syncing members ([`1e19299`](https://github.com/OpenASL/HowSignBot/commit/1e1929995135560cd386973c713451e5ecf2bb17))
