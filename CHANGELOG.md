@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.21.2 (2022-12-10)
+### Fix
+* Remove cert step ([`a40c5e4`](https://github.com/OpenASL/HowSignBot/commit/a40c5e4c6c2e3ced6f2eb8a4adb5392d936f0d83))
+
 ## v22.21.1 (2022-12-10)
 ### Fix
 * Download cockroach cert when deploying ([`f383b6f`](https://github.com/OpenASL/HowSignBot/commit/f383b6fd412be43c6b21bd45f86a31cc4af019ee))
