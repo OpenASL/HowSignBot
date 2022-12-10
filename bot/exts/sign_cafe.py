@@ -331,8 +331,10 @@ class SignCafe(Cog):
 
         role = inter.guild.get_role(settings.SIGN_CAFE_ACKNOWLEDGED_RULES_ROLE_ID)
         assert role is not None
+        logger.info("fetching guild")
+        guild = await self.bot.fetch_guild(settings.SIGN_CAFE_GUILD_ID)
         await store.clear_sign_cafe_members()
-        for member in inter.guild.members:
+        async for member in guild.fetch_members(limit=10000):
             if member.bot:
                 continue
             logger.info(f"storing member {member.id}")

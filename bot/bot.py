@@ -31,7 +31,7 @@ bot = commands.Bot(
     sync_permissions=True,
     reload=settings.DEBUG,
     test_guilds=settings.TEST_GUILDS or None,
-    chunk_guilds_at_startup=False,
+    chunk_guilds_at_startup=True,
 )
 
 PRESENCE_COMMANDS = (
