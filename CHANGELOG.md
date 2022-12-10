@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.21.1 (2022-12-10)
+### Fix
+* Download cockroach cert when deploying ([`f383b6f`](https://github.com/OpenASL/HowSignBot/commit/f383b6fd412be43c6b21bd45f86a31cc4af019ee))
+
 ## v22.21.0 (2022-10-09)
 ### Feature
 * Add zoom close message (trees) ([#504](https://github.com/OpenASL/HowSignBot/issues/504)) ([`61afca2`](https://github.com/OpenASL/HowSignBot/commit/61afca27edd0cf54706768563f02e9e4c21f7e72))
