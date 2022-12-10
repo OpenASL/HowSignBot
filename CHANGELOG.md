@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v22.21.3 (2022-12-10)
+### Fix
+* **sign_cafe:** Fix syncing members ([`1e19299`](https://github.com/OpenASL/HowSignBot/commit/1e1929995135560cd386973c713451e5ecf2bb17))
+
 ## v22.21.2 (2022-12-10)
 ### Fix
 * Remove cert step ([`a40c5e4`](https://github.com/OpenASL/HowSignBot/commit/a40c5e4c6c2e3ced6f2eb8a4adb5392d936f0d83))
