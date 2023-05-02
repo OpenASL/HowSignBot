@@ -882,7 +882,6 @@ class Store:
     async def list_user_star_highlight_logs(
         self, user_id: int, *, limit: int, after: dt.datetime | None
     ) -> list[Mapping]:
-
         query = star_logs.select().where(
             (star_logs.c.to_user_id == user_id)
             & (star_logs.c.jump_url != NULL)

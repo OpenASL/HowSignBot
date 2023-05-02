@@ -4,20 +4,20 @@ ci:
   autoupdate_commit_msg: 'chore(pre-commit): pre-commit autoupdate'
 repos:
 - repo: https://github.com/asottile/pyupgrade
-  rev: v2.38.2
+  rev: v3.3.2
   hooks:
   - id: pyupgrade
     args: [--py38-plus]
 - repo: https://github.com/pycqa/isort
-  rev: 5.10.1
+  rev: 5.12.0
   hooks:
     - id: isort
 - repo: https://github.com/psf/black
-  rev: 22.8.0
+  rev: 23.3.0
   hooks:
   - id: black
 - repo: https://github.com/PyCQA/flake8
-  rev: 5.0.4
+  rev: 6.0.0
   hooks:
   - id: flake8
     additional_dependencies: ['flake8-bugbear==22.9.23']
