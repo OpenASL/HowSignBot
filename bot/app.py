@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 import aiohttp_cors
@@ -60,11 +59,11 @@ async def start_bot():
         await bot.close()
 
 
-async def on_startup(app):
+async def on_startup(app: web.Application):
     for ext in walk_extensions():
         bot.load_extension(ext)
     await store.connect()
-    app["bot_task"] = asyncio.create_task(start_bot())
+    app["bot_task"] = bot.loop.create_task(start_bot())
     app["bot"] = bot
 
 

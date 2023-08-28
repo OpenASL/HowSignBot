@@ -7,10 +7,10 @@ from typing import Any, Awaitable, Callable, Mapping, Sequence, Type, cast
 
 import disnake
 import holiday_emojis
-import meetings
 from aiohttp import client
 from disnake.ext.commands import Bot, Context, errors, has_any_role
 from disnake.ext.commands.errors import MissingAnyRole, NoPrivateMessage
+from meetings.zoom import ZoomClient
 from nameparser import HumanName
 
 from bot import settings
@@ -81,6 +81,12 @@ FACES = (
     "😹",
     "😼",
     "🙀",
+)
+
+zoom_client = ZoomClient(
+    account_id=settings.ZOOM_ACCOUNT_ID,
+    client_id=settings.ZOOM_CLIENT_ID,
+    client_secret=settings.ZOOM_CLIENT_SECRET,
 )
 
 
@@ -256,9 +262,7 @@ async def maybe_create_zoom_meeting(
     meeting_exists = await store.zoom_meeting_exists(meeting_id=meeting_id)
     if not meeting_exists:
         try:
-            meeting = await meetings.get_zoom(
-                token=settings.ZOOM_JWT, meeting_id=meeting_id
-            )
+            meeting = await zoom_client.get_zoom(meeting_id=meeting_id)
         except client.ClientResponseError as error:
             logger.exception(f"error when fetching zoom meeting {meeting_id}")
             raise errors.CheckFailure(
@@ -336,8 +340,7 @@ async def zoom_impl(
         return zoom_meeting_id, message
     else:
         try:
-            meeting = await meetings.create_zoom(
-                token=settings.ZOOM_JWT,
+            meeting = await zoom_client.create_zoom(
                 user_id=zoom_user,
                 topic="",
                 settings={
