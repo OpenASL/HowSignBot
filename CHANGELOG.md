@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v22.22.0 (2023-08-28)
+### Feature
+
+* **zoom:** Zoom oauth server-to-server ([#572](https://github.com/OpenASL/HowSignBot/issues/572)) ([`694c7d7`](https://github.com/OpenASL/HowSignBot/commit/694c7d7e2e4710f7966faa0e6521f85f742a6513))
+
 ## v22.21.4 (2022-12-10)
 ### Fix
 * Don't chunk at startup ([`0642ec8`](https://github.com/OpenASL/HowSignBot/commit/0642ec84a068b831e1c00e8de8ed63b28ca4649f))
