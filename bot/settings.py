@@ -67,12 +67,15 @@ SIGN_CAFE_SURVEY_VANITY_ROLE_ID = env.int(
 
 # Mapping of Discord user IDs => emails
 ZOOM_USERS = env.dict("ZOOM_USERS", subcast_keys=int, required=True)
+ZOOM_ACCOUNT_ID = env.str("ZOOM_ACCOUNT_ID", required=True)
+ZOOM_CLIENT_ID = env.str("ZOOM_CLIENT_ID", required=True)
+ZOOM_CLIENT_SECRET = env.str("ZOOM_CLIENT_SECRET", required=True)
 # Emails for Zoom users that should never be downgraded to Basic
 ZOOM_NO_DOWNGRADE = env.list("ZOOM_NO_DOWNGRADE", default=[], subcast=str)
 ZOOM_EMAILS = {email: zoom_id for zoom_id, email in ZOOM_USERS.items()}
-ZOOM_JWT = env.str("ZOOM_JWT", required=True)
-ZOOM_HOOK_TOKEN = env.str("ZOOM_HOOK_TOKEN", required=True)
+ZOOM_HOOK_SECRET = env.str("ZOOM_HOOK_SECRET", required=True)
 ZOOM_REPOST_COOLDOWN = env.int("ZOOM_REPOST_COOLDOWN", 30)
+
 ZZZZOOM_URL = env.str("ZZZZOOM_URL", "https://zzzzoom.us")
 
 WATCH2GETHER_API_KEY = env.str("WATCH2GETHER_API_KEY", required=True)

@@ -1,5 +1,8 @@
 import asyncio
 import datetime as dt
+import hashlib
+import hmac
+import json
 import logging
 from typing import cast
 
@@ -140,10 +143,33 @@ async def handle_zoom_event(bot: Bot, data: dict):
 
 
 def setup(bot: Bot) -> None:
-    async def zoom(request):
-        if request.headers["authorization"] != settings.ZOOM_HOOK_TOKEN:
+    async def zoom(request: web.Request):
+        text = await request.text()
+        data = json.loads(text)
+        event = data["event"]
+        # https://developers.zoom.us/docs/api/rest/webhook-reference/#validate-your-webhook-endpoint
+        if event == "endpoint.url_validation":
+            plain_token = data["payload"]["plainToken"]
+            encrypted_token = hmac.new(
+                settings.ZOOM_HOOK_SECRET.encode("utf-8"),
+                plain_token.encode("utf-8"),
+                hashlib.sha256,
+            ).hexdigest()
+            return web.json_response(
+                {"plainToken": plain_token, "encryptedToken": encrypted_token}
+            )
+        # https://developers.zoom.us/docs/api/rest/webhook-reference/#verify-webhook-events
+        message = f"v0:{request.headers['x-zm-request-timestamp']}:{text}"
+        signature = hmac.new(
+            settings.ZOOM_HOOK_SECRET.encode("utf-8"),
+            message.encode("utf-8"),
+            hashlib.sha256,
+        ).hexdigest()
+        expected_signature = request.headers["x-zm-signature"]
+        actual_signature = f"v0={signature}"
+        if expected_signature != actual_signature:
             return web.Response(body="", status=403)
-        data = await request.json()
+
         # Zoom expects responses within 3 seconds, so run the handler logic asynchronously
         #   https://marketplace.zoom.us/docs/api-reference/webhook-reference#notification-delivery
         asyncio.create_task(handle_zoom_event(bot, data))
