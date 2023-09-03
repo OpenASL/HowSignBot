@@ -55,12 +55,6 @@ heroku logs -a howsign -t
 heroku logs -a howsign-staging -t
 ```
 
-## Cycling the Zoom token
-
-```
-python script/cycle_zoom_token.py --set
-```
-
 ## Setting up Zoom webhooks (for participant indicator and auto-closing)
 
 - Go to your app in the [Zoom app dashboard](https://marketplace.zoom.us/user/build)
