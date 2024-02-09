@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v22.22.1 (2024-02-09)
+
+### Fix
+
+* Update dactle URL ([#587](https://github.com/OpenASL/HowSignBot/issues/587)) ([`c7bad2f`](https://github.com/OpenASL/HowSignBot/commit/c7bad2f214b894c7e8e4b777dfd18d28a88bd12e))
+
 ## v22.22.0 (2023-08-28)
 ### Feature
 
