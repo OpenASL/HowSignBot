@@ -216,7 +216,7 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
         if include_wordle:
             wordle_embed = disnake.Embed(
                 title="Daily ASL Wordle",
-                description="https://dactle.asl.cafe/",
+                description="https://dactle.sloria.io/",
                 color=THEME_COLOR,
             )
             wordle_embed.set_thumbnail(url="attachment://wordle.png")
