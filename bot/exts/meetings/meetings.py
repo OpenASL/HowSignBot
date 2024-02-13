@@ -268,7 +268,9 @@ class Meetings(Cog):
                 for message in messages
             )
             await inter.send(
-                embed=disnake.Embed(title="🚀 Meeting Details Revealed", description=links)
+                embed=disnake.Embed(
+                    title="🚀 Meeting Details Revealed", description=links
+                )
             )
         else:
             channel_message = next(
@@ -349,7 +351,8 @@ class Meetings(Cog):
         }
         description = "\n".join(
             tuple(
-                ("👑 " if email.lower() in licensed_user_emails else "") + f"<@!{user_id}>"
+                ("👑 " if email.lower() in licensed_user_emails else "")
+                + f"<@!{user_id}>"
                 for user_id, email in settings.ZOOM_USERS.items()
             )
         )

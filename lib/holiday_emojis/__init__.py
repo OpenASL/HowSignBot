@@ -27,9 +27,9 @@ class USPlus(holidays.US):
         self[dt.date(year, holidays.constants.JAN, 24)] = "National Peanut Butter Day"
         self[dt.date(year, holidays.constants.JAN, 26)] = "Australia Day"
         self[dt.date(year, holidays.constants.JAN, 29)] = "Puzzle Day"
-        self[
-            dt.date(year, holidays.constants.FEB, 1)
-        ] = "First Day of Black History Month"
+        self[dt.date(year, holidays.constants.FEB, 1)] = (
+            "First Day of Black History Month"
+        )
         self[dt.date(year, holidays.constants.FEB, 2)] = "Groundhog Day"
         self[dt.date(year, holidays.constants.FEB, 5)] = "World Nutella Day"
         self[dt.date(year, holidays.constants.FEB, 9)] = "Pizza Day"
@@ -43,51 +43,51 @@ class USPlus(holidays.US):
         self[easter(year)] = "Easter"
         self[dt.date(year, holidays.constants.MAR, 20)] = "Earth Day"
         self[dt.date(year, holidays.constants.MAR, 26)] = "Purple Day"
-        self[
-            dt.date(year, holidays.constants.MAR, 31)
-        ] = "International Transgender Day of Visibility"
+        self[dt.date(year, holidays.constants.MAR, 31)] = (
+            "International Transgender Day of Visibility"
+        )
         self[dt.date(year, holidays.constants.APR, 23)] = "National Picnic Day"
         self[dt.date(year, holidays.constants.APR, 26)] = "Pretzel Day"
         self[dt.date(year, holidays.constants.MAY, 1) + rd(weekday=FR(+1))] = "Space Day"
         self[dt.date(year, holidays.constants.MAY, 4)] = "Star Wars Day"
-        self[
-            dt.date(year, holidays.constants.MAY, 1) + rd(weekday=SU(+2))
-        ] = "Mother's Day"
+        self[dt.date(year, holidays.constants.MAY, 1) + rd(weekday=SU(+2))] = (
+            "Mother's Day"
+        )
         self[dt.date(year, holidays.constants.MAY, 22)] = "World Turtle Day"
         self[dt.date(year, holidays.constants.MAY, 28)] = "National Hamburger Day"
-        self[
-            dt.date(year, holidays.constants.JUN, 1) + rd(weekday=SU(+3))
-        ] = "Father's Day"
+        self[dt.date(year, holidays.constants.JUN, 1) + rd(weekday=SU(+3))] = (
+            "Father's Day"
+        )
         self[dt.date(year, holidays.constants.JUN, 5)] = "National Donut Day"
         self[dt.date(year, holidays.constants.JUN, 14)] = "Flag Day"
         self[dt.date(year, holidays.constants.JUN, 19)] = "Juneteenth"
         self[dt.date(year, holidays.constants.JUN, 28)] = "Pride Day"
-        self[
-            dt.date(year, holidays.constants.JUL, 1) + rd(weekday=SU(+3))
-        ] = "Ice Cream Day"
+        self[dt.date(year, holidays.constants.JUL, 1) + rd(weekday=SU(+3))] = (
+            "Ice Cream Day"
+        )
         self[dt.date(year, holidays.constants.JUL, 14)] = "Bastille Day"
         self[dt.date(year, holidays.constants.JUL, 17)] = "National Tattoo Day"
         self[dt.date(year, holidays.constants.JUL, 20)] = "National Lollipop Day"
         self[dt.date(year, holidays.constants.JUL, 23)] = "National Hot Dog Day"
         self[dt.date(year, holidays.constants.JUL, 24)] = "National Cousins Day"
         self[dt.date(year, holidays.constants.JUL, 31)] = "National Avocado Day"
-        self[
-            dt.date(year, holidays.constants.AUG, 1) + rd(weekday=FR(+1))
-        ] = "International Beer Day"
+        self[dt.date(year, holidays.constants.AUG, 1) + rd(weekday=FR(+1))] = (
+            "International Beer Day"
+        )
         self[dt.date(year, holidays.constants.AUG, 8)] = "National Bowling Day"
         self[dt.date(year, holidays.constants.AUG, 24)] = "National Waffle Day"
-        self[
-            dt.date(year, holidays.constants.SEP, 19)
-        ] = "International Talk Like A Pirate Day"
+        self[dt.date(year, holidays.constants.SEP, 19)] = (
+            "International Talk Like A Pirate Day"
+        )
         self[dt.date(year, holidays.constants.SEP, 29)] = "National Coffee Day"
         self[dt.date(2021, holidays.constants.SEP, 27)] = "Yom Kippur"
         self[dt.date(2022, holidays.constants.OCT, 4)] = "Yom Kippur"
         self[dt.date(2023, holidays.constants.SEP, 24)] = "Yom Kippur"
         self[dt.date(year, holidays.constants.OCT, 4)] = "National Taco Day"
         self[dt.date(year, holidays.constants.OCT, 31)] = "Halloween"
-        self[
-            dt.date(year, holidays.constants.NOV, 1) + rd(weekday=FR(+4))
-        ] = "Native American Heritage Day"
+        self[dt.date(year, holidays.constants.NOV, 1) + rd(weekday=FR(+4))] = (
+            "Native American Heritage Day"
+        )
         self[dt.date(year, holidays.constants.NOV, 28)] = "National French Toast Day"
         self[dt.date(year, holidays.constants.DEC, 4)] = "National Cookie Day"
         self[dt.date(year, holidays.constants.DEC, 8)] = "National Brownie Day"
