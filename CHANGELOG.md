@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v22.22.2 (2024-02-13)
+
+### Fix
+
+* Fix signbank searches ([#588](https://github.com/OpenASL/HowSignBot/issues/588)) ([`4e16270`](https://github.com/OpenASL/HowSignBot/commit/4e1627021189f9e71be5c5b8a93f2fd360eabd00))
+
 ## v22.22.1 (2024-02-09)
 
 ### Fix
