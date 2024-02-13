@@ -920,8 +920,8 @@ class Store:
 
 
 store = Store(
-    database_url=settings.TEST_DATABASE_URL
-    if settings.TESTING
-    else settings.DATABASE_URL,
+    database_url=(
+        settings.TEST_DATABASE_URL if settings.TESTING else settings.DATABASE_URL
+    ),
     force_rollback=settings.TESTING,
 )

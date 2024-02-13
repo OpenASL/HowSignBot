@@ -294,7 +294,9 @@ class Practice(commands.Cog):
                     assert guild is not None
                     dm_response += f"*{guild.name}*\n"
             else:
-                dm_response = "⚠️ You are not a member of any servers that have a practice schedule."
+                dm_response = (
+                    "⚠️ You are not a member of any servers that have a practice schedule."
+                )
         else:
             if str(old_timezone) != str(new_timezone):
                 assert new_timezone is not None

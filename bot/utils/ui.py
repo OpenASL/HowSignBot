@@ -42,9 +42,7 @@ class ButtonGroupView(disnake.ui.View):
                 assert inter.user is not None
                 # Ignore clicks by other users
                 if inter.user.id != self.creator_id:
-                    await inter.send(
-                        "⚠️ You can't interact with this UI.", ephemeral=True
-                    )
+                    await inter.send("⚠️ You can't interact with this UI.", ephemeral=True)
                     return
                 self.value = value
                 self.stop()
