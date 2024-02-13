@@ -62,7 +62,7 @@ def word_display(word: str, *, template: str = SIGN_TEMPLATE, max_length: int = 
     return template.format(
         word_uppercased=word.upper(),
         aslcore=f"https://aslcore.org/search/?query={quoted_word}&architecture=1&art=1&biology=1&computerscience=1&engineering=1&literature=1&organicchemistry=1&philosophy=1&physics=1&sustainability=1",
-        asl_signbank=f"https://aslsignbank.haskins.yale.edu/signs/search/?keyword={quoted_word}",
+        asl_signbank=f"https://aslsignbank.haskins.yale.edu/signs/search/?translation={quoted_word}",
         howsign=f"https://howsign.app/?s={quoted_word}",
         lifeprint=f"https://www.google.com/search?&q=site%3Alifeprint.com+{quoted_word}",
         handspeak=f"https://www.google.com/search?&q=site%3Ahandspeak.com+{quoted_word}",
