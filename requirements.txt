@@ -1,6 +1,6 @@
 ariadne==0.17.1
 disnake==2.4.0
-environs==9.5.0
+environs==11.0.0
 gspread==5.12.4
 aiohttp==3.8.6
 aiohttp-cors==0.7.0
