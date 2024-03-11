@@ -1,4 +1,4 @@
 from . import database
 
 __all__ = ["database"]
-__version__ = "22.22.2"
+__version__ = "22.22.3"

@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v22.22.3 (2024-03-11)
+
+### Fix
+
+* Temporarily disable presence to avoid rate limit ([`3f08949`](https://github.com/OpenASL/HowSignBot/commit/3f0894954786ebc6140a60004391ac834874422c))
+
 ## v22.22.2 (2024-02-13)
 
 ### Fix
