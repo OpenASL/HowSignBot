@@ -97,7 +97,7 @@
 # name: test_schedule[None]
   dict({
     'embed': Embed(
-      Empty=Embed.Empty,
+      Empty=None,
       author=EmbedProxy(),
       color=<Colour value=8701136>,
       colour=<Colour value=8701136>,
@@ -110,10 +110,10 @@
       image=EmbedProxy(),
       provider=EmbedProxy(),
       thumbnail=EmbedProxy(),
-      timestamp=Embed.Empty,
-      title=Embed.Empty,
+      timestamp=None,
+      title=None,
       type='rich',
-      url=Embed.Empty,
+      url=None,
       video=EmbedProxy(),
     ),
   })
@@ -121,7 +121,7 @@
 # name: test_schedule[today]
   dict({
     'embed': Embed(
-      Empty=Embed.Empty,
+      Empty=None,
       author=EmbedProxy(),
       color=<Colour value=8701136>,
       colour=<Colour value=8701136>,
@@ -134,10 +134,10 @@
       image=EmbedProxy(),
       provider=EmbedProxy(),
       thumbnail=EmbedProxy(),
-      timestamp=Embed.Empty,
-      title=Embed.Empty,
+      timestamp=None,
+      title=None,
       type='rich',
-      url=Embed.Empty,
+      url=None,
       video=EmbedProxy(),
     ),
   })
@@ -145,7 +145,7 @@
 # name: test_schedule_on_a_holiday
   dict({
     'embed': Embed(
-      Empty=Embed.Empty,
+      Empty=None,
       author=EmbedProxy(),
       color=<Colour value=8701136>,
       colour=<Colour value=8701136>,
@@ -158,10 +158,10 @@
       image=EmbedProxy(),
       provider=EmbedProxy(),
       thumbnail=EmbedProxy(),
-      timestamp=Embed.Empty,
-      title=Embed.Empty,
+      timestamp=None,
+      title=None,
       type='rich',
-      url=Embed.Empty,
+      url=None,
       video=EmbedProxy(),
     ),
   })

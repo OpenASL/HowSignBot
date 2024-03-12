@@ -1,24 +1,26 @@
 # name: test_handshape[open8]
   dict({
     'embed': Embed(
-      Empty=Embed.Empty,
+      Empty=None,
       author=EmbedProxy(),
-      color=Embed.Empty,
-      colour=Embed.Empty,
-      description=Embed.Empty,
+      color=None,
+      colour=None,
+      description=None,
       fields=list([
       ]),
       footer=EmbedProxy(),
       image=EmbedProxy(url='attachment://Open8.png'),
       provider=EmbedProxy(),
       thumbnail=EmbedProxy(),
-      timestamp=Embed.Empty,
+      timestamp=None,
       title='Open8',
       type='rich',
-      url=Embed.Empty,
+      url=None,
       video=EmbedProxy(),
     ),
     'file': File(
+      bytes_length=21155,
+      closed=False,
       description=None,
       filename='Open8.png',
       spoiler=False,
@@ -33,24 +35,26 @@
 # name: test_handshape[random]
   dict({
     'embed': Embed(
-      Empty=Embed.Empty,
+      Empty=None,
       author=EmbedProxy(),
-      color=Embed.Empty,
-      colour=Embed.Empty,
-      description=Embed.Empty,
+      color=None,
+      colour=None,
+      description=None,
       fields=list([
       ]),
       footer=EmbedProxy(),
       image=EmbedProxy(url='attachment://8.png'),
       provider=EmbedProxy(),
       thumbnail=EmbedProxy(),
-      timestamp=Embed.Empty,
+      timestamp=None,
       title='8',
       type='rich',
-      url=Embed.Empty,
+      url=None,
       video=EmbedProxy(),
     ),
     'file': File(
+      bytes_length=20739,
+      closed=False,
       description=None,
       filename='8.png',
       spoiler=False,
@@ -65,11 +69,11 @@
 # name: test_sign[need, ask]
   dict({
     'embed': Embed(
-      Empty=Embed.Empty,
+      Empty=None,
       author=EmbedProxy(),
-      color=Embed.Empty,
-      colour=Embed.Empty,
-      description=Embed.Empty,
+      color=None,
+      colour=None,
+      description=None,
       fields=list([
         EmbedProxy(inline=True, name='NEED', value='[🍃 **ASLCORE** - NEED](https://aslcore.org/search/?query=need&architecture=1&art=1&biology=1&computerscience=1&engineering=1&literature=1&organicchemistry=1&philosophy=1&physics=1&sustainability=1)\n[📜 **ASL Signbank** - NEED](https://aslsignbank.haskins.yale.edu/signs/search/?translation=need)\n[🤲 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+need)\n[🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+need)\n[🤝 **SigningSavvy** - Sign for NEED](https://www.signingsavvy.com/search/need)\n[🌐 **Spread The Sign** - NEED](https://www.spreadthesign.com/en.us/search/?q=need)\n[🔬 **STEM Dictionary** - NEED](https://deaftec.org/stem-dictionary/dictionary_term/need/)\n[📹 **YouGlish** - ASL videos with NEED](https://youglish.com/pronounce/need/signlanguage/us)\nShare: https://howsign.app/?s=need\n'),
         EmbedProxy(inline=True, name='ASK', value='[🍃 **ASLCORE** - ASK](https://aslcore.org/search/?query=ask&architecture=1&art=1&biology=1&computerscience=1&engineering=1&literature=1&organicchemistry=1&philosophy=1&physics=1&sustainability=1)\n[📜 **ASL Signbank** - ASK](https://aslsignbank.haskins.yale.edu/signs/search/?translation=ask)\n[🤲 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+ask)\n[🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+ask)\n[🤝 **SigningSavvy** - Sign for ASK](https://www.signingsavvy.com/search/ask)\n[🌐 **Spread The Sign** - ASK](https://www.spreadthesign.com/en.us/search/?q=ask)\n[🔬 **STEM Dictionary** - ASK](https://deaftec.org/stem-dictionary/dictionary_term/ask/)\n[📹 **YouGlish** - ASL videos with ASK](https://youglish.com/pronounce/ask/signlanguage/us)\nShare: https://howsign.app/?s=ask\n'),
@@ -78,10 +82,10 @@
       image=EmbedProxy(),
       provider=EmbedProxy(),
       thumbnail=EmbedProxy(),
-      timestamp=Embed.Empty,
-      title=Embed.Empty,
+      timestamp=None,
+      title=None,
       type='rich',
-      url=Embed.Empty,
+      url=None,
       video=EmbedProxy(),
     ),
   })
@@ -89,10 +93,10 @@
 # name: test_sign[tiger]
   dict({
     'embed': Embed(
-      Empty=Embed.Empty,
+      Empty=None,
       author=EmbedProxy(),
-      color=Embed.Empty,
-      colour=Embed.Empty,
+      color=None,
+      colour=None,
       description='''
         [🍃 **ASLCORE** - TIGER](https://aslcore.org/search/?query=tiger&architecture=1&art=1&biology=1&computerscience=1&engineering=1&literature=1&organicchemistry=1&philosophy=1&physics=1&sustainability=1)
         [📜 **ASL Signbank** - TIGER](https://aslsignbank.haskins.yale.edu/signs/search/?translation=tiger)
@@ -111,10 +115,10 @@
       image=EmbedProxy(),
       provider=EmbedProxy(),
       thumbnail=EmbedProxy(),
-      timestamp=Embed.Empty,
+      timestamp=None,
       title='TIGER',
       type='rich',
-      url=Embed.Empty,
+      url=None,
       video=EmbedProxy(),
     ),
   })
@@ -122,10 +126,10 @@
 # name: test_sign[what's up]
   dict({
     'embed': Embed(
-      Empty=Embed.Empty,
+      Empty=None,
       author=EmbedProxy(),
-      color=Embed.Empty,
-      colour=Embed.Empty,
+      color=None,
+      colour=None,
       description='''
         [🍃 **ASLCORE** - WHAT'S UP](https://aslcore.org/search/?query=what%27s+up&architecture=1&art=1&biology=1&computerscience=1&engineering=1&literature=1&organicchemistry=1&philosophy=1&physics=1&sustainability=1)
         [📜 **ASL Signbank** - WHAT'S UP](https://aslsignbank.haskins.yale.edu/signs/search/?translation=what%27s+up)
@@ -144,10 +148,10 @@
       image=EmbedProxy(),
       provider=EmbedProxy(),
       thumbnail=EmbedProxy(),
-      timestamp=Embed.Empty,
+      timestamp=None,
       title="WHAT'S UP",
       type='rich',
-      url=Embed.Empty,
+      url=None,
       video=EmbedProxy(),
     ),
   })
@@ -155,11 +159,11 @@
 # name: test_sign[||need, ask||]
   dict({
     'embed': Embed(
-      Empty=Embed.Empty,
+      Empty=None,
       author=EmbedProxy(),
-      color=Embed.Empty,
-      colour=Embed.Empty,
-      description=Embed.Empty,
+      color=None,
+      colour=None,
+      description=None,
       fields=list([
         EmbedProxy(inline=True, name='||NEED||', value='[🍃 **ASLCORE** - ||NEED||](https://aslcore.org/search/?query=need&architecture=1&art=1&biology=1&computerscience=1&engineering=1&literature=1&organicchemistry=1&philosophy=1&physics=1&sustainability=1)\n[📜 **ASL Signbank** - ||NEED||](https://aslsignbank.haskins.yale.edu/signs/search/?translation=need)\n[🤲 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+need)\n[🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+need)\n[🤝 **SigningSavvy** - Sign for ||NEED||](https://www.signingsavvy.com/search/need)\n[🌐 **Spread The Sign** - ||NEED||](https://www.spreadthesign.com/en.us/search/?q=need)\n[🔬 **STEM Dictionary** - ||NEED||](https://deaftec.org/stem-dictionary/dictionary_term/need/)\n[📹 **YouGlish** - ASL videos with ||NEED||](https://youglish.com/pronounce/need/signlanguage/us)\nShare: ||https://howsign.app/?s=need||\n'),
         EmbedProxy(inline=True, name='||ASK||', value='[🍃 **ASLCORE** - ||ASK||](https://aslcore.org/search/?query=ask&architecture=1&art=1&biology=1&computerscience=1&engineering=1&literature=1&organicchemistry=1&philosophy=1&physics=1&sustainability=1)\n[📜 **ASL Signbank** - ||ASK||](https://aslsignbank.haskins.yale.edu/signs/search/?translation=ask)\n[🤲 **Handspeak** - Search results](https://www.google.com/search?&q=site%3Ahandspeak.com+ask)\n[🧬 **Lifeprint** - Search results](https://www.google.com/search?&q=site%3Alifeprint.com+ask)\n[🤝 **SigningSavvy** - Sign for ||ASK||](https://www.signingsavvy.com/search/ask)\n[🌐 **Spread The Sign** - ||ASK||](https://www.spreadthesign.com/en.us/search/?q=ask)\n[🔬 **STEM Dictionary** - ||ASK||](https://deaftec.org/stem-dictionary/dictionary_term/ask/)\n[📹 **YouGlish** - ASL videos with ||ASK||](https://youglish.com/pronounce/ask/signlanguage/us)\nShare: ||https://howsign.app/?s=ask||\n'),
@@ -168,10 +172,10 @@
       image=EmbedProxy(),
       provider=EmbedProxy(),
       thumbnail=EmbedProxy(),
-      timestamp=Embed.Empty,
-      title=Embed.Empty,
+      timestamp=None,
+      title=None,
       type='rich',
-      url=Embed.Empty,
+      url=None,
       video=EmbedProxy(),
     ),
   })
@@ -179,10 +183,10 @@
 # name: test_sign[||tiger||]
   dict({
     'embed': Embed(
-      Empty=Embed.Empty,
+      Empty=None,
       author=EmbedProxy(),
-      color=Embed.Empty,
-      colour=Embed.Empty,
+      color=None,
+      colour=None,
       description='''
         [🍃 **ASLCORE** - ||TIGER||](https://aslcore.org/search/?query=tiger&architecture=1&art=1&biology=1&computerscience=1&engineering=1&literature=1&organicchemistry=1&philosophy=1&physics=1&sustainability=1)
         [📜 **ASL Signbank** - ||TIGER||](https://aslsignbank.haskins.yale.edu/signs/search/?translation=tiger)
@@ -201,10 +205,10 @@
       image=EmbedProxy(),
       provider=EmbedProxy(),
       thumbnail=EmbedProxy(),
-      timestamp=Embed.Empty,
+      timestamp=None,
       title='||TIGER||',
       type='rich',
-      url=Embed.Empty,
+      url=None,
       video=EmbedProxy(),
     ),
   })
@@ -212,10 +216,10 @@
 # name: test_sign[||what's up||]
   dict({
     'embed': Embed(
-      Empty=Embed.Empty,
+      Empty=None,
       author=EmbedProxy(),
-      color=Embed.Empty,
-      colour=Embed.Empty,
+      color=None,
+      colour=None,
       description='''
         [🍃 **ASLCORE** - ||WHAT'S UP||](https://aslcore.org/search/?query=what%27s+up&architecture=1&art=1&biology=1&computerscience=1&engineering=1&literature=1&organicchemistry=1&philosophy=1&physics=1&sustainability=1)
         [📜 **ASL Signbank** - ||WHAT'S UP||](https://aslsignbank.haskins.yale.edu/signs/search/?translation=what%27s+up)
@@ -234,10 +238,10 @@
       image=EmbedProxy(),
       provider=EmbedProxy(),
       thumbnail=EmbedProxy(),
-      timestamp=Embed.Empty,
+      timestamp=None,
       title="||WHAT'S UP||",
       type='rich',
-      url=Embed.Empty,
+      url=None,
       video=EmbedProxy(),
     ),
   })
