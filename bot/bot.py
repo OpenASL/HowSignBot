@@ -87,7 +87,7 @@ async def on_slash_command_error(inter: ApplicationCommandInteraction, error: Ex
         error,
         (commands.errors.CheckFailure, commands.errors.BadArgument),
     ):
-        await inter.send(error)
+        await inter.send(str(error))
     elif isinstance(
         error,
         (commands.errors.CommandOnCooldown),

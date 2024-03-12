@@ -108,7 +108,7 @@ async def make_practice_session_embed(
     embed = make_base_embed(dtime)
     sheet_key = await store.get_guild_schedule_sheet_key(guild_id)
     schedule_url = f"https://docs.google.com/spreadsheets/d/{sheet_key}/edit"
-    if not sessions:
+    if not sessions and embed.description:
         embed.description += NO_PRACTICES
     else:
         num_sessions = len(sessions)
