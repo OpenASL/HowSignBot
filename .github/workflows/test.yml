@@ -4,14 +4,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.9
-    - name: Install dependencies
-      run: ./script/bootstrap
-    - name: Run migrations
-      run: PYTHONPATH=. alembic upgrade head
-    - name: Run tests
-      run: ./script/test
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+      - name: Install dependencies
+        run: ./script/bootstrap
+      - name: Run migrations
+        run: PYTHONPATH=. alembic upgrade head
+      - name: Run tests
+        run: ./script/test

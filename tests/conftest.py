@@ -33,5 +33,5 @@ async def store(create_test_database):
 
 
 @pytest.fixture
-def db(store):
+async def db(store):
     return store.db

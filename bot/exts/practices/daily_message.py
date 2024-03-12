@@ -24,16 +24,24 @@ from bot.utils.datetimes import (
 from bot.utils.discord import THEME_COLOR, get_event_url
 from bot.utils.tasks import daily_task
 
-from ._practice_sessions import (
-    get_practice_sessions,
-    make_base_embed,
-    make_practice_session_embed,
-)
-
 logger = logging.getLogger(__name__)
 
 COMMAND_PREFIX = settings.COMMAND_PREFIX
 HERE = Path(__file__).parent
+
+
+def make_base_embed(dtime: dt.datetime) -> disnake.Embed:
+    now_pacific = utcnow().astimezone(PACIFIC)
+    dtime_pacific = dtime.astimezone(PACIFIC)
+    description = dtime_pacific.strftime("%A, %B %-d")
+    if dtime_pacific.date() == now_pacific.date():
+        description = f"Today - {description}"
+    elif (dtime_pacific.date() - now_pacific.date()).days == 1:
+        description = f"Tomorrow - {description}"
+    holiday = holiday_emojis.get(dtime_pacific.date())
+    if holiday and holiday.emoji:
+        description += f" {holiday.emoji}"
+    return disnake.Embed(description=description, color=THEME_COLOR)
 
 
 def get_today_random(dtime: Optional[dt.datetime] = None) -> random.Random:
@@ -120,25 +128,11 @@ class DailyMessage(Cog, name="Daily Message"):  # type: ignore
         channel = cast(disnake.TextChannel, self.bot.get_channel(channel_id))
         guild = channel.guild
         logger.info(f'sending daily message for guild: "{guild.name}" in #{channel.name}')
-        guild_id = guild.id
         dtime = dtime or utcnow()
-        prefer_dates_from = (
-            "current_period" if dtime.date() <= dt.date.today() else "future"
-        )
-        parse_settings = {"PREFER_DATES_FROM": prefer_dates_from}
         settings = await store.get_guild_settings(guild.id)
         if not settings:
             return
-        embed: disnake.Embed
-        if settings["include_practice_schedule"]:
-            sessions = await get_practice_sessions(
-                guild_id,
-                dtime=dtime,
-                parse_settings=parse_settings,
-            )
-            embed = await make_practice_session_embed(guild_id, sessions, dtime=dtime)
-        else:
-            embed = make_base_embed(dtime=dtime)
+        embed = make_base_embed(dtime=dtime)
 
         if settings["include_scheduled_events"]:
             # Display scheduled events for today
