@@ -30,14 +30,14 @@ async def make_user_star_count_embed(
     user: disnake.Member | disnake.User, *, description: str | None = None
 ) -> Embed:
     embed = Embed(
-        description=description or Embed.Empty,
+        description=description or "",
         color=disnake.Color.yellow(),
     )
     user_stars = await store.get_user_stars(user.id)
     embed.add_field(name=f"{STAR_EMOJI} count", value=str(user_stars))
     embed.set_author(
         name=display_name(user),
-        icon_url=user.avatar.url if user.avatar else Embed.Empty,
+        icon_url=user.avatar.url if user.avatar else None,
     )
     return embed
 
@@ -260,7 +260,10 @@ class Stars(Cog):
     @stars_command.sub_command(name="set")
     @commands.has_permissions(kick_members=True)  # Staff
     async def stars_set(
-        self, inter: GuildCommandInteraction, user: disnake.User, stars: int = Param(ge=0)
+        self,
+        inter: GuildCommandInteraction,
+        user: disnake.User,
+        stars: int = Param(ge=0),
     ):
         """(Authorized users only) Set a user's star count
 

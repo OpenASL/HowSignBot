@@ -11,15 +11,8 @@ import disnake
 from disnake import Embed, Guild, GuildCommandInteraction, Member, Message, VoiceState
 from disnake.channel import TextChannel
 from disnake.ext import commands
-from disnake.ext.commands import (
-    Bot,
-    Cog,
-    Context,
-    group,
-    guild_permissions,
-    is_owner,
-    slash_command,
-)
+from disnake.ext.commands import Bot, Cog, Context, group, is_owner, slash_command
+from disnake.types.embed import Embed as EmbedData
 
 from bot import settings
 from bot.database import store
@@ -118,7 +111,7 @@ async def make_inactive_members_embed(guild: Guild):
     return embed
 
 
-def get_tags() -> dict[str, dict[str, str]]:
+def get_tags() -> dict[str, EmbedData]:
     logger.info("fetching tags")
     sheet = get_gsheet()
     worksheet = sheet.worksheet("tags")
@@ -153,7 +146,7 @@ def make_role_table(guild: Guild, label: str, role_ids: Sequence[int]) -> str:
 class SignCafe(Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.tags: dict[str, dict[str, str]] = {}
+        self.tags: dict[str, EmbedData] = {}
         self.unmute_warnings: dict[int, dt.datetime] = {}
 
     def cog_check(self, ctx: Context):
@@ -304,11 +297,9 @@ class SignCafe(Cog):
             await asyncio.sleep(1)
         await ctx.reply("🙌 Video etiquette message posted")
 
-    @guild_permissions(settings.SIGN_CAFE_GUILD_ID, owner=True)
     @slash_command(
         name="syncdata",
         guild_ids=(settings.SIGN_CAFE_GUILD_ID,),
-        default_permission=False,
     )
     @is_owner()
     async def sync_data_command(

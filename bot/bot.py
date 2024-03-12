@@ -28,7 +28,6 @@ bot = commands.Bot(
     owner_id=settings.OWNER_ID,
     intents=intents,
     sync_commands_debug=settings.DEBUG,
-    sync_permissions=True,
     reload=settings.DEBUG,
     test_guilds=settings.TEST_GUILDS or None,
     chunk_guilds_at_startup=False,
@@ -88,7 +87,7 @@ async def on_slash_command_error(inter: ApplicationCommandInteraction, error: Ex
         error,
         (commands.errors.CheckFailure, commands.errors.BadArgument),
     ):
-        await inter.send(error)
+        await inter.send(str(error))
     elif isinstance(
         error,
         (commands.errors.CommandOnCooldown),
