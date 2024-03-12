@@ -11,15 +11,7 @@ import disnake
 from disnake import Embed, Guild, GuildCommandInteraction, Member, Message, VoiceState
 from disnake.channel import TextChannel
 from disnake.ext import commands
-from disnake.ext.commands import (
-    Bot,
-    Cog,
-    Context,
-    group,
-    guild_permissions,
-    is_owner,
-    slash_command,
-)
+from disnake.ext.commands import Bot, Cog, Context, group, is_owner, slash_command
 
 from bot import settings
 from bot.database import store
@@ -304,11 +296,9 @@ class SignCafe(Cog):
             await asyncio.sleep(1)
         await ctx.reply("🙌 Video etiquette message posted")
 
-    @guild_permissions(settings.SIGN_CAFE_GUILD_ID, owner=True)
     @slash_command(
         name="syncdata",
         guild_ids=(settings.SIGN_CAFE_GUILD_ID,),
-        default_permission=False,
     )
     @is_owner()
     async def sync_data_command(

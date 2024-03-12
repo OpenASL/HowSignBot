@@ -28,7 +28,6 @@ bot = commands.Bot(
     owner_id=settings.OWNER_ID,
     intents=intents,
     sync_commands_debug=settings.DEBUG,
-    sync_permissions=True,
     reload=settings.DEBUG,
     test_guilds=settings.TEST_GUILDS or None,
     chunk_guilds_at_startup=False,
