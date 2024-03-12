@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v22.22.4 (2024-03-11)
+
+### Fix
+
+* Upgrade disnake and remove tally extension ([#601](https://github.com/OpenASL/HowSignBot/issues/601)) ([`ab84140`](https://github.com/OpenASL/HowSignBot/commit/ab841403cdd8cdbccc1757198d0bcd7bede9cae0))
+
 ## v22.22.3 (2024-03-11)
 
 ### Fix
